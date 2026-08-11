@@ -1,7 +1,6 @@
 #!/bin/bash
 # auto-deploy.sh
-# Script ini dipanggil oleh GitHub Action atau manual untuk update VPS.
-# Lokasi: /home/seotool/JetDigitalSEO/auto-deploy.sh
+# Dipanggil oleh GitHub Action atau manual untuk update VPS.
 
 set -e
 
@@ -9,14 +8,19 @@ cd /home/seotool/JetDigitalSEO
 
 echo "🚀 Starting Auto-Deploy..."
 
-# 1. Tarik perubahan terbaru dari GitHub
-# Menggunakan fetch dan reset untuk menghindari konflik merge pada .env atau Caddyfile
+# Backup config files yang tidak boleh ditimpa oleh git
+cp .env.hosted .env.hosted.bak 2>/dev/null || true
+cp Caddyfile Caddyfile.bak 2>/dev/null || true
+
 echo "📥 Pulling latest changes..."
 git fetch origin main
 git reset --hard origin/main
 
-# 2. Jalankan skrip deploy yang sudah ada
-# Skrip ini akan me-rebuild Docker image dan restart container
+# Restore config files
+cp .env.hosted.bak .env.hosted 2>/dev/null || true
+cp Caddyfile.bak Caddyfile 2>/dev/null || true
+rm -f .env.hosted.bak Caddyfile.bak
+
 chmod +x scripts/deploy-vps.sh
 ./scripts/deploy-vps.sh --build
 
