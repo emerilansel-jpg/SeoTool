@@ -1,0 +1,92 @@
+import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRankTrackingConfigs } from "@/serverFunctions/rank-tracking";
+import { RankTrackingDomainDetail } from "@/client/features/rank-tracking/RankTrackingDomainDetail";
+import { RankTrackingConfigModal } from "@/client/features/rank-tracking/RankTrackingConfigModal";
+
+export const Route = createFileRoute(
+  "/_project/p/$projectId/rank-tracking/$configId",
+)({
+  component: RankTrackingConfigRoute,
+});
+
+function RankTrackingConfigRoute() {
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment
+  const { projectId, configId } = Route.useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [showConfigModal, setShowConfigModal] = useState(false);
+
+  const { data: configs, isPending } = useQuery({
+    queryKey: ["rankTrackingConfigs", projectId],
+    queryFn: () =>
+      // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment
+      getRankTrackingConfigs({ data: { projectId } }),
+  });
+
+  const config = configs?.find((c) => c.id === configId) ?? null;
+
+  const invalidateConfigs = () => {
+    void queryClient.invalidateQueries({
+      queryKey: ["rankTrackingConfigs", projectId],
+    });
+    void queryClient.invalidateQueries({
+      queryKey: ["rankTrackingConfigSummaries", projectId],
+    });
+  };
+
+  const handleBack = () => {
+    void navigate({
+      to: "/p/$projectId/rank-tracking",
+      // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment
+      params: { projectId },
+    });
+  };
+
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <span className="loading loading-spinner loading-lg" />
+      </div>
+    );
+  }
+
+  if (!config) {
+    return (
+      <>
+        <p className="text-sm text-base-content/70">
+          Domain configuration not found.
+        </p>
+        <button className="btn btn-ghost btn-sm" onClick={handleBack}>
+          Back to domains
+        </button>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <RankTrackingDomainDetail
+        config={config}
+        // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment
+        projectId={projectId}
+        onBack={handleBack}
+        onEdit={() => setShowConfigModal(true)}
+      />
+
+      {showConfigModal && (
+        <RankTrackingConfigModal
+          // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment
+          projectId={projectId}
+          existingConfig={config}
+          onClose={() => setShowConfigModal(false)}
+          onSaved={() => {
+            setShowConfigModal(false);
+            invalidateConfigs();
+          }}
+        />
+      )}
+    </>
+  );
+}

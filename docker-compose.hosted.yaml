@@ -1,0 +1,87 @@
+# Docker Compose for hosted SaaS deployment on a VPS.
+#
+# This stack runs:
+#   - open-seo: the app (workerd in Docker), connected to Postgres
+#   - postgres: the database
+#   - caddy: reverse proxy with automatic TLS
+#
+# Usage:
+#   1. Copy .env.hosted.example to .env.hosted and fill in the values.
+#   2. Edit the Caddyfile to use your domain name.
+#   3. docker compose -f docker-compose.hosted.yaml --env-file .env.hosted up -d --build
+#
+# The app listens on port 3001 internally; Caddy proxies :80/:443 to it.
+
+services:
+  open-seo:
+    build:
+      context: .
+      dockerfile: Dockerfile.selfhost
+    restart: unless-stopped
+    env_file:
+      - .env.hosted
+    environment:
+      # Required for local Docker: exposes Compose env vars to cloudflare:workers
+      # bindings so the app reads them as Worker env.
+      - CLOUDFLARE_INCLUDE_PROCESS_ENV=true
+      - PORT=3001
+      - AUTH_MODE=hosted
+      - DATABASE_PROVIDER=postgres
+      # Hyperdrive isn't available in Docker; the app falls back to
+      # POSTGRES_DATABASE_URL for direct connections.
+      - POSTGRES_DATABASE_URL=postgres://openseo:${POSTGRES_PASSWORD}@postgres:5432/openseo
+    ports:
+      - "127.0.0.1:3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - open_seo_data:/app/.wrangler
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      start_period: 300s
+      retries: 3
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: openseo
+      POSTGRES_USER: openseo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openseo -d openseo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - open-seo
+
+volumes:
+  open_seo_data:
+  pg_data:
+  caddy_data:
+  caddy_config:

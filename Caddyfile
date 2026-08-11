@@ -1,0 +1,28 @@
+# Replace yourdomain.com with your actual domain.
+# Caddy automatically obtains and renews Let's Encrypt TLS certificates.
+
+yourdomain.com {
+    reverse_proxy open-seo:3001
+
+    encode gzip zstd
+
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    # WebSocket support for SAM chat and onboarding agents
+    @websockets {
+        header Connection *Upgrade*
+        header Upgrade websocket
+    }
+    reverse_proxy @websockets open-seo:3001
+}
+
+# Optional: redirect www to apex (uncomment if needed)
+# www.yourdomain.com {
+#     redir https://yourdomain.com{uri} permanent
+# }

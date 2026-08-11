@@ -1,0 +1,7 @@
+--- src/server/lib/dataforseo/client.test.ts
++++ src/server/lib/dataforseo/client.test.ts
+@@ -47,0 +48,4 @@
++
++vi.mock("@/server/lib/runtime-env", () => ({
++  isHostedServerAuthMode: isHostedServerAuthModeMock,
++}));

@@ -1,0 +1,17 @@
+--- src/server/mcp/transport.test.ts
++++ src/server/mcp/transport.test.ts
+@@ -74,10 +74,9 @@
+     headers: {
+       Accept: "application/json, text/event-stream",
+       "Content-Type": "application/json",
+-      },
++    },
+     body: JSON.stringify({
+       jsonrpc: "2.0",
+       id: 1,
+       method: "tools/list",
+     }),
+-    });
+-
++  });
++}
