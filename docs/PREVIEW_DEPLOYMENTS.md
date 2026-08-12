@@ -1,6 +1,6 @@
 # Alchemy preview deployments
 
-OpenSEO preview stages use isolated Cloudflare resources and a shared,
+SeoTool.im preview stages use isolated Cloudflare resources and a shared,
 Alchemy-managed Cloudflare Access boundary.
 
 ## Security model
@@ -9,8 +9,8 @@ Alchemy-managed Cloudflare Access boundary.
   `open-seo-<stage>.<WORKERS_SUBDOMAIN>`.
 - One persistent Access application protects
   `open-seo-*.<WORKERS_SUBDOMAIN>` before any preview Worker exists.
-- Production uses the unsuffixed `open-seo` Worker on `app.openseo.so` and
-  `www.app.openseo.so`. It does not match the preview wildcard and is not
+- Production uses the unsuffixed `open-seo` Worker on `seotool.im` and
+  `www.seotool.im`. It does not match the preview wildcard and is not
   placed behind preview Access.
 - A separate persistent Alchemy stack manages the shared Access boundary. A
   failed preview deploy or teardown therefore cannot remove the gate protecting
@@ -205,5 +205,5 @@ gating the worker (`AUTH_MODE=cloudflare_access` +
 `ACCESS_ALLOWED_EMAILS`; `resolveSelfHostAccess` in alchemy.run.ts derives
 `TEAM_DOMAIN`/`POLICY_AUD`, or accepts them explicitly for a hand-managed
 application). The preview Access wildcard and PR workflow are
-OpenSEO-specific and not required. The walkthrough lives in
+SeoTool.im-specific and not required. The walkthrough lives in
 docs/SELF_HOSTING_CLOUDFLARE.md.

@@ -12,10 +12,10 @@ export function SiteFooter({ className }: { className?: string }) {
   return (
     <div className={className}>
       <Link to="/" className="text-sm font-semibold text-neutral-900">
-        OpenSEO
+        SeoTool.im
       </Link>
 
-      <div className="mt-6 grid grid-cols-2 gap-8 md:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-8 md:grid-cols-5">
         <div>
           <p className="font-semibold text-neutral-900">Features</p>
           <div className="mt-2 flex flex-col gap-1.5">
@@ -31,7 +31,7 @@ export function SiteFooter({ className }: { className?: string }) {
         <div>
           <p className="font-semibold text-neutral-900">AI agents</p>
           <div className="mt-2 flex flex-col gap-1.5">
-            <Link to="/features/mcp">OpenSEO MCP</Link>
+            <Link to="/features/mcp">SeoTool.im MCP</Link>
             <Link to="/google-search-console-mcp">
               Google Search Console MCP
             </Link>
@@ -41,6 +41,7 @@ export function SiteFooter({ className }: { className?: string }) {
         <div>
           <p className="font-semibold text-neutral-900">Resources</p>
           <div className="mt-2 flex flex-col gap-1.5">
+            <Link to="/changelog">Changelog</Link>
             <Link to="/open-source-seo">Why Open Source?</Link>
             <Link to="/blogs">Blog</Link>
             <a href="/docs">Docs</a>
@@ -51,7 +52,11 @@ export function SiteFooter({ className }: { className?: string }) {
         <div>
           <p className="font-semibold text-neutral-900">Company</p>
           <div className="mt-2 flex flex-col gap-1.5">
+            <Link to="/about">About</Link>
             <Link to="/pricing">Pricing</Link>
+            <Link to="/contact">Contact</Link>
+            <Link to="/careers">Careers</Link>
+            <Link to="/affiliates">Affiliates</Link>
             <a
               href="https://github.com/every-app/open-seo"
               target="_blank"
@@ -66,8 +71,17 @@ export function SiteFooter({ className }: { className?: string }) {
             >
               Discord
             </a>
-            <Link to="/privacy">Privacy</Link>
-            <Link to="/terms-and-conditions">Terms</Link>
+          </div>
+        </div>
+
+        <div>
+          <p className="font-semibold text-neutral-900">Legal</p>
+          <div className="mt-2 flex flex-col gap-1.5">
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/terms-and-conditions">Terms of Service</Link>
+            <Link to="/cookie-policy">Cookie Policy</Link>
+            <Link to="/refund-policy">Refund Policy</Link>
+            <Link to="/dpa">Data Processing (DPA)</Link>
           </div>
         </div>
       </div>

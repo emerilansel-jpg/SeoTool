@@ -17,7 +17,10 @@ import { resolveMarket } from "@/shared/keyword-locations";
 import { assertGaugeFeature } from "@/server/billing/quota-gate";
 
 function shouldUseKeywordE2eFixtures() {
-  return import.meta.env.VITE_E2E_KEYWORD_FIXTURES === "1";
+  return (
+    import.meta.env.VITE_E2E_KEYWORD_FIXTURES === "1" ||
+    import.meta.env.BYPASS_AUTH === "true"
+  );
 }
 
 async function getKeywordE2eFixtures() {

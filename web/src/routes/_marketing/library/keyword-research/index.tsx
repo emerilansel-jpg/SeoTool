@@ -59,7 +59,7 @@ const faqs = [
   {
     question: "How do you do keyword research for free?",
     answer:
-      "The discovery half runs on sources you already have: customer conversations, Google's autocomplete and People Also Ask, and your Search Console. Quality SEO data (volume, difficulty, live SERPs) is difficult to get, which is why SaaS tools run $100/month and up. OpenSEO is the most affordable option, starting at $10/month, and you can start for free.",
+      "The discovery half runs on sources you already have: customer conversations, Google's autocomplete and People Also Ask, and your Search Console. Quality SEO data (volume, difficulty, live SERPs) is difficult to get, which is why SaaS tools run $100/month and up. SeoTool.im is the most affordable option, starting at $10/month, and you can start for free.",
   },
   {
     question: "Can you do keyword research without Google Keyword Planner?",
@@ -93,9 +93,9 @@ export const Route = createFileRoute("/_marketing/library/keyword-research/")({
     buildPageSeo({
       title: "How to Do Keyword Research: The Strategy Library",
       description:
-        "Eight practitioner plays that treat keyword research as demand discovery, sourced from real interviews with working SEOs, executable inside OpenSEO.",
+        "Eight practitioner plays that treat keyword research as demand discovery, sourced from real interviews with working SEOs, executable inside SeoTool.im.",
       path: PATH,
-      titleSuffix: "OpenSEO",
+      titleSuffix: "SeoTool.im",
     }),
   component: KeywordResearchLibraryPage,
 });
@@ -113,7 +113,7 @@ function KeywordResearchLibraryPage() {
         <p className="mt-5 text-lg leading-8 text-[var(--color-brand-muted)]">
           Eight practitioner plays that treat keyword research as demand
           discovery, sourced from real interviews with working SEOs, executable
-          inside OpenSEO.
+          inside SeoTool.im.
         </p>
       </header>
 
@@ -208,7 +208,7 @@ function KeywordResearchLibraryPage() {
             href="/features/keyword-research"
             className="font-medium text-neutral-950 underline decoration-[var(--color-brand-accent)] underline-offset-4"
           >
-            OpenSEO's keyword research
+            SeoTool.im's keyword research
           </a>
           , connected to your live Search Console. Open source, self-hostable,
           and scriptable through the{" "}
@@ -219,7 +219,7 @@ function KeywordResearchLibraryPage() {
             MCP
           </a>{" "}
           so your AI assistant can run the whole workflow. Quality SEO data is
-          why the big suites run $100/month and up; OpenSEO starts at $10/month,
+          why the big suites run $100/month and up; SeoTool.im starts at $10/month,
           and you can start for free.
         </p>
       </section>

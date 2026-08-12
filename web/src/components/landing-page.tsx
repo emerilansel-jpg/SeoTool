@@ -12,7 +12,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { featurePages } from "@/lib/feature-pages";
 import "./landing-page.css";
 
-const SIGNUP_URL = "https://app.openseo.so/sign-up";
+const SIGNUP_URL = "https://seotool.im/sign-up";
 const PRODUCT_HUNT_URL =
   "https://www.producthunt.com/products/openseo?launch=openseo";
 const GITHUB_URL = "https://github.com/every-app/open-seo";
@@ -31,7 +31,7 @@ type Testimonial = {
 const TESTIMONIALS: Testimonial[] = [
   {
     quote:
-      "All of the value, none of the bloat. OpenSEO is a no-brainer compared to the expensive alternatives!",
+      "All of the value, none of the bloat. SeoTool.im is a no-brainer compared to the expensive alternatives!",
     name: "Fed",
     initial: "F",
     handle: "@foliofed",
@@ -41,7 +41,7 @@ const TESTIMONIALS: Testimonial[] = [
   },
   {
     quote:
-      "I've been using OpenSEO for the past 3 months, Ben keeps launching features to make it the best. I use it every day to find where my competitors are ranking.",
+      "I've been using SeoTool.im for the past 3 months, Ben keeps launching features to make it the best. I use it every day to find where my competitors are ranking.",
     name: "Samik",
     initial: "S",
     handle: "Subclip",
@@ -51,7 +51,7 @@ const TESTIMONIALS: Testimonial[] = [
   },
   {
     quote:
-      "It's so straightforward and incredibly easy to get started. OpenSEO gives you the complete setup, stripped of all the fluff that you get elsewhere.",
+      "It's so straightforward and incredibly easy to get started. SeoTool.im gives you the complete setup, stripped of all the fluff that you get elsewhere.",
     name: "Tom Raine",
     initial: "T",
     handle: "LinkedIn",
@@ -218,8 +218,8 @@ function Hero() {
           style={{ maxWidth: 640, margin: "24px auto 0" }}
         >
           Keyword research, rank tracking, site audits, backlinks, and AI
-          agents — all in one place. Transparent per-feature pricing that
-          scales from free to agency.
+          agents, all in one place. Transparent per-feature pricing that scales
+          from free to agency.
         </p>
         <div className="itc-hero-ctas">
           <div className="itc-hero-cta-group">
@@ -341,12 +341,12 @@ function DemoVideo() {
       autoPlay
       playsInline
       preload="metadata"
-      aria-label="OpenSEO product demo: running keyword research"
+      aria-label="SeoTool.im product demo: running keyword research"
     >
       <source src="/demo.mp4" type="video/mp4" />
       <img
         src="/demo-poster.webp"
-        alt="OpenSEO keyword research dashboard"
+        alt="SeoTool.im keyword research dashboard"
         width={1280}
         height={966}
         loading="lazy"
@@ -361,7 +361,7 @@ function ProductSection() {
     <section className="itc-section itc-section-demo">
       <Container>
         <div className="itc-narrow">
-          <h2 className="itc-display-lg">See OpenSEO in action</h2>
+          <h2 className="itc-display-lg">See SeoTool.im in action</h2>
           <p className="itc-subhead itc-muted" style={{ margin: "20px 0 0" }}>
             Keyword research, competitor analysis, backlinks, rank tracking,
             technical audits, and AI-search visibility, all on real DataForSEO
@@ -433,7 +433,7 @@ function McpSection() {
             <p className="itc-body-lg itc-muted" style={{ margin: "20px 0 0" }}>
               Give your agent real SEO data instead of guesses. It can research
               keywords, competitors, backlinks, and Google Search Console
-              performance, then you can review the work in OpenSEO.
+              performance, then you can review the work in SeoTool.im.
             </p>
             <div className="itc-agent-icons">
               {MCP_CLIENTS.map(({ name, Icon }) => (
@@ -470,15 +470,15 @@ function McpSection() {
                 <span className="itc-terminal-dot" />
                 <span className="itc-terminal-dot" />
               </span>
-              <span className="itc-terminal-label">claude · openseo mcp</span>
+              <span className="itc-terminal-label">claude · seotool mcp</span>
             </div>
             <pre>
               <code>
                 <span className="t-orange">›</span> find and cluster keywords
-                for <span className="t-bright">openseo.so</span>
+                for <span className="t-bright">seotool.im</span>
                 {"\n\n"}
                 <span className="t-dim">
-                  ⏺ openseo.keyword_research(seed: &quot;open source seo&quot;)
+                  ⏺ seotool.keyword_research(seed: &quot;open source seo&quot;)
                 </span>
                 {"\n"}
                 {"  "}keyword{"                      "}volume{"     "}kd{"\n"}
@@ -505,7 +505,7 @@ function McpSection() {
                 {"\n"}
                 <span className="t-orange">↳</span>
                 <span className="t-dim"> View data in app: </span>
-                <span className="t-bright">app.openseo.so/keywords</span>
+                <span className="t-bright">seotool.im/keywords</span>
               </code>
             </pre>
           </div>
@@ -804,9 +804,9 @@ function OpenSourceSection() {
         <div className="itc-narrow">
           <h2 className="itc-display-lg">Built on open source</h2>
           <p className="itc-subhead itc-muted" style={{ margin: "20px 0 0" }}>
-            OpenSEO&rsquo;s core is fully open source. We believe in
-            transparency — you can audit the code, contribute features, or
-            build your own tools on top of our foundation.
+            SeoTool.im&rsquo;s core is fully open source. We believe in
+            transparency. You can audit the code, contribute features, or build
+            your own tools on top of our foundation.
           </p>
         </div>
 
@@ -903,7 +903,7 @@ export function LandingPage() {
         target="_blank"
         rel="noopener noreferrer"
         className="itc-discord"
-        aria-label="Join the OpenSEO Discord"
+        aria-label="Join the SeoTool.im Discord"
       >
         <IconDiscord size={18} />
         <span>Discord</span>

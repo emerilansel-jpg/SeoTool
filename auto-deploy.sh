@@ -8,18 +8,18 @@ cd /home/seotool/JetDigitalSEO
 
 echo "🚀 Starting Auto-Deploy..."
 
-# Backup config files yang tidak boleh ditimpa oleh git
+# Backup .env.hosted (contains secrets that should never be in git).
+# Caddyfile is now version-controlled with the real domain, so it does
+# NOT need to be preserved across git pulls.
 cp .env.hosted .env.hosted.bak 2>/dev/null || true
-cp Caddyfile Caddyfile.bak 2>/dev/null || true
 
 echo "📥 Pulling latest changes..."
 git fetch origin main
 git reset --hard origin/main
 
-# Restore config files
+# Restore .env.hosted
 cp .env.hosted.bak .env.hosted 2>/dev/null || true
-cp Caddyfile.bak Caddyfile 2>/dev/null || true
-rm -f .env.hosted.bak Caddyfile.bak
+rm -f .env.hosted.bak
 
 chmod +x scripts/deploy-vps.sh
 ./scripts/deploy-vps.sh --build

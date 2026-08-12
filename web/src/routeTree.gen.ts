@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as DpaRouteImport } from './routes/dpa'
+import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as GuidesIndexRouteImport } from './routes/guides/index'
 import { Route as DocsIndexRouteImport } from './routes/docs/index'
@@ -25,6 +28,11 @@ import { Route as ApiEventRouteImport } from './routes/api/event'
 import { Route as MarketingPricingRouteImport } from './routes/_marketing/pricing'
 import { Route as MarketingOpenSourceSeoRouteImport } from './routes/_marketing/open-source-seo'
 import { Route as MarketingGoogleSearchConsoleMcpRouteImport } from './routes/_marketing/google-search-console-mcp'
+import { Route as MarketingContactRouteImport } from './routes/_marketing/contact'
+import { Route as MarketingChangelogRouteImport } from './routes/_marketing/changelog'
+import { Route as MarketingCareersRouteImport } from './routes/_marketing/careers'
+import { Route as MarketingAffiliatesRouteImport } from './routes/_marketing/affiliates'
+import { Route as MarketingAboutRouteImport } from './routes/_marketing/about'
 import { Route as MarketingFeaturesIndexRouteImport } from './routes/_marketing/features/index'
 import { Route as MarketingFeaturesSiteAuditRouteImport } from './routes/_marketing/features/site-audit'
 import { Route as MarketingFeaturesSavedKeywordsRouteImport } from './routes/_marketing/features/saved-keywords'
@@ -46,9 +54,24 @@ const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
   path: '/terms-and-conditions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DpaRoute = DpaRouteImport.update({
+  id: '/dpa',
+  path: '/dpa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiePolicyRoute = CookiePolicyRouteImport.update({
+  id: '/cookie-policy',
+  path: '/cookie-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketingRoute = MarketingRouteImport.update({
@@ -121,6 +144,31 @@ const MarketingGoogleSearchConsoleMcpRoute =
     path: '/google-search-console-mcp',
     getParentRoute: () => MarketingRoute,
   } as any)
+const MarketingContactRoute = MarketingContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingChangelogRoute = MarketingChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingCareersRoute = MarketingCareersRouteImport.update({
+  id: '/careers',
+  path: '/careers',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingAffiliatesRoute = MarketingAffiliatesRouteImport.update({
+  id: '/affiliates',
+  path: '/affiliates',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingAboutRoute = MarketingAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => MarketingRoute,
+} as any)
 const MarketingFeaturesIndexRoute = MarketingFeaturesIndexRouteImport.update({
   id: '/features/',
   path: '/features/',
@@ -212,8 +260,16 @@ const MarketingLibraryKeywordResearchClusterTopicalHubsRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
+  '/cookie-policy': typeof CookiePolicyRoute
+  '/dpa': typeof DpaRoute
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
+  '/about': typeof MarketingAboutRoute
+  '/affiliates': typeof MarketingAffiliatesRoute
+  '/careers': typeof MarketingCareersRoute
+  '/changelog': typeof MarketingChangelogRoute
+  '/contact': typeof MarketingContactRoute
   '/google-search-console-mcp': typeof MarketingGoogleSearchConsoleMcpRoute
   '/open-source-seo': typeof MarketingOpenSourceSeoRoute
   '/pricing': typeof MarketingPricingRoute
@@ -243,8 +299,16 @@ export interface FileRoutesByFullPath {
   '/library/keyword-research/': typeof MarketingLibraryKeywordResearchIndexRoute
 }
 export interface FileRoutesByTo {
+  '/cookie-policy': typeof CookiePolicyRoute
+  '/dpa': typeof DpaRoute
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
+  '/about': typeof MarketingAboutRoute
+  '/affiliates': typeof MarketingAffiliatesRoute
+  '/careers': typeof MarketingCareersRoute
+  '/changelog': typeof MarketingChangelogRoute
+  '/contact': typeof MarketingContactRoute
   '/google-search-console-mcp': typeof MarketingGoogleSearchConsoleMcpRoute
   '/open-source-seo': typeof MarketingOpenSourceSeoRoute
   '/pricing': typeof MarketingPricingRoute
@@ -277,8 +341,16 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_marketing': typeof MarketingRouteWithChildren
+  '/cookie-policy': typeof CookiePolicyRoute
+  '/dpa': typeof DpaRoute
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
+  '/_marketing/about': typeof MarketingAboutRoute
+  '/_marketing/affiliates': typeof MarketingAffiliatesRoute
+  '/_marketing/careers': typeof MarketingCareersRoute
+  '/_marketing/changelog': typeof MarketingChangelogRoute
+  '/_marketing/contact': typeof MarketingContactRoute
   '/_marketing/google-search-console-mcp': typeof MarketingGoogleSearchConsoleMcpRoute
   '/_marketing/open-source-seo': typeof MarketingOpenSourceSeoRoute
   '/_marketing/pricing': typeof MarketingPricingRoute
@@ -312,8 +384,16 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/cookie-policy'
+    | '/dpa'
     | '/privacy'
+    | '/refund-policy'
     | '/terms-and-conditions'
+    | '/about'
+    | '/affiliates'
+    | '/careers'
+    | '/changelog'
+    | '/contact'
     | '/google-search-console-mcp'
     | '/open-source-seo'
     | '/pricing'
@@ -343,8 +423,16 @@ export interface FileRouteTypes {
     | '/library/keyword-research/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/cookie-policy'
+    | '/dpa'
     | '/privacy'
+    | '/refund-policy'
     | '/terms-and-conditions'
+    | '/about'
+    | '/affiliates'
+    | '/careers'
+    | '/changelog'
+    | '/contact'
     | '/google-search-console-mcp'
     | '/open-source-seo'
     | '/pricing'
@@ -376,8 +464,16 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_marketing'
+    | '/cookie-policy'
+    | '/dpa'
     | '/privacy'
+    | '/refund-policy'
     | '/terms-and-conditions'
+    | '/_marketing/about'
+    | '/_marketing/affiliates'
+    | '/_marketing/careers'
+    | '/_marketing/changelog'
+    | '/_marketing/contact'
     | '/_marketing/google-search-console-mcp'
     | '/_marketing/open-source-seo'
     | '/_marketing/pricing'
@@ -410,7 +506,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   MarketingRoute: typeof MarketingRouteWithChildren
+  CookiePolicyRoute: typeof CookiePolicyRoute
+  DpaRoute: typeof DpaRoute
   PrivacyRoute: typeof PrivacyRoute
+  RefundPolicyRoute: typeof RefundPolicyRoute
   TermsAndConditionsRoute: typeof TermsAndConditionsRoute
   ApiEventRoute: typeof ApiEventRoute
   ApiSubscribeRoute: typeof ApiSubscribeRoute
@@ -432,11 +531,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsAndConditionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dpa': {
+      id: '/dpa'
+      path: '/dpa'
+      fullPath: '/dpa'
+      preLoaderRoute: typeof DpaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookie-policy': {
+      id: '/cookie-policy'
+      path: '/cookie-policy'
+      fullPath: '/cookie-policy'
+      preLoaderRoute: typeof CookiePolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_marketing': {
@@ -535,6 +655,41 @@ declare module '@tanstack/react-router' {
       path: '/google-search-console-mcp'
       fullPath: '/google-search-console-mcp'
       preLoaderRoute: typeof MarketingGoogleSearchConsoleMcpRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/contact': {
+      id: '/_marketing/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof MarketingContactRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/changelog': {
+      id: '/_marketing/changelog'
+      path: '/changelog'
+      fullPath: '/changelog'
+      preLoaderRoute: typeof MarketingChangelogRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/careers': {
+      id: '/_marketing/careers'
+      path: '/careers'
+      fullPath: '/careers'
+      preLoaderRoute: typeof MarketingCareersRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/affiliates': {
+      id: '/_marketing/affiliates'
+      path: '/affiliates'
+      fullPath: '/affiliates'
+      preLoaderRoute: typeof MarketingAffiliatesRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/about': {
+      id: '/_marketing/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof MarketingAboutRouteImport
       parentRoute: typeof MarketingRoute
     }
     '/_marketing/features/': {
@@ -646,6 +801,11 @@ declare module '@tanstack/react-router' {
 }
 
 interface MarketingRouteChildren {
+  MarketingAboutRoute: typeof MarketingAboutRoute
+  MarketingAffiliatesRoute: typeof MarketingAffiliatesRoute
+  MarketingCareersRoute: typeof MarketingCareersRoute
+  MarketingChangelogRoute: typeof MarketingChangelogRoute
+  MarketingContactRoute: typeof MarketingContactRoute
   MarketingGoogleSearchConsoleMcpRoute: typeof MarketingGoogleSearchConsoleMcpRoute
   MarketingOpenSourceSeoRoute: typeof MarketingOpenSourceSeoRoute
   MarketingPricingRoute: typeof MarketingPricingRoute
@@ -668,6 +828,11 @@ interface MarketingRouteChildren {
 }
 
 const MarketingRouteChildren: MarketingRouteChildren = {
+  MarketingAboutRoute: MarketingAboutRoute,
+  MarketingAffiliatesRoute: MarketingAffiliatesRoute,
+  MarketingCareersRoute: MarketingCareersRoute,
+  MarketingChangelogRoute: MarketingChangelogRoute,
+  MarketingContactRoute: MarketingContactRoute,
   MarketingGoogleSearchConsoleMcpRoute: MarketingGoogleSearchConsoleMcpRoute,
   MarketingOpenSourceSeoRoute: MarketingOpenSourceSeoRoute,
   MarketingPricingRoute: MarketingPricingRoute,
@@ -701,7 +866,10 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   MarketingRoute: MarketingRouteWithChildren,
+  CookiePolicyRoute: CookiePolicyRoute,
+  DpaRoute: DpaRoute,
   PrivacyRoute: PrivacyRoute,
+  RefundPolicyRoute: RefundPolicyRoute,
   TermsAndConditionsRoute: TermsAndConditionsRoute,
   ApiEventRoute: ApiEventRoute,
   ApiSubscribeRoute: ApiSubscribeRoute,

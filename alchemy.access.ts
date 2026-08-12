@@ -14,8 +14,8 @@ import * as Effect from "effect/Effect";
 
 const WORKER_PREFIX = "open-seo";
 
-// The one stage that adopts openseo.so's live hosted resources (unsuffixed
-// names, app.openseo.so domain, Postgres). Deliberately not "prod" so a
+// The one stage that adopts seotool.im's live hosted resources (unsuffixed
+// names, seotool.im domain, Postgres). Deliberately not "prod" so a
 // self-hoster's stage name can't collide with the adoption path.
 export const HOSTED_PROD_STAGE = "hosted-prod";
 

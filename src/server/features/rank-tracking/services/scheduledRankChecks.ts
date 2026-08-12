@@ -65,7 +65,7 @@ export async function runScheduledRankChecks(env: Env) {
         projectId: config.projectId,
         billingCustomer: {
           userId: "system",
-          userEmail: "system@openseo.so",
+          userEmail: "system@seotool.im",
           organizationId: config.organizationId,
           projectId: config.projectId,
         },

@@ -6,9 +6,9 @@ export const Route = createFileRoute("/_marketing/pricing")({
     buildPageSeo({
       title: "Pricing",
       description:
-        "Start free. Upgrade as you grow. Four tiers with per-feature quotas — keyword research, rank tracking, site audits, backlinks, and AI agents.",
+        "Start free. Upgrade as you grow. Four tiers with per-feature quotas for keyword research, rank tracking, site audits, backlinks, and AI agents.",
       path: "/pricing",
-      titleSuffix: "OpenSEO",
+      titleSuffix: "SeoTool.im",
     }),
   component: Pricing,
 });
@@ -203,7 +203,7 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
   },
 ];
 
-const SIGNUP_URL = "https://app.openseo.so/sign-up";
+const SIGNUP_URL = "https://seotool.im/sign-up";
 
 const usd = (n: number) =>
   n === 0 ? "$0" : n >= 100 ? `$${Math.round(n).toLocaleString()}` : `$${n}`;
@@ -220,7 +220,7 @@ function Pricing() {
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--color-brand-muted)]">
         Start free, upgrade when you need more. Every plan includes keyword
-        research, rank tracking, site audits, and backlinks — with clear
+        research, rank tracking, site audits, and backlinks, with clear
         per-feature quotas so you always know where you stand.
       </p>
 
@@ -381,8 +381,8 @@ function Pricing() {
             </dt>
             <dd className="mt-1.5 text-sm leading-6 text-[var(--color-brand-muted)]">
               Yes. The Free plan includes one project, 10 daily keyword
-              searches, and one site audit per month — enough to evaluate
-              OpenSEO before subscribing.
+              searches, and one site audit per month, enough to evaluate SeoTool.im
+              before subscribing.
             </dd>
           </div>
           <div className="py-4 first:pt-0 last:pb-0">
@@ -392,7 +392,7 @@ function Pricing() {
             <dd className="mt-1.5 text-sm leading-6 text-[var(--color-brand-muted)]">
               You&rsquo;ll see a friendly upgrade prompt when you try to use a
               feature that&rsquo;s exceeded its quota. Your existing data is
-              never lost — just upgrade or wait for the next reset window.
+              never lost. Just upgrade or wait for the next reset window.
             </dd>
           </div>
           <div className="py-4 first:pt-0 last:pb-0">

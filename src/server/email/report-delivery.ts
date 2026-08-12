@@ -77,7 +77,7 @@ export async function sendReportDeliveryEmail(input: {
         dataVariables: {
           reportName: input.reportName,
           snapshotUrl: input.snapshotUrl,
-          appName: "OpenSEO",
+          appName: "SeoTool.im",
         },
       });
     } catch (error) {

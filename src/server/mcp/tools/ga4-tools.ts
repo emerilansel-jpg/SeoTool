@@ -83,7 +83,7 @@ async function missingSelfHostedGoogleClientResponse(
   if (hosted || configured) return null;
 
   return mcpResponse({
-    text: `This self-hosted OpenSEO deployment is not configured for Google Analytics yet. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and BETTER_AUTH_SECRET, enable the Google Analytics Data API and Admin API in your Google Cloud project, then reconnect Google Analytics from the project's settings page. Setup docs: ${GA4_SELF_HOSTED_SETUP_DOCS_URL}`,
+    text: `This self-hosted SeoTool.im deployment is not configured for Google Analytics yet. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and BETTER_AUTH_SECRET, enable the Google Analytics Data API and Admin API in your Google Cloud project, then reconnect Google Analytics from the project's settings page. Setup docs: ${GA4_SELF_HOSTED_SETUP_DOCS_URL}`,
     meta: buildProjectMeta(context, projectId),
     structuredContent: {
       ok: false,

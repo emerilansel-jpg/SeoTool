@@ -67,7 +67,7 @@ export class AlertWorkflow extends WorkflowEntrypoint<
             recipients: rule.recipients,
             summary: trigger.summary,
             details: trigger.details,
-            dashboardUrl: `https://openseo.so/p/${projectId}`,
+            dashboardUrl: `https://seotool.im/p/${projectId}`,
           });
           await AlertRepository.markTriggered(alertId);
         });

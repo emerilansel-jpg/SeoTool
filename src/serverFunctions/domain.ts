@@ -10,7 +10,12 @@ import { DomainService } from "@/server/features/domain/services/DomainService";
 import { resolveLabsMarket } from "@/shared/keyword-locations";
 
 function shouldUseDomainE2eFixtures() {
-  return import.meta.env.VITE_E2E_DOMAIN_FIXTURES === "1";
+  // During E2E testing (BYPASS_AUTH=true), always use fixtures to avoid
+  // hitting the real DataForSEO API and burning credits.
+  return (
+    import.meta.env.VITE_E2E_DOMAIN_FIXTURES === "1" ||
+    import.meta.env.BYPASS_AUTH === "true"
+  );
 }
 
 async function getDomainE2eFixtures() {
@@ -26,7 +31,11 @@ export const getDomainOverview = createServerFn({ method: "POST" })
       ...resolveLabsMarket(data, context.project),
       projectId: context.projectId,
     };
-    if (shouldUseDomainE2eFixtures()) {
+    const useFixtures = shouldUseDomainE2eFixtures();
+    console.log(
+      `[getDomainOverview] domain=${input.domain} useFixtures=${useFixtures} BYPASS_AUTH=${import.meta.env.BYPASS_AUTH} VITE_E2E=${import.meta.env.VITE_E2E_DOMAIN_FIXTURES}`,
+    );
+    if (useFixtures) {
       const fixtures = await getDomainE2eFixtures();
       return fixtures.getFixtureOverview(input.domain);
     }

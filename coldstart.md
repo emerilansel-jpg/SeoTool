@@ -1,4 +1,4 @@
-# Coldstart — JetDigitalSEO (OpenSEO)
+# Coldstart — JetDigitalSEO (SeoTool.im)
 
 Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 
@@ -6,7 +6,7 @@ Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 
 ## Identitas project
 
-**OpenSEO** (`package.json: open-seo` v0.1.3) — SEO SaaS dashboard (Semrush/Ahrefs alternative). Cloudflare Workers + TanStack Start, Postgres (primary) / D1 (SQLite, dev fallback), hosted-only. Ahrefs-style tiered billing: Free / Lite ($49) / Pro ($149) / Agency ($499) dengan per-feature quotas.
+**SeoTool.im** (`package.json: open-seo` v0.1.3) — SEO SaaS dashboard (Semrush/Ahrefs alternative). Cloudflare Workers + TanStack Start, Postgres (primary) / D1 (SQLite, dev fallback), hosted-only. Ahrefs-style tiered billing: Free / Lite ($49) / Pro ($149) / Agency ($499) dengan per-feature quotas.
 
 **Transformasi SaaS (2026-08-08)**: Project ini dulunya open-source self-host (3 auth mode, BYO API key, credit-pool billing). Sekarang **hosted-only** — `cloudflare_access` dan `local_noauth` auth modes dihapus, hanya `hosted` (Better Auth). Billing model berubah dari single-plan + credit pool → **4 tier dengan per-feature quotas** (Ahrefs-style).
 
@@ -377,7 +377,7 @@ Saat rank check berjalan, DataForSEO mengembalikan full SERP (10-100 organic res
 
 ## Transformasi SaaS — Hosted-Only + Tiered Billing (LENGKAP, 7 fase)
 
-Mengubah OpenSEO dari open-source self-host (3 auth mode, BYO API key, credit-pool billing) menjadi **hosted-only SaaS** (Better Auth, 4-tier plan + per-feature quotas). 7 fase, semua selesai dan terverifikasi (881 tests pass, 0 type errors, 0 lint errors).
+Mengubah SeoTool.im dari open-source self-host (3 auth mode, BYO API key, credit-pool billing) menjadi **hosted-only SaaS** (Better Auth, 4-tier plan + per-feature quotas). 7 fase, semua selesai dan terverifikasi (881 tests pass, 0 type errors, 0 lint errors).
 
 ### Fase 1 — Plan Tier Config & Quota System (LENGKAP)
 
@@ -509,7 +509,7 @@ vi.mock("@/server/features/billing/repositories/QuotaRepository", () => ({
 
 ### Supastarter folder
 
-Folder `Supastarter/` di repo ini tidak terkait OpenSEO. tsc errors dari folder ini adalah pre-existing. Selalu gunakan `grep -v "Supastarter"` saat cek tsc output.
+Folder `Supastarter/` di repo ini tidak terkait SeoTool.im. tsc errors dari folder ini adalah pre-existing. Selalu gunakan `grep -v "Supastarter"` saat cek tsc output.
 
 ### prettier-plugin-tailwindcss & ci:check (pre-existing)
 

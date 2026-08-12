@@ -125,7 +125,7 @@ function CloseIcon({ size = 28 }: { size?: number }) {
 
 export const Route = createFileRoute("/_marketing")({
   // Runs at prerender/SSR time, so the count is baked into the static HTML that
-  // Cloudflare serves from the edge — no per-viewer request for it.
+  // Cloudflare serves from the edge, no per-viewer request for it.
   loader: async () => ({ githubStarCount: await loadGithubStarCount() }),
   // The value is fixed per build; never refetch it on client navigation.
   staleTime: Infinity,
@@ -165,12 +165,12 @@ function MarketingLayout() {
           target="_blank"
           rel="noopener noreferrer"
           className="group flex min-h-11 items-center justify-center gap-2 bg-[#ff6154] px-4 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-[#e9574c] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white"
-          aria-label="OpenSEO just launched on Product Hunt. Upvote and comment."
+          aria-label="SeoTool.im just launched on Product Hunt. Upvote and comment."
         >
           <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-white p-0.5">
             <img src="/product-hunt.svg" alt="" className="size-full" />
           </span>
-          <span>OpenSEO just launched on Product Hunt.</span>
+          <span>SeoTool.im just launched on Product Hunt.</span>
           <span className="inline-flex items-center gap-1 whitespace-nowrap underline decoration-white/55 underline-offset-4 group-hover:decoration-white">
             Upvote &amp; comment <span aria-hidden="true">&rarr;</span>
           </span>
@@ -183,7 +183,7 @@ function MarketingLayout() {
               to="/"
               className="text-sm font-semibold hover:opacity-80 transition-opacity"
             >
-              OpenSEO
+              SeoTool.im
             </Link>
 
             <div className="hidden items-center justify-center gap-5 md:flex">
@@ -219,7 +219,7 @@ function MarketingLayout() {
                 <span className="text-neutral-500">{githubStarCount}</span>
               </a>
               <a
-                href="https://app.openseo.so/sign-in"
+                href="https://seotool.im/sign-in"
                 className="hidden h-9 items-center rounded-full border border-[var(--color-border-subtle)] px-4 text-sm font-medium text-neutral-900 transition-colors hover:border-neutral-900 md:inline-flex"
               >
                 Sign in
@@ -231,14 +231,14 @@ function MarketingLayout() {
             <div className="absolute left-0 right-0 top-full z-30 mt-3 rounded-2xl border border-[var(--color-border-subtle)] bg-white p-3 shadow-xl shadow-neutral-900/10 md:hidden">
               <div className="grid grid-cols-2 gap-2">
                 <a
-                  href="https://app.openseo.so/sign-in"
+                  href="https://seotool.im/sign-in"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex h-11 items-center justify-center rounded-xl bg-neutral-950 px-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-800"
                 >
-                  Try OpenSEO
+                  Try SeoTool.im
                 </a>
                 <a
-                  href="https://app.openseo.so/sign-in"
+                  href="https://seotool.im/sign-in"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex h-11 items-center justify-center rounded-xl border border-[var(--color-border-subtle)] px-3 text-sm font-semibold text-neutral-800 transition-colors hover:border-neutral-900 hover:bg-[#f5f1ec]"
                 >
@@ -299,12 +299,12 @@ function ResourcesDropdown() {
     {
       label: "MCP",
       href: "/docs/mcp",
-      description: "Connect OpenSEO to AI clients.",
+      description: "Connect SeoTool.im to AI clients.",
     },
     {
       label: "Skills",
       href: "/docs/skills",
-      description: "Focused OpenSEO workflows.",
+      description: "Focused SeoTool.im workflows.",
     },
   ];
 
@@ -395,7 +395,7 @@ function FeatureDropdown() {
                   className="block rounded-md p-2 transition-colors hover:bg-[#f5f1ec]"
                 >
                   <span className="text-sm font-semibold text-neutral-900">
-                    OpenSEO MCP
+                    SeoTool.im MCP
                   </span>
                   <span className="mt-0.5 block text-xs leading-relaxed text-neutral-600">
                     Connect Claude, Codex, and agents.

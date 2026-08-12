@@ -160,7 +160,7 @@ export class SamChatAgent extends Think {
     return withPgClient(async () => {
       const ctx = await this.loadSamContext();
       if (!ctx) {
-        return "You are SAM, the SEO agent inside OpenSEO. This chat session no longer exists; tell the user to start a new chat.";
+        return "You are SAM, the SEO agent inside SeoTool.im. This chat session no longer exists; tell the user to start a new chat.";
       }
       const memory = await SamProjectMemoryRepository.getBlock(
         ctx.project.id,
@@ -255,7 +255,7 @@ export class SamChatAgent extends Think {
 
       const baseUrl =
         (await this.ctx.storage.get<string>(PUBLIC_ORIGIN_KEY)) ??
-        "https://app.openseo.so";
+        "https://seotool.im";
       const authContext = buildFirstPartyMcpAuthContext({
         userId: ctx.row.userId,
         userEmail: ctx.userEmail,

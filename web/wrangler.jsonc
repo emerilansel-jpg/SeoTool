@@ -19,11 +19,11 @@
   },
   "routes": [
     {
-      "pattern": "openseo.so",
+      "pattern": "seotool.im",
       "custom_domain": true,
     },
     {
-      "pattern": "www.openseo.so",
+      "pattern": "www.seotool.im",
       "custom_domain": true,
     },
   ],

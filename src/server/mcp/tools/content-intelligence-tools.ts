@@ -106,7 +106,7 @@ export const getContentScoresTool = {
   config: {
     title: "Get content-quality scores",
     description:
-      "Read per-page content-quality scores (0-100) with sub-scores (depth, headings, metadata, media, linking, technical) and human-readable flags (thin content, missing H1, etc.) from a completed site audit. Free — reads OpenSEO state, no credits. Scores come from crawled signals only. Omit auditId for the most recent audit.",
+      "Read per-page content-quality scores (0-100) with sub-scores (depth, headings, metadata, media, linking, technical) and human-readable flags (thin content, missing H1, etc.) from a completed site audit. Free — reads SeoTool.im state, no credits. Scores come from crawled signals only. Omit auditId for the most recent audit.",
     inputSchema,
     outputSchema: {
       ok: z.boolean(),

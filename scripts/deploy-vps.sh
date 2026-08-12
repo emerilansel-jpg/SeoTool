@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy OpenSEO hosted SaaS to a VPS.
+# Deploy SeoTool.im hosted SaaS to a VPS.
 #
 # Prerequisites:
 #   - Docker and Docker Compose installed
@@ -11,6 +11,7 @@
 #   ./scripts/deploy-vps.sh [--build]
 #
 # The --build flag forces a rebuild of the Docker image.
+# The marketing site is built inside the open-seo container at startup.
 
 set -euo pipefail
 
@@ -35,10 +36,6 @@ if grep -q "replace-with" "$ENV_FILE"; then
   exit 1
 fi
 
-if ! grep -q "yourdomain.com" Caddyfile 2>/dev/null; then
-  echo "⚠️  Caddyfile doesn't contain 'yourdomain.com' — make sure you've updated it with your real domain."
-fi
-
 if ! command -v docker &> /dev/null; then
   echo "❌ Docker is not installed. Install it first: https://docs.docker.com/get-docker/"
   exit 1
@@ -61,7 +58,7 @@ fi
 
 # ─── Deploy ─────────────────────────────────────────────────────────────
 
-echo "🚀 Starting OpenSEO hosted stack..."
+echo "🚀 Starting SeoTool.im hosted stack..."
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d $BUILD_FLAG
 
 echo ""
@@ -73,7 +70,7 @@ WAITED=0
 while [ $WAITED -lt $MAX_WAIT ]; do
   HEALTH=$(docker inspect --format='{{.State.Health.Status}}' "$(docker compose -f "$COMPOSE_FILE" ps -q open-seo 2>/dev/null)" 2>/dev/null || echo "starting")
   if [ "$HEALTH" = "healthy" ]; then
-    echo "✅ OpenSEO is healthy!"
+    echo "✅ SeoTool.im is healthy!"
     break
   fi
   sleep 10
@@ -82,7 +79,7 @@ while [ $WAITED -lt $MAX_WAIT ]; do
 done
 
 if [ "$HEALTH" != "healthy" ]; then
-  echo "⚠️  OpenSEO hasn't become healthy after ${MAX_WAIT}s."
+  echo "⚠️  SeoTool.im hasn't become healthy after ${MAX_WAIT}s."
   echo "   Check logs: docker compose -f $COMPOSE_FILE logs open-seo"
   exit 1
 fi
@@ -92,7 +89,7 @@ fi
 echo ""
 echo "🎉 Deployment complete!"
 echo ""
-echo "   App:     http://localhost:3001 (proxied via Caddy)"
+echo "   App:     https://seotool.im"
 echo "   Health:  curl http://localhost:3001/api/health"
 echo ""
 echo "   Useful commands:"

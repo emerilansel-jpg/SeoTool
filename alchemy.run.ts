@@ -28,7 +28,7 @@ import {
 // - Any stage except "hosted-prod": fresh stage-suffixed resources. Previews
 //   deploy via `pnpm deploy:preview --stage <name>`; self-hosters via
 //   `pnpm deploy:selfhost` (stage "selfhost", no flag to pass).
-// - Stage "hosted-prod": names the EXISTING openseo.so production resources
+// - Stage "hosted-prod": names the EXISTING seotool.im production resources
 //   so `--adopt` imports them. Deploy via `pnpm deploy:postgres` (--adopt and
 //   the stage baked in).
 //
@@ -321,7 +321,7 @@ export default Alchemy.Stack(
       if (!authUrl) {
         return yield* Effect.die(
           new Error(
-            "Set BETTER_AUTH_URL (https://app.openseo.so) in .env.production.",
+            "Set BETTER_AUTH_URL (https://seotool.im) in .env.production.",
           ),
         );
       }
@@ -357,7 +357,7 @@ export default Alchemy.Stack(
     const app = yield* Cloudflare.Worker("open-seo", {
       name: workerName(stage),
       // Prod serves the real domains; the zone is inferred from the hostname.
-      domain: prod ? ["app.openseo.so", "www.app.openseo.so"] : undefined,
+      domain: prod ? ["seotool.im", "www.seotool.im"] : undefined,
       // Prebuilt worker from `vite build` (@cloudflare/vite-plugin). The entry
       // exports the DO + WorkflowEntrypoint classes (re-exported by
       // src/server.ts), which `bundle: false` requires. Sibling chunks under
@@ -427,7 +427,7 @@ export default Alchemy.Stack(
         ),
       },
     }).pipe(
-      // Prod adopts the live worker serving app.openseo.so; never delete it
+      // Prod adopts the live worker serving seotool.im; never delete it
       // on destroy. (Workflow registrations aren't individually retainable —
       // they're created inside the worker provider — but re-registering them
       // is a lossless upsert, unlike deleting the data-bearing resources.)

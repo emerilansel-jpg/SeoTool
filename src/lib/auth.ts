@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { betterAuth } from "better-auth";
 import { APIError } from "better-auth/api";
-import { captcha } from "better-auth/plugins";
+import { captcha, twoFactor } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { isDisposableEmailDomain } from "@/server/auth/disposable-email";
@@ -98,6 +98,7 @@ function createAuth() {
           ]
         : []),
       tanstackStartCookies(),
+      twoFactor({ issuer: "SeoTool.im" }),
     ],
     databaseHooks: {
       user: {

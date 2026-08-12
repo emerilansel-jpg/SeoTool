@@ -18,7 +18,7 @@ type HostedOrganizationCreator = (
 ) => Promise<{ id: string }>;
 
 function getDefaultHostedOrganizationName(user: HostedUser) {
-  const name = user.name?.trim() || user.email.split("@")[0] || "OpenSEO";
+  const name = user.name?.trim() || user.email.split("@")[0] || "SeoTool.im";
   return `${name}'s workspace`;
 }
 

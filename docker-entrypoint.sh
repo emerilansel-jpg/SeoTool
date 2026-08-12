@@ -1,24 +1,29 @@
 #!/bin/sh
 # Self-host container entrypoint. vite build inlines the envPrefix'd client
 # envs (see vite.config.ts) into the bundle, so the build must run at container
-# start — but the output stays valid until those envs or the image change.
-# Fingerprint them and skip the build when the last start's output matches; an
-# image update lands a fresh container with no build output, so new code always
-# rebuilds.
+# start. The marketing site is also built here and shared with Caddy via a
+# Docker volume.
 set -e
 
-echo 'OpenSEO sends an anonymous usage heartbeat (counts only). Disable: OPENSEO_TELEMETRY_DISABLED=1. Details: docs/SELF_HOSTING_DOCKER.md#telemetry'
+echo 'SeoTool.im sends an anonymous usage heartbeat (counts only). Disable: OPENSEO_TELEMETRY_DISABLED=1.'
 
-# The preflight validates env BEFORE the slow steps, so misconfiguration fails
-# in seconds with the exact fix instead of after a multi-minute build.
+# ─── Build marketing site (static HTML served by Caddy) ─────────────────
+echo "📦 Building marketing site..."
+cd /app/web
+# node_modules already installed at Docker build time; just build.
+pnpm run build
+cd /app
+echo "✅ Marketing site built."
+
+# ─── Preflight ──────────────────────────────────────────────────────────
+# Validates env BEFORE the slow steps, so misconfiguration fails in seconds
+# with the exact fix instead of after a multi-minute build.
 pnpm exec tsx scripts/selfhost-preflight.ts
 
 # Run the correct migration based on the database provider. D1 is the default
 # (local SQLite); Postgres is used for hosted SaaS deployments.
 if [ "${DATABASE_PROVIDER:-}" = "postgres" ]; then
   echo "Running Postgres migrations..."
-  # POSTGRES_DATABASE_URL is set by docker-compose.hosted.yaml. drizzle-kit
-  # reads it from the environment via drizzle-pg.config.ts + loadLocalEnv.
   pnpm run db:migrate:pg
 else
   echo "Running D1 (SQLite) migrations..."
@@ -34,11 +39,11 @@ FP_FILE="$OUT_DIR/.openseo-build-env"
 # vite.config.ts (keep in sync) plus POSTHOG_SOURCEMAPS.
 FINGERPRINT="$(env | grep -E '^(VITE_|AUTH_MODE|BYPASS_EMAIL_VERIFICATION|POSTHOG_PUBLIC_KEY|POSTHOG_HOST|TURNSTILE_SITE_KEY|POSTHOG_SOURCEMAPS)' | sort | sha256sum | cut -d' ' -f1)"
 # A missing sha256sum would yield an empty, always-matching fingerprint and
-# silently disable rebuilds — fail loudly instead.
+# silently disable rebuilds, fail loudly instead.
 test -n "$FINGERPRINT"
 
 if [ -f "$FP_FILE" ] && [ "$(cat "$FP_FILE")" = "$FINGERPRINT" ]; then
-  echo "Reusing existing build (build-relevant env unchanged)."
+  echo "Reusing existing SaaS build (build-relevant env unchanged)."
 else
   echo "Building client + server (first start, changed build env, or new image)..."
   rm -f "$FP_FILE"

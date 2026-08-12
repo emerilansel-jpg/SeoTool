@@ -1,11 +1,11 @@
 # Autumn Plan Configuration
 
 This document describes how to configure the four plan tiers in the Autumn
-dashboard to work with OpenSEO's tiered billing system.
+dashboard to work with SeoTool.im's tiered billing system.
 
 ## Overview
 
-OpenSEO uses four plan tiers, each mapped to an Autumn product/plan:
+SeoTool.im uses four plan tiers, each mapped to an Autumn product/plan:
 
 | Tier   | Price/mo | Autumn Plan ID   | Description                   |
 | ------ | -------- | ---------------- | ----------------------------- |

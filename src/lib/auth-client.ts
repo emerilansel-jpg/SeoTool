@@ -3,6 +3,7 @@ import {
   genericOAuthClient,
   inferAdditionalFields,
   organizationClient,
+  twoFactorClient,
 } from "better-auth/client/plugins";
 import { captureClientEvent, resetAnalyticsUser } from "@/client/lib/posthog";
 import { userAdditionalFields } from "@/lib/auth-options";
@@ -13,6 +14,7 @@ export const authClient = createAuthClient({
   plugins: [
     organizationClient(),
     genericOAuthClient(),
+    twoFactorClient(),
     inferAdditionalFields({ user: userAdditionalFields }),
   ],
 });

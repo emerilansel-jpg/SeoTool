@@ -78,7 +78,7 @@ export async function sendAlertNotificationEmail(input: {
           summary: input.summary,
           details: detailsText,
           dashboardUrl: input.dashboardUrl,
-          appName: "OpenSEO",
+          appName: "SeoTool.im",
         },
       });
     } catch (error) {

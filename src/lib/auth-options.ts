@@ -8,6 +8,18 @@ export const userAdditionalFields = {
     required: false as const,
     input: true as const,
   },
+  emailProductUpdates: {
+    type: "boolean" as const,
+    defaultValue: () => true,
+    required: false as const,
+    input: true as const,
+  },
+  emailAlertNotifications: {
+    type: "boolean" as const,
+    defaultValue: () => true,
+    required: false as const,
+    input: true as const,
+  },
 };
 
 export const baseAuthOptions = {
@@ -23,7 +35,7 @@ export const baseAuthOptions = {
   session: {
     // Serve getSession from a signed cookie instead of a DB round trip. The
     // session lookup runs on every authenticated request, and the DB lives in
-    // us-east — from far colos that single query was ~1s of wall time. The
+    // us-east, from far colos that single query was ~1s of wall time. The
     // trade-off is revocation lag: a session revoked elsewhere (sign-out on
     // another device, password reset) stays valid on an already-issued cookie
     // for up to maxAge. Authorization still hits the DB via the canonical

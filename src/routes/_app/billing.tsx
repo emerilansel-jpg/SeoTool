@@ -164,6 +164,14 @@ function BillingPage() {
                   )}
                   Manage Subscription
                 </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm w-full"
+                  disabled={isPortalLoading}
+                  onClick={handleManageSubscription}
+                >
+                  View Invoice History
+                </button>
               </div>
             )}
           </div>

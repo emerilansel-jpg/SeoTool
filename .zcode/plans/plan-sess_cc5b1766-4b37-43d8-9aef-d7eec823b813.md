@@ -1,4 +1,4 @@
-# Rencana: Transformasi OpenSEO → SaaS Hosted (Ahrefs/Semrush-style)
+# Rencana: Transformasi SeoTool.im → SaaS Hosted (Ahrefs/Semrush-style)
 
 ## Keputusan (dari user)
 

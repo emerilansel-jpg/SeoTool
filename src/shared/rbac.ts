@@ -5,7 +5,7 @@ import { z } from "zod";
  *
  * `owner` and `member` are better-auth organization-plugin defaults (the org
  * creator is `owner`; everyone else invited without a role lands on `member`).
- * `manager` and `viewer` are OpenSEO additions: `manager` can create/edit
+ * `manager` and `viewer` are SeoTool.im additions: `manager` can create/edit
  * shared resources (reports); `viewer` is the client-viewer read-only role for
  * agency clients. Keeping better-auth's `member` in the ladder means existing
  * workspaces keep working — `member` sits between manager and viewer and can

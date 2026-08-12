@@ -25,7 +25,7 @@ function isPlanTier(value: string): value is PlanTier {
   return PLAN_TIER_SET.has(value);
 }
 
-const SUPPORT_EMAIL = "ben@openseo.so";
+const SUPPORT_EMAIL = "support@seotool.im";
 
 const PLAN_FEATURES: Record<PlanTier, string[]> = {
   free: [
@@ -174,7 +174,7 @@ function SubscribePage() {
       <div className="w-full max-w-xs space-y-4 text-center">
         <img
           src="/transparent-logo.png"
-          alt="OpenSEO"
+          alt="SeoTool.im"
           className="mx-auto size-10 rounded-lg"
         />
         <h1 className="text-xl font-semibold">
@@ -201,7 +201,7 @@ function SubscribePage() {
         <div className="text-center space-y-3">
           <img
             src="/transparent-logo.png"
-            alt="OpenSEO"
+            alt="SeoTool.im"
             className="mx-auto size-10 rounded-lg"
           />
           <h1 className="text-xl font-semibold">Billing unavailable</h1>
@@ -270,15 +270,15 @@ function SubscribePage() {
       <div className="text-center space-y-3">
         <img
           src="/transparent-logo.png"
-          alt="OpenSEO"
+          alt="SeoTool.im"
           className="mx-auto size-10 rounded-lg"
         />
         <h1 className="text-xl font-semibold">
           {isUpgradeFlow
             ? "Upgrade your plan"
             : firstName
-              ? `Welcome to OpenSEO, ${firstName}!`
-              : "Welcome to OpenSEO!"}
+              ? `Welcome to SeoTool.im, ${firstName}!`
+              : "Welcome to SeoTool.im!"}
         </h1>
         <p className="text-sm text-base-content/60">
           SEO on your terms. Choose the plan that fits your needs.

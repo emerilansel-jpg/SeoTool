@@ -54,9 +54,9 @@ const authContext: McpToolAuthContext = {
   organizationId: "org-1",
   clientId: "client-1",
   scopes: ["mcp"],
-  audience: "https://app.openseo.so/mcp",
+  audience: "https://seotool.im/mcp",
   subject: "user-1",
-  baseUrl: "https://app.openseo.so",
+  baseUrl: "https://seotool.im",
 };
 
 describe("instrumentMcpToolHandler", () => {

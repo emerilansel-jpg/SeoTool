@@ -1,4 +1,4 @@
-# Contributing to OpenSEO
+# Contributing to SeoTool.im
 
 Contributions are very welcome.
 

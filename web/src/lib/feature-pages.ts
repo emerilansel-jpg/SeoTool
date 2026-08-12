@@ -58,7 +58,7 @@ export const featurePages = {
       "free keyword research tool",
       "keyword research tools",
     ],
-    imageAlt: "OpenSEO keyword research dashboard",
+    imageAlt: "SeoTool.im keyword research dashboard",
     imageSrc:
       "https://imagedelivery.net/ysLOa6bzFaM49Jxok-TAlw/d77077d0-cdf4-4523-0c41-56a7b4861300/public",
     workflows: [
@@ -105,17 +105,17 @@ export const featurePages = {
     ],
     faqs: [
       {
-        question: "What is OpenSEO keyword research best for?",
+        question: "What is SeoTool.im keyword research best for?",
         answer:
-          "OpenSEO is best for finding SEO keyword ideas, checking demand and difficulty, and turning those ideas into saved keywords you can revisit.",
+          "SeoTool.im is best for finding SEO keyword ideas, checking demand and difficulty, and turning those ideas into saved keywords you can revisit.",
       },
       {
-        question: "Can I use OpenSEO as a free keyword research tool?",
+        question: "Can I use SeoTool.im as a free keyword research tool?",
         answer:
-          "Not unlimited: quality keyword data costs money everywhere, which is why the big SEO suites run $100/month and up. OpenSEO is the most affordable option; you can start for free, and paid plans start at $10/month with usage credits included. It's also open source, so you can self-host with your own DataForSEO account.",
+          "Not unlimited: quality keyword data costs money everywhere, which is why the big SEO suites run $100/month and up. SeoTool.im is the most affordable option; you can start for free, and paid plans start at $10/month with usage credits included. It's also open source, so you can self-host with your own DataForSEO account.",
       },
       {
-        question: "Does OpenSEO show live search results?",
+        question: "Does SeoTool.im show live search results?",
         answer:
           "Yes. Keyword research can be paired with SERP inspection so you can see ranking pages alongside the metrics.",
       },
@@ -169,7 +169,7 @@ export const featurePages = {
       "free seo audit tool",
       "seo audit tools",
     ],
-    imageAlt: "OpenSEO site audit report",
+    imageAlt: "SeoTool.im site audit report",
     imageSrc:
       "https://imagedelivery.net/ysLOa6bzFaM49Jxok-TAlw/53149e87-0027-4fa8-5d13-bcaab60c7100/public",
     workflows: [
@@ -213,17 +213,17 @@ export const featurePages = {
     ],
     faqs: [
       {
-        question: "What does the OpenSEO site audit tool check?",
+        question: "What does the SeoTool.im site audit tool check?",
         answer:
           "Status codes, titles, meta descriptions, headings, indexability signals, image alt coverage, links, and response time for every crawled page. Enable Lighthouse and each page also gets performance, SEO, accessibility, and best-practice issues.",
       },
       {
-        question: "Is OpenSEO a free SEO audit tool?",
+        question: "Is SeoTool.im a free SEO audit tool?",
         answer:
-          "For smaller sites, yes: the free plan includes site audits up to 50 pages per crawl. Larger crawls need a paid plan, starting at $10/month. OpenSEO is also open source and self-hostable.",
+          "For smaller sites, yes: the free plan includes site audits up to 50 pages per crawl. Larger crawls need a paid plan, starting at $10/month. SeoTool.im is also open source and self-hostable.",
       },
       {
-        question: "Who should use OpenSEO Site Audit?",
+        question: "Who should use SeoTool.im Site Audit?",
         answer:
           "It is useful for founders, marketers, agencies, and developers who need a shared crawl report and optional Lighthouse issue export.",
       },
@@ -242,7 +242,7 @@ export const featurePages = {
       "backlink analysis tool",
       "google backlink checker",
     ],
-    imageAlt: "OpenSEO backlinks report",
+    imageAlt: "SeoTool.im backlinks report",
     imageSrc:
       "https://imagedelivery.net/ysLOa6bzFaM49Jxok-TAlw/d97206ed-bd64-447c-2b9e-1b9f07c5ec00/public",
     workflows: [
@@ -285,7 +285,7 @@ export const featurePages = {
         href: "/docs/skills/link-prospecting",
       },
       { label: "Domain Overview", href: "/features/domain-overview" },
-      { label: "OpenSEO MCP", href: "/features/mcp" },
+      { label: "SeoTool.im MCP", href: "/features/mcp" },
     ],
     faqs: [
       {
@@ -294,7 +294,7 @@ export const featurePages = {
           "A backlink checker helps you understand which sites link to a domain or page, which links have stronger rank, spam, broken, lost, or nofollow signals, and where competitors are earning authority.",
       },
       {
-        question: "Can I check competitor backlinks in OpenSEO?",
+        question: "Can I check competitor backlinks in SeoTool.im?",
         answer:
           "Yes. Enter any domain, yours or a competitor's, and pull its backlinks, referring domains, and top linked pages.",
       },
@@ -318,7 +318,7 @@ export const featurePages = {
       "competitor keyword analysis tool",
       "website traffic checker",
     ],
-    imageAlt: "OpenSEO domain overview",
+    imageAlt: "SeoTool.im domain overview",
     imageSrc:
       "https://imagedelivery.net/ysLOa6bzFaM49Jxok-TAlw/189e22b8-fdf8-46b4-198c-e912beef2300/public",
     workflows: [
@@ -372,10 +372,10 @@ export const featurePages = {
       {
         question: "How does this compare to Semrush Domain Overview?",
         answer:
-          "OpenSEO covers the core of the same report (estimated traffic, organic keywords, top keywords, and top pages) without a triple-digit monthly seat. OpenSEO is open source, so you can self-host it, and the managed app is $10/month and includes usage credits.",
+          "SeoTool.im covers the core of the same report (estimated traffic, organic keywords, top keywords, and top pages) without a triple-digit monthly seat. SeoTool.im is open source, so you can self-host it, and the managed app is $10/month and includes usage credits.",
       },
       {
-        question: "Can OpenSEO help with competitor keyword analysis?",
+        question: "Can SeoTool.im help with competitor keyword analysis?",
         answer:
           "Yes. Enter a competitor's domain and you get the keywords it ranks for and its top organic pages: the raw material for finding topics worth building or defending.",
       },
@@ -399,7 +399,7 @@ export const featurePages = {
       "keyword rank tracker",
       "google rank tracker",
     ],
-    imageAlt: "OpenSEO rank tracking table",
+    imageAlt: "SeoTool.im rank tracking table",
     imageSrc:
       "https://imagedelivery.net/ysLOa6bzFaM49Jxok-TAlw/4a0f8508-1527-46a8-c91c-086456f21c00/public",
     workflows: [
@@ -434,7 +434,7 @@ export const featurePages = {
     differentiators: [
       "Rank tracking is part of the same workspace as discovery, audit, and competitor research.",
       "Optional desktop and mobile tracking helps teams avoid one-dimensional rank reports.",
-      "OpenSEO can expose ranking data to AI agents through MCP.",
+      "SeoTool.im can expose ranking data to AI agents through MCP.",
     ],
     related: [
       { label: "Keyword Clustering", href: "/docs/skills/keyword-clustering" },
@@ -451,7 +451,7 @@ export const featurePages = {
           "A rank tracker monitors where a domain appears for selected keywords over time so you can see whether SEO work is improving visibility.",
       },
       {
-        question: "Does OpenSEO track mobile and desktop rankings?",
+        question: "Does SeoTool.im track mobile and desktop rankings?",
         answer:
           "Yes: mobile, desktop, or both. Each tracked domain is configured with the devices you want, and enabling both lets you compare them side by side.",
       },
@@ -475,7 +475,7 @@ export const featurePages = {
       "keyword list tool",
       "keyword planning",
     ],
-    imageAlt: "OpenSEO saved keywords list",
+    imageAlt: "SeoTool.im saved keywords list",
     imageSrc:
       "https://imagedelivery.net/ysLOa6bzFaM49Jxok-TAlw/8938a529-b443-4d4f-9869-c972f3cef900/public",
     workflows: [
@@ -514,7 +514,7 @@ export const featurePages = {
     related: [
       { label: "Keyword Research", href: "/features/keyword-research" },
       { label: "Rank Tracking", href: "/features/rank-tracking" },
-      { label: "OpenSEO MCP", href: "/features/mcp" },
+      { label: "SeoTool.im MCP", href: "/features/mcp" },
     ],
     faqs: [
       {
@@ -547,7 +547,7 @@ export const featurePages = {
       "ai search visibility",
       "answer engine optimization",
     ],
-    imageAlt: "OpenSEO AI brand visibility report",
+    imageAlt: "SeoTool.im AI brand visibility report",
     imageSrc:
       "https://imagedelivery.net/ysLOa6bzFaM49Jxok-TAlw/cde3e4f8-079f-4890-cb17-371087107400/public",
     workflows: [
@@ -581,12 +581,12 @@ export const featurePages = {
     differentiators: [
       "AI visibility sits beside classic SEO research instead of replacing it.",
       "The workflow focuses on concrete sources and mentions, not vague AI hype.",
-      "OpenSEO helps teams connect AI mention and citation research to concrete SEO planning.",
+      "SeoTool.im helps teams connect AI mention and citation research to concrete SEO planning.",
     ],
     related: [
       { label: "AI Search Prompts", href: "/features/ai-search-prompts" },
       { label: "Domain Overview", href: "/features/domain-overview" },
-      { label: "OpenSEO MCP", href: "/features/mcp" },
+      { label: "SeoTool.im MCP", href: "/features/mcp" },
     ],
     faqs: [
       {
@@ -597,7 +597,7 @@ export const featurePages = {
       {
         question: "How is AI visibility different from traditional SEO?",
         answer:
-          "Traditional SEO focuses on rankings and pages. OpenSEO's AI visibility workflow looks at mentions, cited pages, related prompts, and platform-level metrics from supported AI-search sources.",
+          "Traditional SEO focuses on rankings and pages. SeoTool.im's AI visibility workflow looks at mentions, cited pages, related prompts, and platform-level metrics from supported AI-search sources.",
       },
       {
         question: "Should AI visibility replace keyword research?",
@@ -619,7 +619,7 @@ export const featurePages = {
       "ai search prompts",
       "answer engine optimization tool",
     ],
-    imageAlt: "OpenSEO prompt explorer",
+    imageAlt: "SeoTool.im prompt explorer",
     imageSrc:
       "https://imagedelivery.net/ysLOa6bzFaM49Jxok-TAlw/9f3d38f2-aa97-417c-ca74-ae378654d700/public",
     workflows: [
@@ -652,13 +652,13 @@ export const featurePages = {
     ],
     differentiators: [
       "Prompt research lives in the same workspace as domain, keyword, and brand visibility workflows.",
-      "OpenSEO treats AI search as a research layer, not a replacement for SEO fundamentals.",
-      "OpenSEO MCP exposes keyword, SERP, domain, backlink, saved keyword, and rank-tracking tools to AI agents.",
+      "SeoTool.im treats AI search as a research layer, not a replacement for SEO fundamentals.",
+      "SeoTool.im MCP exposes keyword, SERP, domain, backlink, saved keyword, and rank-tracking tools to AI agents.",
     ],
     related: [
       { label: "AI Brand Visibility", href: "/features/ai-brand-visibility" },
       { label: "Keyword Research", href: "/features/keyword-research" },
-      { label: "OpenSEO MCP", href: "/features/mcp" },
+      { label: "SeoTool.im MCP", href: "/features/mcp" },
     ],
     faqs: [
       {

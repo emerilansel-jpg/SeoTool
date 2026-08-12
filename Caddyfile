@@ -1,8 +1,25 @@
-# Replace yourdomain.com with your actual domain.
+# SeoTool.im reverse proxy with marketing static files + SaaS app fallback.
 # Caddy automatically obtains and renews Let's Encrypt TLS certificates.
 
-yourdomain.com {
-    reverse_proxy open-seo:3001
+seotool.im {
+    # Marketing static files (prerendered HTML from web/dist/client).
+    # Caddy checks if a static file exists for the request path. If it does,
+    # serve it directly. If not, fall through to the SaaS reverse proxy.
+    root * /srv/marketing
+
+    @staticFiles {
+        file {
+            try_files {path} {path}/index.html
+        }
+    }
+    handle @staticFiles {
+        file_server
+    }
+
+    # Everything else goes to the SaaS app (sign-in, dashboard, API, etc.)
+    handle {
+        reverse_proxy open-seo:3001
+    }
 
     encode gzip zstd
 
@@ -22,7 +39,7 @@ yourdomain.com {
     reverse_proxy @websockets open-seo:3001
 }
 
-# Optional: redirect www to apex (uncomment if needed)
-# www.yourdomain.com {
-#     redir https://yourdomain.com{uri} permanent
-# }
+# Redirect www to apex
+www.seotool.im {
+    redir https://seotool.im{uri} permanent
+}

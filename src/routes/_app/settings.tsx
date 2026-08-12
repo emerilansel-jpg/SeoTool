@@ -5,6 +5,16 @@ import { toast } from "sonner";
 import { type ThemePreference, useThemePreference } from "@/client/lib/theme";
 import { authClient, useSession } from "@/lib/auth-client";
 import { isHostedClientAuthMode } from "@/lib/auth-mode";
+import {
+  DangerZoneSection,
+  ProfileSection,
+  SecuritySection,
+} from "@/client/features/settings/SettingsSections";
+import { NotificationSection } from "@/client/features/settings/NotificationSection";
+import { SessionSection } from "@/client/features/settings/SessionSection";
+import { TwoFactorSection } from "@/client/features/settings/TwoFactorSection";
+import { ApiKeySection } from "@/client/features/settings/ApiKeySection";
+import { TeamSection } from "@/client/features/settings/TeamSection";
 import { version } from "../../../package.json";
 
 export const Route = createFileRoute("/_app/settings")({
@@ -52,6 +62,15 @@ function SettingsPage() {
       <div className="mx-auto max-w-xl space-y-10">
         <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
 
+        {isHosted ? (
+          <ProfileSection
+            name={session?.user?.name ?? ""}
+            email={session?.user?.email ?? ""}
+            isPending={isSessionPending}
+          />
+        ) : null}
+
+        {/* Appearance */}
         <section className="space-y-3">
           <h2 className="text-sm font-medium text-base-content/50">
             Appearance
@@ -89,6 +108,8 @@ function SettingsPage() {
           </div>
         </section>
 
+        {isHosted ? <NotificationSection /> : null}
+
         {isHosted ? (
           <section className="space-y-3">
             <h2 className="text-sm font-medium text-base-content/50">
@@ -96,7 +117,7 @@ function SettingsPage() {
             </h2>
             <div className="flex items-start justify-between gap-6">
               <div>
-                <p className="text-sm">Help improve OpenSEO</p>
+                <p className="text-sm">Help improve SeoTool.im</p>
                 <p className="mt-1 text-sm text-base-content/60">
                   Share analytics and usage data.
                 </p>
@@ -105,7 +126,7 @@ function SettingsPage() {
                 type="checkbox"
                 className="toggle toggle-primary"
                 checked={analyticsEnabled}
-                disabled={isSessionPending || isSaving || !session?.user}
+                disabled={isSaving || !session?.user}
                 onChange={(event) => {
                   void updateAnalyticsPreference(event.currentTarget.checked);
                 }}
@@ -124,6 +145,18 @@ function SettingsPage() {
             </div>
           </section>
         )}
+
+        {isHosted ? <SecuritySection /> : null}
+
+        {isHosted ? <TwoFactorSection /> : null}
+
+        {isHosted ? <SessionSection /> : null}
+
+        {isHosted ? <ApiKeySection /> : null}
+
+        {isHosted ? <TeamSection /> : null}
+
+        {isHosted ? <DangerZoneSection /> : null}
       </div>
     </div>
   );

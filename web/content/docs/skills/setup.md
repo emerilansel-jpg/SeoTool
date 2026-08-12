@@ -1,13 +1,13 @@
 ---
-title: "Set up OpenSEO Agent Skills"
-description: "Add OpenSEO skill files to your AI agent after connecting OpenSEO MCP."
+title: "Set up SeoTool.im Agent Skills"
+description: "Add SeoTool.im skill files to your AI agent after connecting SeoTool.im MCP."
 ---
 
-OpenSEO Agent Skills are separate files from OpenSEO MCP.
+SeoTool.im Agent Skills are separate files from SeoTool.im MCP.
 
-First, [set up OpenSEO MCP](/docs/mcp). MCP gives your agent access to OpenSEO data.
+First, [set up SeoTool.im MCP](/docs/mcp). MCP gives your agent access to SeoTool.im data.
 
-Then add the OpenSEO `SKILL.md` files you want your agent to use. Each skill gives your agent one SEO workflow.
+Then add the SeoTool.im `SKILL.md` files you want your agent to use. Each skill gives your agent one SEO workflow.
 
 ## Choose an installation option
 
@@ -21,9 +21,9 @@ Use this if you want the installer to show the available skills and agents.
 npx skills add every-app/open-seo
 ```
 
-### Option 2: Install all OpenSEO skills
+### Option 2: Install all SeoTool.im skills
 
-Use this if you want every OpenSEO skill.
+Use this if you want every SeoTool.im skill.
 
 ```bash
 npx skills add every-app/open-seo --skill '*'
@@ -63,7 +63,7 @@ cp -R open-seo/.agents/skills/* ~/.claude/skills/
 
 You can also review the source skills on GitHub:
 
-- [OpenSEO Agent Skills on GitHub](https://github.com/every-app/open-seo/tree/main/.agents/skills)
+- [SeoTool.im Agent Skills on GitHub](https://github.com/every-app/open-seo/tree/main/.agents/skills)
 
 Each skill page also links to its source `SKILL.md`.
 
