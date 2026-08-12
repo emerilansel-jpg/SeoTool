@@ -18,11 +18,20 @@ export function getDatabaseProvider(): DatabaseProvider {
   );
 }
 
-// Postgres is only reachable through the HYPERDRIVE binding — never a direct
-// connection string from a Worker var. In local dev the binding resolves to
-// `localConnectionString` from wrangler.jsonc (miniflare never contacts real
-// Hyperdrive), so the same code path covers both.
+// On Cloudflare Workers, Postgres is reachable only through the HYPERDRIVE
+// binding. In self-hosted Docker (vite preview, no workerd) the binding
+// resolves to `localConnectionString` from wrangler.jsonc, which points at a
+// host-local dev database (127.0.0.1:15432) that does not exist inside the
+// container. A direct POSTGRES_DATABASE_URL must therefore take precedence
+// there.
 export function getPostgresConnectionString() {
+  const directUrl = Reflect.get(env, "POSTGRES_DATABASE_URL") as
+    | string
+    | undefined;
+  if (directUrl && directUrl.trim()) {
+    return directUrl.trim();
+  }
+
   const hyperdrive = Reflect.get(env, "HYPERDRIVE") as
     | { connectionString?: string }
     | undefined;
@@ -32,6 +41,6 @@ export function getPostgresConnectionString() {
   }
 
   throw new Error(
-    "DATABASE_PROVIDER=postgres requires a HYPERDRIVE binding (in local dev, its localConnectionString).",
+    "DATABASE_PROVIDER=postgres requires POSTGRES_DATABASE_URL (self-hosted) or a HYPERDRIVE binding (Cloudflare).",
   );
 }

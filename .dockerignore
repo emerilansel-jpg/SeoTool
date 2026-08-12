@@ -10,5 +10,7 @@
 Dockerfile
 .env
 .env.*
+.dev.vars
+**/.dev.vars
 !.env.example
 .alchemy/
