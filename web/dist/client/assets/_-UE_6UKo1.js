@@ -1,0 +1,1 @@
+import{q as s,s as a,j as o,C as n,l as c}from"./main-Dn6_Xd-Q.js";import{D as r}from"./index-C0hUgruI.js";function d(){const t=s.useLoaderData(),e=a.getComponent(t.path);return o.jsx(r,{tree:t.pageTree,...c(),children:o.jsx(n,{backLabel:"Back to Docs",backTo:"/docs",title:t.title,description:t.description,Content:e})})}export{d as component};

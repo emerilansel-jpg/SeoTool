@@ -1,0 +1,1 @@
+const e="Self-Hosting",o=["[Overview](/docs/self-hosting)","[Docker](/docs/self-hosting/docker)","[Cloudflare](/docs/self-hosting/cloudflare)"],s={title:e,pages:o};export{s as default,o as pages,e as title};
