@@ -8,14 +8,19 @@ set -e
 echo 'SeoTool.im sends an anonymous usage heartbeat (counts only). Disable: OPENSEO_TELEMETRY_DISABLED=1.'
 
 # ─── Build marketing site (static HTML served by Caddy) ─────────────────
-echo "📦 Building marketing site..."
-cd /app/web
-# DOCKER_BUILD=1 skips the Cloudflare plugin and prerendering (not needed for
-# static serving via Caddy, and the Cloudflare SSR runtime isn't available
-# in Docker).
-DOCKER_BUILD=1 pnpm run build
-cd /app
-echo "✅ Marketing site built."
+# If web/dist/client/index.html exists (pre-built locally and copied into
+# the Docker image via .dockerignore exception), skip the build. Otherwise
+# build with DOCKER_BUILD=1 (no Cloudflare plugin, no prerendering).
+MARKETING_INDEX="/app/web/dist/client/index.html"
+if [ -f "$MARKETING_INDEX" ]; then
+  echo "📦 Marketing site already built (pre-built HTML found)."
+else
+  echo "📦 Building marketing site (no pre-built HTML found)..."
+  cd /app/web
+  DOCKER_BUILD=1 pnpm run build
+  cd /app
+  echo "✅ Marketing site built."
+fi
 
 # ─── Preflight ──────────────────────────────────────────────────────────
 # Validates env BEFORE the slow steps, so misconfiguration fails in seconds
