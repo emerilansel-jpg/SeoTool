@@ -1,18 +1,42 @@
 # SeoTool.im reverse proxy with marketing static files + SaaS app fallback.
 # Caddy automatically obtains and renews Let's Encrypt TLS certificates.
+#
+# Marketing routes are served as static files from /srv/marketing.
+# Everything else is proxied to the SaaS app (open-seo:3001).
 
 seotool.im {
-    # Marketing static files (prerendered HTML from web/dist/client).
-    # Caddy checks if a static file exists for the request path. If it does,
-    # serve it directly. If not, fall through to the SaaS reverse proxy.
-    root * /srv/marketing
-
-    @staticFiles {
-        file {
-            try_files {path} {path}/index.html
-        }
+    # Known marketing site routes. These are served as static HTML.
+    # Add new marketing routes here when they are created.
+    @marketingRoutes {
+        path / /pricing /about /contact /careers /affiliates /changelog
+        path /features /features/*
+        path /open-source-seo /google-search-console-mcp
+        path /privacy /terms-and-conditions /cookie-policy /refund-policy /dpa
     }
-    handle @staticFiles {
+    handle @marketingRoutes {
+        root * /srv/marketing
+        try_files {path} {path}/index.html /index.html
+        file_server
+    }
+
+    # Marketing static assets (CSS, JS, images, videos)
+    @marketingAssets {
+        path /assets/* /avatars/* /demo.mp4 /demo-poster.webp
+        path /favicon* /apple-touch-icon* /android-chrome*
+        path /site.webmanifest /robots.txt /sitemap.xml
+    }
+    handle @marketingAssets {
+        root * /srv/marketing
+        file_server
+    }
+
+    # Blog, docs, guides content (marketing subpaths)
+    @marketingContent {
+        path /blogs* /docs* /guides*
+    }
+    handle @marketingContent {
+        root * /srv/marketing
+        try_files {path} {path}/index.html /index.html
         file_server
     }
 

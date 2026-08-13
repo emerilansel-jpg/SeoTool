@@ -36,7 +36,10 @@ export default defineConfig({
         ]),
     tanstackStart({
       prerender: {
-        enabled: true,
+        // Prerendering requires the Cloudflare SSR plugin. In Docker builds
+        // we skip it; Caddy serves index.html for all routes and the
+        // client-side router handles the rest.
+        enabled: !isDockerBuild,
       },
     }),
     react(),
