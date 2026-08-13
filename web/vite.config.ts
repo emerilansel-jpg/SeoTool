@@ -6,6 +6,12 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "fumadocs-mdx/vite";
 
+// DOCKER_BUILD=1 disables the Cloudflare plugin for building inside Docker
+// (where the Cloudflare Workers runtime is not available). Prerendering
+// still works using Vite's built-in SSR since subscribe.ts now uses
+// process.env instead of cloudflare:workers.
+const isDockerBuild = process.env.DOCKER_BUILD === "1";
+
 export default defineConfig({
   server: {
     port: 4322,
@@ -21,9 +27,13 @@ export default defineConfig({
     tsConfigPaths({
       projects: ["./tsconfig.json"],
     }),
-    cloudflare({
-      viteEnvironment: { name: "ssr" },
-    }),
+    ...(isDockerBuild
+      ? []
+      : [
+          cloudflare({
+            viteEnvironment: { name: "ssr" },
+          }),
+        ]),
     tanstackStart({
       prerender: {
         enabled: true,

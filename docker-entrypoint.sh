@@ -10,8 +10,10 @@ echo 'SeoTool.im sends an anonymous usage heartbeat (counts only). Disable: OPEN
 # ─── Build marketing site (static HTML served by Caddy) ─────────────────
 echo "📦 Building marketing site..."
 cd /app/web
-# node_modules already installed at Docker build time; just build.
-pnpm run build
+# DOCKER_BUILD=1 skips the Cloudflare plugin and prerendering (not needed for
+# static serving via Caddy, and the Cloudflare SSR runtime isn't available
+# in Docker).
+DOCKER_BUILD=1 pnpm run build
 cd /app
 echo "✅ Marketing site built."
 

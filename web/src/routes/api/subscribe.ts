@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { env } from "cloudflare:workers";
 import { z } from "zod";
 
 const subscribeSchema = z.object({
@@ -20,7 +19,10 @@ export const Route = createFileRoute("/api/subscribe")({
           );
         }
 
-        const loopsApiKey = (env as any).LOOPS_API_KEY as string | undefined;
+        // Use process.env (works in both Cloudflare Workers and Node.js).
+        // In Cloudflare Workers, set LOOPS_API_KEY via wrangler secret or
+        // env binding; in Node.js/Docker, set it as an environment variable.
+        const loopsApiKey = process.env.LOOPS_API_KEY as string | undefined;
 
         if (!loopsApiKey) {
           console.error("Missing LOOPS_API_KEY");
@@ -41,7 +43,7 @@ export const Route = createFileRoute("/api/subscribe")({
               },
               body: JSON.stringify({
                 email: parsed.data.email,
-                source: "openseo-waitlist",
+                source: "seotool-waitlist",
               }),
             },
           );
