@@ -3,16 +3,15 @@
 # This stack runs:
 #   - open-seo: the app (workerd in Docker), connected to Postgres
 #   - postgres: the database
-#   - caddy: reverse proxy with automatic TLS, serves marketing static + proxies SaaS
+#
+# Caddy is NOT included here. The shared gateway-caddy container (already
+# running on this VPS) handles TLS and reverse proxying. See the
+# gateway-caddy Caddyfile for the seotool.im routing configuration.
 #
 # Usage:
 #   1. Copy .env.hosted.example to .env.hosted and fill in the values.
-#   2. Edit the Caddyfile to use your domain name.
+#   2. Update the gateway-caddy Caddyfile with the seotool.im site block.
 #   3. docker compose -f docker-compose.hosted.yaml --env-file .env.hosted up -d --build
-#
-# The app listens on port 3001 internally; Caddy proxies :80/:443 to it.
-# Marketing site static files are built inside the open-seo container and
-# shared with Caddy via the marketing_dist volume.
 
 services:
   open-seo:
@@ -23,14 +22,10 @@ services:
     env_file:
       - .env.hosted
     environment:
-      # Required for local Docker: exposes Compose env vars to cloudflare:workers
-      # bindings so the app reads them as Worker env.
       - CLOUDFLARE_INCLUDE_PROCESS_ENV=true
       - PORT=3001
       - AUTH_MODE=hosted
       - DATABASE_PROVIDER=postgres
-      # Hyperdrive isn't available in Docker; the app falls back to
-      # POSTGRES_DATABASE_URL for direct connections.
       - POSTGRES_DATABASE_URL=postgres://openseo:${POSTGRES_PASSWORD}@postgres:5432/openseo
     ports:
       - "127.0.0.1:3001:3001"
@@ -39,7 +34,6 @@ services:
         condition: service_healthy
     volumes:
       - open_seo_data:/app/.wrangler
-      - marketing_dist:/app/web/dist/client
     healthcheck:
       test:
         [
@@ -70,24 +64,6 @@ services:
       timeout: 5s
       retries: 5
 
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - marketing_dist:/srv/marketing:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      open-seo:
-        condition: service_healthy
-
 volumes:
   open_seo_data:
   pg_data:
-  marketing_dist:
-  caddy_data:
-  caddy_config:
