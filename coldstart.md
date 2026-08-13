@@ -22,7 +22,7 @@ Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 | Auth       | Better Auth **hosted-only** (email/password + Google OAuth + Turnstile captcha). Self-host modes (`cloudflare_access`, `local_noauth`) dihapus. |
 | Data SEO   | `dataforseo-client` (metered), GSC (first-party, gratis)                                                                                        |
 | AI         | Cloudflare Agents SDK, OpenRouter, MCP SDK (24 tools)                                                                                           |
-| Billing    | Autumn (`autumn-js`) over Stripe — **4-tier plan** (Free/Lite/Pro/Agency) + per-feature quotas                                                  |
+| Billing    | PayPal Subscriptions (Billing Plans) — **4-tier plan** (Free/Lite/Pro/Agency) + per-feature quotas + local credits system                       |
 | Quota      | `QuotaService` — 11 features (daily/monthly/gauge windows), atomic upsert enforcement                                                           |
 | UI         | Tailwind v4 + DaisyUI v5, lucide-react, recharts, jspdf (client PDF)                                                                            |
 | Email      | Loops (transactional)                                                                                                                           |
@@ -321,18 +321,18 @@ Monitoring notifikasi berbasis cron: `alert_rules` + Loops email + `AlertWorkflo
 | `src/client/navigation/items.ts`                                               | Nav item "Alerts" (icon `Bell`) di "My Site" group                                                                                                                                                                                                                      |
 
 - `db:generate` → D1 `0044_typical_prima.sql` + PG `0021_high_miracleman.sql`.
-- Cancellation webhook already wired: `subscription.canceled` → `syncAutumnCustomerStatus` → quota reset (dari Fase SaaS 4).
+- Cancellation webhook already wired: `BILLING.SUBSCRIPTION.CANCELLED` → `syncPaypalCustomerStatus` → quota reset (dari Fase SaaS 4).
 - tsc 0, tests 908 pass (885 + 23 baru), brace-balance OK.
 
 ---
 
-## Fase 7 — Stripe Customer Portal (LENGKAP)
+## Fase 7 — PayPal Customer Portal (LENGKAP)
 
 | File                             | Keterangan                                                                                                                                                                                  |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/server/billing/autumn.ts`   | +`billing.openCustomerPortal()` di lazy facade (shape-preserving, mengikuti pola check/track/customers)                                                                                     |
-| `src/serverFunctions/billing.ts` | +`getCustomerPortalUrl` server fn: `requireAuthenticatedContext` → gate hosted + `customerHasPaidPlan` → `autumn.billing.openCustomerPortal({ customerId: orgId, returnUrl })` → URL string |
-| `src/routes/_app/billing.tsx`    | +Tombol "Manage Subscription" (icon CreditCard, loading spinner) untuk paid users. Redirect ke Stripe Billing Portal. Cancel via portal → webhook sudah sync quotas.                        |
+| `src/server/billing/paypal.ts`   | `billingPortal.createSession(subscriptionId)` — PayPal subscription revision URL → redirects to PayPal hosted billing management page.                                                        |
+| `src/serverFunctions/billing.ts` | +`getCustomerPortalUrl` server fn: `requireAuthenticatedContext` → gate hosted + `customerHasPaidPlan` → read `paypalSubscriptionId` from DB → `paypal.billingPortal.createSession()` → URL.  |
+| `src/routes/_app/billing.tsx`    | +Tombol "Manage Subscription" (icon CreditCard, loading spinner) untuk paid users. Redirect ke PayPal Billing Portal. Cancel via portal → webhook sudah sync quotas.                        |
 
 ---
 
@@ -375,9 +375,9 @@ Saat rank check berjalan, DataForSEO mengembalikan full SERP (10-100 organic res
 
 ---
 
-## Transformasi SaaS — Hosted-Only + Tiered Billing (LENGKAP, 7 fase)
+## Transformasi SaaS — Hosted-Only + Tiered Billing (LENGKAP, 7 fase + PayPal)
 
-Mengubah SeoTool.im dari open-source self-host (3 auth mode, BYO API key, credit-pool billing) menjadi **hosted-only SaaS** (Better Auth, 4-tier plan + per-feature quotas). 7 fase, semua selesai dan terverifikasi (881 tests pass, 0 type errors, 0 lint errors).
+Mengubah SeoTool.im dari open-source self-host (3 auth mode, BYO API key, credit-pool billing) menjadi **hosted-only SaaS** (Better Auth, 4-tier plan + per-feature quotas + PayPal billing). 7 fase + PayPal migrasi, semua selesai dan terverifikasi.
 
 ### Fase 1 — Plan Tier Config & Quota System (LENGKAP)
 
@@ -385,16 +385,16 @@ Foundation: plan tier definitions, quota DB schema, QuotaService, gauge counts.
 
 | File                                                                         | Keterangan                                                                                                                                                                                                                                                        |
 | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/shared/plans.ts`                                                        | **Single source of truth**: 4 tier (Free/Lite/Pro/Agency), 11 QuotaFeature, PLAN_LIMITS, QUOTA_FEATURE_PERIODS (daily/monthly/gauge), PLAN_FEATURE_ACCESS (SAM/MCP gates), AUTUMN_PLAN_IDS mapping, `planTierFromAutumnPlanId()`, `creditFeatureToQuotaFeature()` |
-| `src/db/quota.schema.ts` + `src/db/pg/quota.schema.ts`                       | Tabel `usage_quota` (per-feature windowed counter, unique on org+feature+period) + `subscription` (org→plan tier, autumn sub id, period end) dual-dialect                                                                                                         |
-| `src/server/features/billing/repositories/QuotaRepository.ts`                | `getPlanTier`, `upsertSubscription`, `getUsageQuota`, `incrementUsageQuota` (atomic upsert + conditional window reset via SQL CASE), `peekUsageQuota`, `resetUsageQuotaForOrg`                                                                                    |
+| `src/shared/plans.ts`                                                        | **Single source of truth**: 4 tier (Free/Lite/Pro/Agency), 11 QuotaFeature, PLAN_LIMITS, QUOTA_FEATURE_PERIODS (daily/monthly/gauge), PLAN_FEATURE_ACCESS (SAM/MCP gates), PAYPAL_PLAN_IDS mapping, `planTierFromPaypalPlanId()`, `creditFeatureToQuotaFeature()` |
+| `src/db/quota.schema.ts` + `src/db/pg/quota.schema.ts`                       | Tabel `usage_quota` (per-feature windowed counter, unique on org+feature+period) + `subscription` (org→plan tier, paypal sub id, period end) dual-dialect                                                                                                         |
+| `src/server/features/billing/repositories/QuotaRepository.ts`                | `getPlanTier`, `upsertSubscription` (paypalSubscriptionId), `getUsageQuota`, `incrementUsageQuota` (atomic upsert + conditional window reset via SQL CASE), `peekUsageQuota`, `resetUsageQuotaForOrg`                                                               |
 | `src/server/features/billing/services/QuotaService.ts`                       | `checkQuota` (no-increment read), `assertQuotaAvailable` (windowed: atomic increment + throw QUOTA_EXCEEDED), `assertGaugeLimit` (live count compare), `getQuotaState` (UI summary), `resetQuotasOnPlanChange`                                                    |
 | `src/server/features/billing/services/gaugeCounts.ts`                        | Live-count helpers: `countOrgProjects`, `countOrgSavedKeywords`, `countOrgTrackedKeywords`, `countOrgReports`, `gaugeCount` dispatcher                                                                                                                            |
 | `src/server/billing/quota-gate.ts`                                           | **High-level API**: `assertFeatureQuota`, `assertGaugeFeature`, `assertFeatureAccess`, `isFeatureAvailable`                                                                                                                                                       |
 | `src/shared/error-codes.ts`                                                  | +`QUOTA_EXCEEDED`, +`PLAN_LIMIT_REACHED` (both non-reportable)                                                                                                                                                                                                    |
 | `src/client/lib/error-messages.ts`                                           | User-facing messages untuk QUOTA_EXCEEDED + PLAN_LIMIT_REACHED                                                                                                                                                                                                    |
 | `drizzle/0042_flowery_piledriver.sql` + `drizzle-pg/0019_modern_sir_ram.sql` | Migrations (CREATE TABLE usage_quota + subscription)                                                                                                                                                                                                              |
-| `src/server/features/billing/services/QuotaService.test.ts`                  | 20 unit tests (tier defs, limits monotonicity, feature access, quota periods, Autumn plan id mapping)                                                                                                                                                             |
+| `src/server/features/billing/services/QuotaService.test.ts`                  | 20 unit tests (tier defs, limits monotonicity, feature access, quota periods, PayPal plan id mapping)                                                                                                                                                             |
 
 ### Fase 2 — Hapus Self-Host Mode (LENGKAP)
 
@@ -431,26 +431,31 @@ Hook quota gates ke setiap feature call site.
 | `src/server.ts` (`authorizeSamChat`)                                  | `assertFeatureAccess("samAgent")` → 402 jika free                                               |
 | `src/server/features/audit/services/audit-capacity.ts`                | +`getMaxAuditPagesForTier()`, +`getMaxConcurrentAuditsForTier()`, +`planTierToAuditLimitTier()` |
 
-### Fase 4 — Autumn Plan Config + Webhook + Sync (LENGKAP)
+### Fase 4 — PayPal Plan Config + Webhook + Sync (LENGKAP)
 
 | File                                          | Keterangan                                                                                                                                                                    |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/server/billing/customer-status-model.ts` | Derive `planTier` dari Autumn subscription (scan tiered plan ids, prefer active). Extract `autumnSubscriptionId`, `currentPeriodEnd`. Accept `unknown` (defensive narrowing). |
-| `src/server/billing/customer-status-sync.ts`  | `syncAutumnCustomerStatus` → upsert `billing_customer_status` + upsert `subscription` + **reset windowed quotas on tier change** + sync to Loops                              |
-| `src/server/billing/autumn-webhook.ts`        | Handle 4 events: `billing.updated`, `subscription.created/updated/canceled`. Semua converge ke `syncAutumnCustomerStatus`.                                                    |
-| `src/server/billing/subscription.ts`          | `getOrCreateOrganizationCustomer` → lazily create default free-tier subscription row. `customerHasPaidPlan` → baca dari QuotaRepository (local DB, no Autumn round-trip).     |
-| `docs/AUTUMN_PLANS.md`                        | Setup guide: 4 plan tiers di Autumn dashboard, webhook events, plan tier resolution flow                                                                                      |
+| `src/server/billing/customer-status-model.ts` | Derive `planTier` dari PayPal subscription (`plan_id` + `PAYPAL_PLAN_IDS`). Extract `paypalSubscriptionId`, `currentPeriodEnd`. Maps PayPal statuses (ACTIVE/CANCELLED/etc). |
+| `src/server/billing/customer-status-sync.ts`  | `syncPaypalCustomerStatus` → upsert `billing_customer_status` + upsert `subscription` + **reset windowed quotas on tier change** + grant credits + sync to Loops              |
+| `src/server/billing/paypal-webhook.ts`        | Handle events: `BILLING.SUBSCRIPTION.CREATED/UPDATED/CANCELLED/EXPIRED/ACTIVATED/SUSPENDED`, `PAYMENT.CAPTURE.COMPLETED`. Semua converge ke `syncPaypalCustomerStatus`.      |
+| `src/server/billing/paypal-webhook-verify.ts` | PayPal webhook signature verification via `/v1/notifications/verify-webhook-signature` API.                                                                                    |
+| `src/server/billing/subscription.ts`          | `getOrCreateOrganizationCustomer` → lazily create default free-tier subscription row + grant free credits. `customerHasPaidPlan` → baca dari QuotaRepository (local DB).       |
+| `src/server/billing/credits.ts`               | Local credits management: `grantMonthlyCredits`, `getCreditBalance`, `deductCredits`, `addTopupCredits`. Menggunakan `usage_quota` table.                                     |
+| `src/server/billing/paypal.ts`                | PayPal REST API client: OAuth2 token caching, typed facade untuk subscriptions/billingPlans/billingPortal/webhooks.                                                           |
+| `docs/PAYPAL_BILLING.md`                      | Setup guide: 4 plan tiers di PayPal dashboard, webhook events, plan tier resolution flow, credits system                                                                     |
 
 ### Fase 5 — UI: Pricing, Billing, Quota Bars, Paywall (LENGKAP)
 
 | File                                             | Keterangan                                                                                                                                                                        |
 | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/client/features/billing/plan-detection.ts`  | `getCustomerPlanTier()` — resolve PlanTier dari Autumn subs. `getCustomerPlanStatus()` — backward-compat free/paid.                                                               |
-| `src/client/features/billing/HostedPlanGate.tsx` | `HostedPlanGateState` +`planTier: PlanTier`. Hapus self-host stub.                                                                                                                |
+| `src/client/features/billing/plan-detection.ts`  | `getCustomerPlanTier()` — resolve PlanTier dari PayPal subs. `getCustomerPlanStatus()` — backward-compat free/paid. Uses `PAYPAL_PLAN_IDS`.                                       |
+| `src/client/features/billing/HostedPlanGate.tsx` | `HostedPlanGateState` +`planTier: PlanTier`. Uses `usePlanTier()` hook (local DB, no Autumn).                                                                                    |
+| `src/client/features/billing/use-billing.ts`     | Local hooks: `usePlanTier()`, `useIsPaidPlan()`, `useSubscriptionProblemStatus()`. Fetch dari `getQuotaStateSummary`.                                                             |
 | `src/client/features/billing/QuotaBar.tsx`       | Komponen: label, used/limit, progress bar (green/yellow/red), reset time, "Unlimited" badge                                                                                       |
-| `src/routes/_authenticated.subscribe.tsx`        | **3-tier picker** (Lite $49 / Pro $149 / Agency $499). Radio-style selection. Checkout via `customerQuery.attach()`. Search param `plan=lite`. PostHog events dengan `plan_tier`. |
-| `src/routes/_app/billing.tsx`                    | Current plan card + quota usage section (QuotaBar per feature via `getQuotaStateSummary`) + legacy credit chart. Tombol Upgrade/Change → `/subscribe`.                            |
-| `src/serverFunctions/billing.ts`                 | +`getQuotaStateSummary` server fn (returns per-feature usage/limit/reset)                                                                                                         |
+| `src/routes/_authenticated.subscribe.tsx`        | **3-tier picker** (Lite $49 / Pro $149 / Agency $499). Radio-style selection. Checkout via `createPaypalSubscription` → redirect ke PayPal approval URL. PostHog events.          |
+| `src/routes/_app/billing.tsx`                    | Current plan card + quota usage section (QuotaBar per feature via `getQuotaStateSummary`). Tombol Manage Subscription → PayPal portal. Buy Credits → PayPal one-time payment.       |
+| `src/serverFunctions/billing.ts`                 | +`getQuotaStateSummary` server fn. +`getCustomerPortalUrl` → PayPal billing portal via subscription revision URL.                                                                 |
+| `src/serverFunctions/paypal-checkout.ts`         | `createPaypalSubscription` (creates PayPal subscription + returns approve URL). `verifyPaypalSubscription` (post-checkout verification). `createPaypalTopup` (one-time payment).  |
 
 ### Fase 6 — Landing Page Polish (LENGKAP)
 
@@ -463,11 +468,56 @@ Hook quota gates ke setiap feature call site.
 
 | File                         | Keterangan                                                                                                                                                                                            |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docker-compose.hosted.yaml` | 3 services: `open-seo` (workerd, AUTH_MODE=hosted, DATABASE_PROVIDER=postgres) + `postgres` (17-alpine, healthcheck) + `caddy` (reverse proxy, TLS). Volumes: app data + pg data + caddy data/config. |
-| `Caddyfile`                  | Reverse proxy + auto TLS + security headers + WebSocket support untuk SAM/onboarding agents.                                                                                                          |
-| `.env.hosted.example`        | Template: POSTGRES_PASSWORD, BETTER_AUTH_SECRET/URL, GOOGLE_CLIENT_ID/SECRET, TURNSTILE, LOOPS, DATAFORSEO_API_KEY, AUTUMN_SECRET_KEY/WEBHOOK_SECRET, OPENROUTER_API_KEY, POSTHOG.                    |
-| `scripts/deploy-vps.sh`      | Deploy script: pre-flight checks (env, placeholders, Caddyfile, docker) + compose up + health wait loop + summary.                                                                                    |
+| `docker-compose.hosted.yaml` | 2 services: `open-seo` (workerd, AUTH_MODE=hosted, DATABASE_PROVIDER=postgres) + `postgres` (17-alpine, healthcheck). Caddy TIDAK termasuk — ditangani oleh gateway-caddy shared (lihat bawah). Volumes: app data + pg data. |
+| `gateway-caddy/Caddyfile`    | **Running reverse proxy** untuk SEMUA app di VPS (seotool.im, omniroute, pesat). Marketing static + SaaS proxy routing + auto TLS + security headers + WebSocket. Lihat detail di section "Produksi LIVE" bawah. |
+| `Caddyfile`                  | Template standalone (seotool.im only). **STALE** — masih punya bug `/assets/*` collision. Gunakan `gateway-caddy/Caddyfile` sebagai source of truth.                                                  |
+| `.env.hosted.example`        | Template: POSTGRES_PASSWORD, BETTER_AUTH_SECRET/URL, GOOGLE_CLIENT_ID/SECRET, TURNSTILE, LOOPS, DATAFORSEO_API_KEY, PAYPAL_CLIENT_ID/SECRET/MODE/WEBHOOK_ID, OPENROUTER_API_KEY, POSTHOG.          |
+| `scripts/deploy-vps.sh`      | Deploy script: pre-flight checks (env, placeholders, docker) + compose up --build + health wait loop + summary.                                                                                       |
+| `auto-deploy.sh`             | Wrapper untuk CI: backup `.env.hosted` → `git fetch + reset --hard origin/main` → restore `.env.hosted` → `scripts/deploy-vps.sh --build`. Dipanggil oleh GitHub Action.                               |
+| `.github/workflows/deploy.yml` | CI/CD: `appleboy/ssh-action` SSH ke VPS → jalankan `auto-deploy.sh`. Trigger: push ke `main`.                                                                                                         |
 | `docker-entrypoint.sh`       | Detect `DATABASE_PROVIDER=postgres` → run `db:migrate:pg` (bukan `db:migrate:local`).                                                                                                                 |
+
+---
+
+## Produksi LIVE (seotool.im) — arsitektur gateway-caddy
+
+**VPS**: 148.230.103.98, user `seotool` (uid 1005, docker group, NO sudo). Domain `seotool.im` live dengan TLS.
+
+### Shared gateway-caddy (BUKAN per-app Caddy)
+
+VPS menjalankan **satu container gateway-caddy** (`/opt/gateway/compose.yaml`, root-owned) yang reverse-proxy SEMUA app: seotool.im (marketing + SaaS), api.jetdigitalpro.com (omniroute), pesat.ai subdomain. Container ini terpisah dari `docker-compose.hosted.yaml` (yang hanya open-seo + postgres).
+
+- **Marketing static files** (`/srv/marketing`) adalah writable layer di gateway-caddy, BUKAN volume `marketing_dist`. Di-populate dari pre-built `web/dist/client` (built locally, committed via `!web/dist/` gitignore exception).
+- Config source of truth: `gateway-caddy/Caddyfile`. File `/opt/gateway/Caddyfile` di VPS harus mirror ini. Reload: `docker exec gateway-caddy caddy reload --config /etc/caddy/Caddyfile`.
+
+### Bug /assets/* collision (FIXED 2026-08-13, commit d9959dc)
+
+Marketing static site dan SaaS app **sama-sama** serve JS/CSS bundles di `/assets/*`. Caddy matcher `@marketingAssets path /assets/*` lama meng-claim semua `/assets/*` untuk marketing → SaaS lazy-loaded route chunks (mis. `/assets/_auth-*.js` di sign-in page) **404** → "Failed to fetch dynamically imported module".
+
+**Fix**: `/assets/*` di-exclude dari `@marketingAssets`. Ditambah matcher `@marketingAssetFile` dengan `file { root /srv/marketing }` — serve dari marketing HANYA jika file-nya ada di sana; otherwise fall through ke catch-all `handle` yang proxy ke SaaS (`open-seo:3001`). Hash chunk berubah tiap rebuild, jadi verifikasi pakai URL aktual dari SSR HTML.
+
+### CI/CD auto-deploy
+
+Push ke `main` → GitHub Action (`.github/workflows/deploy.yml`) → `appleboy/ssh-action` SSH → `auto-deploy.sh`. **Deployment permission gotcha** (FIXED commit fd5aaf9): `auto-deploy.sh` + `scripts/deploy-vps.sh` wajib executable bit di git (`git update-index --chmod=+x`), else CI error "Permission denied" (exit 126). Repo di VPS sering root-owned (hasil `git reset --hard`); fix ownership via `docker run --rm -v <path>:/repo alpine chown -R 1005:1005 /repo` (docker group = root-equivalent).
+
+---
+
+## QA gap analysis (2026-08-13, plan.md)
+
+Audit lengkap di `plan.md` di repo root. **Product mature untuk classic SEO + STRONG di AI/GEO** (brand lookup, SoV, cited sources, prompt explorer, SAM agent, MCP server). Keyword difficulty, search intent, SERP feature tags (incl. AI Overview/PAA), new/lost backlinks, anchor text SUDAH ada — jangan re-flag.
+
+**P0 broken/unfinished (prioritas tertinggi):**
+1. Team invitation emails tidak pernah terkirim (Better Auth org plugin tidak ada `sendInvitationEmail` hook) — `src/client/features/settings/TeamSection.tsx`
+2. Content Strategy creation flows masih stub ("Coming soon" alerts) — `src/client/features/content-strategy/StrategyPageView.tsx`
+3. OAuth-only users tidak bisa self-delete (deleteAccount requires password) — `src/serverFunctions/account.ts`
+4. Credit top-up purchase: `createPaypalTopup` server fn sudah dibuat, perlu wiring ke UI billing page
+5. Alert/report emails fail silently (console.error, no throw)
+
+**P1 compliance/trust:** no GDPR data export, no billing transactional/welcome emails, no dunning, no notification center, legal links incomplete in-app.
+
+**P2 competitive SEO gaps:** Google-only (no Bing/Yahoo), no competitor rank tracking, no SoV in rank tracking, no backlink link intersect, no dedicated new/lost backlinks view (data ada), no anchor distribution report (data ada), no sitemap validator/generator, no schema validation audit issue, no crawl budget/log analysis, no on-page SEO checker, no keyword trends/clustering, no disavow/toxic flagging.
+
+**P3 platform:** manager/viewer roles unassignable via UI (RBAC dead code), no trial period, no invoice PDF, no roll-up reports. **P4 local SEO:** geo-grid, GBP audit, citation, review monitoring. **P5 AI/GEO:** AI Overviews rank tracking, AI-bot log analysis, llms.txt, GEO content recs.
 
 ---
 
@@ -522,6 +572,140 @@ Folder `Supastarter/` di repo ini tidak terkait SeoTool.im. tsc errors dari fold
 
 ---
 
+## PayPal Integration Guide (2026-08-13)
+
+Panduan lengkap untuk setup dan integrasi PayPal Billing Plans di SeoTool.im.
+
+### Arsitektur
+
+```
+User → Subscribe Page → createPaypalSubscription (server fn)
+  → PayPal API: POST /v1/billing/subscriptions
+  → Redirect user ke PayPal approval URL
+  → User approves → PayPal fires BILLING.SUBSCRIPTION.CREATED webhook
+  → /api/paypal/webhook → verifyWebhookSignature → syncPaypalCustomerStatus
+  → Upsert subscription table + grant credits + sync Loops CRM
+```
+
+### Key Files
+
+| File | Purpose |
+|---|---|
+| `src/server/billing/paypal.ts` | PayPal REST API client (OAuth2 + typed facade) |
+| `src/server/billing/credits.ts` | Local credits management (monthly + topup pools) |
+| `src/server/billing/paypal-webhook.ts` | Webhook handler (events → sync) |
+| `src/server/billing/paypal-webhook-verify.ts` | Webhook signature verification |
+| `src/serverFunctions/paypal-checkout.ts` | Checkout server functions |
+| `src/client/features/billing/use-billing.ts` | Local React hooks for billing state |
+
+### Setup Steps
+
+#### 1. PayPal Developer Dashboard
+
+1. Go to https://developer.paypal.com/dashboard/applications
+2. Create **Products** (one per tier):
+   - SeoTool Lite ($49/mo)
+   - SeoTool Pro ($149/mo)
+   - SeoTool Agency ($499/mo)
+3. Create **Billing Plans** for each product:
+   - Plan IDs: `lite-plan`, `pro-plan`, `agency-plan` (must match `PAYPAL_PLAN_IDS` in `src/shared/plans.ts`)
+   - Billing cycle: Monthly
+   - Auto-bill outstanding: Yes
+   - Payment failure threshold: 3
+4. Create **Webhook**:
+   - URL: `https://yourdomain.com/api/paypal/webhook`
+   - Events: `BILLING.SUBSCRIPTION.CREATED`, `BILLING.SUBSCRIPTION.UPDATED`, `BILLING.SUBSCRIPTION.CANCELLED`, `BILLING.SUBSCRIPTION.EXPIRED`, `BILLING.SUBSCRIPTION.ACTIVATED`, `BILLING.SUBSCRIPTION.SUSPENDED`, `PAYMENT.CAPTURE.COMPLETED`
+   - Save the **Webhook ID**
+
+#### 2. Environment Variables
+
+```bash
+# .env.hosted
+PAYPAL_CLIENT_ID=your-client-id
+PAYPAL_CLIENT_SECRET=your-client-secret
+PAYPAL_MODE=sandbox  # or "live" for production
+PAYPAL_WEBHOOK_ID=your-webhook-id
+```
+
+#### 3. Database Migration
+
+The migration renames `autumn_subscription_id` → `paypal_subscription_id` in the `subscription` table:
+
+```bash
+# D1 (SQLite)
+pnpm drizzle-kit push
+
+# Postgres
+pnpm drizzle-kit push --config=drizzle-pg.config.ts
+```
+
+Migration files:
+- `drizzle/0047_rename_autumn_to_paypal.sql`
+- `drizzle-pg/0024_rename_autumn_to_paypal.sql`
+
+### Credits System
+
+PayPal has no native credits/balance. Credits are managed locally:
+
+| Tier | Monthly Credits | Top-up Available |
+|---|---|---|
+| Free | 100 | No |
+| Lite | 5,000 | Yes |
+| Pro | 25,000 | Yes |
+| Agency | 100,000 | Yes |
+
+Credits are stored in `usage_quota` table with special feature names:
+- `usage_credits` — monthly pool (granted on plan creation/renewal)
+- `topup_credits` — one-time purchase pool (rolls over)
+
+### Checkout Flow
+
+1. User clicks "Subscribe to [Plan]" on `/subscribe`
+2. `createPaypalSubscription` server function is called
+3. Server creates PayPal subscription via API
+4. User is redirected to PayPal approval URL
+5. User approves subscription on PayPal
+6. PayPal fires `BILLING.SUBSCRIPTION.CREATED` webhook
+7. Webhook handler verifies signature and calls `syncPaypalCustomerStatus`
+8. Local DB is updated: subscription tier, credits granted, quotas reset
+9. User is redirected back to app with `?checkout=success`
+10. App polls `getQuotaStateSummary` until subscription appears
+
+### Webhook Events
+
+| Event | Action |
+|---|---|
+| `BILLING.SUBSCRIPTION.CREATED` | Sync subscription, grant credits |
+| `BILLING.SUBSCRIPTION.UPDATED` | Sync tier changes, reset quotas if changed |
+| `BILLING.SUBSCRIPTION.CANCELLED` | Sync to free tier, reset quotas |
+| `BILLING.SUBSCRIPTION.EXPIRED` | Sync to free tier |
+| `BILLING.SUBSCRIPTION.ACTIVATED` | Sync subscription status |
+| `BILLING.SUBSCRIPTION.SUSPENDED` | Sync to past_due status |
+| `PAYMENT.CAPTURE.COMPLETED` | Handle top-up credit purchase |
+
+### Customer Portal
+
+PayPal's customer portal is accessed via the subscription revision URL:
+- `POST /v1/billing/subscriptions/{id}/revise`
+- Redirects to PayPal's hosted billing management page
+- User can: update payment method, cancel subscription, view invoices
+
+### Testing
+
+1. Use PayPal sandbox mode (`PAYPAL_MODE=sandbox`)
+2. Create sandbox products and plans in PayPal developer dashboard
+3. Use PayPal sandbox test accounts for checkout testing
+4. Webhooks can be tested via PayPal dashboard → Webhooks → Send test event
+
+### Troubleshooting
+
+- **Webhook not received**: Check webhook URL is accessible, verify `PAYPAL_WEBHOOK_ID` matches
+- **Signature verification fails**: Ensure `PAYPAL_WEBHOOK_ID` is set correctly in env
+- **Subscription not syncing**: Check webhook logs in PayPal dashboard → Webhooks → Events
+- **Credits not granted**: Check `credits.ts` logs, verify subscription status is `ACTIVE`
+
+---
+
 ## Quality gate yang wajib dijalankan
 
 ```bash
@@ -555,11 +739,11 @@ pnpm db:generate  # D1 + PG
 | 3a       | **Content Intelligence — Content-Quality Scoring** ✅         | `audit_pages`                         | DONE. Skor deterministik 0-100 per halaman dari sinyal crawl. Tabel `content_scores`.                                                                                                                                                                |
 | 3b       | **Content Intelligence — Content Gap (Entity/Topic Gap)** ✅  | DataForSEO Labs `domain_intersection` | DONE. Domain-level keyword gap vs 1–3 kompetitor, di-cluster jadi topics. R2-cached (no migration). Credit feature `content_intelligence`.                                                                                                           |
 | 3c       | **Content Intelligence — Entity Extraction (Topical/LLM)** ✅ | OpenRouter (`generateText`)           | DONE. Per-page entity/topic extraction via LLM. Tabel `page_entities`. Best-effort workflow phase. Graceful skip tanpa OPENROUTER_API_KEY.                                                                                                           |
-| **SaaS** | **Transformasi Hosted-Only + Tiered Billing** ✅              | —                                     | DONE (7 fase). Hosted-only auth, 4-tier plan (Free/Lite/Pro/Agency), per-feature quotas, Autumn webhook sync, VPS deploy config.                                                                                                                     |
+| **SaaS** | **Transformasi Hosted-Only + Tiered Billing** ✅              | —                                     | DONE (7 fase). Hosted-only auth, 4-tier plan (Free/Lite/Pro/Agency), per-feature quotas, PayPal webhook sync, VPS deploy config.                                                                                                                      |
 | 4        | **Content Strategy** ✅                                       | Fase 3                                | DONE (2 slice). Topic clusters + content briefs (Slice A, CRUD). Programmatic AI content briefs + internal linking (Slice B, OpenRouter).                                                                                                            |
 | 5        | **Alerts** ✅                                                 | Rank/Audit data                       | DONE (Slice A). `alert_rules` + `alertEvaluator` (rank_drop + audit_critical) + `AlertWorkflow` cron dispatch + Loops email. GSC/GA4 alerts deferred.                                                                                                |
 | 6        | **Semi-gap** ✅ (Slice A)                                     | —                                     | DONE (Slice A). SERP snapshot persistence — full top-20 SERP composition persisted per rank check, zero extra API cost. Competitor table + tracked domain highlight. Domain first-class entity (Slice B) + Local SEO persistence (Slice C) deferred. |
-| 7        | **Stripe Customer Portal** ✅                                 | Autumn SDK                            | DONE. `getCustomerPortalUrl` server fn + "Manage Subscription" button di billing page. Cancellation via Stripe portal → webhook sync.                                                                                                                |
+| 7        | **PayPal Customer Portal** ✅                                 | PayPal SDK                            | DONE. `getCustomerPortalUrl` server fn + "Manage Subscription" button di billing page. Cancellation via PayPal portal → webhook sync.                                                                                                                 |
 | 8        | **Quota Analytics Dashboard** ✅                              | QuotaService                          | DONE. Admin dashboard: plan distribution, MRR estimate, quota usage summary, recent orgs. `requirePlatformAdmin` middleware (env-var allowlist). Route `/admin`.                                                                                     |
 
 ---
@@ -581,10 +765,12 @@ pnpm test:ci             # vitest run --reporter=dot
 - `DATABASE_PROVIDER` — `postgres` (hosted SaaS) atau `d1` (dev fallback)
 - `AUTH_MODE` — selalu `hosted` (mode lain dihapus; nilai deprecated di-ignore dengan warning)
 - `DATAFORSEO_API_KEY` — base64 dari `login:password` DataForSEO
-- `AUTUMN_SECRET_KEY` / `AUTUMN_WEBHOOK_SECRET` — billing (Autumn/Stripe)
+- `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` — billing (PayPal Subscriptions)
+- `PAYPAL_MODE` — `sandbox` (dev) atau `live` (production)
+- `PAYPAL_WEBHOOK_ID` — webhook ID dari PayPal dashboard (after creating webhook endpoint)
 - `OPENROUTER_API_KEY` — AI agent (SAM, onboarding chat, entity extraction)
 - `TURNSTILE_SECRET_KEY` / `TURNSTILE_SITE_KEY` — signup captcha
 - `POSTGRES_PASSWORD` — DB password (Docker Compose VPS deploy)
 - `PLATFORM_ADMIN_USER_IDS` — comma-separated user IDs untuk admin dashboard access (`/admin`)
 
-**Deploy VPS**: `./scripts/deploy-vps.sh --build` (lihat `docker-compose.hosted.yaml` + `.env.hosted.example`)
+**Deploy VPS**: Push ke `main` → GitHub Action auto-deploy (`auto-deploy.sh`). Manual: `bash auto-deploy.sh` atau `./scripts/deploy-vps.sh --build`. Lihat `docker-compose.hosted.yaml` + `.env.hosted.example` + section "Produksi LIVE" di atas.

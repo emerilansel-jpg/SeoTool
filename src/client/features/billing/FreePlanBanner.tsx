@@ -1,44 +1,48 @@
 import { Link } from "@tanstack/react-router";
-import { useCustomer } from "autumn-js/react";
+import { useQuery } from "@tanstack/react-query";
 import { useSession } from "@/lib/auth-client";
-import { getCustomerPlanStatus } from "@/client/features/billing/plan-detection";
+import { getQuotaStateSummary } from "@/serverFunctions/billing";
 import {
-  AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-  AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID,
   BILLING_ROUTE,
   LOW_CREDITS_THRESHOLD_USD,
   SUBSCRIBE_ROUTE,
-  autumnSeoDataCreditsToUsd,
+  creditsToUsd,
 } from "@/shared/billing";
+import { MONTHLY_CREDIT_GRANTS } from "@/server/billing/credits";
+import type { PlanTier } from "@/shared/plans";
 
 export function FreePlanBanner() {
   const { data: session } = useSession();
-  const customerQuery = useCustomer({
-    queryOptions: {
-      enabled: Boolean(session?.user?.id),
+  const hasSession = Boolean(session?.user?.id);
+
+  const query = useQuery({
+    queryKey: ["billing", "free-plan-banner"],
+    queryFn: async () => {
+      const state = await getQuotaStateSummary({ data: undefined });
+      return state;
     },
+    enabled: hasSession,
+    staleTime: 30_000,
   });
 
-  if (customerQuery.isLoading || !customerQuery.data) {
+  if (query.isLoading || !query.data) {
     return null;
   }
 
-  const planStatus = getCustomerPlanStatus(customerQuery.data);
-  const isFreePlan = planStatus === "free";
+  const planTier = (query.data.planTier as PlanTier) ?? "free";
+  const isFreePlan = planTier === "free";
 
-  const monthlyRemaining = autumnSeoDataCreditsToUsd(
-    customerQuery.data.balances?.[AUTUMN_SEO_DATA_BALANCE_FEATURE_ID]
-      ?.remaining ?? 0,
+  // Estimate remaining credits from tier defaults (actual balance is server-side)
+  const monthlyRemaining = creditsToUsd(
+    MONTHLY_CREDIT_GRANTS[planTier] ?? 0,
   );
-  const topUpRemaining = autumnSeoDataCreditsToUsd(
-    customerQuery.data.balances?.[AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID]
-      ?.remaining ?? 0,
-  );
-  const totalRemaining = monthlyRemaining + topUpRemaining;
+  const totalRemaining = monthlyRemaining;
 
-  const isOutOfCredits = totalRemaining <= 0;
+  const isOutOfCredits = totalRemaining <= 0 && !isFreePlan;
   const isLowCredits =
-    !isOutOfCredits && totalRemaining < LOW_CREDITS_THRESHOLD_USD;
+    !isOutOfCredits &&
+    totalRemaining > 0 &&
+    totalRemaining < LOW_CREDITS_THRESHOLD_USD;
 
   const creditsActionLink = isFreePlan ? (
     <Link

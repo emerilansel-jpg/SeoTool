@@ -44,7 +44,7 @@ export function getSubscribeRouteState(args: {
     return "redirectToApp" as const;
   }
 
-  // Back from Stripe but Autumn hasn't reflected the subscription yet — poll
+  // Back from PayPal checkout but the webhook hasn't synced yet — poll
   // instead of showing the paywall again (whose only CTA is paying twice).
   if (args.checkoutCompleted) {
     return "finalizing" as const;

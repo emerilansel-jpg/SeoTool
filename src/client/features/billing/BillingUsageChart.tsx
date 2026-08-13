@@ -1,20 +1,14 @@
-import { useAggregateEvents } from "autumn-js/react";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
-import {
-  AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-  AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID,
-  autumnSeoDataCreditsToUsd,
-} from "@/shared/billing";
-
-const BILLING_USAGE_FEATURE_IDS: string[] = [
-  AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-  AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID,
-];
+import { getBillingUsageEvents } from "@/serverFunctions/billing";
+import { useSession } from "@/lib/auth-client";
 
 export function BillingUsageChart() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [chartWidth, setChartWidth] = useState(0);
+  const { data: session } = useSession();
+  const hasSession = Boolean(session?.user?.id);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -28,20 +22,25 @@ export function BillingUsageChart() {
     return () => observer.disconnect();
   }, []);
 
-  const eventsQuery = useAggregateEvents({
-    featureId: BILLING_USAGE_FEATURE_IDS,
-    range: "30d",
-    binSize: "day",
+  // Fetch usage events from local DB
+  const now = Date.now();
+  const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+
+  const eventsQuery = useQuery({
+    queryKey: ["billing", "usage-events", thirtyDaysAgo, now],
+    queryFn: async () => {
+      const events = await getBillingUsageEvents({
+        data: { start: thirtyDaysAgo, end: now },
+      });
+      return events;
+    },
+    enabled: hasSession,
+    staleTime: 60_000,
   });
 
-  const chartData = (eventsQuery.list ?? []).map((row) => ({
-    date: row.period,
-    credits: autumnSeoDataCreditsToUsd(
-      BILLING_USAGE_FEATURE_IDS.reduce(
-        (sum, featureId) => sum + (row.values?.[featureId] ?? 0),
-        0,
-      ),
-    ),
+  const chartData = (eventsQuery.data ?? []).map((event) => ({
+    date: new Date().toISOString(),
+    credits: (event.properties.monthly_remaining as number ?? 0) / 1000,
   }));
 
   const totalSpend = chartData.reduce((sum, d) => sum + d.credits, 0);

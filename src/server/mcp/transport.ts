@@ -8,9 +8,9 @@ import {
   runWithMcpToolAuthContext,
   workersOAuthMcpPropsSchema,
 } from "@/server/mcp/context";
-import { registerOpenSeoMcpTools } from "@/server/mcp/server";
+import { registerSeoToolMcpTools } from "@/server/mcp/server";
 
-function createOpenSeoMcpServer() {
+function createSeoToolMcpServer() {
   const server = new McpServer(
     {
       name: "SeoTool.im MCP",
@@ -32,12 +32,12 @@ function createOpenSeoMcpServer() {
         "SeoTool.im research tools use credits. Proceed with normal focused research, but ask the user for confirmation before planned batches over 2,000 credits.",
     },
   );
-  registerOpenSeoMcpTools(server);
+  registerSeoToolMcpTools(server);
 
   return server;
 }
 
-export async function handleAuthenticatedOpenSeoMcpRequest(
+export async function handleAuthenticatedSeoToolMcpRequest(
   request: Request,
   props: unknown,
   env: unknown,
@@ -52,10 +52,10 @@ export async function handleAuthenticatedOpenSeoMcpRequest(
     return new Response("MCP auth context required", { status: 403 });
   }
 
-  return handleOpenSeoMcpRequest(request, result.data, env, ctx);
+  return handleSeoToolMcpRequest(request, result.data, env, ctx);
 }
 
-function handleOpenSeoMcpRequest(
+function handleSeoToolMcpRequest(
   request: Request,
   props: ReturnType<typeof createWorkersOAuthMcpProps> | undefined,
   env: unknown,
@@ -77,7 +77,7 @@ function handleOpenSeoMcpRequest(
     });
   }
 
-  const server = createOpenSeoMcpServer();
+  const server = createSeoToolMcpServer();
   const handler = createMcpHandler(server, {
     route: MCP_ROUTE,
     enableJsonResponse: true,
@@ -98,6 +98,6 @@ function handleOpenSeoMcpRequest(
 
 // Kept for backward compatibility with any caller that still references the
 // self-hosted MCP path. The app is hosted-only now, so this always 404s.
-export async function handleSelfHostedOpenSeoMcpRequest(): Promise<Response> {
+export async function handleSelfHostedSeoToolMcpRequest(): Promise<Response> {
   return new Response("Not found", { status: 404 });
 }

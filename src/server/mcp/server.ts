@@ -42,7 +42,7 @@ import { whoamiTool } from "@/server/mcp/tools/whoami";
 // registered one explicit call at a time (not via a loop/helper) so each one's
 // input/output schema types stay concrete, which the SDK's registerTool
 // generics require to type the handler callback.
-export function registerOpenSeoMcpTools(server: McpServer) {
+export function registerSeoToolMcpTools(server: McpServer) {
   server.registerTool(
     whoamiTool.name,
     whoamiTool.config,

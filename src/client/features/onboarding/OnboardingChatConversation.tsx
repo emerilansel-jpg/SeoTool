@@ -1,6 +1,6 @@
 import { useAgent } from "agents/react";
 import { useAgentChat } from "@cloudflare/ai-chat/react";
-import { useCustomer } from "autumn-js/react";
+import { createPaypalSubscription } from "@/serverFunctions/paypal-checkout";
 import { useEffect, useRef, useState } from "react";
 import {
   ChatMessage,
@@ -8,7 +8,6 @@ import {
   type ResolveToolLabel,
 } from "@/client/components/chat/ChatMessage";
 import { captureClientEvent } from "@/client/lib/posthog";
-import { AUTUMN_PAID_PLAN_ID } from "@/shared/billing";
 import { FREE_ONBOARDING_QUESTION_LIMIT } from "@/shared/onboardingChat";
 import {
   ChatComposer,
@@ -89,7 +88,6 @@ export function OnboardingChatConversation({
   // This chat is only ever the pre-upgrade free preview: once a user upgrades
   // they are routed into the GSC onboarding step and never return here, so
   // there's no "paid" state to model — the question cap always applies.
-  const customerQuery = useCustomer();
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [isStartingCheckout, setIsStartingCheckout] = useState(false);
   const [usedSuggestions, setUsedSuggestions] = useState<string[]>([]);
@@ -112,14 +110,14 @@ export function OnboardingChatConversation({
       captureClientEvent("billing:checkout_start");
       // After payment, re-enter onboarding at the GSC step (not back into this
       // chat) so the user finishes connecting Search Console + MCP.
-      const successUrl = new URL("/onboarding", window.location.origin);
-      successUrl.searchParams.set("step", "3");
-      successUrl.searchParams.set("checkout", "success");
-      await customerQuery.attach({
-        planId: AUTUMN_PAID_PLAN_ID,
-        redirectMode: "always",
-        successUrl: successUrl.toString(),
+      const result = await createPaypalSubscription({
+        data: { tier: "lite" },
       });
+      if (result?.approveUrl) {
+        window.location.href = result.approveUrl;
+      } else {
+        throw new Error("No approval URL returned from PayPal");
+      }
     } catch (checkoutErr) {
       console.error("Failed to start checkout", checkoutErr);
       setCheckoutError(

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-  AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID,
-  autumnSeoDataCreditsToUsd,
+  PAYPAL_CREDITS_FEATURE_ID,
+  PAYPAL_TOPUP_CREDITS_FEATURE_ID,
+  creditsToUsd,
 } from "@/shared/billing";
 import {
   creditFeatureLabel,
@@ -14,8 +14,8 @@ import {
 } from "@/serverFunctions/billing";
 
 const BILLING_USAGE_FEATURE_IDS: string[] = [
-  AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-  AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID,
+  PAYPAL_CREDITS_FEATURE_ID,
+  PAYPAL_TOPUP_CREDITS_FEATURE_ID,
 ];
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
@@ -127,7 +127,7 @@ export function getBillingFeatureBreakdownRows(
   return [...creditsByLabel.entries()]
     .map(([label, credits]) => ({
       label,
-      usd: autumnSeoDataCreditsToUsd(credits),
+      usd: creditsToUsd(credits),
     }))
     .filter((row) => row.usd > 0)
     .toSorted((a, b) => b.usd - a.usd);

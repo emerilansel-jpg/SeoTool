@@ -12,18 +12,18 @@ import { runScheduledAlerts } from "@/server/features/alerts/services/scheduledA
 import { getOrCreateOrganizationCustomer } from "@/server/billing/subscription";
 import { assertFeatureAccess } from "@/server/billing/quota-gate";
 import {
-  createOpenSeoOAuthProvider,
-  type OpenSeoOAuthEnv,
+  createSeoToolOAuthProvider,
+  type SeoToolOAuthEnv,
 } from "@/server/mcp/oauth-provider";
 import { requestWithPublicOrigin } from "@/server/mcp/public-origin";
 import {
-  AUTUMN_WEBHOOK_PATH,
-  handleAutumnWebhookRequest,
-} from "@/server/billing/autumn-webhook";
+  PAYPAL_WEBHOOK_PATH,
+  handlePaypalWebhookRequest,
+} from "@/server/billing/paypal-webhook";
 import { withPgClient } from "@/db";
 
 const appFetch = createStartHandler(defaultStreamHandler);
-const openSeoOAuthProvider = createOpenSeoOAuthProvider(appFetch);
+const seotoolOAuthProvider = createSeoToolOAuthProvider(appFetch);
 
 // Authorize an onboarding-chat connection in the Worker, before it reaches the
 // Durable Object. The DO instance name is the projectId (set client-side); we
@@ -147,11 +147,11 @@ function handleFetch(
     return routeChatAgents(publicRequest, env);
   }
 
-  if (pathname === AUTUMN_WEBHOOK_PATH) {
-    return handleAutumnWebhookRequest(publicRequest);
+  if (pathname === PAYPAL_WEBHOOK_PATH) {
+    return handlePaypalWebhookRequest(publicRequest);
   }
 
-  return openSeoOAuthProvider.fetch(publicRequest, env as OpenSeoOAuthEnv, ctx);
+  return seotoolOAuthProvider.fetch(publicRequest, env as SeoToolOAuthEnv, ctx);
 }
 
 // Export Workflow classes as named exports

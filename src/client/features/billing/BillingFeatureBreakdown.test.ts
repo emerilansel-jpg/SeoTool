@@ -21,7 +21,7 @@ describe("getBillingFeatureBreakdownRows", () => {
     expect(rows).toEqual([{ label: "Rank Tracking", usd: 0.25 }]);
   });
 
-  it("supports raw Autumn property aliases", () => {
+  it("supports raw billing property aliases", () => {
     const rows = getBillingFeatureBreakdownRows([
       {
         value: 200,

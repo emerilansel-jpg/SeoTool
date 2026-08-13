@@ -57,10 +57,9 @@ export const usageQuota = sqliteTable(
 );
 
 // Links an organization to its current subscription/plan tier. The source of
-// truth for "what plan is this org on" in our DB. Synced from Autumn via the
-// billing webhook (subscription.created/updated/canceled). The free tier is
-// the default at org creation; a subscription row is upserted on first
-// customer creation.
+// truth for "what plan is this org on" in our DB. Synced from PayPal via the
+// billing webhook (BILLING.SUBSCRIPTION.*). The free tier is the default at
+// org creation; a subscription row is upserted on first customer creation.
 export const subscription = sqliteTable(
   "subscription",
   {
@@ -73,9 +72,8 @@ export const subscription = sqliteTable(
     })
       .notNull()
       .default("free"),
-    // Autumn's subscription id (null for the free tier, which is the Autumn
-    // Default and has no subscription record).
-    autumnSubscriptionId: text("autumn_subscription_id"),
+    // PayPal subscription id (null for the free tier, which has no subscription).
+    paypalSubscriptionId: text("paypal_subscription_id"),
     // "active" | "canceled" | "past_due" | "trialing"
     status: text("status").notNull().default("active"),
     // ISO-8601 UTC end of the current billing period. Used to compute
@@ -89,6 +87,6 @@ export const subscription = sqliteTable(
       .default(sql`(current_timestamp)`),
   },
   (table) => [
-    index("subscription_autumn_sub_idx").on(table.autumnSubscriptionId),
+    index("subscription_paypal_sub_idx").on(table.paypalSubscriptionId),
   ],
 );

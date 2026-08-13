@@ -70,7 +70,7 @@ For MCP output that passes external SDK class instances through `structuredConte
 
 ### Deployment modes
 
-SeoTool.im supports `hosted`, `cloudflare_access`, and `local_noauth` modes. `local_noauth` is an intentionally trusted local mode and is unsafe for public exposure; its lack of login is not automatically a vulnerability. Hosted mode uses Better Auth and organization-level Autumn billing. Self-hosted modes use the operator's provider key and intentionally bypass Autumn.
+SeoTool.im supports `hosted`, `cloudflare_access`, and `local_noauth` modes. `local_noauth` is an intentionally trusted local mode and is unsafe for public exposure; its lack of login is not automatically a vulnerability. Hosted mode uses Better Auth and organization-level PayPal billing. Self-hosted modes use the operator's provider key and intentionally bypass billing.
 
 ### Workspaces and fixtures
 

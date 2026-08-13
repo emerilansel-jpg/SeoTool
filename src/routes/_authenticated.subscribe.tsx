@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useCustomer } from "autumn-js/react";
 import { useEffect, useState } from "react";
 import { User } from "lucide-react";
 import { ThemePreferenceMenuItems } from "@/client/components/ThemePreferenceMenuItems";
@@ -7,12 +6,11 @@ import { captureClientEvent } from "@/client/lib/posthog";
 import { getStoredRedditAttribution } from "@/client/lib/reddit-attribution";
 import { signOutAndRedirect, useSession } from "@/lib/auth-client";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
-import { getSubscribeRouteState } from "@/client/features/billing/route-state";
-import { getCustomerPlanStatus } from "@/client/features/billing/plan-detection";
 import { normalizeAuthRedirect } from "@/lib/auth-redirect";
 import { captureRedditConversionEvent } from "@/serverFunctions/redditConversions";
+import { createPaypalSubscription } from "@/serverFunctions/paypal-checkout";
+import { getQuotaStateSummary } from "@/serverFunctions/billing";
 import {
-  AUTUMN_PLAN_IDS,
   PLAN_PRICES_USD,
   PLAN_TIER_LABELS,
   ORDERED_PLAN_TIERS,
@@ -84,38 +82,49 @@ function SubscribePage() {
   );
   const [isAttaching, setIsAttaching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isPaid, setIsPaid] = useState(false);
   const checkoutCompleted =
     typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).get("checkout") === "success";
 
   const hasSession = Boolean(session?.user?.id);
-  const customerQuery = useCustomer({
-    queryOptions: {
-      enabled: hasSession,
-    },
-  });
 
-  const planStatus = getCustomerPlanStatus(customerQuery.data);
-  const subscribeRouteState = getSubscribeRouteState({
-    hasSession,
-    isCustomerLoading: customerQuery.isLoading,
-    isCustomerError: customerQuery.isError,
-    hasManagedAccess: true, // Always true; managed access is no longer a separate gate
-    planStatus,
-    isUpgradeFlow: isUpgradeFlow === true,
-    checkoutCompleted,
-  });
+  // Check subscription status from local DB
+  useEffect(() => {
+    if (!hasSession) return;
+    void getQuotaStateSummary({ data: undefined })
+      .then((state) => {
+        setIsPaid(state.planTier !== "free");
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsLoading(false);
+      });
+  }, [hasSession]);
 
-  // Autumn can lag Stripe by a few seconds after checkout; poll until the
-  // subscription shows up so the just-paid user isn't shown the paywall again.
+  // Determine route state locally (no Autumn dependency)
+  const subscribeRouteState = (() => {
+    if (isLoading) return "loading";
+    if (isPaid && !isUpgradeFlow) return "redirectToApp";
+    if (checkoutCompleted && !isPaid) return "finalizing";
+    if (checkoutCompleted && isPaid) return "redirectToApp";
+    return "showPaywall";
+  })();
+
+  // After checkout, poll until subscription shows up
   const isFinalizing = subscribeRouteState === "finalizing";
   useEffect(() => {
     if (!isFinalizing) return;
     const interval = setInterval(() => {
-      void customerQuery.refetch();
+      void getQuotaStateSummary({ data: undefined }).then((state) => {
+        if (state.planTier !== "free") {
+          setIsPaid(true);
+        }
+      });
     }, 2000);
     return () => clearInterval(interval);
-  }, [customerQuery, isFinalizing]);
+  }, [isFinalizing]);
 
   useEffect(() => {
     if (subscribeRouteState === "redirectToApp") {
@@ -127,9 +136,6 @@ function SubscribePage() {
       const goToApp = () =>
         void navigate({
           to: destinationPath,
-          // destinationPath is a runtime string (parsed from the `redirect`
-          // query param), so the router can't infer its search schema; pass
-          // the parsed query through as the full next search state.
           // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion
           search: destinationSearch as never,
           replace: true,
@@ -195,38 +201,6 @@ function SubscribePage() {
     );
   }
 
-  if (subscribeRouteState === "error") {
-    return (
-      <div className="w-full max-w-xs space-y-4">
-        <div className="text-center space-y-3">
-          <img
-            src="/transparent-logo.png"
-            alt="SeoTool.im"
-            className="mx-auto size-10 rounded-lg"
-          />
-          <h1 className="text-xl font-semibold">Billing unavailable</h1>
-        </div>
-
-        <p className="text-sm text-center text-base-content/70">
-          {getStandardErrorMessage(
-            customerQuery.error,
-            "We couldn't verify your billing status right now. Please try again.",
-          )}
-        </p>
-
-        <button
-          type="button"
-          className="btn btn-soft w-full"
-          onClick={() => {
-            void customerQuery.refetch();
-          }}
-        >
-          Try again
-        </button>
-      </div>
-    );
-  }
-
   async function handleSubscribe() {
     if (selectedPlan === "free") return;
 
@@ -235,17 +209,17 @@ function SubscribePage() {
 
     try {
       captureClientEvent("billing:checkout_start", { plan_tier: selectedPlan });
-      const successUrl = new URL(window.location.href);
-      successUrl.searchParams.set("checkout", "success");
-      const planId = AUTUMN_PLAN_IDS[selectedPlan];
 
-      if (!planId) throw new Error("Plan not found");
-
-      await customerQuery.attach({
-        planId,
-        redirectMode: "always",
-        successUrl: successUrl.toString(),
+      // Create PayPal subscription and redirect to approval page
+      const result = await createPaypalSubscription({
+        data: { tier: selectedPlan },
       });
+
+      if (result?.approveUrl) {
+        window.location.href = result.approveUrl;
+      } else {
+        throw new Error("No approval URL returned from PayPal");
+      }
     } catch (err) {
       setError(
         getStandardErrorMessage(
@@ -259,8 +233,6 @@ function SubscribePage() {
 
   const firstName = session?.user?.name?.split(" ")[0] || "";
 
-  // The free plan doesn't have a subscribe button, it's just the default.
-  // The UI displays the 3 paid tiers as options.
   const paidTiers = ORDERED_PLAN_TIERS.filter((t) => t !== "free");
 
   return (
@@ -299,7 +271,7 @@ function SubscribePage() {
           >
             <div className="flex w-full items-center justify-between">
               <span className="font-semibold">{PLAN_TIER_LABELS[tier]}</span>
-              <span className="font-mediumtabular-nums">
+              <span className="font-medium tabular-nums">
                 ${PLAN_PRICES_USD[tier]}/mo
               </span>
             </div>
@@ -342,7 +314,7 @@ function SubscribePage() {
               30-day money-back guarantee
             </span>
           </span>
-          . Cancel anytime. Powered by Stripe.
+          . Cancel anytime. Powered by PayPal.
         </p>
       </div>
 

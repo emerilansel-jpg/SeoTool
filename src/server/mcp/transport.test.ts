@@ -24,7 +24,7 @@ const serverMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/server/mcp/server", () => ({
-  registerOpenSeoMcpTools: vi.fn(),
+  registerSeoToolMcpTools: vi.fn(),
 }));
 
 vi.mock("agents/mcp", () => ({
@@ -68,7 +68,7 @@ const _transportOptionsSchema = z.object({
 });
 
 function _createMcpRequest() {
-  return new Request("https://open-seo.test/mcp", {
+  return new Request("https://seotool.test/mcp", {
     method: "POST",
     headers: {
       Accept: "application/json, text/event-stream",
@@ -82,15 +82,15 @@ function _createMcpRequest() {
   });
 }
 
-describe("handleSelfHostedOpenSeoMcpRequest (removed)", () => {
+describe("handleSelfHostedSeoToolMcpRequest (removed)", () => {
   // The self-hosted MCP path is gone — the app is hosted-only now. The handler
   // is kept as a 404 stub for backward compatibility with any caller that still
   // references it.
   it("returns 404 — self-hosted MCP is no longer supported", async () => {
-    const { handleSelfHostedOpenSeoMcpRequest } =
+    const { handleSelfHostedSeoToolMcpRequest } =
       await import("@/server/mcp/transport");
 
-    const response = await handleSelfHostedOpenSeoMcpRequest();
+    const response = await handleSelfHostedSeoToolMcpRequest();
     expect(response.status).toBe(404);
   }, 20000);
 });

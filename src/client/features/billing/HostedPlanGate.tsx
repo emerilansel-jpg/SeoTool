@@ -1,10 +1,5 @@
 import type { ReactNode } from "react";
-import { useCustomer } from "autumn-js/react";
-import { useSession } from "@/lib/auth-client";
-import {
-  getCustomerPlanTier,
-  getCustomerPlanStatus,
-} from "@/client/features/billing/plan-detection";
+import { usePlanTier } from "@/client/features/billing/use-billing";
 import type { PlanTier } from "@/shared/plans";
 
 export type HostedPlanGateState = {
@@ -18,19 +13,11 @@ export function HostedPlanGate({
 }: {
   children: (state: HostedPlanGateState) => ReactNode;
 }) {
-  const { data: session, isPending: isSessionPending } = useSession();
-  const hasSession = Boolean(session?.user?.id);
-  const customerQuery = useCustomer({
-    queryOptions: { enabled: hasSession },
-  });
+  const { planTier, isLoading } = usePlanTier();
 
   return children({
-    isLoading: isSessionPending || !hasSession || customerQuery.isLoading,
-    isFreePlan:
-      !!customerQuery.data &&
-      getCustomerPlanStatus(customerQuery.data) === "free",
-    planTier: customerQuery.data
-      ? getCustomerPlanTier(customerQuery.data)
-      : "free",
+    isLoading,
+    isFreePlan: planTier === "free",
+    planTier,
   });
 }

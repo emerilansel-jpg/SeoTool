@@ -169,6 +169,13 @@
       "when": 1786608206320,
       "tag": "0023_concerned_the_spike",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1786700000000,
+      "tag": "0024_rename_autumn_to_paypal",
+      "breakpoints": true
     }
   ]
 }

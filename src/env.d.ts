@@ -28,8 +28,10 @@ declare namespace Cloudflare {
     LOOPS_API_KEY?: string;
     LOOPS_TRANSACTIONAL_VERIFY_EMAIL_ID?: string;
     LOOPS_TRANSACTIONAL_RESET_PASSWORD_ID?: string;
-    AUTUMN_SECRET_KEY?: string;
-    AUTUMN_WEBHOOK_SECRET?: string;
+    PAYPAL_CLIENT_ID?: string;
+    PAYPAL_CLIENT_SECRET?: string;
+    PAYPAL_MODE?: string;
+    PAYPAL_WEBHOOK_ID?: string;
 
     // Cloudflare Turnstile — signup captcha. Secret verifies tokens
     // server-side; site key is public and inlined into the client build.

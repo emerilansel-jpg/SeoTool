@@ -1,9 +1,9 @@
 /* eslint-disable max-lines */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-  AUTUMN_SEO_DATA_CREDITS_PER_USD,
-  AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID,
+  PAYPAL_CREDITS_FEATURE_ID,
+  CREDITS_PER_USD,
+  PAYPAL_TOPUP_CREDITS_FEATURE_ID,
   SEO_DATA_COST_MARKUP,
 } from "@/shared/billing";
 
@@ -26,12 +26,10 @@ vi.mock("cloudflare:workers", () => ({
   waitUntil: vi.fn(),
 }));
 
-vi.mock("@/server/billing/autumn", () => ({
-  autumn: {
-    check: checkMock,
-    track: trackMock,
-  },
-  AUTUMN_TRACK_RETRY_OPTIONS: {},
+vi.mock("@/server/billing/credits", () => ({
+  getCreditBalance: checkMock,
+  deductCredits: trackMock,
+  grantMonthlyCredits: vi.fn(),
 }));
 
 // Keep the real subscription module (its assertUsageCreditsAvailable calls the
@@ -132,14 +130,10 @@ function setupHostedMode() {
 }
 
 function mockBalances(monthly: number, topup: number) {
-  checkMock.mockImplementation(async (args: { featureId: string }) => {
-    if (args.featureId === AUTUMN_SEO_DATA_BALANCE_FEATURE_ID) {
-      return { allowed: true, balance: { remaining: monthly } };
-    }
-    if (args.featureId === AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID) {
-      return { allowed: true, balance: { remaining: topup } };
-    }
-    return { allowed: false, balance: null };
+  checkMock.mockResolvedValue({
+    monthlyRemaining: monthly,
+    topupRemaining: topup,
+    totalRemaining: monthly + topup,
   });
 }
 
@@ -179,20 +173,13 @@ describe("meterDataforseoCall with split balances", () => {
     const client = createDataforseoClient(billingCustomer);
     await client.backlinks.summary(backlinksInput);
 
-    expect(checkMock).toHaveBeenCalledTimes(2);
-    expect(checkMock).toHaveBeenCalledWith({
-      customerId: "org_123",
-      featureId: AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-    });
-    expect(checkMock).toHaveBeenCalledWith({
-      customerId: "org_123",
-      featureId: AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID,
-    });
+    expect(checkMock).toHaveBeenCalledTimes(1);
+    expect(checkMock).toHaveBeenCalledWith("org_123");
   });
 
   const RAW_COST = 0.05;
   const EXPECTED_CREDITS = Math.ceil(
-    RAW_COST * SEO_DATA_COST_MARKUP * AUTUMN_SEO_DATA_CREDITS_PER_USD,
+    RAW_COST * SEO_DATA_COST_MARKUP * CREDITS_PER_USD,
   );
 
   it("deducts entirely from monthly when monthly has enough", async () => {
@@ -204,14 +191,7 @@ describe("meterDataforseoCall with split balances", () => {
     await client.backlinks.summary(backlinksInput);
 
     expect(trackMock).toHaveBeenCalledTimes(1);
-    expect(trackMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        customerId: "org_123",
-        featureId: AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-        value: EXPECTED_CREDITS,
-      }),
-      expect.anything(),
-    );
+    expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
   });
 
   it("deducts entirely from topup when monthly is empty", async () => {
@@ -223,14 +203,7 @@ describe("meterDataforseoCall with split balances", () => {
     await client.backlinks.summary(backlinksInput);
 
     expect(trackMock).toHaveBeenCalledTimes(1);
-    expect(trackMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        customerId: "org_123",
-        featureId: AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID,
-        value: EXPECTED_CREDITS,
-      }),
-      expect.anything(),
-    );
+    expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
   });
 
   it("splits deduction across monthly and topup when monthly is partially sufficient", async () => {
@@ -242,23 +215,8 @@ describe("meterDataforseoCall with split balances", () => {
     const client = createDataforseoClient(billingCustomer);
     await client.backlinks.summary(backlinksInput);
 
-    expect(trackMock).toHaveBeenCalledTimes(2);
-    expect(trackMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        customerId: "org_123",
-        featureId: AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-        value: monthlyAvailable,
-      }),
-      expect.anything(),
-    );
-    expect(trackMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        customerId: "org_123",
-        featureId: AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID,
-        value: EXPECTED_CREDITS - monthlyAvailable,
-      }),
-      expect.anything(),
-    );
+    expect(trackMock).toHaveBeenCalledTimes(1);
+    expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
   });
 
   it("throws INSUFFICIENT_CREDITS when both balances are exactly zero", async () => {
@@ -290,14 +248,7 @@ describe("meterDataforseoCall with split balances", () => {
     );
 
     expect(trackMock).toHaveBeenCalledTimes(1);
-    expect(trackMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        customerId: "org_123",
-        featureId: AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-        value: EXPECTED_CREDITS,
-      }),
-      expect.anything(),
-    );
+    expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
   });
 
   it("skips the charge for an unbilled invalid-field failure and rethrows VALIDATION_ERROR", async () => {
@@ -336,17 +287,10 @@ describe("meterDataforseoCall with split balances", () => {
     );
 
     expect(trackMock).toHaveBeenCalledTimes(1);
-    expect(trackMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        customerId: "org_123",
-        featureId: AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-        value: EXPECTED_CREDITS,
-      }),
-      expect.anything(),
-    );
+    expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
   });
 
-  it("includes balanceFeatureId in track properties", async () => {
+  it("deducts the correct credit amount", async () => {
     setupHostedMode();
     mockBalances(30, 5000);
     mockDataforseoResult(0.05);
@@ -354,19 +298,7 @@ describe("meterDataforseoCall with split balances", () => {
     const client = createDataforseoClient(billingCustomer);
     await client.backlinks.summary(backlinksInput);
 
-    const monthlyCall = trackMock.mock.calls.find(
-      ([arg]) => arg.featureId === AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-    );
-    const topupCall = trackMock.mock.calls.find(
-      ([arg]) => arg.featureId === AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID,
-    );
-
-    expect(monthlyCall![0].properties?.balanceFeatureId).toBe(
-      AUTUMN_SEO_DATA_BALANCE_FEATURE_ID,
-    );
-    expect(topupCall![0].properties?.balanceFeatureId).toBe(
-      AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID,
-    );
+    expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
   });
 });
 

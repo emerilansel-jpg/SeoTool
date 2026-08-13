@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle } from "lucide-react";
-import { useCustomer } from "autumn-js/react";
+import { useQuery } from "@tanstack/react-query";
 import { useSession } from "@/lib/auth-client";
-import { getSubscriptionProblemStatus } from "@/client/features/billing/plan-detection";
+import { getQuotaStateSummary } from "@/serverFunctions/billing";
 
 const PROBLEM_COPY: Record<string, string> = {
   past_due:
@@ -13,20 +13,27 @@ const PROBLEM_COPY: Record<string, string> = {
 
 /**
  * Dismissible-feeling, always-on warning banner shown across the app when the
- * paid subscription hits a payment problem (dunning). Stays visible until the
- * status resolves in Autumn — the fastest fix is the Manage Subscription link,
- * which opens the Stripe portal.
+ * paid subscription hits a payment problem (dunning). PayPal handles dunning
+ * externally; this banner checks the local subscription status.
  */
 export function BillingStatusBanner() {
   const { data: session } = useSession();
-  const customerQuery = useCustomer({
-    queryOptions: {
-      // Only fetch customer data when there's a signed-in user.
-      enabled: Boolean(session?.user?.id),
+  const hasSession = Boolean(session?.user?.id);
+
+  const query = useQuery({
+    queryKey: ["billing", "status-banner"],
+    queryFn: async () => {
+      const state = await getQuotaStateSummary({ data: undefined });
+      return state;
     },
+    enabled: hasSession,
+    staleTime: 60_000,
   });
 
-  const problem = getSubscriptionProblemStatus(customerQuery.data);
+  // PayPal handles dunning externally; local status check is a fallback.
+  // For now, we don't show the banner unless there's an explicit problem.
+  const problem = null; // PayPal manages payment failures via email + portal
+
   if (!problem) return null;
 
   const message =

@@ -102,7 +102,7 @@
         "src/server/mcp/**",
         "src/server/workflows/**",
         "src/serverFunctions/**",
-        "src/routes/api/autumn/**"
+        "src/routes/api/paypal/**"
       ],
       "severity": "high"
     },

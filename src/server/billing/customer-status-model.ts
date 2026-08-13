@@ -1,6 +1,6 @@
 import {
-  AUTUMN_PLAN_IDS,
-  planTierFromAutumnPlanId,
+  PAYPAL_PLAN_IDS,
+  planTierFromPaypalPlanId,
   type PlanTier,
 } from "@/shared/plans";
 
@@ -14,71 +14,64 @@ export type BillingCustomerStatusSnapshot = {
   paidPlanId: string | null;
   paidPlanStatus: string | null;
   planTier: PlanTier;
-  autumnSubscriptionId: string | null;
+  paypalSubscriptionId: string | null;
   currentPeriodEnd: string | null;
   customerJson: string;
   syncedAt: string;
 };
 
-export function deriveBillingCustomerStatusSnapshot(
-  customerInput: unknown,
-): BillingCustomerStatusSnapshot {
-  const customer = isRecord(customerInput) ? customerInput : {};
-  const organizationId = typeof customer.id === "string" ? customer.id : null;
-  if (!organizationId) {
-    throw new Error("Autumn customer is missing an id");
-  }
+/** Derive a billing snapshot from a PayPal subscription resource object.
+ *  Called by the webhook handler after fetching the subscription from PayPal. */
+export function deriveBillingCustomerStatusSnapshot(args: {
+  organizationId: string;
+  subscription: Record<string, unknown>;
+}): BillingCustomerStatusSnapshot {
+  const { organizationId, subscription: sub } = args;
 
-  const rawSubs = Array.isArray(customer.subscriptions)
-    ? customer.subscriptions
-    : [];
-  const subscriptions = rawSubs.filter(isRecord);
-  const subscription = selectTierSubscription(subscriptions);
-  const planTier = subscription
-    ? (planTierFromAutumnPlanId(
-        typeof subscription.planId === "string" ? subscription.planId : null,
-      ) ?? "free")
-    : "free";
+  const planId =
+    typeof sub.plan_id === "string" ? sub.plan_id : null;
+  const planTier = planTierFromPaypalPlanId(planId) ?? "free";
+
+  // Map PayPal statuses to our internal status strings
+  const paypalStatus =
+    typeof sub.status === "string" ? sub.status : "UNKNOWN";
+  const internalStatus = mapPaypalStatus(paypalStatus);
+
+  // next_billing_time is ISO-8601
+  const currentPeriodEnd =
+    typeof sub.next_billing_time === "string"
+      ? sub.next_billing_time
+      : null;
 
   return {
     organizationId,
-    isPaying: subscription?.status === "active",
-    paidPlanId:
-      typeof subscription?.planId === "string" ? subscription.planId : null,
-    paidPlanStatus:
-      typeof subscription?.status === "string" ? subscription.status : null,
+    isPaying: paypalStatus === "ACTIVE",
+    paidPlanId: planId,
+    paidPlanStatus: internalStatus,
     planTier,
-    autumnSubscriptionId:
-      typeof subscription?.id === "string" ? subscription.id : null,
-    currentPeriodEnd:
-      typeof subscription?.currentPeriodEnd === "string"
-        ? subscription.currentPeriodEnd
-        : null,
-    // Full payload kept verbatim — query rarely-used fields via json_extract.
-    customerJson: JSON.stringify(customerInput),
+    paypalSubscriptionId:
+      typeof sub.id === "string" ? sub.id : null,
+    currentPeriodEnd,
+    customerJson: JSON.stringify(sub),
     syncedAt: new Date().toISOString(),
   };
 }
 
-// Select the highest-tier active subscription. Scans for any of the tiered
-// plan ids (lite/pro/agency), preferring "active" status. Falls back to null
-// (free tier) when no tiered subscription is found.
-function selectTierSubscription(
-  subscriptions: Record<string, unknown>[],
-): Record<string, unknown> | null {
-  const tieredPlanIds = new Set<string>(
-    (["lite", "pro", "agency"] as const)
-      .map((tier) => AUTUMN_PLAN_IDS[tier])
-      .filter((id): id is string => id !== null),
-  );
-
-  const tiered = subscriptions.filter((s) => {
-    const planId = typeof s.planId === "string" ? s.planId : null;
-    return planId !== null && tieredPlanIds.has(planId);
-  });
-
-  if (tiered.length === 0) return null;
-
-  // Prefer active, then any (trialing, past_due, etc.)
-  return tiered.find((s) => s.status === "active") ?? tiered[0] ?? null;
+/** Map PayPal subscription status to our internal status string. */
+function mapPaypalStatus(paypalStatus: string): string {
+  switch (paypalStatus) {
+    case "ACTIVE":
+      return "active";
+    case "CANCELLED":
+      return "canceled";
+    case "EXPIRED":
+      return "canceled";
+    case "SUSPENDED":
+      return "past_due";
+    case "APPROVAL_PENDING":
+    case "APPROVED":
+      return "active";
+    default:
+      return "active";
+  }
 }

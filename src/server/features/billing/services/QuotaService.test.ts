@@ -10,8 +10,8 @@ import {
   DEFAULT_PLAN_TIER,
   isPaidTier,
   getPlanLimit,
-  planTierFromAutumnPlanId,
-  AUTUMN_PLAN_IDS,
+  planTierFromPaypalPlanId,
+  PAYPAL_PLAN_IDS,
   type PlanTier,
   type QuotaFeature,
 } from "@/shared/plans";
@@ -140,24 +140,24 @@ describe("plans: quota periods", () => {
 
 describe("plans: Autumn plan id mapping", () => {
   it("maps free tier to null (Autumn Default)", () => {
-    expect(AUTUMN_PLAN_IDS.free).toBeNull();
+    expect(PAYPAL_PLAN_IDS.free).toBeNull();
   });
 
   it("maps paid tiers to Autumn plan ids", () => {
-    expect(AUTUMN_PLAN_IDS.lite).toBe("lite-plan");
-    expect(AUTUMN_PLAN_IDS.pro).toBe("pro-plan");
-    expect(AUTUMN_PLAN_IDS.agency).toBe("agency-plan");
+    expect(PAYPAL_PLAN_IDS.lite).toBe("lite-plan");
+    expect(PAYPAL_PLAN_IDS.pro).toBe("pro-plan");
+    expect(PAYPAL_PLAN_IDS.agency).toBe("agency-plan");
   });
 
   it("resolves Autumn plan ids back to tiers", () => {
-    expect(planTierFromAutumnPlanId("lite-plan")).toBe("lite");
-    expect(planTierFromAutumnPlanId("pro-plan")).toBe("pro");
-    expect(planTierFromAutumnPlanId("agency-plan")).toBe("agency");
+    expect(planTierFromPaypalPlanId("lite-plan")).toBe("lite");
+    expect(planTierFromPaypalPlanId("pro-plan")).toBe("pro");
+    expect(planTierFromPaypalPlanId("agency-plan")).toBe("agency");
   });
 
   it("returns null for unknown Autumn plan ids", () => {
-    expect(planTierFromAutumnPlanId("unknown")).toBeNull();
-    expect(planTierFromAutumnPlanId(null)).toBeNull();
-    expect(planTierFromAutumnPlanId(undefined)).toBeNull();
+    expect(planTierFromPaypalPlanId("unknown")).toBeNull();
+    expect(planTierFromPaypalPlanId(null)).toBeNull();
+    expect(planTierFromPaypalPlanId(undefined)).toBeNull();
   });
 });

@@ -31,13 +31,13 @@ export async function getPlanTier(organizationId: string): Promise<PlanTier> {
   return row?.planTier ?? "free";
 }
 
-/** Upsert the org's subscription. Called by the billing webhook when Autumn
+/** Upsert the org's subscription. Called by the billing webhook when PayPal
  *  reports a subscription change, and lazily on first customer creation to
  *  pin the default free tier. */
 export async function upsertSubscription(input: {
   organizationId: string;
   planTier: PlanTier;
-  autumnSubscriptionId?: string | null;
+  paypalSubscriptionId?: string | null;
   status?: string;
   currentPeriodEnd?: string | null;
 }): Promise<SubscriptionRow> {
@@ -48,7 +48,7 @@ export async function upsertSubscription(input: {
     .values({
       organizationId: input.organizationId,
       planTier: input.planTier,
-      autumnSubscriptionId: input.autumnSubscriptionId ?? null,
+      paypalSubscriptionId: input.paypalSubscriptionId ?? null,
       status: input.status ?? "active",
       currentPeriodEnd: input.currentPeriodEnd ?? null,
     })
@@ -56,7 +56,7 @@ export async function upsertSubscription(input: {
       target: subscription.organizationId,
       set: {
         planTier: input.planTier,
-        autumnSubscriptionId: input.autumnSubscriptionId ?? null,
+        paypalSubscriptionId: input.paypalSubscriptionId ?? null,
         status: input.status ?? "active",
         currentPeriodEnd: input.currentPeriodEnd ?? null,
         updatedAt: sql`(current_timestamp)`,

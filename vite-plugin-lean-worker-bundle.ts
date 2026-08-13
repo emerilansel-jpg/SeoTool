@@ -26,12 +26,6 @@ const EAGER_DENYLIST: Array<{ pattern: RegExp; expected: string }> = [
       "through the metered client or src/server/lib/dataforseo/shared.ts",
   },
   {
-    pattern: /node_modules\/autumn-js\//,
-    expected:
-      "lazy-loaded behind the facade in src/server/billing/autumn.ts and " +
-      "the /api/autumn route's lazy handler",
-  },
-  {
     pattern:
       /node_modules\/(workers-ai-provider|@ai-sdk\/(openai|anthropic))\//,
     expected:

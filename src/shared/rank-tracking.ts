@@ -1,5 +1,5 @@
 import {
-  AUTUMN_SEO_DATA_CREDITS_PER_USD,
+  CREDITS_PER_USD,
   SEO_DATA_COST_MARKUP,
   roundUsdForBilling,
 } from "./billing";
@@ -72,7 +72,7 @@ export function estimateRankCheckCredits(
   const costUsd = roundUsdForBilling(
     totalChecks * costPerSerpAtDepth(depth, method) * SEO_DATA_COST_MARKUP,
   );
-  const costCredits = Math.ceil(costUsd * AUTUMN_SEO_DATA_CREDITS_PER_USD);
+  const costCredits = Math.ceil(costUsd * CREDITS_PER_USD);
   return { costUsd, costCredits };
 }
 

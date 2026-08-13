@@ -50,13 +50,13 @@ export const subscription = pgTable(
     })
       .notNull()
       .default("free"),
-    autumnSubscriptionId: text("autumn_subscription_id"),
+    paypalSubscriptionId: text("paypal_subscription_id"),
     status: text("status").notNull().default("active"),
     currentPeriodEnd: text("current_period_end"),
     createdAt: text("created_at").notNull().default(isoNow),
     updatedAt: text("updated_at").notNull().default(isoNow),
   },
   (table) => [
-    index("subscription_autumn_sub_idx").on(table.autumnSubscriptionId),
+    index("subscription_paypal_sub_idx").on(table.paypalSubscriptionId),
   ],
 );

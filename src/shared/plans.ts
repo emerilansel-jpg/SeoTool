@@ -16,31 +16,34 @@
 export const PLAN_TIERS = ["free", "lite", "pro", "agency"] as const;
 export type PlanTier = (typeof PLAN_TIERS)[number];
 
-/** Autumn product/plan id for each tier. Maps 1:1 to plans configured in the
- *  Autumn dashboard. The free tier is the Autumn Default (attached at customer
- *  creation), so it has no subscription plan id. */
-export const AUTUMN_PLAN_IDS: Record<PlanTier, string | null> = {
+/** PayPal Billing Plan ID for each tier. Maps 1:1 to plans configured in the
+ *  PayPal dashboard. The free tier has no subscription plan id. */
+export const PAYPAL_PLAN_IDS: Record<PlanTier, string | null> = {
   free: null,
   lite: "lite-plan",
   pro: "pro-plan",
   agency: "agency-plan",
 };
 
-/** Reverse lookup: Autumn plan id → our tier. Used by the webhook handler to
+/** Reverse lookup: PayPal plan id → our tier. Used by the webhook handler to
  *  resolve a subscription update to a tier. */
-const AUTUMN_PLAN_ID_TO_TIER = new Map<string, PlanTier>(
+const PAYPAL_PLAN_ID_TO_TIER = new Map<string, PlanTier>(
   (["lite", "pro", "agency"] as const).map((tier) => [
-    AUTUMN_PLAN_IDS[tier]!,
+    PAYPAL_PLAN_IDS[tier]!,
     tier,
   ]),
 );
 
-export function planTierFromAutumnPlanId(
+export function planTierFromPaypalPlanId(
   planId: string | null | undefined,
 ): PlanTier | null {
   if (!planId) return null;
-  return AUTUMN_PLAN_ID_TO_TIER.get(planId) ?? null;
+  return PAYPAL_PLAN_ID_TO_TIER.get(planId) ?? null;
 }
+
+// Backward-compatible aliases
+export const AUTUMN_PLAN_IDS = PAYPAL_PLAN_IDS;
+export const planTierFromAutumnPlanId = planTierFromPaypalPlanId;
 
 /** Display price in USD per month. Free is $0. */
 export const PLAN_PRICES_USD: Record<PlanTier, number> = {

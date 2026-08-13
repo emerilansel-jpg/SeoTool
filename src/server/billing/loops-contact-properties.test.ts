@@ -5,7 +5,7 @@ import {
 } from "./loops-contact-properties";
 
 describe("getBillingLoopsContactProperties", () => {
-  it("maps Autumn billing fields to Loops custom properties", () => {
+  it("maps billing fields to Loops custom properties", () => {
     expect(
       getBillingLoopsContactProperties({
         paidPlanId: "base-plan",

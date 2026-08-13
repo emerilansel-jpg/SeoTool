@@ -1,20 +1,20 @@
 export const BILLING_ROUTE = "/billing";
 export const SUBSCRIBE_ROUTE = "/subscribe";
 
-export const AUTUMN_PAID_PLAN_ID = "base-plan";
-/** Autumn one-time top-up product. Attaching it grants extra usage credits
- *  that roll over and draw from the same pool as monthly credits. */
-export const AUTUMN_SEO_DATA_TOP_UP_PLAN_ID = "credit-top-up";
-const _AUTUMN_PAID_PLAN_FEATURE_ID = "paid_plan";
-// Granted by both the free plan (now the Autumn Default, so every non-paid
-// user gets it) and the paid base plan. It's the floor for using the managed
-// service at all — paid-only features gate on AUTUMN_PAID_PLAN_FEATURE_ID.
-export const AUTUMN_MANAGED_ACCESS_FEATURE_ID = "managed_service_access";
+/** PayPal Billing Plan ID for each paid tier. Configured in the PayPal
+ *  dashboard under Products > Billing Plans. The free tier has no plan. */
+export const PAYPAL_PLAN_IDS: Record<string, string | null> = {
+  free: null,
+  lite: "lite-plan",
+  pro: "pro-plan",
+  agency: "agency-plan",
+};
+
 // The shared usage-credit pool. Both DataForSEO and onboarding-LLM spend deduct
 // from these (monthly usage_credits first, then rolled-over topup_credits).
-export const AUTUMN_SEO_DATA_BALANCE_FEATURE_ID = "usage_credits";
-export const AUTUMN_SEO_DATA_TOPUP_BALANCE_FEATURE_ID = "topup_credits";
-export const AUTUMN_SEO_DATA_CREDITS_PER_USD = 1000;
+export const PAYPAL_CREDITS_FEATURE_ID = "usage_credits";
+export const PAYPAL_TOPUP_CREDITS_FEATURE_ID = "topup_credits";
+export const CREDITS_PER_USD = 1000;
 export const SEO_DATA_COST_MARKUP = 1.28;
 export const LOW_CREDITS_THRESHOLD_USD = 0.25;
 
@@ -22,9 +22,13 @@ export function roundUsdForBilling(value: number) {
   return Math.round(value * 100000) / 100000;
 }
 
-export function autumnSeoDataCreditsToUsd(credits: number) {
-  return credits / AUTUMN_SEO_DATA_CREDITS_PER_USD;
+export function creditsToUsd(credits: number) {
+  return credits / CREDITS_PER_USD;
 }
+
+// Backward-compatible alias for files not yet migrated
+export const AUTUMN_SEO_DATA_CREDITS_PER_USD = CREDITS_PER_USD;
+export const autumnSeoDataCreditsToUsd = creditsToUsd;
 
 /**
  * Convert a raw DataForSEO USD cost into the USD amount a hosted customer is

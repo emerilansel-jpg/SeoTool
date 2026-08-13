@@ -89,7 +89,6 @@
     "@tanstack/react-table": "^8.21.3",
     "agents": "0.17.3",
     "ai": "^6.0.199",
-    "autumn-js": "^1.2.33",
     "better-auth": "^1.6.22",
     "cheerio": "^1.2.0",
     "cloudflare": "^5.2.0",

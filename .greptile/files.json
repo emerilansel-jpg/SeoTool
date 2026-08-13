@@ -114,12 +114,12 @@
         "src/server/mcp/**",
         "src/server/workflows/**",
         "src/serverFunctions/**",
-        "src/routes/api/autumn/**"
+        "src/routes/api/paypal/**"
       ]
     },
     {
-      "path": "src/server/billing/autumn.ts",
-      "description": "Single lazy Autumn client and the restricted retry policy for non-idempotent track calls.",
+      "path": "src/server/billing/paypal.ts",
+      "description": "PayPal REST API client with OAuth2 token caching and typed facade over subscription/plan endpoints.",
       "scope": [
         "src/shared/billing*.ts",
         "src/shared/rank-tracking.ts",
@@ -134,7 +134,7 @@
         "src/server/mcp/**",
         "src/server/workflows/**",
         "src/serverFunctions/**",
-        "src/routes/api/autumn/**"
+        "src/routes/api/paypal/**"
       ]
     },
     {

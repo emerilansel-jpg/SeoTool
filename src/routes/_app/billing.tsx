@@ -1,5 +1,4 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
-import { useCustomer } from "autumn-js/react";
 import { useEffect, useState } from "react";
 import { CreditCard, Zap } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
@@ -9,17 +8,17 @@ import { getStoredRedditAttribution } from "@/client/lib/reddit-attribution";
 import { BillingUsageChart } from "@/client/features/billing/BillingUsageChart";
 import { BillingFeatureBreakdown } from "@/client/features/billing/BillingFeatureBreakdown";
 import { getBillingRouteState } from "@/client/features/billing/route-state";
-import { getCustomerPlanTier } from "@/client/features/billing/plan-detection";
+import { usePlanTier } from "@/client/features/billing/use-billing";
 import { captureRedditConversionEvent } from "@/serverFunctions/redditConversions";
 import {
   getQuotaStateSummary,
   getCustomerPortalUrl,
 } from "@/serverFunctions/billing";
+import { createPaypalTopup } from "@/serverFunctions/paypal-checkout";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { QuotaBar } from "@/client/features/billing/QuotaBar";
 import { PLAN_TIER_LABELS, PLAN_PRICES_USD } from "@/shared/plans";
-import { AUTUMN_SEO_DATA_TOP_UP_PLAN_ID } from "@/shared/billing";
 
 export const Route = createFileRoute("/_app/billing")({
   beforeLoad: () => {
@@ -35,11 +34,8 @@ function BillingPage() {
   const [isPortalLoading, setIsPortalLoading] = useState(false);
   const [isBuyingCredits, setIsBuyingCredits] = useState(false);
 
-  const customerQuery = useCustomer({
-    queryOptions: {
-      enabled: Boolean(session?.user?.id),
-    },
-  });
+  const { planTier, isLoading: isPlanLoading } = usePlanTier();
+  const isFreePlan = planTier === "free";
 
   const getQuotaState = useServerFn(getQuotaStateSummary);
   const quotaQuery = useQuery({
@@ -47,9 +43,6 @@ function BillingPage() {
     queryFn: () => getQuotaState(),
     enabled: Boolean(session?.user?.id),
   });
-
-  const planTier = getCustomerPlanTier(customerQuery.data);
-  const isFreePlan = planTier === "free";
 
   const openPortal = useServerFn(getCustomerPortalUrl);
 
@@ -66,13 +59,12 @@ function BillingPage() {
   async function handleBuyCredits() {
     setIsBuyingCredits(true);
     try {
-      const successUrl = new URL(window.location.href);
-      successUrl.searchParams.set("checkout", "success");
-      await customerQuery.attach({
-        planId: AUTUMN_SEO_DATA_TOP_UP_PLAN_ID,
-        redirectMode: "always",
-        successUrl: successUrl.toString(),
+      const result = await createPaypalTopup({
+        data: { amountUsd: 10 },
       });
+      if (result?.approveUrl) {
+        window.location.href = result.approveUrl;
+      }
     } catch {
       setIsBuyingCredits(false);
     }
@@ -81,8 +73,8 @@ function BillingPage() {
   const billingRouteState = getBillingRouteState({
     hasSession: Boolean(session?.user?.id),
     isSessionPending,
-    isCustomerLoading: customerQuery.isLoading || quotaQuery.isLoading,
-    isCustomerError: customerQuery.isError || quotaQuery.isError,
+    isCustomerLoading: isPlanLoading || quotaQuery.isLoading,
+    isCustomerError: quotaQuery.isError,
   });
 
   const checkoutCompleted =
@@ -110,7 +102,7 @@ function BillingPage() {
         <h1 className="text-xl font-semibold">Billing unavailable</h1>
         <p className="text-sm text-base-content/70">
           {getStandardErrorMessage(
-            customerQuery.error ?? quotaQuery.error,
+            quotaQuery.error,
             "We couldn't load your billing details right now. Please try again.",
           )}
         </p>
@@ -118,7 +110,6 @@ function BillingPage() {
           type="button"
           className="btn btn-soft btn-sm"
           onClick={() => {
-            void customerQuery.refetch();
             void quotaQuery.refetch();
           }}
         >
@@ -181,20 +172,12 @@ function BillingPage() {
                   )}
                   Manage Subscription
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm w-full"
-                  disabled={isPortalLoading}
-                  onClick={handleManageSubscription}
-                >
-                  View Invoice History
-                </button>
               </div>
             )}
           </div>
         </div>
 
-        {/* Upgrade options card (if on free or lite) */}
+        {/* Upgrade options card */}
         {!isFreePlan && planTier !== "agency" ? (
           <div className="flex flex-col justify-between rounded-lg border border-base-300 bg-base-100 p-4 gap-4">
             <div>
@@ -248,7 +231,7 @@ function BillingPage() {
         </div>
       </div>
 
-      {/* Retain the legacy chart and breakdown for historical spend */}
+      {/* Credit top-up */}
       <div className="mt-10 flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold">Overage & Past Usage</h2>
         <button
@@ -266,7 +249,7 @@ function BillingPage() {
         </button>
       </div>
       <p className="text-sm text-base-content/70 -mt-3">
-        Any limits exceeded will draw from your legacy credit pool if available.
+        Any limits exceeded will draw from your credit pool if available.
         Top up anytime, credits roll over and never expire.
       </p>
 
