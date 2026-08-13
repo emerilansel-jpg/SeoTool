@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-table";
 import { Search } from "lucide-react";
 import { useMemo } from "react";
+import { AreaTrendChart } from "@/client/features/keywords/components";
 import {
   AppDataTable,
   makeSelectionColumn,
@@ -56,9 +57,18 @@ export function SavedKeywordsTable({
       }),
       columnHelper.accessor("searchVolume", {
         header: ({ column }) => (
-          <SortableHeader column={column} label="Volume" />
+          <SortableHeader column={column} label="Volume & Trend" />
         ),
-        cell: ({ getValue }) => formatSavedKeywordNumber(getValue()),
+        cell: ({ row }) => (
+          <div className="flex flex-col items-start gap-1 w-full max-w-[120px]">
+            <span className="tabular-nums">
+              {formatSavedKeywordNumber(row.original.searchVolume)}
+            </span>
+            <div className="h-6 w-full -ml-1">
+              <AreaTrendChart trend={row.original.monthlySearches ?? []} />
+            </div>
+          </div>
+        ),
       }),
       columnHelper.accessor("cpc", {
         header: ({ column }) => <SortableHeader column={column} label="CPC" />,

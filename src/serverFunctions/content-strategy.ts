@@ -36,7 +36,7 @@ const _getTopicCluster = createServerFn({ method: "GET" })
     return ContentStrategyService.getTopicCluster(id, projectId);
   });
 
-const _createTopicCluster = createServerFn({ method: "POST" })
+export const createTopicCluster = createServerFn({ method: "POST" })
   .middleware([requireProjectContext, requireProjectRole("member")])
   .validator(createTopicClusterSchema)
   .handler(async ({ data }) => {
@@ -80,7 +80,7 @@ export const getContentBrief = createServerFn({ method: "GET" })
     return ContentStrategyService.getContentBrief(id, projectId);
   });
 
-const _createContentBrief = createServerFn({ method: "POST" })
+export const createContentBrief = createServerFn({ method: "POST" })
   .middleware([requireProjectContext, requireProjectRole("member")])
   .validator(createContentBriefSchema)
   .handler(async ({ data }) => {

@@ -9,68 +9,75 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VerifyEmailRouteImport } from './routes/verify-email'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as AuthRouteImport } from './routes/_auth'
-import { Route as ProjectRouteRouteImport } from './routes/_project/route'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
-import { Route as AppIndexRouteImport } from './routes/_app/index'
-import { Route as ApiHealthRouteImport } from './routes/api/health'
-import { Route as AuthenticatedSubscribeRouteImport } from './routes/_authenticated.subscribe'
-import { Route as AuthenticatedOauthConsentRouteImport } from './routes/_authenticated.oauth-consent'
-import { Route as AuthSignUpRouteImport } from './routes/_auth.sign-up'
-import { Route as AuthSignInRouteImport } from './routes/_auth.sign-in'
-import { Route as AppSupportRouteImport } from './routes/_app/support'
-import { Route as AppSettingsRouteImport } from './routes/_app/settings'
-import { Route as AppProjectsRouteImport } from './routes/_app/projects'
-import { Route as AppBillingRouteImport } from './routes/_app/billing'
-import { Route as AppAiRouteImport } from './routes/_app/ai'
+import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as ProjectRouteRouteImport } from './routes/_project/route'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as Char91DotwellKnownChar93OpenaiAppsChallengeRouteImport } from './routes/[.well-known]/openai-apps-challenge'
-import { Route as AuthenticatedOnboardingIndexRouteImport } from './routes/_authenticated.onboarding.index'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppAiRouteImport } from './routes/_app/ai'
+import { Route as AppBillingRouteImport } from './routes/_app/billing'
+import { Route as AppProjectsRouteImport } from './routes/_app/projects'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppSupportRouteImport } from './routes/_app/support'
+import { Route as AuthSignInRouteImport } from './routes/_auth.sign-in'
+import { Route as AuthSignUpRouteImport } from './routes/_auth.sign-up'
+import { Route as AuthenticatedAcceptInvitationRouteImport } from './routes/_authenticated.accept-invitation'
+import { Route as AuthenticatedOauthConsentRouteImport } from './routes/_authenticated.oauth-consent'
+import { Route as AuthenticatedSubscribeRouteImport } from './routes/_authenticated.subscribe'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
-import { Route as ApiAutumnSplatRouteImport } from './routes/api/autumn/$'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as AuthenticatedOnboardingChatRouteImport } from './routes/_authenticated.onboarding.chat'
-import { Route as AppHelpOpenrouterApiKeyRouteImport } from './routes/_app/help/openrouter-api-key'
 import { Route as AppHelpDataforseoApiKeyRouteImport } from './routes/_app/help/dataforseo-api-key'
+import { Route as AppHelpOpenrouterApiKeyRouteImport } from './routes/_app/help/openrouter-api-key'
+import { Route as AuthenticatedOnboardingIndexRouteImport } from './routes/_authenticated.onboarding.index'
+import { Route as AuthenticatedOnboardingChatRouteImport } from './routes/_authenticated.onboarding.chat'
 import { Route as ProjectPProjectIdRouteRouteImport } from './routes/_project/p/$projectId/route'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiAutumnSplatRouteImport } from './routes/api/autumn/$'
 import { Route as ProjectPProjectIdIndexRouteImport } from './routes/_project/p/$projectId/index'
-import { Route as ApiGscOauthCallbackRouteImport } from './routes/api/gsc/oauth/callback'
-import { Route as ApiGa4OauthCallbackRouteImport } from './routes/api/ga4/oauth/callback'
-import { Route as ProjectPProjectIdSettingsRouteImport } from './routes/_project/p/$projectId/settings'
-import { Route as ProjectPProjectIdSearchPerformanceRouteImport } from './routes/_project/p/$projectId/search-performance'
-import { Route as ProjectPProjectIdSavedRouteImport } from './routes/_project/p/$projectId/saved'
-import { Route as ProjectPProjectIdSamRouteImport } from './routes/_project/p/$projectId/sam'
-import { Route as ProjectPProjectIdRankTrackingRouteImport } from './routes/_project/p/$projectId/rank-tracking'
-import { Route as ProjectPProjectIdPromptExplorerRouteImport } from './routes/_project/p/$projectId/prompt-explorer'
-import { Route as ProjectPProjectIdKeywordsRouteImport } from './routes/_project/p/$projectId/keywords'
-import { Route as ProjectPProjectIdGa4InsightsRouteImport } from './routes/_project/p/$projectId/ga4-insights'
-import { Route as ProjectPProjectIdDomainRouteImport } from './routes/_project/p/$projectId/domain'
-import { Route as ProjectPProjectIdContentGapRouteImport } from './routes/_project/p/$projectId/content-gap'
-import { Route as ProjectPProjectIdBrandLookupRouteImport } from './routes/_project/p/$projectId/brand-lookup'
-import { Route as ProjectPProjectIdBacklinksRouteImport } from './routes/_project/p/$projectId/backlinks'
 import { Route as ProjectPProjectIdAuditRouteImport } from './routes/_project/p/$projectId/audit'
+import { Route as ProjectPProjectIdBacklinksRouteImport } from './routes/_project/p/$projectId/backlinks'
+import { Route as ProjectPProjectIdBrandLookupRouteImport } from './routes/_project/p/$projectId/brand-lookup'
+import { Route as ProjectPProjectIdContentGapRouteImport } from './routes/_project/p/$projectId/content-gap'
+import { Route as ProjectPProjectIdDomainRouteImport } from './routes/_project/p/$projectId/domain'
+import { Route as ProjectPProjectIdGa4InsightsRouteImport } from './routes/_project/p/$projectId/ga4-insights'
+import { Route as ProjectPProjectIdKeywordsRouteImport } from './routes/_project/p/$projectId/keywords'
+import { Route as ProjectPProjectIdPromptExplorerRouteImport } from './routes/_project/p/$projectId/prompt-explorer'
+import { Route as ProjectPProjectIdRankTrackingRouteImport } from './routes/_project/p/$projectId/rank-tracking'
 import { Route as ProjectPProjectIdReportsRouteRouteImport } from './routes/_project/p/$projectId/reports/route'
-import { Route as ProjectPProjectIdStrategyIndexRouteImport } from './routes/_project/p/$projectId/strategy/index'
-import { Route as ProjectPProjectIdReportsIndexRouteImport } from './routes/_project/p/$projectId/reports/index'
-import { Route as ProjectPProjectIdRankTrackingIndexRouteImport } from './routes/_project/p/$projectId/rank-tracking/index'
-import { Route as ProjectPProjectIdAuditIndexRouteImport } from './routes/_project/p/$projectId/audit/index'
+import { Route as ProjectPProjectIdSamRouteImport } from './routes/_project/p/$projectId/sam'
+import { Route as ProjectPProjectIdSavedRouteImport } from './routes/_project/p/$projectId/saved'
+import { Route as ProjectPProjectIdSearchPerformanceRouteImport } from './routes/_project/p/$projectId/search-performance'
+import { Route as ProjectPProjectIdSettingsRouteImport } from './routes/_project/p/$projectId/settings'
+import { Route as ApiGa4OauthCallbackRouteImport } from './routes/api/ga4/oauth/callback'
+import { Route as ApiGscOauthCallbackRouteImport } from './routes/api/gsc/oauth/callback'
 import { Route as ProjectPProjectIdAlertsIndexRouteImport } from './routes/_project/p/$projectId/alerts/index'
-import { Route as ProjectPProjectIdReportsReportIdRouteImport } from './routes/_project/p/$projectId/reports/$reportId'
+import { Route as ProjectPProjectIdAuditIndexRouteImport } from './routes/_project/p/$projectId/audit/index'
+import { Route as ProjectPProjectIdRankTrackingIndexRouteImport } from './routes/_project/p/$projectId/rank-tracking/index'
 import { Route as ProjectPProjectIdRankTrackingConfigIdRouteImport } from './routes/_project/p/$projectId/rank-tracking/$configId'
-import { Route as ProjectPProjectIdStrategyBriefsBriefIdRouteImport } from './routes/_project/p/$projectId/strategy/briefs/$briefId'
+import { Route as ProjectPProjectIdReportsIndexRouteImport } from './routes/_project/p/$projectId/reports/index'
+import { Route as ProjectPProjectIdReportsReportIdRouteImport } from './routes/_project/p/$projectId/reports/$reportId'
+import { Route as ProjectPProjectIdStrategyIndexRouteImport } from './routes/_project/p/$projectId/strategy/index'
 import { Route as ProjectPProjectIdAuditIssuesResultIdRouteImport } from './routes/_project/p/$projectId/audit/issues/$resultId'
+import { Route as ProjectPProjectIdStrategyBriefsBriefIdRouteImport } from './routes/_project/p/$projectId/strategy/briefs/$briefId'
 
-const VerifyEmailRoute = VerifyEmailRouteImport.update({
-  id: '/verify-email',
-  path: '/verify-email',
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const AuthRoute = AuthRouteImport.update({
+  id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectRouteRoute = ProjectRouteRouteImport.update({
+  id: '/_project',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -78,77 +85,15 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/_auth',
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
   getParentRoute: () => rootRouteImport,
-} as any)
-const ProjectRouteRoute = ProjectRouteRouteImport.update({
-  id: '/_project',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRouteRoute = AppRouteRouteImport.update({
-  id: '/_app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const ApiHealthRoute = ApiHealthRouteImport.update({
-  id: '/api/health',
-  path: '/api/health',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedSubscribeRoute = AuthenticatedSubscribeRouteImport.update({
-  id: '/subscribe',
-  path: '/subscribe',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedOauthConsentRoute =
-  AuthenticatedOauthConsentRouteImport.update({
-    id: '/oauth-consent',
-    path: '/oauth-consent',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthSignUpRoute = AuthSignUpRouteImport.update({
-  id: '/sign-up',
-  path: '/sign-up',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthSignInRoute = AuthSignInRouteImport.update({
-  id: '/sign-in',
-  path: '/sign-in',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AppSupportRoute = AppSupportRouteImport.update({
-  id: '/support',
-  path: '/support',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppProjectsRoute = AppProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppBillingRoute = AppBillingRouteImport.update({
-  id: '/billing',
-  path: '/billing',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppAiRoute = AppAiRouteImport.update({
-  id: '/ai',
-  path: '/ai',
-  getParentRoute: () => AppRouteRoute,
 } as any)
 const Char91DotwellKnownChar93OpenaiAppsChallengeRoute =
   Char91DotwellKnownChar93OpenaiAppsChallengeRouteImport.update({
@@ -156,36 +101,71 @@ const Char91DotwellKnownChar93OpenaiAppsChallengeRoute =
     path: '/.well-known/openai-apps-challenge',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AuthenticatedOnboardingIndexRoute =
-  AuthenticatedOnboardingIndexRouteImport.update({
-    id: '/onboarding/',
-    path: '/onboarding/',
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAiRoute = AppAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppBillingRoute = AppBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProjectsRoute = AppProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppSupportRoute = AppSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AuthSignInRoute = AuthSignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSignUpRoute = AuthSignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthenticatedAcceptInvitationRoute =
+  AuthenticatedAcceptInvitationRouteImport.update({
+    id: '/accept-invitation',
+    path: '/accept-invitation',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedOauthConsentRoute =
+  AuthenticatedOauthConsentRouteImport.update({
+    id: '/oauth-consent',
+    path: '/oauth-consent',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedSubscribeRoute = AuthenticatedSubscribeRouteImport.update({
+  id: '/subscribe',
+  path: '/subscribe',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const ApiAutumnSplatRoute = ApiAutumnSplatRouteImport.update({
-  id: '/api/autumn/$',
-  path: '/api/autumn/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedOnboardingChatRoute =
-  AuthenticatedOnboardingChatRouteImport.update({
-    id: '/onboarding/chat',
-    path: '/onboarding/chat',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AppHelpOpenrouterApiKeyRoute = AppHelpOpenrouterApiKeyRouteImport.update({
-  id: '/help/openrouter-api-key',
-  path: '/help/openrouter-api-key',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppHelpDataforseoApiKeyRoute = AppHelpDataforseoApiKeyRouteImport.update({
@@ -193,81 +173,52 @@ const AppHelpDataforseoApiKeyRoute = AppHelpDataforseoApiKeyRouteImport.update({
   path: '/help/dataforseo-api-key',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppHelpOpenrouterApiKeyRoute = AppHelpOpenrouterApiKeyRouteImport.update({
+  id: '/help/openrouter-api-key',
+  path: '/help/openrouter-api-key',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AuthenticatedOnboardingIndexRoute =
+  AuthenticatedOnboardingIndexRouteImport.update({
+    id: '/onboarding/',
+    path: '/onboarding/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOnboardingChatRoute =
+  AuthenticatedOnboardingChatRouteImport.update({
+    id: '/onboarding/chat',
+    path: '/onboarding/chat',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const ProjectPProjectIdRouteRoute = ProjectPProjectIdRouteRouteImport.update({
   id: '/p/$projectId',
   path: '/p/$projectId',
   getParentRoute: () => ProjectRouteRoute,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAutumnSplatRoute = ApiAutumnSplatRouteImport.update({
+  id: '/api/autumn/$',
+  path: '/api/autumn/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectPProjectIdIndexRoute = ProjectPProjectIdIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ProjectPProjectIdRouteRoute,
 } as any)
-const ApiGscOauthCallbackRoute = ApiGscOauthCallbackRouteImport.update({
-  id: '/api/gsc/oauth/callback',
-  path: '/api/gsc/oauth/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiGa4OauthCallbackRoute = ApiGa4OauthCallbackRouteImport.update({
-  id: '/api/ga4/oauth/callback',
-  path: '/api/ga4/oauth/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProjectPProjectIdSettingsRoute =
-  ProjectPProjectIdSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => ProjectPProjectIdRouteRoute,
-  } as any)
-const ProjectPProjectIdSearchPerformanceRoute =
-  ProjectPProjectIdSearchPerformanceRouteImport.update({
-    id: '/search-performance',
-    path: '/search-performance',
-    getParentRoute: () => ProjectPProjectIdRouteRoute,
-  } as any)
-const ProjectPProjectIdSavedRoute = ProjectPProjectIdSavedRouteImport.update({
-  id: '/saved',
-  path: '/saved',
+const ProjectPProjectIdAuditRoute = ProjectPProjectIdAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
   getParentRoute: () => ProjectPProjectIdRouteRoute,
 } as any)
-const ProjectPProjectIdSamRoute = ProjectPProjectIdSamRouteImport.update({
-  id: '/sam',
-  path: '/sam',
-  getParentRoute: () => ProjectPProjectIdRouteRoute,
-} as any)
-const ProjectPProjectIdRankTrackingRoute =
-  ProjectPProjectIdRankTrackingRouteImport.update({
-    id: '/rank-tracking',
-    path: '/rank-tracking',
-    getParentRoute: () => ProjectPProjectIdRouteRoute,
-  } as any)
-const ProjectPProjectIdPromptExplorerRoute =
-  ProjectPProjectIdPromptExplorerRouteImport.update({
-    id: '/prompt-explorer',
-    path: '/prompt-explorer',
-    getParentRoute: () => ProjectPProjectIdRouteRoute,
-  } as any)
-const ProjectPProjectIdKeywordsRoute =
-  ProjectPProjectIdKeywordsRouteImport.update({
-    id: '/keywords',
-    path: '/keywords',
-    getParentRoute: () => ProjectPProjectIdRouteRoute,
-  } as any)
-const ProjectPProjectIdGa4InsightsRoute =
-  ProjectPProjectIdGa4InsightsRouteImport.update({
-    id: '/ga4-insights',
-    path: '/ga4-insights',
-    getParentRoute: () => ProjectPProjectIdRouteRoute,
-  } as any)
-const ProjectPProjectIdDomainRoute = ProjectPProjectIdDomainRouteImport.update({
-  id: '/domain',
-  path: '/domain',
-  getParentRoute: () => ProjectPProjectIdRouteRoute,
-} as any)
-const ProjectPProjectIdContentGapRoute =
-  ProjectPProjectIdContentGapRouteImport.update({
-    id: '/content-gap',
-    path: '/content-gap',
+const ProjectPProjectIdBacklinksRoute =
+  ProjectPProjectIdBacklinksRouteImport.update({
+    id: '/backlinks',
+    path: '/backlinks',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
 const ProjectPProjectIdBrandLookupRoute =
@@ -276,40 +227,84 @@ const ProjectPProjectIdBrandLookupRoute =
     path: '/brand-lookup',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
-const ProjectPProjectIdBacklinksRoute =
-  ProjectPProjectIdBacklinksRouteImport.update({
-    id: '/backlinks',
-    path: '/backlinks',
+const ProjectPProjectIdContentGapRoute =
+  ProjectPProjectIdContentGapRouteImport.update({
+    id: '/content-gap',
+    path: '/content-gap',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
-const ProjectPProjectIdAuditRoute = ProjectPProjectIdAuditRouteImport.update({
-  id: '/audit',
-  path: '/audit',
+const ProjectPProjectIdDomainRoute = ProjectPProjectIdDomainRouteImport.update({
+  id: '/domain',
+  path: '/domain',
   getParentRoute: () => ProjectPProjectIdRouteRoute,
 } as any)
+const ProjectPProjectIdGa4InsightsRoute =
+  ProjectPProjectIdGa4InsightsRouteImport.update({
+    id: '/ga4-insights',
+    path: '/ga4-insights',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
+const ProjectPProjectIdKeywordsRoute =
+  ProjectPProjectIdKeywordsRouteImport.update({
+    id: '/keywords',
+    path: '/keywords',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
+const ProjectPProjectIdPromptExplorerRoute =
+  ProjectPProjectIdPromptExplorerRouteImport.update({
+    id: '/prompt-explorer',
+    path: '/prompt-explorer',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
+const ProjectPProjectIdRankTrackingRoute =
+  ProjectPProjectIdRankTrackingRouteImport.update({
+    id: '/rank-tracking',
+    path: '/rank-tracking',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
 const ProjectPProjectIdReportsRouteRoute =
   ProjectPProjectIdReportsRouteRouteImport.update({
     id: '/reports',
     path: '/reports',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
-const ProjectPProjectIdStrategyIndexRoute =
-  ProjectPProjectIdStrategyIndexRouteImport.update({
-    id: '/strategy/',
-    path: '/strategy/',
+const ProjectPProjectIdSamRoute = ProjectPProjectIdSamRouteImport.update({
+  id: '/sam',
+  path: '/sam',
+  getParentRoute: () => ProjectPProjectIdRouteRoute,
+} as any)
+const ProjectPProjectIdSavedRoute = ProjectPProjectIdSavedRouteImport.update({
+  id: '/saved',
+  path: '/saved',
+  getParentRoute: () => ProjectPProjectIdRouteRoute,
+} as any)
+const ProjectPProjectIdSearchPerformanceRoute =
+  ProjectPProjectIdSearchPerformanceRouteImport.update({
+    id: '/search-performance',
+    path: '/search-performance',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
-const ProjectPProjectIdReportsIndexRoute =
-  ProjectPProjectIdReportsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => ProjectPProjectIdReportsRouteRoute,
+const ProjectPProjectIdSettingsRoute =
+  ProjectPProjectIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
-const ProjectPProjectIdRankTrackingIndexRoute =
-  ProjectPProjectIdRankTrackingIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => ProjectPProjectIdRankTrackingRoute,
+const ApiGa4OauthCallbackRoute = ApiGa4OauthCallbackRouteImport.update({
+  id: '/api/ga4/oauth/callback',
+  path: '/api/ga4/oauth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGscOauthCallbackRoute = ApiGscOauthCallbackRouteImport.update({
+  id: '/api/gsc/oauth/callback',
+  path: '/api/gsc/oauth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectPProjectIdAlertsIndexRoute =
+  ProjectPProjectIdAlertsIndexRouteImport.update({
+    id: '/alerts/',
+    path: '/alerts/',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
 const ProjectPProjectIdAuditIndexRoute =
   ProjectPProjectIdAuditIndexRouteImport.update({
@@ -317,17 +312,11 @@ const ProjectPProjectIdAuditIndexRoute =
     path: '/',
     getParentRoute: () => ProjectPProjectIdAuditRoute,
   } as any)
-const ProjectPProjectIdAlertsIndexRoute =
-  ProjectPProjectIdAlertsIndexRouteImport.update({
-    id: '/alerts/',
-    path: '/alerts/',
-    getParentRoute: () => ProjectPProjectIdRouteRoute,
-  } as any)
-const ProjectPProjectIdReportsReportIdRoute =
-  ProjectPProjectIdReportsReportIdRouteImport.update({
-    id: '/$reportId',
-    path: '/$reportId',
-    getParentRoute: () => ProjectPProjectIdReportsRouteRoute,
+const ProjectPProjectIdRankTrackingIndexRoute =
+  ProjectPProjectIdRankTrackingIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ProjectPProjectIdRankTrackingRoute,
   } as any)
 const ProjectPProjectIdRankTrackingConfigIdRoute =
   ProjectPProjectIdRankTrackingConfigIdRouteImport.update({
@@ -335,10 +324,22 @@ const ProjectPProjectIdRankTrackingConfigIdRoute =
     path: '/$configId',
     getParentRoute: () => ProjectPProjectIdRankTrackingRoute,
   } as any)
-const ProjectPProjectIdStrategyBriefsBriefIdRoute =
-  ProjectPProjectIdStrategyBriefsBriefIdRouteImport.update({
-    id: '/strategy/briefs/$briefId',
-    path: '/strategy/briefs/$briefId',
+const ProjectPProjectIdReportsIndexRoute =
+  ProjectPProjectIdReportsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ProjectPProjectIdReportsRouteRoute,
+  } as any)
+const ProjectPProjectIdReportsReportIdRoute =
+  ProjectPProjectIdReportsReportIdRouteImport.update({
+    id: '/$reportId',
+    path: '/$reportId',
+    getParentRoute: () => ProjectPProjectIdReportsRouteRoute,
+  } as any)
+const ProjectPProjectIdStrategyIndexRoute =
+  ProjectPProjectIdStrategyIndexRouteImport.update({
+    id: '/strategy/',
+    path: '/strategy/',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
 const ProjectPProjectIdAuditIssuesResultIdRoute =
@@ -346,6 +347,12 @@ const ProjectPProjectIdAuditIssuesResultIdRoute =
     id: '/issues/$resultId',
     path: '/issues/$resultId',
     getParentRoute: () => ProjectPProjectIdAuditRoute,
+  } as any)
+const ProjectPProjectIdStrategyBriefsBriefIdRoute =
+  ProjectPProjectIdStrategyBriefsBriefIdRouteImport.update({
+    id: '/strategy/briefs/$briefId',
+    path: '/strategy/briefs/$briefId',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -361,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof AppSupportRoute
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
+  '/accept-invitation': typeof AuthenticatedAcceptInvitationRoute
   '/oauth-consent': typeof AuthenticatedOauthConsentRoute
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/api/health': typeof ApiHealthRoute
@@ -412,6 +420,7 @@ export interface FileRoutesByTo {
   '/support': typeof AppSupportRoute
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
+  '/accept-invitation': typeof AuthenticatedAcceptInvitationRoute
   '/oauth-consent': typeof AuthenticatedOauthConsentRoute
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/api/health': typeof ApiHealthRoute
@@ -463,6 +472,7 @@ export interface FileRoutesById {
   '/_app/support': typeof AppSupportRoute
   '/_auth/sign-in': typeof AuthSignInRoute
   '/_auth/sign-up': typeof AuthSignUpRoute
+  '/_authenticated/accept-invitation': typeof AuthenticatedAcceptInvitationRoute
   '/_authenticated/oauth-consent': typeof AuthenticatedOauthConsentRoute
   '/_authenticated/subscribe': typeof AuthenticatedSubscribeRoute
   '/api/health': typeof ApiHealthRoute
@@ -517,6 +527,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/sign-in'
     | '/sign-up'
+    | '/accept-invitation'
     | '/oauth-consent'
     | '/subscribe'
     | '/api/health'
@@ -568,6 +579,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/sign-in'
     | '/sign-up'
+    | '/accept-invitation'
     | '/oauth-consent'
     | '/subscribe'
     | '/api/health'
@@ -618,6 +630,7 @@ export interface FileRouteTypes {
     | '/_app/support'
     | '/_auth/sign-in'
     | '/_auth/sign-up'
+    | '/_authenticated/accept-invitation'
     | '/_authenticated/oauth-consent'
     | '/_authenticated/subscribe'
     | '/api/health'
@@ -676,32 +689,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/verify-email': {
-      id: '/verify-email'
-      path: '/verify-email'
-      fullPath: '/verify-email'
-      preLoaderRoute: typeof VerifyEmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
+    '/_app': {
+      id: '/_app'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteImport
+      preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth': {
@@ -711,6 +703,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_project': {
       id: '/_project'
       path: ''
@@ -718,11 +717,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app': {
-      id: '/_app'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AppRouteRouteImport
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/openai-apps-challenge': {
+      id: '/.well-known/openai-apps-challenge'
+      path: '/.well-known/openai-apps-challenge'
+      fullPath: '/.well-known/openai-apps-challenge'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OpenaiAppsChallengeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/': {
@@ -732,60 +752,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/api/health': {
-      id: '/api/health'
-      path: '/api/health'
-      fullPath: '/api/health'
-      preLoaderRoute: typeof ApiHealthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/subscribe': {
-      id: '/_authenticated/subscribe'
-      path: '/subscribe'
-      fullPath: '/subscribe'
-      preLoaderRoute: typeof AuthenticatedSubscribeRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/oauth-consent': {
-      id: '/_authenticated/oauth-consent'
-      path: '/oauth-consent'
-      fullPath: '/oauth-consent'
-      preLoaderRoute: typeof AuthenticatedOauthConsentRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_auth/sign-up': {
-      id: '/_auth/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof AuthSignUpRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/_auth/sign-in': {
-      id: '/_auth/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof AuthSignInRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/_app/support': {
-      id: '/_app/support'
-      path: '/support'
-      fullPath: '/support'
-      preLoaderRoute: typeof AppSupportRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
-    '/_app/settings': {
-      id: '/_app/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
-    '/_app/projects': {
-      id: '/_app/projects'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof AppProjectsRouteImport
+    '/_app/ai': {
+      id: '/_app/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AppAiRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/billing': {
@@ -795,60 +766,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBillingRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/_app/ai': {
-      id: '/_app/ai'
-      path: '/ai'
-      fullPath: '/ai'
-      preLoaderRoute: typeof AppAiRouteImport
+    '/_app/projects': {
+      id: '/_app/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof AppProjectsRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/.well-known/openai-apps-challenge': {
-      id: '/.well-known/openai-apps-challenge'
-      path: '/.well-known/openai-apps-challenge'
-      fullPath: '/.well-known/openai-apps-challenge'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OpenaiAppsChallengeRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_authenticated/onboarding/': {
-      id: '/_authenticated/onboarding/'
-      path: '/onboarding'
-      fullPath: '/onboarding/'
-      preLoaderRoute: typeof AuthenticatedOnboardingIndexRouteImport
+    '/_app/support': {
+      id: '/_app/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof AppSupportRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_auth/sign-in': {
+      id: '/_auth/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof AuthSignInRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/sign-up': {
+      id: '/_auth/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof AuthSignUpRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_authenticated/accept-invitation': {
+      id: '/_authenticated/accept-invitation'
+      path: '/accept-invitation'
+      fullPath: '/accept-invitation'
+      preLoaderRoute: typeof AuthenticatedAcceptInvitationRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/oauth-consent': {
+      id: '/_authenticated/oauth-consent'
+      path: '/oauth-consent'
+      fullPath: '/oauth-consent'
+      preLoaderRoute: typeof AuthenticatedOauthConsentRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/subscribe': {
+      id: '/_authenticated/subscribe'
+      path: '/subscribe'
+      fullPath: '/subscribe'
+      preLoaderRoute: typeof AuthenticatedSubscribeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_app/admin/': {
       id: '/_app/admin/'
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AppAdminIndexRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
-    '/api/autumn/$': {
-      id: '/api/autumn/$'
-      path: '/api/autumn/$'
-      fullPath: '/api/autumn/$'
-      preLoaderRoute: typeof ApiAutumnSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/onboarding/chat': {
-      id: '/_authenticated/onboarding/chat'
-      path: '/onboarding/chat'
-      fullPath: '/onboarding/chat'
-      preLoaderRoute: typeof AuthenticatedOnboardingChatRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_app/help/openrouter-api-key': {
-      id: '/_app/help/openrouter-api-key'
-      path: '/help/openrouter-api-key'
-      fullPath: '/help/openrouter-api-key'
-      preLoaderRoute: typeof AppHelpOpenrouterApiKeyRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/help/dataforseo-api-key': {
@@ -858,6 +843,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHelpDataforseoApiKeyRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/help/openrouter-api-key': {
+      id: '/_app/help/openrouter-api-key'
+      path: '/help/openrouter-api-key'
+      fullPath: '/help/openrouter-api-key'
+      preLoaderRoute: typeof AppHelpOpenrouterApiKeyRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_authenticated/onboarding/': {
+      id: '/_authenticated/onboarding/'
+      path: '/onboarding'
+      fullPath: '/onboarding/'
+      preLoaderRoute: typeof AuthenticatedOnboardingIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/onboarding/chat': {
+      id: '/_authenticated/onboarding/chat'
+      path: '/onboarding/chat'
+      fullPath: '/onboarding/chat'
+      preLoaderRoute: typeof AuthenticatedOnboardingChatRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_project/p/$projectId': {
       id: '/_project/p/$projectId'
       path: '/p/$projectId'
@@ -865,109 +871,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectPProjectIdRouteRouteImport
       parentRoute: typeof ProjectRouteRoute
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/autumn/$': {
+      id: '/api/autumn/$'
+      path: '/api/autumn/$'
+      fullPath: '/api/autumn/$'
+      preLoaderRoute: typeof ApiAutumnSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_project/p/$projectId/': {
       id: '/_project/p/$projectId/'
       path: '/'
       fullPath: '/p/$projectId/'
       preLoaderRoute: typeof ProjectPProjectIdIndexRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/api/gsc/oauth/callback': {
-      id: '/api/gsc/oauth/callback'
-      path: '/api/gsc/oauth/callback'
-      fullPath: '/api/gsc/oauth/callback'
-      preLoaderRoute: typeof ApiGscOauthCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ga4/oauth/callback': {
-      id: '/api/ga4/oauth/callback'
-      path: '/api/ga4/oauth/callback'
-      fullPath: '/api/ga4/oauth/callback'
-      preLoaderRoute: typeof ApiGa4OauthCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_project/p/$projectId/settings': {
-      id: '/_project/p/$projectId/settings'
-      path: '/settings'
-      fullPath: '/p/$projectId/settings'
-      preLoaderRoute: typeof ProjectPProjectIdSettingsRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/_project/p/$projectId/search-performance': {
-      id: '/_project/p/$projectId/search-performance'
-      path: '/search-performance'
-      fullPath: '/p/$projectId/search-performance'
-      preLoaderRoute: typeof ProjectPProjectIdSearchPerformanceRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/_project/p/$projectId/saved': {
-      id: '/_project/p/$projectId/saved'
-      path: '/saved'
-      fullPath: '/p/$projectId/saved'
-      preLoaderRoute: typeof ProjectPProjectIdSavedRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/_project/p/$projectId/sam': {
-      id: '/_project/p/$projectId/sam'
-      path: '/sam'
-      fullPath: '/p/$projectId/sam'
-      preLoaderRoute: typeof ProjectPProjectIdSamRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/_project/p/$projectId/rank-tracking': {
-      id: '/_project/p/$projectId/rank-tracking'
-      path: '/rank-tracking'
-      fullPath: '/p/$projectId/rank-tracking'
-      preLoaderRoute: typeof ProjectPProjectIdRankTrackingRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/_project/p/$projectId/prompt-explorer': {
-      id: '/_project/p/$projectId/prompt-explorer'
-      path: '/prompt-explorer'
-      fullPath: '/p/$projectId/prompt-explorer'
-      preLoaderRoute: typeof ProjectPProjectIdPromptExplorerRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/_project/p/$projectId/keywords': {
-      id: '/_project/p/$projectId/keywords'
-      path: '/keywords'
-      fullPath: '/p/$projectId/keywords'
-      preLoaderRoute: typeof ProjectPProjectIdKeywordsRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/_project/p/$projectId/ga4-insights': {
-      id: '/_project/p/$projectId/ga4-insights'
-      path: '/ga4-insights'
-      fullPath: '/p/$projectId/ga4-insights'
-      preLoaderRoute: typeof ProjectPProjectIdGa4InsightsRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/_project/p/$projectId/domain': {
-      id: '/_project/p/$projectId/domain'
-      path: '/domain'
-      fullPath: '/p/$projectId/domain'
-      preLoaderRoute: typeof ProjectPProjectIdDomainRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/_project/p/$projectId/content-gap': {
-      id: '/_project/p/$projectId/content-gap'
-      path: '/content-gap'
-      fullPath: '/p/$projectId/content-gap'
-      preLoaderRoute: typeof ProjectPProjectIdContentGapRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/_project/p/$projectId/brand-lookup': {
-      id: '/_project/p/$projectId/brand-lookup'
-      path: '/brand-lookup'
-      fullPath: '/p/$projectId/brand-lookup'
-      preLoaderRoute: typeof ProjectPProjectIdBrandLookupRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/_project/p/$projectId/backlinks': {
-      id: '/_project/p/$projectId/backlinks'
-      path: '/backlinks'
-      fullPath: '/p/$projectId/backlinks'
-      preLoaderRoute: typeof ProjectPProjectIdBacklinksRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
     '/_project/p/$projectId/audit': {
@@ -977,6 +899,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectPProjectIdAuditRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
+    '/_project/p/$projectId/backlinks': {
+      id: '/_project/p/$projectId/backlinks'
+      path: '/backlinks'
+      fullPath: '/p/$projectId/backlinks'
+      preLoaderRoute: typeof ProjectPProjectIdBacklinksRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/brand-lookup': {
+      id: '/_project/p/$projectId/brand-lookup'
+      path: '/brand-lookup'
+      fullPath: '/p/$projectId/brand-lookup'
+      preLoaderRoute: typeof ProjectPProjectIdBrandLookupRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/content-gap': {
+      id: '/_project/p/$projectId/content-gap'
+      path: '/content-gap'
+      fullPath: '/p/$projectId/content-gap'
+      preLoaderRoute: typeof ProjectPProjectIdContentGapRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/domain': {
+      id: '/_project/p/$projectId/domain'
+      path: '/domain'
+      fullPath: '/p/$projectId/domain'
+      preLoaderRoute: typeof ProjectPProjectIdDomainRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/ga4-insights': {
+      id: '/_project/p/$projectId/ga4-insights'
+      path: '/ga4-insights'
+      fullPath: '/p/$projectId/ga4-insights'
+      preLoaderRoute: typeof ProjectPProjectIdGa4InsightsRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/keywords': {
+      id: '/_project/p/$projectId/keywords'
+      path: '/keywords'
+      fullPath: '/p/$projectId/keywords'
+      preLoaderRoute: typeof ProjectPProjectIdKeywordsRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/prompt-explorer': {
+      id: '/_project/p/$projectId/prompt-explorer'
+      path: '/prompt-explorer'
+      fullPath: '/p/$projectId/prompt-explorer'
+      preLoaderRoute: typeof ProjectPProjectIdPromptExplorerRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/rank-tracking': {
+      id: '/_project/p/$projectId/rank-tracking'
+      path: '/rank-tracking'
+      fullPath: '/p/$projectId/rank-tracking'
+      preLoaderRoute: typeof ProjectPProjectIdRankTrackingRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
     '/_project/p/$projectId/reports': {
       id: '/_project/p/$projectId/reports'
       path: '/reports'
@@ -984,33 +962,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectPProjectIdReportsRouteRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
-    '/_project/p/$projectId/strategy/': {
-      id: '/_project/p/$projectId/strategy/'
-      path: '/strategy'
-      fullPath: '/p/$projectId/strategy/'
-      preLoaderRoute: typeof ProjectPProjectIdStrategyIndexRouteImport
+    '/_project/p/$projectId/sam': {
+      id: '/_project/p/$projectId/sam'
+      path: '/sam'
+      fullPath: '/p/$projectId/sam'
+      preLoaderRoute: typeof ProjectPProjectIdSamRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
-    '/_project/p/$projectId/reports/': {
-      id: '/_project/p/$projectId/reports/'
-      path: '/'
-      fullPath: '/p/$projectId/reports/'
-      preLoaderRoute: typeof ProjectPProjectIdReportsIndexRouteImport
-      parentRoute: typeof ProjectPProjectIdReportsRouteRoute
+    '/_project/p/$projectId/saved': {
+      id: '/_project/p/$projectId/saved'
+      path: '/saved'
+      fullPath: '/p/$projectId/saved'
+      preLoaderRoute: typeof ProjectPProjectIdSavedRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
     }
-    '/_project/p/$projectId/rank-tracking/': {
-      id: '/_project/p/$projectId/rank-tracking/'
-      path: '/'
-      fullPath: '/p/$projectId/rank-tracking/'
-      preLoaderRoute: typeof ProjectPProjectIdRankTrackingIndexRouteImport
-      parentRoute: typeof ProjectPProjectIdRankTrackingRoute
+    '/_project/p/$projectId/search-performance': {
+      id: '/_project/p/$projectId/search-performance'
+      path: '/search-performance'
+      fullPath: '/p/$projectId/search-performance'
+      preLoaderRoute: typeof ProjectPProjectIdSearchPerformanceRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
     }
-    '/_project/p/$projectId/audit/': {
-      id: '/_project/p/$projectId/audit/'
-      path: '/'
-      fullPath: '/p/$projectId/audit/'
-      preLoaderRoute: typeof ProjectPProjectIdAuditIndexRouteImport
-      parentRoute: typeof ProjectPProjectIdAuditRoute
+    '/_project/p/$projectId/settings': {
+      id: '/_project/p/$projectId/settings'
+      path: '/settings'
+      fullPath: '/p/$projectId/settings'
+      preLoaderRoute: typeof ProjectPProjectIdSettingsRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/api/ga4/oauth/callback': {
+      id: '/api/ga4/oauth/callback'
+      path: '/api/ga4/oauth/callback'
+      fullPath: '/api/ga4/oauth/callback'
+      preLoaderRoute: typeof ApiGa4OauthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gsc/oauth/callback': {
+      id: '/api/gsc/oauth/callback'
+      path: '/api/gsc/oauth/callback'
+      fullPath: '/api/gsc/oauth/callback'
+      preLoaderRoute: typeof ApiGscOauthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_project/p/$projectId/alerts/': {
       id: '/_project/p/$projectId/alerts/'
@@ -1019,12 +1011,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectPProjectIdAlertsIndexRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
-    '/_project/p/$projectId/reports/$reportId': {
-      id: '/_project/p/$projectId/reports/$reportId'
-      path: '/$reportId'
-      fullPath: '/p/$projectId/reports/$reportId'
-      preLoaderRoute: typeof ProjectPProjectIdReportsReportIdRouteImport
-      parentRoute: typeof ProjectPProjectIdReportsRouteRoute
+    '/_project/p/$projectId/audit/': {
+      id: '/_project/p/$projectId/audit/'
+      path: '/'
+      fullPath: '/p/$projectId/audit/'
+      preLoaderRoute: typeof ProjectPProjectIdAuditIndexRouteImport
+      parentRoute: typeof ProjectPProjectIdAuditRoute
+    }
+    '/_project/p/$projectId/rank-tracking/': {
+      id: '/_project/p/$projectId/rank-tracking/'
+      path: '/'
+      fullPath: '/p/$projectId/rank-tracking/'
+      preLoaderRoute: typeof ProjectPProjectIdRankTrackingIndexRouteImport
+      parentRoute: typeof ProjectPProjectIdRankTrackingRoute
     }
     '/_project/p/$projectId/rank-tracking/$configId': {
       id: '/_project/p/$projectId/rank-tracking/$configId'
@@ -1033,11 +1032,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectPProjectIdRankTrackingConfigIdRouteImport
       parentRoute: typeof ProjectPProjectIdRankTrackingRoute
     }
-    '/_project/p/$projectId/strategy/briefs/$briefId': {
-      id: '/_project/p/$projectId/strategy/briefs/$briefId'
-      path: '/strategy/briefs/$briefId'
-      fullPath: '/p/$projectId/strategy/briefs/$briefId'
-      preLoaderRoute: typeof ProjectPProjectIdStrategyBriefsBriefIdRouteImport
+    '/_project/p/$projectId/reports/': {
+      id: '/_project/p/$projectId/reports/'
+      path: '/'
+      fullPath: '/p/$projectId/reports/'
+      preLoaderRoute: typeof ProjectPProjectIdReportsIndexRouteImport
+      parentRoute: typeof ProjectPProjectIdReportsRouteRoute
+    }
+    '/_project/p/$projectId/reports/$reportId': {
+      id: '/_project/p/$projectId/reports/$reportId'
+      path: '/$reportId'
+      fullPath: '/p/$projectId/reports/$reportId'
+      preLoaderRoute: typeof ProjectPProjectIdReportsReportIdRouteImport
+      parentRoute: typeof ProjectPProjectIdReportsRouteRoute
+    }
+    '/_project/p/$projectId/strategy/': {
+      id: '/_project/p/$projectId/strategy/'
+      path: '/strategy'
+      fullPath: '/p/$projectId/strategy/'
+      preLoaderRoute: typeof ProjectPProjectIdStrategyIndexRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
     '/_project/p/$projectId/audit/issues/$resultId': {
@@ -1046,6 +1059,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/p/$projectId/audit/issues/$resultId'
       preLoaderRoute: typeof ProjectPProjectIdAuditIssuesResultIdRouteImport
       parentRoute: typeof ProjectPProjectIdAuditRoute
+    }
+    '/_project/p/$projectId/strategy/briefs/$briefId': {
+      id: '/_project/p/$projectId/strategy/briefs/$briefId'
+      path: '/strategy/briefs/$briefId'
+      fullPath: '/p/$projectId/strategy/briefs/$briefId'
+      preLoaderRoute: typeof ProjectPProjectIdStrategyBriefsBriefIdRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
     }
   }
 }
@@ -1207,6 +1227,7 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAcceptInvitationRoute: typeof AuthenticatedAcceptInvitationRoute
   AuthenticatedOauthConsentRoute: typeof AuthenticatedOauthConsentRoute
   AuthenticatedSubscribeRoute: typeof AuthenticatedSubscribeRoute
   AuthenticatedOnboardingChatRoute: typeof AuthenticatedOnboardingChatRoute
@@ -1214,6 +1235,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAcceptInvitationRoute: AuthenticatedAcceptInvitationRoute,
   AuthenticatedOauthConsentRoute: AuthenticatedOauthConsentRoute,
   AuthenticatedSubscribeRoute: AuthenticatedSubscribeRoute,
   AuthenticatedOnboardingChatRoute: AuthenticatedOnboardingChatRoute,
@@ -1243,13 +1265,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

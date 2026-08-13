@@ -19,6 +19,8 @@ import {
 import { AlertRepository } from "@/server/features/alerts/repositories/AlertRepository";
 import { RankTrackingRepository } from "@/server/features/rank-tracking/repositories/RankTrackingRepository";
 import { AuditRepository } from "@/server/features/audit/repositories/AuditRepository";
+import { NotificationRepository } from "@/server/features/notifications/repositories/NotificationRepository";
+import { ProjectRepository } from "@/server/features/projects/repositories/ProjectRepository";
 import { sendAlertNotificationEmail } from "@/server/email/alert-notification";
 
 interface AlertParams {
@@ -70,6 +72,21 @@ export class AlertWorkflow extends WorkflowEntrypoint<
             dashboardUrl: `https://seotool.im/p/${projectId}`,
           });
           await AlertRepository.markTriggered(alertId);
+          // Fan out an in-app notification to every org member so the bell
+          // inbox reflects the alert even for users without an email address on
+          // the recipients list.
+          const project = await ProjectRepository.getProjectById(projectId);
+          if (project?.organizationId) {
+            await NotificationRepository.createForOrganization(
+              project.organizationId,
+              {
+                type: "alert",
+                title: rule.name,
+                body: trigger.summary,
+                linkPath: `/p/${projectId}/alerts`,
+              },
+            );
+          }
         });
       }
 

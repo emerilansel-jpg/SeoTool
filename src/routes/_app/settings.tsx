@@ -10,11 +10,13 @@ import {
   ProfileSection,
   SecuritySection,
 } from "@/client/features/settings/SettingsSections";
+import { DataExportSection } from "@/client/features/settings/DataExportSection";
 import { NotificationSection } from "@/client/features/settings/NotificationSection";
 import { SessionSection } from "@/client/features/settings/SessionSection";
 import { TwoFactorSection } from "@/client/features/settings/TwoFactorSection";
 import { ApiKeySection } from "@/client/features/settings/ApiKeySection";
 import { TeamSection } from "@/client/features/settings/TeamSection";
+import { LegalFooter } from "@/client/components/LegalFooter";
 import { version } from "../../../package.json";
 
 export const Route = createFileRoute("/_app/settings")({
@@ -156,7 +158,11 @@ function SettingsPage() {
 
         {isHosted ? <TeamSection /> : null}
 
+        {isHosted ? <DataExportSection /> : null}
+
         {isHosted ? <DangerZoneSection /> : null}
+
+        {isHosted ? <LegalFooter className="pt-4" /> : null}
       </div>
     </div>
   );

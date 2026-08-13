@@ -1,7 +1,7 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { useCustomer } from "autumn-js/react";
 import { useEffect, useState } from "react";
-import { CreditCard } from "lucide-react";
+import { CreditCard, Zap } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { isHostedClientAuthMode } from "@/lib/auth-mode";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
@@ -19,6 +19,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { QuotaBar } from "@/client/features/billing/QuotaBar";
 import { PLAN_TIER_LABELS, PLAN_PRICES_USD } from "@/shared/plans";
+import { AUTUMN_SEO_DATA_TOP_UP_PLAN_ID } from "@/shared/billing";
 
 export const Route = createFileRoute("/_app/billing")({
   beforeLoad: () => {
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/_app/billing")({
 function BillingPage() {
   const { data: session, isPending: isSessionPending } = useSession();
   const [isPortalLoading, setIsPortalLoading] = useState(false);
+  const [isBuyingCredits, setIsBuyingCredits] = useState(false);
 
   const customerQuery = useCustomer({
     queryOptions: {
@@ -58,6 +60,21 @@ function BillingPage() {
       window.location.assign(url);
     } catch {
       setIsPortalLoading(false);
+    }
+  }
+
+  async function handleBuyCredits() {
+    setIsBuyingCredits(true);
+    try {
+      const successUrl = new URL(window.location.href);
+      successUrl.searchParams.set("checkout", "success");
+      await customerQuery.attach({
+        planId: AUTUMN_SEO_DATA_TOP_UP_PLAN_ID,
+        redirectMode: "always",
+        successUrl: successUrl.toString(),
+      });
+    } catch {
+      setIsBuyingCredits(false);
     }
   }
 
@@ -232,9 +249,25 @@ function BillingPage() {
       </div>
 
       {/* Retain the legacy chart and breakdown for historical spend */}
-      <h2 className="mt-10 text-lg font-semibold">Overage & Past Usage</h2>
+      <div className="mt-10 flex items-center justify-between gap-4">
+        <h2 className="text-lg font-semibold">Overage & Past Usage</h2>
+        <button
+          type="button"
+          className="btn btn-outline btn-sm shrink-0"
+          disabled={isBuyingCredits}
+          onClick={() => void handleBuyCredits()}
+        >
+          {isBuyingCredits ? (
+            <span className="loading loading-spinner loading-xs" />
+          ) : (
+            <Zap className="w-4 h-4" />
+          )}
+          Buy Credits
+        </button>
+      </div>
       <p className="text-sm text-base-content/70 -mt-3">
         Any limits exceeded will draw from your legacy credit pool if available.
+        Top up anytime, credits roll over and never expire.
       </p>
 
       <BillingUsageChart />

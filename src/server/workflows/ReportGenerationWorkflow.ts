@@ -15,6 +15,7 @@ import {
   ReportsRepository,
   type ReportSnapshot,
 } from "@/server/features/reports/repositories/ReportsRepository";
+import { NotificationRepository } from "@/server/features/notifications/repositories/NotificationRepository";
 import { sendReportDeliveryEmail } from "@/server/email/report-delivery";
 
 interface ReportGenerationParams {
@@ -29,7 +30,7 @@ export class ReportGenerationWorkflow extends WorkflowEntrypoint<
 > {
   async run(event: WorkflowEvent<ReportGenerationParams>, step: WorkflowStep) {
     return withPgClient(async () => {
-      const { reportId, projectId } = event.payload;
+      const { reportId, projectId, organizationId } = event.payload;
 
       const report = await pgStep<ReportWithSections>(
         step,
@@ -92,6 +93,17 @@ export class ReportGenerationWorkflow extends WorkflowEntrypoint<
           }),
         );
       }
+
+      // Fan out an in-app notification so every teammate sees the fresh report
+      // in the bell inbox, independent of the email recipient list.
+      await pgStep(step, "create-notification", undefined, () =>
+        NotificationRepository.createForOrganization(organizationId, {
+          type: "report",
+          title: `Report ready: ${report.name}`,
+          body: "A new report snapshot has been generated.",
+          linkPath: `/p/${projectId}/reports/${reportId}`,
+        }),
+      );
     });
   }
 }

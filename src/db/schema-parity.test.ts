@@ -19,6 +19,7 @@ import * as sqliteAlerts from "./alerts.schema";
 import * as sqliteSerpSnapshots from "./serp-snapshots.schema";
 import * as sqliteAudit from "./audit.schema";
 import * as sqliteContentIntelligence from "./content-intelligence.schema";
+import * as sqliteNotifications from "./notifications.schema";
 import * as pgApp from "./pg/app.schema";
 import * as pgSam from "./pg/sam.schema";
 import * as pgAuth from "./pg/better-auth-schema";
@@ -34,6 +35,7 @@ import * as pgAlerts from "./pg/alerts.schema";
 import * as pgSerpSnapshots from "./pg/serp-snapshots.schema";
 import * as pgAudit from "./pg/audit.schema";
 import * as pgContentIntelligence from "./pg/content-intelligence.schema";
+import * as pgNotifications from "./pg/notifications.schema";
 
 // Guards the ONE structural artifact `db:generate` does not regenerate: the
 // hand-written Postgres schema. The provider-aware `db`/`@/db/schema` barrel
@@ -164,6 +166,7 @@ const sqliteAppTables = tablesFrom(
   sqliteSerpSnapshots,
   sqliteAudit,
   sqliteContentIntelligence,
+  sqliteNotifications,
 );
 const pgAppTables = tablesFrom(
   pgApp,
@@ -180,6 +183,7 @@ const pgAppTables = tablesFrom(
   pgSerpSnapshots,
   pgAudit,
   pgContentIntelligence,
+  pgNotifications,
 );
 const sqliteAuthTables = tablesFrom(sqliteAuth);
 const pgAuthTables = tablesFrom(pgAuth);

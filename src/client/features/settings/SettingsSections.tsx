@@ -28,7 +28,10 @@ const changePasswordSchema = z
   });
 
 const deleteAccountSchema = z.object({
-  password: z.string().min(1, "Enter your password to confirm."),
+  // Plain string (empty allowed): users who sign in with Google have no
+  // password and leave this blank. The server requires a correct password only
+  // when a credential account exists.
+  password: z.string(),
   confirmation: z.literal("DELETE", {
     message: "Type DELETE to confirm.",
   }),
@@ -261,7 +264,9 @@ export function DangerZoneSection() {
     onSubmit: async ({ formApi, value }) => {
       try {
         const result = await deleteAccount({
-          data: { password: value.password },
+          data: {
+            password: value.password,
+          },
         });
         if (!result?.success) {
           formApi.setErrorMap({
@@ -371,7 +376,12 @@ export function DangerZoneSection() {
               const error = getFieldError(field.state.meta.errors);
               return (
                 <div className="space-y-1.5">
-                  <label className="text-sm">Your password</label>
+                  <label className="text-sm">
+                    Your password{" "}
+                    <span className="text-base-content/40">
+                      (leave blank if you sign in with Google)
+                    </span>
+                  </label>
                   <input
                     type="password"
                     className="input input-bordered w-full"

@@ -20,6 +20,7 @@ import { getOrCreateDefaultHostedOrganization } from "@/server/auth/default-host
 import {
   sendHostedPasswordResetEmail,
   sendHostedVerificationEmail,
+  sendHostedWelcomeEmail,
   upsertHostedSignupContact,
 } from "@/server/email/loops";
 
@@ -158,6 +159,19 @@ async function syncHostedSignupContact(user: {
     });
   } catch (error) {
     console.error("Failed to sync Loops profile after user creation:", {
+      userId: user.id,
+      email: user.email,
+      error,
+    });
+  }
+
+  // Best-effort welcome email. Runs independently of the CRM sync above so a
+  // Loops contact error doesn't block it, and skips silently when no welcome
+  // template is configured.
+  try {
+    await sendHostedWelcomeEmail({ email: user.email, name: user.name });
+  } catch (error) {
+    console.error("Failed to send welcome email:", {
       userId: user.id,
       email: user.email,
       error,

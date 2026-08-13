@@ -14,6 +14,8 @@ import { captureClientEvent } from "@/client/lib/posthog";
 import { FreePlanAlert } from "./FreePlanAlert";
 import { RankTrackingDetailHeader } from "./RankTrackingDetailHeader";
 import { RankTrackingOverview } from "./RankTrackingOverview";
+import { ScorecardRow } from "./ScorecardRow";
+import { SerpCompetitorsCard } from "./SerpCompetitorsCard";
 import { RankTrackingTable } from "./RankTrackingTable";
 import {
   countMatrixRuns,
@@ -244,6 +246,11 @@ export function RankTrackingDomainDetail({
           </div>
         )}
 
+        {/* Portfolio scorecards: visibility (SoV), ranking counts, movers */}
+        {(rows?.length ?? 0) > 0 && (
+          <ScorecardRow rows={rows ?? []} device={activeDevice} />
+        )}
+
         {/* Portfolio overview */}
         {(rows?.length ?? 0) > 0 && (
           <RankTrackingOverview
@@ -251,6 +258,17 @@ export function RankTrackingDomainDetail({
             projectId={projectId}
             configId={config.id}
           />
+        )}
+
+        {/* SERP competitors: domains that appear most in your tracked keywords' SERPs */}
+        {(rows?.length ?? 0) > 0 && (
+          <div className="px-4 pb-3">
+            <SerpCompetitorsCard
+              projectId={projectId}
+              configId={config.id}
+              device={activeDevice}
+            />
+          </div>
         )}
 
         {/* Table toolbar */}

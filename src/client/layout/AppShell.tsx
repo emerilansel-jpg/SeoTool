@@ -8,6 +8,7 @@ import {
   SeoApiStatusBanners,
 } from "@/client/layout/AppShellParts";
 import { GscReEngagementModal } from "@/client/features/gsc/GscReEngagementModal";
+import { BillingStatusBanner } from "@/client/features/billing/BillingStatusBanner";
 import { Sidebar } from "@/client/components/Sidebar";
 import { BILLING_ROUTE } from "@/shared/billing";
 import { getSeoApiKeyStatus } from "@/serverFunctions/config";
@@ -142,6 +143,8 @@ export function AuthenticatedAppLayout({
               shouldShowSeoApiWarning={shouldShowSeoApiWarning}
               seoApiKeyStatusError={seoApiKeyStatusError}
             />
+
+            <BillingStatusBanner />
 
             {banner}
 

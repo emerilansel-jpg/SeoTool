@@ -17,6 +17,7 @@ import {
 } from "@/client/navigation/items";
 import { ProjectSwitcher } from "@/client/features/projects/ProjectSwitcher";
 import { SamSidebarPanel } from "@/client/features/sam/SamSidebarPanel";
+import { NotificationCenter } from "@/client/features/notifications/NotificationCenter";
 import { ThemePreferenceMenuItems } from "@/client/components/ThemePreferenceMenuItems";
 import { closeDropdown } from "@/client/lib/dropdown";
 import { signOutAndRedirect, useSession } from "@/lib/auth-client";
@@ -121,13 +122,16 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
   return (
     <div className="flex h-full w-60 flex-col bg-base-200">
       <div className="flex items-center justify-between px-4 pb-2 pt-3">
-        <Link
-          to="/"
-          onClick={onNavigate}
-          className="text-base font-semibold text-base-content"
-        >
-          SeoTool.im
-        </Link>
+        <div className="flex items-center gap-1">
+          <Link
+            to="/"
+            onClick={onNavigate}
+            className="text-base font-semibold text-base-content"
+          >
+            SeoTool.im
+          </Link>
+          <NotificationCenter />
+        </div>
         {onClose ? (
           <button
             type="button"

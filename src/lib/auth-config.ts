@@ -3,6 +3,7 @@ import { genericOAuth, organization } from "better-auth/plugins";
 import { baseAuthOptions } from "@/lib/auth-options";
 import { GSC_OAUTH_PROVIDER_ID, GSC_OAUTH_SCOPES } from "@/shared/gsc";
 import { GA4_OAUTH_PROVIDER_ID, GA4_OAUTH_SCOPES } from "@/shared/ga4";
+import { sendHostedTeamInvitationEmail } from "@/server/email/loops";
 
 export function createBaseAuthConfig() {
   return {
@@ -34,7 +35,25 @@ export function createBaseAuthConfig() {
       // server-side at signup via `auth.api.createOrganization({ body: { userId }})`
       // — that's a "system action" (no session + userId in body) which better-auth
       // exempts from this flag, so the bootstrap keeps working.
-      organization({ allowUserToCreateOrganization: false }),
+      organization({
+        allowUserToCreateOrganization: false,
+        // Better Auth creates the invitation row; this hook delivers the email
+        // so the invitee actually learns about it. Without it, invitations were
+        // created silently and the invitee had to be handed the accept URL by
+        // hand. Best-effort: sendHostedTeamInvitationEmail skips gracefully
+        // when Loops is not configured (self-host).
+        sendInvitationEmail: async (data) => {
+          const baseUrl = env.BETTER_AUTH_URL?.trim();
+          if (!baseUrl) return;
+          const inviteUrl = `${baseUrl}/accept-invitation?id=${data.id}`;
+          await sendHostedTeamInvitationEmail({
+            email: data.email,
+            inviteUrl,
+            organizationName: data.organization?.name ?? "your team",
+            inviterName: data.inviter?.user?.name,
+          });
+        },
+      }),
       genericOAuth({
         config: [
           {

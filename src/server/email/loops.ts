@@ -145,3 +145,67 @@ export async function sendHostedPasswordResetEmail({
     },
   });
 }
+
+/**
+ * Send a team-invitation email via Loops. Best-effort: silently skips when
+ * LOOPS_API_KEY or LOOPS_TRANSACTIONAL_TEAM_INVITE_ID is not set (self-host
+ * without email configured), so org invitations still work as data rows.
+ */
+export async function sendHostedTeamInvitationEmail({
+  email,
+  inviteUrl,
+  organizationName,
+  inviterName,
+}: {
+  email: string;
+  inviteUrl: string;
+  organizationName: string;
+  inviterName?: string | null;
+}) {
+  const apiKey = getOptionalEnv("LOOPS_API_KEY");
+  const templateId = getOptionalEnv("LOOPS_TRANSACTIONAL_TEAM_INVITE_ID");
+  if (!apiKey || !templateId) {
+    return;
+  }
+
+  await sendLoopsTransactionalEmail({
+    apiKey,
+    email,
+    transactionalId: templateId,
+    dataVariables: {
+      appName: "SeoTool.im",
+      inviteUrl,
+      organizationName,
+      inviterName: inviterName ?? "Your team",
+    },
+  });
+}
+
+/**
+ * Send a welcome / getting-started email after signup. Best-effort: silently
+ * skips when LOOPS_API_KEY or LOOPS_TRANSACTIONAL_WELCOME_ID is not set, so
+ * deployments that haven't configured a welcome template are unaffected.
+ */
+export async function sendHostedWelcomeEmail({
+  email,
+  name,
+}: {
+  email: string;
+  name?: string | null;
+}) {
+  const apiKey = getOptionalEnv("LOOPS_API_KEY");
+  const templateId = getOptionalEnv("LOOPS_TRANSACTIONAL_WELCOME_ID");
+  if (!apiKey || !templateId) {
+    return;
+  }
+
+  await sendLoopsTransactionalEmail({
+    apiKey,
+    email,
+    transactionalId: templateId,
+    dataVariables: {
+      appName: "SeoTool.im",
+      firstName: name?.split(" ")[0] ?? "",
+    },
+  });
+}

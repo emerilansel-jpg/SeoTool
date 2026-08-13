@@ -31,6 +31,8 @@ import * as sqliteSerpSnapshots from "./serp-snapshots.schema";
 import * as pgSerpSnapshots from "./pg/serp-snapshots.schema";
 import * as sqliteApiKeys from "./api-keys.schema";
 import * as pgApiKeys from "./pg/api-keys.schema";
+import * as sqliteNotifications from "./notifications.schema";
+import * as pgNotifications from "./pg/notifications.schema";
 
 // Canonical schema barrel. Repositories import their tables from here and the
 // provider-aware `db` from "@/db", so each repository is written ONCE for both
@@ -57,7 +59,8 @@ type AppSchema = typeof sqliteApp &
   typeof sqliteContentStrategy &
   typeof sqliteAlerts &
   typeof sqliteSerpSnapshots &
-  typeof sqliteApiKeys;
+  typeof sqliteApiKeys &
+  typeof sqliteNotifications;
 
 const runtimeSchema =
   getDatabaseProvider() === "postgres"
@@ -78,6 +81,7 @@ const runtimeSchema =
         ...pgAlerts,
         ...pgSerpSnapshots,
         ...pgApiKeys,
+        ...pgNotifications,
       }
     : {
         ...sqliteApp,
@@ -96,6 +100,7 @@ const runtimeSchema =
         ...sqliteAlerts,
         ...sqliteSerpSnapshots,
         ...sqliteApiKeys,
+        ...sqliteNotifications,
       };
 
 // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- guarded by schema-parity.test.ts
@@ -147,4 +152,5 @@ export const {
   alertRules,
   serpSnapshots,
   apiKeys,
+  notifications,
 } = schema;

@@ -160,6 +160,14 @@ export const AUDIT_ISSUE_TYPES = {
     howToFix:
       "Add links to related pages, the parent category, or the homepage. If the page's navigation is rendered by JavaScript, make sure it also exists in the server-rendered HTML.",
   },
+  "missing-structured-data": {
+    severity: "warning",
+    title: "Missing structured data",
+    explanation:
+      "The page has no JSON-LD structured data (no <script type='application/ld+json'> tag). Structured data helps search engines understand your content and can unlock rich results (stars, FAQs, breadcrumbs) in the SERP.",
+    howToFix:
+      "Add relevant JSON-LD markup (Article, Product, FAQPage, BreadcrumbList, Organization, etc.) using the schema.org vocabulary. Use Google's Rich Results Test to validate.",
+  },
   "title-too-long": {
     severity: "info",
     title: "Title too long",

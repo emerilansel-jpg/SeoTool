@@ -150,5 +150,10 @@ export function runPageReporters(page: CrawledPageResult): DetectedIssue[] {
     report("deep-page", { crawlDepth: page.crawlDepth });
   }
 
+  // Structured data
+  if (page.isIndexable && !page.hasStructuredData) {
+    report("missing-structured-data");
+  }
+
   return issues;
 }

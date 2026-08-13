@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { serpSnapshots } from "@/db/schema";
 
@@ -67,5 +67,55 @@ export const SerpSnapshotRepository = {
         ),
       )
       .orderBy(serpSnapshots.rank);
+  },
+
+  /**
+   * Aggregate SERP competitors for a run: which domains appear most often
+   * across the tracked keywords' SERPs, excluding the tracked domain itself.
+   */
+  async getSerpCompetitorsForRun(
+    runId: string,
+    device: string,
+    limit = 20,
+  ): Promise<
+    Array<{
+      domain: string;
+      appearances: number;
+      keywordCount: number;
+      avgRank: number;
+    }>
+  > {
+    const rows = await db
+      .select({
+        domain: serpSnapshots.domain,
+        appearances: sql<number>`cast(count(*) as int)`.as("appearances"),
+        keywordCount:
+          sql<number>`cast(count(distinct ${serpSnapshots.trackingKeywordId}) as int)`.as(
+            "keywordCount",
+          ),
+        avgRank:
+          sql<number>`cast(round(avg(${serpSnapshots.rank}), 1) as real)`.as(
+            "avgRank",
+          ),
+      })
+      .from(serpSnapshots)
+      .where(
+        and(
+          eq(serpSnapshots.runId, runId),
+          eq(serpSnapshots.device, device),
+          eq(serpSnapshots.isTrackedDomain, false),
+          isNotNull(serpSnapshots.domain),
+        ),
+      )
+      .groupBy(serpSnapshots.domain)
+      .orderBy(desc(sql`count(*)`))
+      .limit(limit);
+
+    return rows.map((r) => ({
+      domain: r.domain ?? "",
+      appearances: r.appearances ?? 0,
+      keywordCount: r.keywordCount ?? 0,
+      avgRank: r.avgRank ?? 0,
+    }));
   },
 };

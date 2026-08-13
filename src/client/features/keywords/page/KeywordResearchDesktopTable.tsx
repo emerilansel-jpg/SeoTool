@@ -11,6 +11,7 @@ import {
   useSelectionAnchor,
 } from "@/client/components/table/AppDataTable";
 import {
+  AreaTrendChart,
   IntentBadge,
   SortHeader,
   type SortDir,
@@ -86,19 +87,28 @@ export function KeywordResearchDesktopTable({
       keywordColumnHelper.accessor("searchVolume", {
         header: () => (
           <SortHeader
-            label="Volume"
+            label="Volume & Trend"
             field="searchVolume"
             current={sortField}
             dir={sortDir}
             onToggle={toggleSort}
-            className="justify-end"
+            className="justify-end w-32"
           />
         ),
-        cell: ({ getValue }) => formatNumber(getValue()),
+        cell: ({ row }) => (
+          <div className="flex flex-col items-end gap-1 w-full max-w-[120px] ml-auto">
+            <span className="font-medium text-base-content tabular-nums">
+              {formatNumber(row.original.searchVolume)}
+            </span>
+            <div className="h-6 w-full -mr-1">
+              <AreaTrendChart trend={row.original.trend} />
+            </div>
+          </div>
+        ),
         meta: {
-          headerClassName: "text-right",
+          headerClassName: "text-right w-32",
           cellClassName:
-            "whitespace-nowrap text-right tabular-nums text-base-content/70",
+            "whitespace-nowrap text-right tabular-nums text-base-content/70 w-32",
         },
       }),
       keywordColumnHelper.accessor("cpc", {

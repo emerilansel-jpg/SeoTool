@@ -1,26 +1,43 @@
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Plus, X } from "lucide-react";
 import {
   listTopicClusters,
   listContentBriefs,
+  createTopicCluster,
+  createContentBrief,
 } from "@/serverFunctions/content-strategy";
+import { useServerFn } from "@tanstack/react-start";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { EmptyStrategyState, ClusterCard } from "./StrategyParts";
 
-export function StrategyPageView({ projectId }: { projectId: string }) {
-  const [isClusterModalOpen, setIsClusterModalOpen] = useState(false);
+type ClusterModalState = { open: boolean };
+type BriefModalState = { open: boolean; clusterId: string };
 
-  const { data: clusters = [], isLoading: isLoadingClusters } = useQuery({
+export function StrategyPageView({ projectId }: { projectId: string }) {
+  const queryClient = useQueryClient();
+  const [clusterModal, setClusterModal] = useState<ClusterModalState>({
+    open: false,
+  });
+  const [briefModal, setBriefModal] = useState<BriefModalState>({
+    open: false,
+    clusterId: "",
+  });
+
+  const clustersQuery = useQuery({
     queryKey: ["topic_clusters", projectId],
     queryFn: () => listTopicClusters({ data: { projectId } }),
   });
-
-  const { data: briefs = [], isLoading: isLoadingBriefs } = useQuery({
+  const briefsQuery = useQuery({
     queryKey: ["content_briefs", projectId],
     queryFn: () => listContentBriefs({ data: { projectId } }),
   });
 
-  if (isLoadingClusters || isLoadingBriefs) {
+  const clusters = clustersQuery.data ?? [];
+  const briefs = briefsQuery.data ?? [];
+
+  if (clustersQuery.isLoading || briefsQuery.isLoading) {
     return (
       <div className="p-8 text-center">
         <span className="loading loading-spinner" />
@@ -32,7 +49,18 @@ export function StrategyPageView({ projectId }: { projectId: string }) {
     return (
       <div className="p-8 max-w-3xl mx-auto">
         <EmptyStrategyState
-          onCreateCluster={() => setIsClusterModalOpen(true)}
+          onCreateCluster={() => setClusterModal({ open: true })}
+        />
+        <CreateClusterModal
+          projectId={projectId}
+          state={clusterModal}
+          onClose={() => setClusterModal({ open: false })}
+          onCreated={() => {
+            void queryClient.invalidateQueries({
+              queryKey: ["topic_clusters", projectId],
+            });
+            setClusterModal({ open: false });
+          }}
         />
       </div>
     );
@@ -61,7 +89,7 @@ export function StrategyPageView({ projectId }: { projectId: string }) {
         </div>
         <button
           className="btn btn-primary"
-          onClick={() => setIsClusterModalOpen(true)}
+          onClick={() => setClusterModal({ open: true })}
         >
           <Plus className="w-4 h-4 mr-2" /> New Cluster
         </button>
@@ -74,56 +102,314 @@ export function StrategyPageView({ projectId }: { projectId: string }) {
             cluster={cluster}
             projectId={projectId}
             briefs={briefsByCluster[cluster.id] || []}
-            onAddBrief={(id) => {
-              // Minimal stub: a real implementation would open a brief creation modal prefilled with cluster
-              alert(`Create brief for cluster ${id} - Coming soon`);
-            }}
+            onAddBrief={(clusterId) => setBriefModal({ open: true, clusterId })}
           />
         ))}
 
         {/* Unclustered briefs */}
         {briefsByCluster["unclustered"] &&
-          briefsByCluster["unclustered"].length > 0 && (
-            <div className="card bg-base-200/50 shadow-sm border border-base-200 border-dashed">
-              <div className="card-body p-4">
-                <h3 className="font-semibold text-lg text-base-content/70">
-                  Unclustered Ideas
-                </h3>
-                <div className="divider my-2" />
-                <div className="space-y-2 opacity-80">
-                  {briefsByCluster["unclustered"].map((brief) => (
-                    <div
-                      key={brief.id}
-                      className="text-sm p-2 bg-base-100 rounded border border-base-300"
-                    >
-                      {brief.targetKeyword}
-                    </div>
-                  ))}
-                </div>
+        briefsByCluster["unclustered"].length > 0 ? (
+          <div className="card bg-base-200/50 shadow-sm border border-base-200 border-dashed">
+            <div className="card-body p-4">
+              <h3 className="font-semibold text-lg text-base-content/70">
+                Unclustered Ideas
+              </h3>
+              <div className="divider my-2" />
+              <div className="space-y-2 opacity-80">
+                {briefsByCluster["unclustered"].map((brief) => (
+                  <div
+                    key={brief.id}
+                    className="text-sm p-2 bg-base-100 rounded border border-base-300"
+                  >
+                    {brief.targetKeyword}
+                  </div>
+                ))}
               </div>
             </div>
-          )}
+          </div>
+        ) : null}
       </div>
 
-      {/* Basic modal stub for creating clusters */}
-      {isClusterModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">Create Topic Cluster</h3>
-            <p className="py-4 text-base-content/70">
-              Cluster forms are coming in the next iteraton.
-            </p>
-            <div className="modal-action">
-              <button
-                className="btn"
-                onClick={() => setIsClusterModalOpen(false)}
-              >
-                Close
-              </button>
-            </div>
+      <CreateClusterModal
+        projectId={projectId}
+        state={clusterModal}
+        onClose={() => setClusterModal({ open: false })}
+        onCreated={() => {
+          void queryClient.invalidateQueries({
+            queryKey: ["topic_clusters", projectId],
+          });
+          setClusterModal({ open: false });
+        }}
+      />
+      <CreateBriefModal
+        projectId={projectId}
+        state={briefModal}
+        onClose={() =>
+          setBriefModal({ open: false, clusterId: briefModal.clusterId })
+        }
+        onCreated={() => {
+          void queryClient.invalidateQueries({
+            queryKey: ["content_briefs", projectId],
+          });
+          setBriefModal({ open: false, clusterId: briefModal.clusterId });
+        }}
+      />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Create Topic Cluster modal
+// ---------------------------------------------------------------------------
+
+function CreateClusterModal({
+  projectId,
+  state,
+  onClose,
+  onCreated,
+}: {
+  projectId: string;
+  state: ClusterModalState;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const createCluster = useServerFn(createTopicCluster);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [pillarPageUrl, setPillarPageUrl] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!state.open) return null;
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setIsSaving(true);
+    setError(null);
+    try {
+      await createCluster({
+        data: {
+          projectId,
+          name: name.trim(),
+          description: description.trim() || null,
+          pillarPageUrl: pillarPageUrl.trim() || null,
+        },
+      });
+      toast.success("Cluster created.");
+      setName("");
+      setDescription("");
+      setPillarPageUrl("");
+      onCreated();
+    } catch (err) {
+      setError(
+        getStandardErrorMessage(
+          err,
+          "Could not create the cluster. Please try again.",
+        ),
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box">
+        <button
+          type="button"
+          className="btn btn-sm btn-circle btn-ghost absolute right-3 top-3"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          <X className="w-4 h-4" />
+        </button>
+        <h3 className="font-bold text-lg">Create Topic Cluster</h3>
+        <p className="py-1 text-sm text-base-content/60">
+          Group related keywords around a pillar topic.
+        </p>
+
+        <form className="mt-2 space-y-4" onSubmit={(e) => void handleSubmit(e)}>
+          <div className="space-y-1.5">
+            <label className="text-sm">Cluster name</label>
+            <input
+              type="text"
+              className="input input-bordered w-full"
+              placeholder="e.g. Email marketing"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              maxLength={100}
+            />
           </div>
-        </div>
-      )}
+
+          <div className="space-y-1.5">
+            <label className="text-sm">
+              Description{" "}
+              <span className="text-base-content/40">(optional)</span>
+            </label>
+            <textarea
+              className="textarea textarea-bordered w-full"
+              placeholder="What this cluster covers"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              maxLength={500}
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm">
+              Pillar page URL{" "}
+              <span className="text-base-content/40">(optional)</span>
+            </label>
+            <input
+              type="url"
+              className="input input-bordered w-full"
+              placeholder="https://example.com/email-marketing"
+              value={pillarPageUrl}
+              onChange={(e) => setPillarPageUrl(e.target.value)}
+            />
+          </div>
+
+          {error ? <p className="text-sm text-error">{error}</p> : null}
+
+          <div className="modal-action">
+            <button type="button" className="btn btn-ghost" onClick={onClose}>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={isSaving || !name.trim()}
+            >
+              {isSaving ? (
+                <span className="loading loading-spinner loading-xs" />
+              ) : null}
+              Create Cluster
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Create Content Brief modal
+// ---------------------------------------------------------------------------
+
+function CreateBriefModal({
+  projectId,
+  state,
+  onClose,
+  onCreated,
+}: {
+  projectId: string;
+  state: BriefModalState;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const createBrief = useServerFn(createContentBrief);
+  const [targetKeyword, setTargetKeyword] = useState("");
+  const [title, setTitle] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!state.open) return null;
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!targetKeyword.trim()) return;
+    setIsSaving(true);
+    setError(null);
+    try {
+      await createBrief({
+        data: {
+          projectId,
+          clusterId: state.clusterId || null,
+          targetKeyword: targetKeyword.trim(),
+          title: title.trim() || null,
+        },
+      });
+      toast.success("Brief added.");
+      setTargetKeyword("");
+      setTitle("");
+      onCreated();
+    } catch (err) {
+      setError(
+        getStandardErrorMessage(
+          err,
+          "Could not add the brief. Please try again.",
+        ),
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box">
+        <button
+          type="button"
+          className="btn btn-sm btn-circle btn-ghost absolute right-3 top-3"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          <X className="w-4 h-4" />
+        </button>
+        <h3 className="font-bold text-lg">Add Content Brief</h3>
+        <p className="py-1 text-sm text-base-content/60">
+          Plan a new piece of content for this cluster.
+        </p>
+
+        <form className="mt-2 space-y-4" onSubmit={(e) => void handleSubmit(e)}>
+          <div className="space-y-1.5">
+            <label className="text-sm">Target keyword</label>
+            <input
+              type="text"
+              className="input input-bordered w-full"
+              placeholder="e.g. best email marketing tools"
+              value={targetKeyword}
+              onChange={(e) => setTargetKeyword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm">
+              Working title{" "}
+              <span className="text-base-content/40">(optional)</span>
+            </label>
+            <input
+              type="text"
+              className="input input-bordered w-full"
+              placeholder="A draft title for this brief"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+
+          {error ? <p className="text-sm text-error">{error}</p> : null}
+
+          <div className="modal-action">
+            <button type="button" className="btn btn-ghost" onClick={onClose}>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={isSaving || !targetKeyword.trim()}
+            >
+              {isSaving ? (
+                <span className="loading loading-spinner loading-xs" />
+              ) : null}
+              Add Brief
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
