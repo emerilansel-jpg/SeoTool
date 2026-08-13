@@ -1,0 +1,199 @@
+# ============================================================
+# Gateway Caddyfile — SINGLE reverse proxy for ALL apps
+# Updated: SeoTool.im marketing static + SaaS proxy routing
+# ============================================================
+
+# ===== OmniRoute (api.jetdigitalpro.com) =====
+api.jetdigitalpro.com {
+        tls internal
+        encode zstd gzip
+        reverse_proxy omniroute:20128 {
+                header_up Host {host}
+                header_up X-Real-IP {remote_host}
+                flush_interval -1
+                transport http {
+                        read_timeout 0s
+                        write_timeout 0s
+                }
+        }
+        header {
+                Access-Control-Allow-Origin *
+                Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+                Access-Control-Allow-Headers "Authorization, Content-Type"
+                X-Content-Type-Options nosniff
+                X-Frame-Options DENY
+        }
+        @options method OPTIONS
+        respond @options 204
+}
+
+# ===== SeoTool.im — marketing static + SaaS app =====
+seotool.im {
+        tls internal
+        encode gzip zstd
+
+        # Marketing static files (prerendered HTML from web/dist/client).
+        # Known marketing routes are served as static files from /srv/marketing.
+        # All other requests fall through to the SaaS app.
+        @marketingRoutes {
+                path / /pricing /about /contact /careers /affiliates /changelog
+                path /features /features/*
+                path /open-source-seo /google-search-console-mcp
+                path /privacy /terms-and-conditions /cookie-policy /refund-policy /dpa
+        }
+        handle @marketingRoutes {
+                root * /srv/marketing
+                try_files {path} {path}/index.html /index.html
+                file_server
+        }
+
+        # Marketing static assets (CSS, JS, images, videos, avatars, blog)
+        @marketingAssets {
+                path /assets/* /avatars/* /blog/*
+                path /demo.mp4 /demo-poster.webp
+                path /favicon* /apple-touch-icon* /android-chrome*
+                path /site.webmanifest /robots.txt /sitemap.xml /social-card.png /product-hunt.svg
+        }
+        handle @marketingAssets {
+                root * /srv/marketing
+                file_server
+        }
+
+        # Blog, docs, guides, library content
+        @marketingContent {
+                path /blogs* /docs* /guides* /library*
+        }
+        handle @marketingContent {
+                root * /srv/marketing
+                try_files {path} {path}/index.html /index.html
+                file_server
+        }
+
+        # Everything else goes to the SaaS app
+        handle {
+                reverse_proxy open-seo:3001
+        }
+
+        header {
+                Strict-Transport-Security "max-age=31536000; includeSubDomains"
+                X-Content-Type-Options nosniff
+                X-Frame-Options DENY
+                Referrer-Policy "strict-origin-when-cross-origin"
+        }
+        @websockets {
+                header Connection *Upgrade*
+                header Upgrade websocket
+        }
+        reverse_proxy @websockets open-seo:3001
+}
+
+www.seotool.im {
+        tls internal
+        redir https://seotool.im{uri} permanent
+}
+
+# ===== pesat — advisor.pesat.ai =====
+advisor.pesat.ai {
+        tls /certs/origin.crt /certs/origin.key
+        @advisor_exact path /advisor
+        redir @advisor_exact /advisor/ 301
+        handle_path /advisor/api/* {
+                reverse_proxy 172.20.0.1:3002
+        }
+        handle_path /advisor/* {
+                header Cache-Control "no-cache, no-store, must-revalidate"
+                root * /builds/apps/advisor
+                try_files {path} /index.html
+                file_server
+        }
+        handle {
+                redir /advisor/ 301
+        }
+}
+
+# ===== pesat — apps.pesat.ai =====
+apps.pesat.ai {
+        tls /certs/origin.crt /certs/origin.key
+        @advisor_exact path /advisor
+        redir @advisor_exact /advisor/ 301
+        handle_path /advisor/api/* {
+                reverse_proxy 172.20.0.1:3002
+        }
+        handle_path /advisor/* {
+                header Cache-Control "no-cache, no-store, must-revalidate"
+                root * /builds/apps/advisor
+                try_files {path} /index.html
+                file_server
+        }
+        handle {
+                redir /advisor/ 301
+        }
+}
+
+# ===== pesat — pesat.ai =====
+pesat.ai {
+        tls /certs/origin.crt /certs/origin.key
+        @advisor_exact path /advisor
+        redir @advisor_exact /advisor/ 301
+        handle_path /advisor/api/* {
+                reverse_proxy 172.20.0.1:3002
+        }
+        handle_path /advisor/* {
+                header Cache-Control "no-cache, no-store, must-revalidate"
+                root * /builds/apps/advisor
+                try_files {path} /index.html
+                file_server
+        }
+        handle {
+                redir /advisor/ 301
+        }
+}
+
+# ===== pesat — *.pesat.ai (dynamic subdomains) =====
+*.pesat.ai {
+        tls /certs/origin.crt /certs/origin.key
+        root * /builds/{labels.2}
+        handle_path /api/* {
+                reverse_proxy 172.20.0.1:3002
+        }
+        handle {
+                try_files {path} /index.html
+                file_server
+        }
+}
+
+# ===== pesat — control.pesat.ai =====
+control.pesat.ai {
+        tls /certs/origin.crt /certs/origin.key
+        @api_post {
+                method POST
+                path /
+        }
+        route @api_post {
+                reverse_proxy api:3000
+        }
+        handle /deploy {
+                reverse_proxy api:3000
+        }
+        handle /health {
+                reverse_proxy api:3000
+        }
+        handle /status/* {
+                reverse_proxy api:3000
+        }
+        handle /v1/* {
+                reverse_proxy api:3000
+        }
+        handle /bootstrap {
+                reverse_proxy api:3000
+        }
+        handle /index.html {
+                root * /opt/pesat-control-plane/admin
+                file_server
+        }
+        handle {
+                root * /opt/pesat-control-plane/admin
+                file_server
+                try_files {path} /universal.html
+        }
+}
