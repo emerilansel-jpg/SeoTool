@@ -36,7 +36,7 @@ A company open sourcing their code puts a flag in the sand saying, "We are going
 
 ##### Fair pricing
 
-Anyone can [self-host SeoTool.im](https://github.com/every-app/open-seo) and use it at cost for themselves.
+Anyone can [self-host SeoTool.im](https://github.com/emerilansel-jpg/SeoTool) and use it at cost for themselves.
 
 Since our code is open source, other companies could try to provide the same service for cheaper. This is a check, so we cannot just keep charging more and more. We need to offer the hosted service at a fair price so that customers are happy to pay for it because it gives them so much value.
 

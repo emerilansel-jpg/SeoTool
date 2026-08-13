@@ -47,4 +47,4 @@ SeoTool.im uses the same `SKILL.md` pattern supported by modern AI agents. To le
 
 These pages explain what each skill is for. The source instructions live in GitHub:
 
-- [SeoTool.im Agent Skills on GitHub](https://github.com/every-app/open-seo/tree/main/.agents/skills)
+- [SeoTool.im Agent Skills on GitHub](https://github.com/emerilansel-jpg/SeoTool/tree/main/.agents/skills)

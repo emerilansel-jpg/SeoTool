@@ -39,7 +39,7 @@ export function BlogLayout({ children }: { children: ReactNode }) {
               </Link>
             ))}
             <a
-              href="https://github.com/every-app/open-seo"
+              href="https://github.com/emerilansel-jpg/SeoTool"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden shrink-0 transition-colors hover:text-neutral-950 sm:inline"

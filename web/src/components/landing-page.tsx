@@ -15,7 +15,7 @@ import "./landing-page.css";
 const SIGNUP_URL = "https://seotool.im/sign-up";
 const PRODUCT_HUNT_URL =
   "https://www.producthunt.com/products/openseo?launch=openseo";
-const GITHUB_URL = "https://github.com/every-app/open-seo";
+const GITHUB_URL = "https://github.com/emerilansel-jpg/SeoTool";
 const DISCORD_URL = "https://discord.gg/c9uGs3cFXr";
 
 type Testimonial = {

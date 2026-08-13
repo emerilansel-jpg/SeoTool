@@ -58,7 +58,7 @@ export function SiteFooter({ className }: { className?: string }) {
             <Link to="/careers">Careers</Link>
             <Link to="/affiliates">Affiliates</Link>
             <a
-              href="https://github.com/every-app/open-seo"
+              href="https://github.com/emerilansel-jpg/SeoTool"
               target="_blank"
               rel="noopener noreferrer"
             >

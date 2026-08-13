@@ -65,7 +65,7 @@ function OpenSourceSeoCta() {
           </span>
         </a>
         <a
-          href="https://github.com/every-app/open-seo"
+          href="https://github.com/emerilansel-jpg/SeoTool"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[var(--color-border-subtle)] bg-white px-4 text-sm font-medium text-neutral-950 transition-colors hover:border-neutral-950"

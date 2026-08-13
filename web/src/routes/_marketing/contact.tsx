@@ -55,7 +55,7 @@ function ContactPage() {
         </a>
 
         <a
-          href="https://github.com/every-app/open-seo/issues"
+          href="https://github.com/emerilansel-jpg/SeoTool/issues"
           target="_blank"
           rel="noopener noreferrer"
           className="group relative flex flex-col items-center justify-center rounded-3xl border border-[var(--color-border-subtle)] bg-white p-10 text-center shadow-sm transition-all hover:border-neutral-900 hover:shadow-md"

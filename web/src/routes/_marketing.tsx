@@ -9,7 +9,7 @@ import { NewsletterSignup } from "@/components/newsletter-signup";
 import { SiteFooter } from "@/components/site-footer";
 import { featureGroups } from "@/lib/feature-pages";
 
-const GITHUB_REPO = "every-app/open-seo";
+const GITHUB_REPO = "emerilansel-jpg/SeoTool";
 const PRODUCT_HUNT_URL =
   "https://www.producthunt.com/products/openseo?launch=openseo";
 // Used if GitHub is unreachable at build time so the header never renders empty.
@@ -71,7 +71,7 @@ function getMobileNavItems(githubStarCount: string) {
       links: [
         {
           label: `GitHub ${githubStarCount}`,
-          href: "https://github.com/every-app/open-seo",
+          href: "https://github.com/emerilansel-jpg/SeoTool",
         },
       ],
     },
@@ -208,7 +208,7 @@ function MarketingLayout() {
                 {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
               </button>
               <a
-                href="https://github.com/every-app/open-seo"
+                href="https://github.com/emerilansel-jpg/SeoTool"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`GitHub, ${githubStarCount} stars`}
