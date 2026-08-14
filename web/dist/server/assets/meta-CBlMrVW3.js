@@ -1,0 +1,11 @@
+const title = "Agent Skills";
+const pages = ["[Overview](/docs/skills)", "[Install Agent Skills](/docs/skills/setup)", "[Project Setup](/docs/skills/seo-project-setup)", "[SEO Coach](/docs/skills/seo-coach)", "[SEO Audit](/docs/skills/seo-audit)", "[Keyword Research](/docs/skills/keyword-research)", "[Keyword Clustering](/docs/skills/keyword-clustering)", "[Competitive Landscape](/docs/skills/competitive-landscape)", "[Competitor Analysis](/docs/skills/competitor-analysis)", "[Link Prospecting](/docs/skills/link-prospecting)"];
+const meta = {
+  title,
+  pages
+};
+export {
+  meta as default,
+  pages,
+  title
+};
