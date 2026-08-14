@@ -5,16 +5,21 @@
  * type, and a single orange emphasis moment around the MCP section.
  */
 
-import { type ReactNode, type SVGProps } from "react";
+import {
+  type ReactNode,
+  type SVGProps,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { NewsletterSignup } from "@/components/newsletter-signup";
 import { ProductHuntLaurel } from "@/components/product-hunt-laurel";
 import { SiteFooter } from "@/components/site-footer";
-import { featurePages } from "@/lib/feature-pages";
 import "./landing-page.css";
 
 const SIGNUP_URL = "https://seotool.im/sign-up";
 const PRODUCT_HUNT_URL =
-  "https://www.producthunt.com/products/openseo?launch=openseo";
+  "https://www.producthunt.com/products/seotool-im";
 const GITHUB_URL = "https://github.com/emerilansel-jpg/SeoTool";
 const DISCORD_URL = "https://discord.gg/c9uGs3cFXr";
 
@@ -60,6 +65,113 @@ const TESTIMONIALS: Testimonial[] = [
     avatarSrc: "/avatars/tom-avatar.jpeg",
   },
 ];
+
+// ─── Scroll reveal: one IntersectionObserver for all .itc-reveal elements ──
+
+function useScrollReveal() {
+  useEffect(() => {
+    const reveals = document.querySelectorAll<HTMLElement>(".itc-reveal");
+    if (!reveals.length) return;
+
+    // No IO support (or SSR) — show everything immediately.
+    if (typeof IntersectionObserver === "undefined") {
+      reveals.forEach((el) => el.classList.add("itc-reveal-in"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("itc-reveal-in");
+            observer.unobserve(entry.target);
+          }
+        }
+      },
+      { rootMargin: "0px 0px -60px 0px", threshold: 0.08 },
+    );
+
+    reveals.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+}
+
+// ─── Count-up: animates from 0 to target when `start` becomes true ──
+
+function CountUp({
+  target,
+  decimals = 0,
+  suffix = "",
+  prefix = "",
+  start,
+  duration = 1400,
+}: {
+  target: number;
+  decimals?: number;
+  suffix?: string;
+  prefix?: string;
+  start: boolean;
+  duration?: number;
+}) {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    if (!start) return;
+    // Respect reduced-motion: jump to final value.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setValue(target);
+      return;
+    }
+    let raf = 0;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min((now - startTime) / duration, 1);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(target * eased);
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [start, target, duration]);
+
+  return (
+    <>
+      {prefix}
+      {value.toFixed(decimals)}
+      {suffix}
+    </>
+  );
+}
+
+// ─── In-view hook: single boolean for triggering section animations ──
+
+function useInView<T extends HTMLElement>(threshold = 0.2) {
+  const ref = useRef<T>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, inView };
+}
 
 // ─── Icons (inline SVG only, per project convention) ─────────────────
 
@@ -217,14 +329,38 @@ function Hero() {
           className="itc-subhead itc-muted itc-hero-subtitle"
           style={{ maxWidth: 640, margin: "24px auto 0" }}
         >
-          Keyword research, rank tracking, site audits, backlinks, and AI
-          agents, all in one place. Transparent per-feature pricing that scales
-          from free to agency.
+          Keyword research, rank tracking, site audits, backlinks, AI-search
+          visibility, and content intelligence, plus an MCP server that puts it
+          all in your AI agent&apos;s hands. Transparent pricing that scales from
+          free to agency.
         </p>
         <div className="itc-hero-ctas">
           <div className="itc-hero-cta-group">
             <ArrowCta size="lg" />
             <p className="itc-hero-cta-note">No credit card required</p>
+          </div>
+        </div>
+
+        <div className="itc-hero-data">
+          <div className="itc-hero-data-card">
+            <span className="itc-hero-data-label">KD Score</span>
+            <span className="itc-hero-data-value">12</span>
+            <span className="itc-hero-data-trend">Easy</span>
+          </div>
+          <div className="itc-hero-data-card">
+            <span className="itc-hero-data-label">Volume</span>
+            <span className="itc-hero-data-value">8,200</span>
+            <span className="itc-hero-data-trend">+24% MoM</span>
+          </div>
+          <div className="itc-hero-data-card">
+            <span className="itc-hero-data-label">Position</span>
+            <span className="itc-hero-data-value">#3</span>
+            <span className="itc-hero-data-trend">&#8593; 47 spots</span>
+          </div>
+          <div className="itc-hero-data-card">
+            <span className="itc-hero-data-label">CTR</span>
+            <span className="itc-hero-data-value">12.4%</span>
+            <span className="itc-hero-data-trend">+3.1%</span>
           </div>
         </div>
       </Container>
@@ -236,7 +372,7 @@ function Hero() {
 
 function Testimonial() {
   return (
-    <section className="itc-inverse">
+    <section className="itc-inverse itc-reveal">
       <Container>
         <div className="itc-testimonials">
           <h2
@@ -292,40 +428,154 @@ function Testimonial() {
   );
 }
 
-// ─── Product ─────────────────────────────────────────────────────────
+// ─── Trust bar ──────────────────────────────────────────────────────
 
-const FEATURE_CARDS = [
+function TrustBar() {
+  return (
+    <section className="itc-trustbar">
+      <Container>
+        <p className="itc-trustbar-text">
+          The open-source alternative to Ahrefs and Semrush. Powered by real
+          DataForSEO data.
+        </p>
+      </Container>
+    </section>
+  );
+}
+
+// ─── Live metrics: animated stat bar ────────────────────────────────
+
+type MetricData = {
+  target: number;
+  decimals?: number;
+  prefix?: string;
+  suffix?: string;
+  label: string;
+};
+
+const METRICS: MetricData[] = [
+  { target: 5, suffix: "M+", label: "Keywords Researched" },
+  { target: 250, suffix: "K+", label: "Domains Analyzed" },
+  { target: 1.2, decimals: 1, suffix: "M+", label: "SERPs Cached" },
+  { target: 99.9, decimals: 1, suffix: "%", label: "Uptime" },
+];
+
+function LiveMetrics() {
+  const { ref, inView } = useInView<HTMLDivElement>(0.15);
+
+  return (
+    <section className="itc-metrics" ref={ref}>
+      <Container>
+        <div className="itc-metrics-grid">
+          {METRICS.map((m) => (
+            <div className="itc-metric" key={m.label}>
+              <p className="itc-metric-value">
+                <CountUp
+                  target={m.target}
+                  decimals={m.decimals ?? 0}
+                  suffix={m.suffix}
+                  prefix={m.prefix}
+                  start={inView}
+                />
+              </p>
+              <p className="itc-metric-label">{m.label}</p>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+// ─── Features ─────────────────────────────────────────────────────────
+
+type FeatureCardData = { eyebrow: string; blurb: string; href: string };
+
+const FEATURE_GROUPS: Array<{
+  title: string;
+  description: string;
+  cards: FeatureCardData[];
+}> = [
   {
-    page: featurePages.keywordResearch,
-    blurb: "Find ideas, demand, difficulty, intent, and live SERPs.",
+    title: "Research & Discovery",
+    description:
+      "Find demand, understand competitors, and build a keyword pipeline you can act on.",
+    cards: [
+      {
+        eyebrow: "Keyword Research",
+        blurb: "Volume, difficulty, intent, CPC, and live SERPs.",
+        href: "/features/keyword-research",
+      },
+      {
+        eyebrow: "Domain Overview",
+        blurb: "Competitor traffic, ranking keywords, and top pages.",
+        href: "/features/domain-overview",
+      },
+      {
+        eyebrow: "Backlinks",
+        blurb: "Backlinks, referring domains, and link quality signals.",
+        href: "/features/backlink-checker",
+      },
+      {
+        eyebrow: "Saved Keywords",
+        blurb: "Organize opportunities for content and tracking.",
+        href: "/features/saved-keywords",
+      },
+    ],
   },
   {
-    page: featurePages.domainOverview,
-    blurb: "Estimate organic traffic and ranking keywords.",
+    title: "Monitor & Audit",
+    description:
+      "Track rankings, crawl for technical issues, and pull data from Google Search Console and GA4.",
+    cards: [
+      {
+        eyebrow: "Rank Tracking",
+        blurb: "Keyword positions over time, desktop and mobile.",
+        href: "/features/rank-tracking",
+      },
+      {
+        eyebrow: "Site Audit",
+        blurb: "Technical crawl with optional Lighthouse checks.",
+        href: "/features/site-audit",
+      },
+      {
+        eyebrow: "GSC Insights",
+        blurb: "Clicks, impressions, CTR, and position from Search Console.",
+        href: "/features",
+      },
+      {
+        eyebrow: "GA4 Insights",
+        blurb: "Traffic and engagement from Google Analytics.",
+        href: "/features",
+      },
+    ],
   },
   {
-    page: featurePages.backlinkChecker,
-    blurb: "Inspect backlinks, referring domains, and link quality.",
-  },
-  {
-    page: featurePages.rankTracking,
-    blurb: "Track keyword positions over time.",
-  },
-  {
-    page: featurePages.siteAudit,
-    blurb: "Crawl pages and surface technical issues.",
-  },
-  {
-    page: featurePages.aiBrandVisibility,
-    blurb: "Review AI mentions, citations, and prompts.",
-  },
-  {
-    page: featurePages.aiSearchPrompts,
-    blurb: "Compare prompts across supported AI models.",
-  },
-  {
-    page: featurePages.savedKeywords,
-    blurb: "Organize ideas for content and tracking.",
+    title: "AI & Content",
+    description:
+      "Track AI-search visibility, research content gaps, and export white-label reports.",
+    cards: [
+      {
+        eyebrow: "AI Brand Visibility",
+        blurb: "ChatGPT and Google AI Overview mentions and citations.",
+        href: "/features/ai-brand-visibility",
+      },
+      {
+        eyebrow: "Prompt Explorer",
+        blurb: "Compare answers across supported AI models.",
+        href: "/features/ai-search-prompts",
+      },
+      {
+        eyebrow: "Content Intelligence",
+        blurb: "Content gaps, page scores, and entity research.",
+        href: "/features",
+      },
+      {
+        eyebrow: "White-label Reports",
+        blurb: "Scheduled reports with PDF export for clients.",
+        href: "/features",
+      },
+    ],
   },
 ];
 
@@ -356,48 +606,137 @@ function DemoVideo() {
   );
 }
 
-function ProductSection() {
+function FeatureSection() {
   return (
-    <section className="itc-section itc-section-demo">
+    <section className="itc-section itc-section-features itc-reveal">
       <Container>
-        <div className="itc-narrow">
-          <h2 className="itc-display-lg">See SeoTool.im in action</h2>
+        <div className="itc-narrow" style={{ margin: "0 auto 56px" }}>
+          <h2 className="itc-display-lg">Every SEO workflow, in one workspace</h2>
           <p className="itc-subhead itc-muted" style={{ margin: "20px 0 0" }}>
-            Keyword research, competitor analysis, backlinks, rank tracking,
-            technical audits, and AI-search visibility, all on real DataForSEO
-            data and connected to each other.
+            Research, monitor, audit, and track AI-search visibility. SeoTool.im
+            connects each workflow to the next so nothing falls through the
+            cracks.
           </p>
         </div>
 
-        <div className="itc-mockup" style={{ marginTop: 48 }}>
+        <div className="itc-feature-groups">
+          {FEATURE_GROUPS.map((group) => (
+            <div key={group.title} className="itc-feature-group">
+              <div className="itc-feature-group-header">
+                <h3 className="itc-card-title">{group.title}</h3>
+                <p className="itc-body-sm itc-muted" style={{ margin: "6px 0 0" }}>
+                  {group.description}
+                </p>
+              </div>
+              <div className="itc-feature-list-grid">
+                {group.cards.map((card) => (
+                  <a
+                    key={card.eyebrow}
+                    href={card.href}
+                    className="itc-card itc-feature-list-card"
+                  >
+                    <p style={{ margin: 0, fontSize: 16, fontWeight: 500 }}>
+                      {card.eyebrow}
+                    </p>
+                    <p
+                      className="itc-body-sm itc-muted"
+                      style={{ margin: "8px 0 0" }}
+                    >
+                      {card.blurb}
+                    </p>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="itc-mockup" style={{ marginTop: 56 }}>
           <div className="itc-mockup-media" style={{ aspectRatio: "1280/966" }}>
             <DemoVideo />
           </div>
         </div>
 
-        <div className="itc-feature-list-grid">
-          {FEATURE_CARDS.map(({ page, blurb }) => (
-            <a
-              key={page.slug}
-              href={`/features/${page.slug}`}
-              className="itc-card itc-feature-list-card"
-            >
-              <p style={{ margin: 0, fontSize: 16, fontWeight: 500 }}>
-                {page.eyebrow}
-              </p>
-              <p
-                className="itc-body-sm itc-muted"
-                style={{ margin: "8px 0 0" }}
-              >
-                {blurb}
-              </p>
-            </a>
-          ))}
-        </div>
-
         <div className="itc-feature-more-header">
           <a href="/features" className="itc-textlink">
             All features <IconArrowRight size={15} className="itc-arrow" />
+          </a>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+// ─── Pricing teaser ───────────────────────────────────────────────────
+
+const PRICING_TIERS: Array<{
+  name: string;
+  price: string;
+  blurb: string;
+  popular?: boolean;
+}> = [
+  {
+    name: "Free",
+    price: "$0",
+    blurb: "Test the waters with one project.",
+  },
+  {
+    name: "Lite",
+    price: "$49",
+    blurb: "For solo marketers and small businesses.",
+  },
+  {
+    name: "Pro",
+    price: "$149",
+    blurb: "For growing agencies managing multiple clients.",
+    popular: true,
+  },
+  {
+    name: "Agency",
+    price: "$499",
+    blurb: "For large agencies with heavy workloads.",
+  },
+];
+
+function PricingTeaser() {
+  return (
+    <section className="itc-section itc-section-pricing itc-reveal">
+      <Container>
+        <div className="itc-narrow" style={{ margin: "0 auto 40px" }}>
+          <h2 className="itc-display-lg">Transparent pricing that scales</h2>
+          <p className="itc-subhead itc-muted" style={{ margin: "20px 0 0" }}>
+            Start free, upgrade when you need more. No per-seat fees, no
+            arbitrary paywalls. Every plan includes usage credits.
+          </p>
+        </div>
+
+        <div className="itc-pricing-grid">
+          {PRICING_TIERS.map((tier) => (
+            <div
+              key={tier.name}
+              className={`itc-pricing-card${tier.popular ? " itc-pricing-card-featured" : ""}`}
+            >
+              {tier.popular ? (
+                <span className="itc-pricing-badge">Most popular</span>
+              ) : null}
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 500 }}>
+                {tier.name}
+              </p>
+              <p className="itc-pricing-price">
+                {tier.price}
+                <span className="itc-pricing-period">/mo</span>
+              </p>
+              <p className="itc-body-sm itc-muted" style={{ margin: "8px 0 0" }}>
+                {tier.blurb}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="itc-pricing-cta">
+          <a href="/pricing" className="itc-btn itc-btn-secondary">
+            Compare all features
+            <IconArrowRight size={16} className="itc-arrow" />
           </a>
         </div>
       </Container>
@@ -422,7 +761,7 @@ const MCP_CLIENTS: McpClient[] = [
 
 function McpSection() {
   return (
-    <section className="itc-mcp-section">
+    <section className="itc-mcp-section itc-reveal">
       <Container>
         <div className="itc-mcp-grid">
           <div>
@@ -795,11 +1134,49 @@ function GeminiIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+// ─── CTA band: final conversion push ────────────────────────────────
+
+function CtaBand() {
+  return (
+    <section className="itc-cta-band">
+      <Container>
+        <div className="itc-narrow" style={{ margin: "0 auto" }}>
+          <h2 className="itc-display-lg" style={{ textAlign: "center" }}>
+            Ready to take control of your SEO?
+          </h2>
+          <p
+            className="itc-subhead itc-muted"
+            style={{ margin: "20px auto 0", textAlign: "center", maxWidth: 520 }}
+          >
+            Join hundreds of marketers and agencies using SeoTool.im to research,
+            track, and grow. Start free in under two minutes.
+          </p>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 12,
+              marginTop: 32,
+              flexWrap: "wrap",
+            }}
+          >
+            <ArrowCta size="lg">Start free now</ArrowCta>
+            <a href="/pricing" className="itc-btn itc-btn-secondary itc-btn-lg">
+              View pricing
+              <IconArrowRight size={18} className="itc-arrow" />
+            </a>
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
 // ─── Open source ─────────────────────────────────────────────────────
 
 function OpenSourceSection() {
   return (
-    <section className="itc-section itc-section-open-source">
+    <section className="itc-section itc-section-open-source itc-reveal">
       <Container>
         <div className="itc-narrow">
           <h2 className="itc-display-lg">Built on open source</h2>
@@ -890,13 +1267,19 @@ function Footer() {
 // ─── Page ────────────────────────────────────────────────────────────
 
 export function LandingPage() {
+  useScrollReveal();
+
   return (
     <div className="itc">
       <Hero />
+      <TrustBar />
+      <LiveMetrics />
+      <FeatureSection />
       <McpSection />
+      <PricingTeaser />
       <Testimonial />
+      <CtaBand />
       <OpenSourceSection />
-      <ProductSection />
       <Footer />
       <a
         href={DISCORD_URL}

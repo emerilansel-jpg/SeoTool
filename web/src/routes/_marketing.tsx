@@ -11,7 +11,7 @@ import { featureGroups } from "@/lib/feature-pages";
 
 const GITHUB_REPO = "emerilansel-jpg/SeoTool";
 const PRODUCT_HUNT_URL =
-  "https://www.producthunt.com/products/openseo?launch=openseo";
+  "https://www.producthunt.com/products/seotool-im";
 // Used if GitHub is unreachable at build time so the header never renders empty.
 const FALLBACK_STAR_COUNT = "2.1k";
 
@@ -27,7 +27,7 @@ async function fetchGithubStarCount(): Promise<string> {
       headers: {
         Accept: "application/vnd.github+json",
         // GitHub rejects requests without a User-Agent.
-        "User-Agent": "openseo-landing",
+        "User-Agent": "seotool-landing",
       },
     });
     if (!res.ok) return FALLBACK_STAR_COUNT;
@@ -149,8 +149,8 @@ function MarketingLayout() {
     const root = document.documentElement;
     const prevRoot = root.style.backgroundColor;
     const prevBody = document.body.style.backgroundColor;
-    root.style.backgroundColor = "#f5f1ec";
-    document.body.style.backgroundColor = "#f5f1ec";
+    root.style.backgroundColor = "#0a0b14";
+    document.body.style.backgroundColor = "#0a0b14";
     return () => {
       root.style.backgroundColor = prevRoot;
       document.body.style.backgroundColor = prevBody;
@@ -164,21 +164,21 @@ function MarketingLayout() {
           href={PRODUCT_HUNT_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex min-h-11 items-center justify-center gap-2 bg-[#ff6154] px-4 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-[#e9574c] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white"
+          className="group flex min-h-11 items-center justify-center gap-2 border-b border-[var(--color-border-subtle)] bg-[#0d0e18] px-4 py-2.5 text-center text-sm font-semibold text-[var(--color-brand)] transition-colors hover:bg-[#12141f] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--color-brand-accent)]"
           aria-label="SeoTool.im just launched on Product Hunt. Upvote and comment."
         >
           <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-white p-0.5">
             <img src="/product-hunt.svg" alt="" className="size-full" />
           </span>
           <span>SeoTool.im just launched on Product Hunt.</span>
-          <span className="inline-flex items-center gap-1 whitespace-nowrap underline decoration-white/55 underline-offset-4 group-hover:decoration-white">
+          <span className="inline-flex items-center gap-1 whitespace-nowrap underline decoration-[var(--color-brand-accent)]/60 underline-offset-4 group-hover:decoration-[var(--color-brand-accent)]">
             Upvote &amp; comment <span aria-hidden="true">&rarr;</span>
           </span>
         </a>
       ) : null}
       <div className="relative z-50 mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6 md:pt-8">
         <div className="relative mx-auto max-w-5xl">
-          <nav className="grid min-h-14 grid-cols-[1fr_auto] items-center gap-3 rounded-full border border-[var(--color-border-subtle)] bg-white/90 px-4 py-2.5 shadow-sm shadow-neutral-900/5 backdrop-blur md:grid-cols-[1fr_auto_1fr] md:px-5">
+          <nav className="grid min-h-14 grid-cols-[1fr_auto] items-center gap-3 rounded-full border border-[var(--color-border-subtle)] bg-[#0a0b14]/80 px-4 py-2.5 shadow-lg shadow-black/20 backdrop-blur-xl md:grid-cols-[1fr_auto_1fr] md:px-5">
             <Link
               to="/"
               className="text-sm font-semibold hover:opacity-80 transition-opacity"
@@ -191,7 +191,7 @@ function MarketingLayout() {
               <ResourcesDropdown />
               <Link
                 to="/pricing"
-                className="text-sm font-semibold text-neutral-600 transition-colors hover:text-neutral-900"
+                className="text-sm font-semibold text-[var(--color-brand-muted)] transition-colors hover:text-[var(--color-brand)]"
               >
                 Pricing
               </Link>
@@ -203,7 +203,7 @@ function MarketingLayout() {
                 aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileMenuOpen}
                 onClick={() => setMobileMenuOpen((open) => !open)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-900 transition-colors hover:bg-[#f5f1ec] md:hidden"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--color-brand)] transition-colors hover:bg-[var(--color-surface-raised)] md:hidden"
               >
                 {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
               </button>
@@ -212,15 +212,15 @@ function MarketingLayout() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`GitHub, ${githubStarCount} stars`}
-                className="hidden h-9 items-center gap-1.5 px-2 text-sm font-semibold text-neutral-600 transition-colors hover:text-neutral-900 md:inline-flex"
+                className="hidden h-9 items-center gap-1.5 px-2 text-sm font-semibold text-[var(--color-brand-muted)] transition-colors hover:text-[var(--color-brand)] md:inline-flex"
               >
                 <GitHubIcon size={16} />
                 <span>GitHub</span>
-                <span className="text-neutral-500">{githubStarCount}</span>
+                <span className="text-[var(--color-brand-muted)]">{githubStarCount}</span>
               </a>
               <a
                 href="https://seotool.im/sign-in"
-                className="hidden h-9 items-center rounded-full border border-[var(--color-border-subtle)] px-4 text-sm font-medium text-neutral-900 transition-colors hover:border-neutral-900 md:inline-flex"
+                className="hidden h-9 items-center rounded-full border border-[var(--color-border-subtle)] px-4 text-sm font-medium text-[var(--color-brand)] transition-colors hover:border-[var(--color-brand-accent)] md:inline-flex"
               >
                 Sign in
               </a>
@@ -228,19 +228,19 @@ function MarketingLayout() {
           </nav>
 
           {mobileMenuOpen ? (
-            <div className="absolute left-0 right-0 top-full z-30 mt-3 rounded-2xl border border-[var(--color-border-subtle)] bg-white p-3 shadow-xl shadow-neutral-900/10 md:hidden">
+            <div className="absolute left-0 right-0 top-full z-30 mt-3 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] p-3 shadow-xl shadow-black/30 md:hidden">
               <div className="grid grid-cols-2 gap-2">
                 <a
                   href="https://seotool.im/sign-in"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex h-11 items-center justify-center rounded-xl bg-neutral-950 px-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-800"
+                  className="flex h-11 items-center justify-center rounded-xl bg-[var(--color-cta)] px-3 text-sm font-semibold text-white transition-colors hover:bg-[#ff6a1f]"
                 >
                   Try SeoTool.im
                 </a>
                 <a
                   href="https://seotool.im/sign-in"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex h-11 items-center justify-center rounded-xl border border-[var(--color-border-subtle)] px-3 text-sm font-semibold text-neutral-800 transition-colors hover:border-neutral-900 hover:bg-[#f5f1ec]"
+                  className="flex h-11 items-center justify-center rounded-xl border border-[var(--color-border-subtle)] px-3 text-sm font-semibold text-[var(--color-brand)] transition-colors hover:border-[var(--color-brand-accent)] hover:bg-[var(--color-surface-raised)]"
                 >
                   Sign in
                 </a>
@@ -249,7 +249,7 @@ function MarketingLayout() {
               <div className="mt-3 space-y-3">
                 {mobileNavItems.map((section) => (
                   <div key={section.label}>
-                    <p className="px-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    <p className="px-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-brand-muted)]">
                       {section.label}
                     </p>
                     <div className="mt-1 space-y-1">
@@ -258,7 +258,7 @@ function MarketingLayout() {
                           key={item.href}
                           href={item.href}
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex min-h-10 items-center rounded-xl px-2 text-sm font-semibold text-neutral-800 transition-colors hover:bg-neutral-50 hover:text-neutral-950"
+                          className="flex min-h-10 items-center rounded-xl px-2 text-sm font-semibold text-[var(--color-brand)] transition-colors hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-brand)]"
                         >
                           {item.label}
                         </a>
@@ -312,28 +312,28 @@ function ResourcesDropdown() {
     <div className="group relative">
       <a
         href="/blogs"
-        className="text-sm font-semibold text-neutral-600 transition-colors hover:text-neutral-900 md:hidden"
+        className="text-sm font-semibold text-[var(--color-brand-muted)] transition-colors hover:text-[var(--color-brand)] md:hidden"
       >
         Resources
       </a>
       <button
         type="button"
-        className="hidden h-10 items-center text-sm font-semibold text-neutral-600 transition-colors hover:text-neutral-900 md:inline-flex"
+        className="hidden h-10 items-center text-sm font-semibold text-[var(--color-brand-muted)] transition-colors hover:text-[var(--color-brand)] md:inline-flex"
       >
         Resources
       </button>
       <div className="pointer-events-none absolute left-1/2 top-[calc(100%-2px)] z-20 hidden w-[280px] -translate-x-1/2 pt-2 opacity-0 transition md:block group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
-        <div className="rounded-lg border border-[var(--color-border-subtle)] bg-white p-3 shadow-xl shadow-neutral-900/10">
+        <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] p-3 shadow-xl shadow-black/30">
           {resources.map((resource) => (
             <a
               key={resource.href}
               href={resource.href}
-              className="block rounded-md px-3 py-2.5 transition-colors hover:bg-[#f5f1ec]"
+              className="block rounded-md px-3 py-2.5 transition-colors hover:bg-[var(--color-surface-raised)]"
             >
-              <span className="block text-sm font-semibold text-neutral-900">
+              <span className="block text-sm font-semibold text-[var(--color-brand)]">
                 {resource.label}
               </span>
-              <span className="mt-0.5 block text-xs leading-relaxed text-neutral-600">
+              <span className="mt-0.5 block text-xs leading-relaxed text-[var(--color-brand-muted)]">
                 {resource.description}
               </span>
             </a>
@@ -349,22 +349,22 @@ function FeatureDropdown() {
     <div className="group relative">
       <Link
         to="/features"
-        className="text-sm font-semibold text-neutral-600 transition-colors hover:text-neutral-900 md:hidden"
+        className="text-sm font-semibold text-[var(--color-brand-muted)] transition-colors hover:text-[var(--color-brand)] md:hidden"
       >
         Features
       </Link>
       <button
         type="button"
-        className="hidden h-10 items-center text-sm font-semibold text-neutral-600 transition-colors hover:text-neutral-900 md:inline-flex"
+        className="hidden h-10 items-center text-sm font-semibold text-[var(--color-brand-muted)] transition-colors hover:text-[var(--color-brand)] md:inline-flex"
       >
         Features
       </button>
       <div className="pointer-events-none absolute left-1/2 top-[calc(100%-2px)] z-20 hidden w-[560px] -translate-x-1/2 pt-2 opacity-0 transition md:block group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
-        <div className="rounded-lg border border-[var(--color-border-subtle)] bg-white p-5 shadow-xl shadow-neutral-900/10">
+        <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] p-5 shadow-xl shadow-black/30">
           <div className="grid grid-cols-2 gap-x-8 gap-y-6">
             {featureGroups.map((group) => (
               <div key={group.label}>
-                <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-brand-muted)]">
                   {group.label}
                 </p>
                 <div className="mt-3 space-y-1">
@@ -372,12 +372,12 @@ function FeatureDropdown() {
                     <a
                       key={page.slug}
                       href={`/features/${page.slug}`}
-                      className="block rounded-md px-2 py-1.5 transition-colors hover:bg-[#f5f1ec]"
+                      className="block rounded-md px-2 py-1.5 transition-colors hover:bg-[var(--color-surface-raised)]"
                     >
-                      <span className="block text-sm font-semibold text-neutral-900">
+                      <span className="block text-sm font-semibold text-[var(--color-brand)]">
                         {page.eyebrow}
                       </span>
-                      <span className="mt-0.5 block text-xs leading-relaxed text-neutral-600">
+                      <span className="mt-0.5 block text-xs leading-relaxed text-[var(--color-brand-muted)]">
                         {page.navDescription}
                       </span>
                     </a>
@@ -386,35 +386,35 @@ function FeatureDropdown() {
               </div>
             ))}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-brand-muted)]">
                 AI agents
               </p>
               <div className="mt-3 space-y-2">
                 <a
                   href="/features/mcp"
-                  className="block rounded-md p-2 transition-colors hover:bg-[#f5f1ec]"
+                  className="block rounded-md p-2 transition-colors hover:bg-[var(--color-surface-raised)]"
                 >
-                  <span className="text-sm font-semibold text-neutral-900">
+                  <span className="text-sm font-semibold text-[var(--color-brand)]">
                     SeoTool.im MCP
                   </span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-neutral-600">
+                  <span className="mt-0.5 block text-xs leading-relaxed text-[var(--color-brand-muted)]">
                     Connect Claude, Codex, and agents.
                   </span>
                 </a>
                 <a
                   href="/google-search-console-mcp"
-                  className="block rounded-md p-2 transition-colors hover:bg-[#f5f1ec]"
+                  className="block rounded-md p-2 transition-colors hover:bg-[var(--color-surface-raised)]"
                 >
-                  <span className="text-sm font-semibold text-neutral-900">
+                  <span className="text-sm font-semibold text-[var(--color-brand)]">
                     Search Console MCP
                   </span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-neutral-600">
+                  <span className="mt-0.5 block text-xs leading-relaxed text-[var(--color-brand-muted)]">
                     Search Console data for agents.
                   </span>
                 </a>
                 <a
                   href="/features"
-                  className="block rounded-md border border-[var(--color-border-subtle)] bg-[#f5f1ec] px-2 py-1.5 text-sm font-medium text-neutral-900 transition-colors hover:border-neutral-900"
+                  className="block rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] px-2 py-1.5 text-sm font-medium text-[var(--color-brand)] transition-colors hover:border-[var(--color-brand-accent)]"
                 >
                   View all features <span aria-hidden="true">&rarr;</span>
                 </a>
@@ -432,10 +432,10 @@ function MarketingFooter() {
     <>
       {/* Newsletter */}
       <div className="mt-16 border-t border-[var(--color-border-subtle)] pt-8">
-        <p className="text-sm font-semibold text-neutral-900">
+        <p className="text-sm font-semibold text-[var(--color-brand)]">
           Stay in the loop
         </p>
-        <p className="text-sm text-neutral-600 mt-1 leading-relaxed">
+        <p className="text-sm text-[var(--color-brand-muted)] mt-1 leading-relaxed">
           Product updates, new features, and the occasional behind-the-scenes.
         </p>
         <div className="mt-3">
@@ -445,7 +445,7 @@ function MarketingFooter() {
 
       {/* Footer */}
       <div className="mt-8">
-        <SiteFooter className="text-xs text-neutral-600 [&_a]:transition-colors [&_a]:hover:text-neutral-900" />
+        <SiteFooter className="text-xs text-[var(--color-brand-muted)] [&_a]:transition-colors [&_a]:hover:text-[var(--color-brand)]" />
       </div>
     </>
   );
