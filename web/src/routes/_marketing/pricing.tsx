@@ -215,7 +215,7 @@ function Pricing() {
       <p className="text-sm font-medium text-[var(--color-brand-accent)]">
         Pricing
       </p>
-      <h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-neutral-950 md:text-5xl">
+      <h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-[var(--color-brand)] md:text-5xl">
         Simple, transparent pricing
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--color-brand-muted)]">
@@ -231,8 +231,8 @@ function Pricing() {
             key={plan.tier}
             className={`relative flex flex-col rounded-xl border p-6 ${
               plan.highlight
-                ? "border-[var(--color-brand-accent)] bg-white shadow-sm ring-1 ring-[var(--color-brand-accent)]/30"
-                : "border-[var(--color-border-subtle)] bg-white"
+                ? "border-[var(--color-brand-accent)] bg-[var(--color-surface-raised)] shadow-sm ring-1 ring-[var(--color-brand-accent)]/30"
+                : "border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)]"
             }`}
           >
             {plan.highlight ? (
@@ -240,13 +240,13 @@ function Pricing() {
                 Most popular
               </span>
             ) : null}
-            <h3 className="text-lg font-semibold text-neutral-950">
+            <h3 className="text-lg font-semibold text-[var(--color-brand)]">
               {plan.name}
             </h3>
             <p className="mt-1 text-sm text-[var(--color-brand-muted)]">
               {plan.blurb}
             </p>
-            <p className="mt-4 text-3xl font-semibold tabular-nums text-neutral-950">
+            <p className="mt-4 text-3xl font-semibold tabular-nums text-[var(--color-brand)]">
               {usd(plan.price)}
               <span className="text-base font-normal text-[var(--color-brand-muted)]">
                 {plan.price > 0 ? "/mo" : ""}
@@ -260,8 +260,8 @@ function Pricing() {
               }
               className={`mt-5 inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
                 plan.highlight || plan.price > 0
-                  ? "bg-neutral-950 text-white hover:bg-neutral-800"
-                  : "border border-[var(--color-border-subtle)] text-neutral-950 hover:bg-neutral-50"
+                  ? "bg-[var(--color-cta)] text-white hover:bg-[#ff6a1f]"
+                  : "border border-[var(--color-border-subtle)] text-[var(--color-brand)] hover:bg-[var(--color-surface-raised)]"
               }`}
             >
               {plan.cta}
@@ -272,7 +272,7 @@ function Pricing() {
 
       {/* Feature comparison table */}
       <section className="mt-14">
-        <h2 className="text-xl font-semibold tracking-tight text-neutral-950">
+        <h2 className="text-xl font-semibold tracking-tight text-[var(--color-brand)]">
           Compare plans
         </h2>
 
@@ -281,13 +281,13 @@ function Pricing() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-surface)]">
-                <th className="px-5 py-3 text-left font-medium text-neutral-700">
+                <th className="px-5 py-3 text-left font-medium text-[var(--color-brand-muted)]">
                   Feature
                 </th>
                 {PLANS.map((plan) => (
                   <th
                     key={plan.tier}
-                    className="px-5 py-3 text-center font-semibold text-neutral-950"
+                    className="px-5 py-3 text-center font-semibold text-[var(--color-brand)]"
                   >
                     {plan.name}
                   </th>
@@ -303,7 +303,7 @@ function Pricing() {
                   >
                     <td
                       colSpan={5}
-                      className="px-5 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500"
+                      className="px-5 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-brand-muted)]"
                     >
                       {group.group}
                     </td>
@@ -313,13 +313,13 @@ function Pricing() {
                       key={row.label}
                       className="border-b border-[var(--color-border-subtle)] last:border-0"
                     >
-                      <td className="px-5 py-3 text-neutral-700">
+                      <td className="px-5 py-3 text-[var(--color-brand-muted)]">
                         {row.label}
                       </td>
                       {PLANS.map((plan) => (
                         <td
                           key={plan.tier}
-                          className="px-5 py-3 text-center tabular-nums text-neutral-950"
+                          className="px-5 py-3 text-center tabular-nums text-[var(--color-brand)]"
                         >
                           <FeatureCell value={row.values[plan.tier]} />
                         </td>
@@ -339,23 +339,23 @@ function Pricing() {
               key={group.group}
               className="rounded-lg border border-[var(--color-border-subtle)] p-4"
             >
-              <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-brand-muted)]">
                 {group.group}
               </p>
               <dl className="mt-3 space-y-3">
                 {group.rows.map((row) => (
                   <div key={row.label} className="space-y-1">
-                    <dt className="text-sm text-neutral-700">{row.label}</dt>
+                    <dt className="text-sm text-[var(--color-brand-muted)]">{row.label}</dt>
                     <dd className="flex gap-2 text-xs">
                       {PLANS.map((plan) => (
                         <span
                           key={plan.tier}
                           className="inline-flex items-center gap-1 rounded border border-[var(--color-border-subtle)] px-2 py-0.5"
                         >
-                          <span className="font-medium text-neutral-500">
+                          <span className="font-medium text-[var(--color-brand-muted)]">
                             {plan.name}:
                           </span>
-                          <span className="text-neutral-950">
+                          <span className="text-[var(--color-brand)]">
                             <FeatureCell value={row.values[plan.tier]} />
                           </span>
                         </span>
@@ -371,12 +371,12 @@ function Pricing() {
 
       {/* FAQ */}
       <section className="mt-14">
-        <h2 className="text-xl font-semibold tracking-tight text-neutral-950">
+        <h2 className="text-xl font-semibold tracking-tight text-[var(--color-brand)]">
           FAQ
         </h2>
         <dl className="mt-5 divide-y divide-[var(--color-border-subtle)]">
           <div className="py-4 first:pt-0 last:pb-0">
-            <dt className="text-sm font-medium text-neutral-950">
+            <dt className="text-sm font-medium text-[var(--color-brand)]">
               Is there a free plan?
             </dt>
             <dd className="mt-1.5 text-sm leading-6 text-[var(--color-brand-muted)]">
@@ -386,7 +386,7 @@ function Pricing() {
             </dd>
           </div>
           <div className="py-4 first:pt-0 last:pb-0">
-            <dt className="text-sm font-medium text-neutral-950">
+            <dt className="text-sm font-medium text-[var(--color-brand)]">
               What happens when I hit my quota limit?
             </dt>
             <dd className="mt-1.5 text-sm leading-6 text-[var(--color-brand-muted)]">
@@ -396,7 +396,7 @@ function Pricing() {
             </dd>
           </div>
           <div className="py-4 first:pt-0 last:pb-0">
-            <dt className="text-sm font-medium text-neutral-950">
+            <dt className="text-sm font-medium text-[var(--color-brand)]">
               Can I upgrade or downgrade anytime?
             </dt>
             <dd className="mt-1.5 text-sm leading-6 text-[var(--color-brand-muted)]">
@@ -405,7 +405,7 @@ function Pricing() {
             </dd>
           </div>
           <div className="py-4 first:pt-0 last:pb-0">
-            <dt className="text-sm font-medium text-neutral-950">
+            <dt className="text-sm font-medium text-[var(--color-brand)]">
               Do quotas reset?
             </dt>
             <dd className="mt-1.5 text-sm leading-6 text-[var(--color-brand-muted)]">
@@ -415,7 +415,7 @@ function Pricing() {
             </dd>
           </div>
           <div className="py-4 first:pt-0 last:pb-0">
-            <dt className="text-sm font-medium text-neutral-950">
+            <dt className="text-sm font-medium text-[var(--color-brand)]">
               Can I cancel anytime?
             </dt>
             <dd className="mt-1.5 text-sm leading-6 text-[var(--color-brand-muted)]">
@@ -431,7 +431,7 @@ function Pricing() {
 
 function FeatureCell({ value }: { value: FeatureValue }) {
   if (value === "unlimited") {
-    return <span className="text-neutral-950">Unlimited</span>;
+    return <span className="text-[var(--color-brand)]">Unlimited</span>;
   }
   if (value === true) {
     return (
@@ -444,7 +444,7 @@ function FeatureCell({ value }: { value: FeatureValue }) {
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="mx-auto text-emerald-600"
+        className="mx-auto text-[var(--color-success)]"
         aria-label="Included"
       >
         <path d="M20 6 9 17l-5-5" />
@@ -452,7 +452,7 @@ function FeatureCell({ value }: { value: FeatureValue }) {
     );
   }
   if (value === false || value === "—") {
-    return <span className="text-neutral-300">&mdash;</span>;
+    return <span className="text-[var(--color-brand-muted)]">&mdash;</span>;
   }
   return <span>{value}</span>;
 }

@@ -11,13 +11,13 @@ const featureLinks = featureGroups.flatMap((group) =>
 export function SiteFooter({ className }: { className?: string }) {
   return (
     <div className={className}>
-      <Link to="/" className="text-sm font-semibold text-neutral-900">
+      <Link to="/" className="text-sm font-semibold text-[var(--color-brand)]">
         SeoTool.im
       </Link>
 
       <div className="mt-6 grid grid-cols-2 gap-8 md:grid-cols-5">
         <div>
-          <p className="font-semibold text-neutral-900">Features</p>
+          <p className="font-semibold text-[var(--color-brand)]">Features</p>
           <div className="mt-2 flex flex-col gap-1.5">
             {featureLinks.map((link) => (
               <a key={link.href} href={link.href}>
@@ -29,7 +29,7 @@ export function SiteFooter({ className }: { className?: string }) {
         </div>
 
         <div>
-          <p className="font-semibold text-neutral-900">AI agents</p>
+          <p className="font-semibold text-[var(--color-brand)]">AI agents</p>
           <div className="mt-2 flex flex-col gap-1.5">
             <Link to="/features/mcp">SeoTool.im MCP</Link>
             <Link to="/google-search-console-mcp">
@@ -39,7 +39,7 @@ export function SiteFooter({ className }: { className?: string }) {
         </div>
 
         <div>
-          <p className="font-semibold text-neutral-900">Resources</p>
+          <p className="font-semibold text-[var(--color-brand)]">Resources</p>
           <div className="mt-2 flex flex-col gap-1.5">
             <Link to="/changelog">Changelog</Link>
             <Link to="/open-source-seo">Why Open Source?</Link>
@@ -50,7 +50,7 @@ export function SiteFooter({ className }: { className?: string }) {
         </div>
 
         <div>
-          <p className="font-semibold text-neutral-900">Company</p>
+          <p className="font-semibold text-[var(--color-brand)]">Company</p>
           <div className="mt-2 flex flex-col gap-1.5">
             <Link to="/about">About</Link>
             <Link to="/pricing">Pricing</Link>
@@ -75,7 +75,7 @@ export function SiteFooter({ className }: { className?: string }) {
         </div>
 
         <div>
-          <p className="font-semibold text-neutral-900">Legal</p>
+          <p className="font-semibold text-[var(--color-brand)]">Legal</p>
           <div className="mt-2 flex flex-col gap-1.5">
             <Link to="/privacy">Privacy Policy</Link>
             <Link to="/terms-and-conditions">Terms of Service</Link>

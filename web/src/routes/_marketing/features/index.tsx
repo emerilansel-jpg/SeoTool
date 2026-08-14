@@ -23,7 +23,7 @@ function FeaturesIndex() {
       <p className="text-sm font-medium text-[var(--color-brand-accent)]">
         Open-source SEO tools
       </p>
-      <h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-neutral-950 md:text-6xl">
+      <h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-[var(--color-brand)] md:text-6xl">
         All the tools you need, in one workspace
       </h1>
       <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--color-brand-muted)]">
@@ -34,7 +34,7 @@ function FeaturesIndex() {
       <div className="mt-12 space-y-12">
         <section>
           <div className="border-b border-[var(--color-border-subtle)] pb-4">
-            <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
+            <h2 className="text-2xl font-semibold tracking-tight text-[var(--color-brand)]">
               AI agent workflows
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-brand-muted)]">
@@ -47,14 +47,14 @@ function FeaturesIndex() {
               <p className="text-xs font-medium text-[var(--color-brand-accent)]">
                 SeoTool.im MCP
               </p>
-              <h3 className="mt-2 text-lg font-semibold text-neutral-950">
+              <h3 className="mt-2 text-lg font-semibold text-[var(--color-brand)]">
                 SeoTool.im MCP
               </h3>
               <p className="mt-2 text-sm leading-6 text-[var(--color-brand-muted)]">
                 Connect Claude, Codex, and other agents to SeoTool.im research
                 tools.
               </p>
-              <p className="mt-4 text-sm font-medium text-neutral-950">
+              <p className="mt-4 text-sm font-medium text-[var(--color-brand)]">
                 Explore MCP <span aria-hidden="true">&rarr;</span>
               </p>
             </FeatureCard>
@@ -62,14 +62,14 @@ function FeaturesIndex() {
               <p className="text-xs font-medium text-[var(--color-brand-accent)]">
                 Search Console MCP
               </p>
-              <h3 className="mt-2 text-lg font-semibold text-neutral-950">
+              <h3 className="mt-2 text-lg font-semibold text-[var(--color-brand)]">
                 Google Search Console MCP
               </h3>
               <p className="mt-2 text-sm leading-6 text-[var(--color-brand-muted)]">
                 Give agents access to clicks, impressions, CTR, position, and
                 URL inspection.
               </p>
-              <p className="mt-4 text-sm font-medium text-neutral-950">
+              <p className="mt-4 text-sm font-medium text-[var(--color-brand)]">
                 Explore GSC MCP <span aria-hidden="true">&rarr;</span>
               </p>
             </FeatureCard>
@@ -79,7 +79,7 @@ function FeaturesIndex() {
         {featureGroups.map((group) => (
           <section key={group.label}>
             <div className="border-b border-[var(--color-border-subtle)] pb-4">
-              <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
+              <h2 className="text-2xl font-semibold tracking-tight text-[var(--color-brand)]">
                 {group.label}
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-brand-muted)]">
@@ -92,13 +92,13 @@ function FeaturesIndex() {
                   <p className="text-xs font-medium text-[var(--color-brand-accent)]">
                     {page.eyebrow}
                   </p>
-                  <h3 className="mt-2 text-lg font-semibold text-neutral-950">
+                  <h3 className="mt-2 text-lg font-semibold text-[var(--color-brand)]">
                     {page.title}
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-[var(--color-brand-muted)]">
                     {page.navDescription}
                   </p>
-                  <p className="mt-4 text-sm font-medium text-neutral-950">
+                  <p className="mt-4 text-sm font-medium text-[var(--color-brand)]">
                     Explore feature <span aria-hidden="true">&rarr;</span>
                   </p>
                 </FeatureCard>
@@ -121,7 +121,7 @@ function FeatureCard({
   return (
     <a
       href={href}
-      className="block rounded-lg border border-[var(--color-border-subtle)] bg-white p-5 transition-colors hover:border-neutral-900"
+      className="block rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] p-5 transition-colors hover:border-[var(--color-brand-accent)]"
     >
       {children}
     </a>

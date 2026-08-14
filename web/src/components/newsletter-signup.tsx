@@ -35,7 +35,11 @@ export function NewsletterSignup() {
   };
 
   if (status === "success") {
-    return <p className="text-sm text-neutral-900">You&apos;re on the list.</p>;
+    return (
+      <p className="text-sm text-[var(--color-brand)]">
+        You&apos;re on the list.
+      </p>
+    );
   }
 
   return (
@@ -54,18 +58,18 @@ export function NewsletterSignup() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           disabled={status === "loading"}
-          className="h-10 min-w-0 flex-1 rounded-lg border border-[var(--color-border-subtle)] bg-white px-3 text-sm text-neutral-900 placeholder:text-neutral-500 transition focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900"
+          className="h-10 min-w-0 flex-1 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] px-3 text-sm text-[var(--color-brand)] placeholder:text-[var(--color-brand-muted)] transition focus:border-[var(--color-brand-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-brand-accent)]"
         />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="h-10 shrink-0 rounded-lg bg-neutral-950 px-5 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:opacity-50"
+          className="h-10 shrink-0 rounded-lg bg-[var(--color-cta)] px-5 text-sm font-medium text-white transition-colors hover:bg-[#ff6a1f] disabled:opacity-50"
         >
           {status === "loading" ? "..." : "Subscribe"}
         </button>
       </div>
       {status === "error" && (
-        <p className="mt-2 text-xs text-red-600">{errorMessage}</p>
+        <p className="mt-2 text-xs text-red-400">{errorMessage}</p>
       )}
     </form>
   );
