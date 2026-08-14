@@ -1,1 +1,0 @@
-import{j as t,g as o,h as e,d as n}from"./main-C2dxGXc5.js";import{L as s}from"./legal-page-dUeM2uVh.js";import"./site-footer-D9bA-m2X.js";function m(){return t.jsx(s,{title:o.title,description:o.description,children:t.jsx(e,{components:n})})}export{m as component};

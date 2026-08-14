@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { buildPageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/_marketing/pricing")({
@@ -205,10 +206,15 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
 
 const SIGNUP_URL = "https://seotool.im/sign-up";
 
+// Annual billing: pay for 10 months, get 12 (a 20% discount).
+const ANNUAL_DISCOUNT = 0.8;
+
 const usd = (n: number) =>
   n === 0 ? "$0" : n >= 100 ? `$${Math.round(n).toLocaleString()}` : `$${n}`;
 
 function Pricing() {
+  const [annual, setAnnual] = useState(true);
+
   return (
     <article className="mx-auto max-w-5xl">
       {/* Hero */}
@@ -224,50 +230,105 @@ function Pricing() {
         per-feature quotas so you always know where you stand.
       </p>
 
-      {/* Plan cards */}
-      <section className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {PLANS.map((plan) => (
-          <div
-            key={plan.tier}
-            className={`relative flex flex-col rounded-xl border p-6 ${
-              plan.highlight
-                ? "border-[var(--color-brand-accent)] bg-[var(--color-surface-raised)] shadow-sm ring-1 ring-[var(--color-brand-accent)]/30"
-                : "border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)]"
+      {/* Billing period toggle */}
+      <div className="mt-8 flex justify-center">
+        <div
+          role="group"
+          aria-label="Billing period"
+          className="inline-flex rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] p-1"
+        >
+          <button
+            type="button"
+            aria-pressed={!annual}
+            onClick={() => setAnnual(false)}
+            className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+              annual
+                ? "text-[var(--color-brand-muted)] hover:text-[var(--color-brand)]"
+                : "bg-[var(--color-cta)] text-white"
             }`}
           >
-            {plan.highlight ? (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--color-brand-accent)] px-3 py-0.5 text-xs font-medium text-white">
-                Most popular
-              </span>
-            ) : null}
-            <h3 className="text-lg font-semibold text-[var(--color-brand)]">
-              {plan.name}
-            </h3>
-            <p className="mt-1 text-sm text-[var(--color-brand-muted)]">
-              {plan.blurb}
-            </p>
-            <p className="mt-4 text-3xl font-semibold tabular-nums text-[var(--color-brand)]">
-              {usd(plan.price)}
-              <span className="text-base font-normal text-[var(--color-brand-muted)]">
-                {plan.price > 0 ? "/mo" : ""}
-              </span>
-            </p>
-            <a
-              href={
-                plan.tier === "free"
-                  ? SIGNUP_URL
-                  : `${SIGNUP_URL}?plan=${plan.tier}`
-              }
-              className={`mt-5 inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-                plan.highlight || plan.price > 0
-                  ? "bg-[var(--color-cta)] text-white hover:bg-[#ff6a1f]"
-                  : "border border-[var(--color-border-subtle)] text-[var(--color-brand)] hover:bg-[var(--color-surface-raised)]"
+            Monthly
+          </button>
+          <button
+            type="button"
+            aria-pressed={annual}
+            onClick={() => setAnnual(true)}
+            className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+              annual
+                ? "bg-[var(--color-cta)] text-white"
+                : "text-[var(--color-brand-muted)] hover:text-[var(--color-brand)]"
+            }`}
+          >
+            Annual
+            <span
+              className={`ml-2 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                annual
+                  ? "bg-white/20 text-white"
+                  : "bg-[var(--color-brand-accent)]/15 text-[var(--color-brand-accent)]"
               }`}
             >
-              {plan.cta}
-            </a>
-          </div>
-        ))}
+              −20%
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Plan cards */}
+      <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {PLANS.map((plan) => {
+          const monthlyPrice = annual
+            ? Math.round(plan.price * ANNUAL_DISCOUNT)
+            : plan.price;
+          return (
+            <div
+              key={plan.tier}
+              className={`relative flex flex-col rounded-xl border p-6 ${
+                plan.highlight
+                  ? "border-[var(--color-brand-accent)] bg-[var(--color-surface-raised)] shadow-sm ring-1 ring-[var(--color-brand-accent)]/30"
+                  : "border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)]"
+              }`}
+            >
+              {plan.highlight ? (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--color-brand-accent)] px-3 py-0.5 text-xs font-medium text-white">
+                  Most popular
+                </span>
+              ) : null}
+              <h3 className="text-lg font-semibold text-[var(--color-brand)]">
+                {plan.name}
+              </h3>
+              <p className="mt-1 text-sm text-[var(--color-brand-muted)]">
+                {plan.blurb}
+              </p>
+              <p className="mt-4 text-3xl font-semibold tabular-nums text-[var(--color-brand)]">
+                {usd(monthlyPrice)}
+                <span className="text-base font-normal text-[var(--color-brand-muted)]">
+                  {plan.price > 0 ? "/mo" : ""}
+                </span>
+              </p>
+              <p className="mt-1 text-xs text-[var(--color-brand-muted)]">
+                {plan.price === 0
+                  ? "Free forever"
+                  : annual
+                    ? `Billed annually (${usd(monthlyPrice * 12)}/yr)`
+                    : "Billed monthly"}
+              </p>
+              <a
+                href={
+                  plan.tier === "free"
+                    ? SIGNUP_URL
+                    : `${SIGNUP_URL}?plan=${plan.tier}`
+                }
+                className={`mt-5 inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+                  plan.highlight || plan.price > 0
+                    ? "bg-[var(--color-cta)] text-white hover:bg-[#ff6a1f]"
+                    : "border border-[var(--color-border-subtle)] text-[var(--color-brand)] hover:bg-[var(--color-surface-raised)]"
+                }`}
+              >
+                {plan.cta}
+              </a>
+            </div>
+          );
+        })}
       </section>
 
       {/* Feature comparison table */}
@@ -401,7 +462,8 @@ function Pricing() {
             </dt>
             <dd className="mt-1.5 text-sm leading-6 text-[var(--color-brand-muted)]">
               Yes. Changes take effect immediately and your usage quotas reset
-              to match the new plan. Billing is prorated through Stripe.
+              to match the new plan. Billing is handled through PayPal
+              Subscriptions.
             </dd>
           </div>
           <div className="py-4 first:pt-0 last:pb-0">

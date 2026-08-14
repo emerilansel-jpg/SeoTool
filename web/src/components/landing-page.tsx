@@ -6,6 +6,7 @@
  */
 
 import {
+  type FormEvent,
   type ReactNode,
   type SVGProps,
   useEffect,
@@ -307,6 +308,20 @@ function ArrowCta({
 // ─── Hero ────────────────────────────────────────────────────────────
 
 function Hero() {
+  const [url, setUrl] = useState("");
+
+  // Sends the visitor into the sign-up flow with their domain prefilled, so
+  // the first thing the app can do is run the audit they just asked for.
+  const handleAudit = (e: FormEvent) => {
+    e.preventDefault();
+    const trimmed = url.trim();
+    window.location.assign(
+      trimmed
+        ? `${SIGNUP_URL}?domain=${encodeURIComponent(trimmed)}`
+        : SIGNUP_URL,
+    );
+  };
+
   return (
     <section className="itc-hero">
       <Container>
@@ -334,31 +349,78 @@ function Hero() {
           all in your AI agent&apos;s hands. Transparent pricing that scales from
           free to agency.
         </p>
-        <div className="itc-hero-ctas">
-          <div className="itc-hero-cta-group">
-            <ArrowCta size="lg" />
-            <p className="itc-hero-cta-note">No credit card required</p>
-          </div>
-        </div>
+
+        <form className="itc-urlbox" onSubmit={handleAudit}>
+          <input
+            className="itc-urlbox-input"
+            type="text"
+            inputMode="url"
+            autoComplete="url"
+            spellCheck={false}
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="yourdomain.com"
+            aria-label="Your website URL, for a free site audit"
+          />
+          <button type="submit" className="itc-urlbox-btn">
+            Run free audit
+            <IconArrowRight size={16} className="itc-arrow" />
+          </button>
+        </form>
+        <p className="itc-urlbox-note">
+          Free plan, no credit card required
+          <span aria-hidden="true">·</span>
+          <a href={SIGNUP_URL}>start without a site</a>
+          <span aria-hidden="true">·</span>
+          <a href="/pricing">see pricing</a>
+        </p>
 
         <div className="itc-hero-data">
           <div className="itc-hero-data-card">
-            <span className="itc-hero-data-label">KD Score</span>
+            <span
+              className="itc-hero-data-label itc-tip"
+              data-tip="Keyword Difficulty. How hard it is to rank for this keyword, 0 to 100. Lower is easier."
+              tabIndex={0}
+            >
+              KD Score
+              <span className="itc-tip-dot" aria-hidden="true" />
+            </span>
             <span className="itc-hero-data-value">12</span>
             <span className="itc-hero-data-trend">Easy</span>
           </div>
           <div className="itc-hero-data-card">
-            <span className="itc-hero-data-label">Volume</span>
+            <span
+              className="itc-hero-data-label itc-tip"
+              data-tip="Search volume. Average monthly searches for this keyword."
+              tabIndex={0}
+            >
+              Volume
+              <span className="itc-tip-dot" aria-hidden="true" />
+            </span>
             <span className="itc-hero-data-value">8,200</span>
             <span className="itc-hero-data-trend">+24% MoM</span>
           </div>
           <div className="itc-hero-data-card">
-            <span className="itc-hero-data-label">Position</span>
+            <span
+              className="itc-hero-data-label itc-tip"
+              data-tip="Your current position in Google search results for this keyword."
+              tabIndex={0}
+            >
+              Position
+              <span className="itc-tip-dot" aria-hidden="true" />
+            </span>
             <span className="itc-hero-data-value">#3</span>
             <span className="itc-hero-data-trend">&#8593; 47 spots</span>
           </div>
           <div className="itc-hero-data-card">
-            <span className="itc-hero-data-label">CTR</span>
+            <span
+              className="itc-hero-data-label itc-tip"
+              data-tip="Click-through rate. The share of searchers who click your result."
+              tabIndex={0}
+            >
+              CTR
+              <span className="itc-tip-dot" aria-hidden="true" />
+            </span>
             <span className="itc-hero-data-value">12.4%</span>
             <span className="itc-hero-data-trend">+3.1%</span>
           </div>

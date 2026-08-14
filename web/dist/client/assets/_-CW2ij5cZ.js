@@ -1,1 +1,0 @@
-import{q as s,s as a,j as o,C as n,l as c}from"./main-C2dxGXc5.js";import{D as r}from"./index-v-9T9idB.js";function d(){const t=s.useLoaderData(),e=a.getComponent(t.path);return o.jsx(r,{tree:t.pageTree,...c(),children:o.jsx(n,{backLabel:"Back to Docs",backTo:"/docs",title:t.title,description:t.description,Content:e})})}export{d as component};

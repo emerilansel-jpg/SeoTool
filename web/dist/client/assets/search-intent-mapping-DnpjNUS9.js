@@ -1,0 +1,1 @@
+import{j as t,ay as o,az as n,d as e}from"./main-9otM4Lfa.js";import{L as r}from"./library-page-Cxr4X2MY.js";const i=()=>t.jsx(r,{title:o.title,description:o.description,crumb:"Search-intent mapping",children:t.jsx(n,{components:{...e}})});export{i as component};
