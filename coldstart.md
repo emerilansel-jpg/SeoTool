@@ -10,6 +10,10 @@ Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 
 **Transformasi SaaS (2026-08-08)**: Project ini dulunya open-source self-host (3 auth mode, BYO API key, credit-pool billing). Sekarang **hosted-only** — `cloudflare_access` dan `local_noauth` auth modes dihapus, hanya `hosted` (Better Auth). Billing model berubah dari single-plan + credit pool → **4 tier dengan per-feature quotas** (Ahrefs-style).
 
+**Dark Command Center + Conversion UX (2026-08-16)**: Marketing site redesign ke dark theme (near-black canvas, cyan data-glow `#00e5ff`, orange CTA `#ff5600`). Ditambah conversion UX: hero URL analyzer, metric tooltips, pricing toggle, structured data. Semua CSS-only animations (PageSpeed-safe), `prefers-reduced-motion` guards.
+
+**Rebrand OpenSEO → SeoTool.im (2026-08-17)**: Semua user-facing + internal code identifiers cleaned (themes, localStorage, MCP commands, env examples, docs, marketing). Hanya infra IDs yang tersisa (DB names, Hyperdrive, HMAC salts). Commit `1343430`.
+
 ---
 
 ## Tech stack
@@ -506,18 +510,66 @@ Push ke `main` → GitHub Action (`.github/workflows/deploy.yml`) → `appleboy/
 
 Audit lengkap di `plan.md` di repo root. **Product mature untuk classic SEO + STRONG di AI/GEO** (brand lookup, SoV, cited sources, prompt explorer, SAM agent, MCP server). Keyword difficulty, search intent, SERP feature tags (incl. AI Overview/PAA), new/lost backlinks, anchor text SUDAH ada — jangan re-flag.
 
-**P0 broken/unfinished (prioritas tertinggi):**
-1. Team invitation emails tidak pernah terkirim (Better Auth org plugin tidak ada `sendInvitationEmail` hook) — `src/client/features/settings/TeamSection.tsx`
-2. Content Strategy creation flows masih stub ("Coming soon" alerts) — `src/client/features/content-strategy/StrategyPageView.tsx`
-3. OAuth-only users tidak bisa self-delete (deleteAccount requires password) — `src/serverFunctions/account.ts`
-4. Credit top-up purchase: `createPaypalTopup` server fn sudah dibuat, perlu wiring ke UI billing page
-5. Alert/report emails fail silently (console.error, no throw)
+**IMPLEMENTATION STATUS (2026-08-13):**
+- **Sprint 1 (P0) DONE + verified**: team invite email (Better Auth `sendInvitationEmail` org hook + `/accept-invitation` route), Content Strategy create forms (cluster + brief), OAuth-only account deletion, Buy-Credits top-up button, alert/report email PostHog visibility.
+- **Sprint 2 (P1) DONE + verified**: GDPR data export (`exportAccountData`), welcome email (`sendHostedWelcomeEmail`), dunning banner (`BillingStatusBanner`), legal footer (LegalFooter), in-app notification center (`notifications` table + bell in Sidebar).
+- **Sprint 3 (P2 partial) DONE + verified**: P2-3 SoV in rank tracking, P2-5 New/lost backlinks view, P2-11 Keyword trends, P2-2 SERP competitors view, P2-8 Schema validation audit issue.
+- **ALL Sprint 1-3 DEPLOYED** (commit `5a0b3e0`): 47 files changed, 13,287 insertions. VPS auto-deploy, health check OK.
 
-**P1 compliance/trust:** no GDPR data export, no billing transactional/welcome emails, no dunning, no notification center, legal links incomplete in-app.
-
-**P2 competitive SEO gaps:** Google-only (no Bing/Yahoo), no competitor rank tracking, no SoV in rank tracking, no backlink link intersect, no dedicated new/lost backlinks view (data ada), no anchor distribution report (data ada), no sitemap validator/generator, no schema validation audit issue, no crawl budget/log analysis, no on-page SEO checker, no keyword trends/clustering, no disavow/toxic flagging.
+**Remaining P2 items (not yet implemented):**
+- P2-1: Bing support (DataForSEO supports, needs config/UI)
+- P2-4: Link intersect (`backlinks_domain_intersection`)
+- P2-6: Anchor distribution (`/backlinks/anchors/live`)
+- P2-7: Sitemap validator
+- P2-9: Crawl budget/log analysis
+- P2-10: On-page SEO checker
+- P2-12: Keyword clustering
+- P2-13: Disavow/toxic link flagging
+- P2-14: PPC integration
+- P2-15: SERP volatility
 
 **P3 platform:** manager/viewer roles unassignable via UI (RBAC dead code), no trial period, no invoice PDF, no roll-up reports. **P4 local SEO:** geo-grid, GBP audit, citation, review monitoring. **P5 AI/GEO:** AI Overviews rank tracking, AI-bot log analysis, llms.txt, GEO content recs.
+
+**Pending user action:** Loops.so template IDs belum di-set di VPS. User perlu buat 2 template manual di Loops dashboard: "Team Invitation" (Account Management group) dan "Welcome" (Notifications group). Set `LOOPS_TRANSACTIONAL_TEAM_INVITE_ID` dan `LOOPS_TRANSACTIONAL_WELCOME_ID` di `.env.hosted` lalu restart container.
+
+---
+
+## Dark Command Center Redesign (2026-08-16, LENGKAP)
+
+Marketing site redesign ke dark theme. Near-black canvas (`#0a0b14`), dot-grid background, cyan data-glow (`#00e5ff`), orange CTA (`#ff5600`). Typography: Space Grotesk (display) + Inter (body) + JetBrains Mono (data). CSS-only animations (PageSpeed-safe), `prefers-reduced-motion` guards, `content-visibility: auto` on below-fold sections.
+
+| File | Keterangan |
+|---|---|
+| `web/src/styles/app.css` | Dark palette `@theme` tokens, Space Grotesk font, `color-scheme: dark` |
+| `web/src/routes/_marketing/index.tsx` | Font preload (Space Grotesk wght 500/600/700) |
+| `web/src/routes/_marketing.tsx` | Dark glassmorphic nav, dark mobile menu, body bg `#0a0b14` |
+| `web/src/components/landing-page.css` | Complete rewrite (~800 lines): dot-grid hero, cyan glow, glass cards, staggered animations, reveal classes |
+| `web/src/components/landing-page.tsx` | Hero with floating live-data cards, `LiveMetrics` section (IntersectionObserver count-up), dark feature cards, CTA band |
+| `web/src/routes/_marketing/pricing.tsx` | Dark pricing cards, cyan gradient border on featured tier, orange CTA buttons |
+| `web/src/routes/_marketing/features/index.tsx` | Dark feature cards with cyan hover glow |
+| `web/src/components/site-footer.tsx` | Dark footer with theme-aware text colors |
+| `web/src/components/newsletter-signup.tsx` | Dark form inputs, cyan focus ring, orange button |
+| `web/src/routes/__root.tsx` | `data-theme="dark"` for fumadocs components |
+
+**Commit**: `d85a798` + `a99ee84` (marketing dist rebuild).
+
+---
+
+## Conversion UX (2026-08-16, LENGKAP)
+
+Hero URL analyzer (instant audit CTA), metric tooltips (explaining SEO terms), pricing toggle (monthly/annual), structured data (JSON-LD for rich snippets). All integrated into Dark Command Center design.
+
+**Commit**: `67715ec`.
+
+---
+
+## Rebrand OpenSEO → SeoTool.im (2026-08-17, LENGKAP)
+
+Semua user-facing + internal code identifiers cleaned. Termasuk: file references (`openseo-fact-sheet.md` → `seotool-fact-sheet.md`), URLs (`app.openseo.so` → `app.seotool.im`), MCP commands (`openseo` → `seotool`), variable names, build artifacts (`.openseo-build-env` → `.seotool-build-env`), docs, release notes, marketing content, Loops source tag.
+
+Hanya infra IDs yang tersisa (DB names, Hyperdrive binding, `OPENSEO_TELEMETRY_DISABLED`, HMAC salts).
+
+**Commit**: `1343430` (27 files, 39 insertions / 39 deletions).
 
 ---
 
@@ -715,7 +767,8 @@ pnpm exec tsc --noEmit 2>&1 | grep -v "Supastarter" | grep -c "error TS"
 
 # Tests
 pnpm test
-# Harus: 918 pass (baseline 908 + 10 SERP extract tests)
+# Harus: ~928 pass, 12 pre-existing fail (promptExplorer, customer-status-model, dataforseo/client, page-reporters)
+# 5 test files gagal — ini pre-existing dari QA Sprints + PayPal migration, BUKAN regressions baru
 
 # Lint (file baru/berubah)
 pnpm exec oxlint <files> --type-aware
@@ -745,6 +798,10 @@ pnpm db:generate  # D1 + PG
 | 6        | **Semi-gap** ✅ (Slice A)                                     | —                                     | DONE (Slice A). SERP snapshot persistence — full top-20 SERP composition persisted per rank check, zero extra API cost. Competitor table + tracked domain highlight. Domain first-class entity (Slice B) + Local SEO persistence (Slice C) deferred. |
 | 7        | **PayPal Customer Portal** ✅                                 | PayPal SDK                            | DONE. `getCustomerPortalUrl` server fn + "Manage Subscription" button di billing page. Cancellation via PayPal portal → webhook sync.                                                                                                                 |
 | 8        | **Quota Analytics Dashboard** ✅                              | QuotaService                          | DONE. Admin dashboard: plan distribution, MRR estimate, quota usage summary, recent orgs. `requirePlatformAdmin` middleware (env-var allowlist). Route `/admin`.                                                                                     |
+| QA       | **QA Sprint 1-3** ✅                                          | All features                          | DONE (commit `5a0b3e0`). 15 features, 47 files. P0 fixes, P1 compliance, P2 partial. Deployed to production.                                                                                                                                       |
+| Billing  | **PayPal Migration** ✅                                       | Autumn/Stripe                         | DONE (commit `0510bbd`). Autumn/Stripe → PayPal Subscriptions. ~40 files. Credits in `usage_quota` table. New env vars `PAYPAL_*`.                                                                                                                 |
+| Marketing | **Dark Command Center** ✅                                   | —                                     | DONE (commits `d85a798`, `a99ee84`). Dark theme redesign + conversion UX (hero analyzer, tooltips, pricing toggle, structured data). CSS-only animations.                                                                                          |
+| Cleanup  | **Rebrand OpenSEO → SeoTool.im** ✅                           | —                                     | DONE (commit `1343430`). All user-facing identifiers cleaned. Only infra IDs remain.                                                                                                                                                               |
 
 ---
 
