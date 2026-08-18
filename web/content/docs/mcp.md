@@ -20,7 +20,7 @@ For the most current setup UI and a copyable endpoint, open [AI & MCP in SeoTool
 Use user scope to make SeoTool.im available across projects. Use local scope for the current repository.
 
 ```bash
-claude mcp add --transport http --scope user openseo https://seotool.im/mcp
+claude mcp add --transport http --scope user seotool https://seotool.im/mcp
 ```
 
 After adding the server, approve the SeoTool.im login when prompted.
@@ -43,7 +43,7 @@ Claude Desktop custom connectors require a Claude plan that supports custom conn
 ```json
 {
   "mcpServers": {
-    "openseo": {
+    "seotool": {
       "url": "https://seotool.im/mcp"
     }
   }
@@ -57,7 +57,7 @@ Claude Desktop custom connectors require a Claude plan that supports custom conn
 Run this in your terminal:
 
 ```bash
-codex mcp add openseo --url https://seotool.im/mcp
+codex mcp add seotool --url https://seotool.im/mcp
 ```
 
 Approve the login when prompted.

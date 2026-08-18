@@ -93,7 +93,7 @@ function AiPage() {
                 Run this in your terminal:
               </p>
               <CodeBlock
-                code={`claude mcp add --transport http --scope user openseo ${mcpUrl}`}
+                code={`claude mcp add --transport http --scope user seotool ${mcpUrl}`}
                 onCopy={() =>
                   captureClientEvent("mcp:setup_command_copy", {
                     agent: "claude-code",
@@ -152,7 +152,7 @@ function AiPage() {
                 Run this in your terminal:
               </p>
               <CodeBlock
-                code={`codex mcp add openseo --url ${mcpUrl}`}
+                code={`codex mcp add seotool --url ${mcpUrl}`}
                 onCopy={() =>
                   captureClientEvent("mcp:setup_command_copy", {
                     agent: "codex",

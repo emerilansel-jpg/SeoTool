@@ -73,7 +73,7 @@ The prevalence evidence says a credible audit needs ~6 check families, not 300. 
 
 ### P2 — later
 
-- **`npx openseo-audit` local agent** (see §4 option D) — gated on block-rate telemetry, which now exists from week 1.
+- **`npx seotool-audit` local agent** (see §4 option D) — gated on block-rate telemetry, which now exists from week 1.
 - **Crawl snapshots in R2** ("what we saw" evidence; lightweight SEOnaut WACZ analog).
 - **Hreflang validation, structured-data validation, page-size checks, link-placement classification.**
 

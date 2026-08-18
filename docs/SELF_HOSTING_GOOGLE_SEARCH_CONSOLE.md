@@ -41,7 +41,7 @@ Under **APIs & Services → Credentials → Create credentials → OAuth client 
 
    | Deployment   | Redirect URI                                             |
    | ------------ | -------------------------------------------------------- |
-   | Deployed     | `https://your-openseo-domain.com/api/gsc/oauth/callback` |
+   | Deployed     | `https://your-seotool-domain.com/api/gsc/oauth/callback` |
    | Local Docker | `http://localhost:3001/api/gsc/oauth/callback`           |
 
    The scheme, host, and port must match exactly, with no trailing slash.

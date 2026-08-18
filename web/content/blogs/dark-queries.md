@@ -16,7 +16,7 @@ You can't force Google to hand them over. But you can reconstruct most of them, 
 - [The 100-clicks, 14-queries problem](#the-100-clicks-14-queries-problem)
 - [Why the gap is getting worse, not better](#why-the-gap-is-getting-worse-not-better)
 - [The fix: triangulate three data sources](#the-fix-triangulate-three-data-sources)
-- [Do it with SeoTool.im](#do-it-with-openseo)
+- [Do it with SeoTool.im](#do-it-with-seotoolim)
 - [What to do Monday morning](#what-to-do-monday-morning)
 
 ## The 100-clicks, 14-queries problem

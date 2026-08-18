@@ -21,7 +21,7 @@ import {
   trackUsageCreditSpend,
 } from "@/server/billing/subscription";
 import { FREE_ONBOARDING_QUESTION_LIMIT } from "@/shared/onboardingChat";
-import openSeoFactSheet from "@/server/features/onboarding/openseo-fact-sheet.md?raw";
+import seotoolFactSheet from "@/server/features/onboarding/seotool-fact-sheet.md?raw";
 
 function buildSystemPrompt(domain: string | null): string {
   return [
@@ -55,7 +55,7 @@ function buildSystemPrompt(domain: string | null): string {
     domain
       ? `The user's website is ${domain}.`
       : "If you need the user's website before answering, ask for it briefly.",
-    `SeoTool.im Fact Sheet:\n\n${openSeoFactSheet}`,
+    `SeoTool.im Fact Sheet:\n\n${seotoolFactSheet}`,
   ].join("\n\n");
 }
 
