@@ -23,6 +23,7 @@ export const user = sqliteTable("user", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
   analyticsOptedOut: integer("analytics_opted_out", { mode: "boolean" }),
+  twoFactorEnabled: integer("two_factor_enabled", { mode: "boolean" }),
 });
 
 export const session = sqliteTable(
@@ -82,6 +83,27 @@ export const account = sqliteTable(
       table.accountId,
       table.providerId,
     ),
+  ],
+);
+
+export const twoFactor = sqliteTable(
+  "twoFactor",
+  {
+    id: text("id").primaryKey(),
+    secret: text("secret").notNull(),
+    backupCodes: text("backup_codes").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    verified: integer("verified", { mode: "boolean" }).default(true).notNull(),
+    failedVerificationCount: integer("failed_verification_count")
+      .default(0)
+      .notNull(),
+    lockedUntil: integer("locked_until", { mode: "timestamp_ms" }),
+  },
+  (table) => [
+    index("twoFactor_secret_idx").on(table.secret),
+    index("twoFactor_userId_idx").on(table.userId),
   ],
 );
 

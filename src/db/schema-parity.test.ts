@@ -286,6 +286,8 @@ const REQUIRED_BETTER_AUTH_INDEXES: {
   { table: "member", columns: ["user_id"], unique: false },
   { table: "invitation", columns: ["organization_id"], unique: false },
   { table: "invitation", columns: ["email"], unique: false },
+  { table: "twoFactor", columns: ["secret"], unique: false },
+  { table: "twoFactor", columns: ["user_id"], unique: false },
 ];
 
 function indexKeys(table: Table, dialect: Dialect): string[] {

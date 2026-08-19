@@ -344,6 +344,13 @@
       "when": 1787151171099,
       "tag": "0048_slim_katie_power",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "6",
+      "when": 1787170849831,
+      "tag": "0049_flimsy_sugar_man",
+      "breakpoints": true
     }
   ]
 }
