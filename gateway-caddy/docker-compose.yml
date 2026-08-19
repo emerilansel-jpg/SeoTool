@@ -14,9 +14,9 @@ services:
     container_name: seotool-caddy
     restart: unless-stopped
     ports:
-      # Change to "4443:443" if pesat-caddy still occupies 443
-      - "443:443"
-      - "80:80"
+      # seotool-caddy on non-standard ports (pesat keeps 80/443)
+      - "4443:443"
+      - "8080:80"
     volumes:
       - ./Caddyfile.seotool:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
