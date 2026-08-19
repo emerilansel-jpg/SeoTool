@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { User } from "lucide-react";
+import { Lock, ShieldCheck, User, XCircle } from "lucide-react";
 import { ThemePreferenceMenuItems } from "@/client/components/ThemePreferenceMenuItems";
 import { captureClientEvent } from "@/client/lib/posthog";
 import { getStoredRedditAttribution } from "@/client/lib/reddit-attribution";
@@ -10,10 +10,12 @@ import { normalizeAuthRedirect } from "@/lib/auth-redirect";
 import { captureRedditConversionEvent } from "@/serverFunctions/redditConversions";
 import { createPaypalSubscription } from "@/serverFunctions/paypal-checkout";
 import { getQuotaStateSummary } from "@/serverFunctions/billing";
+import { PlanPickerGrid } from "@/client/features/billing/PlanPickerGrid";
+import type { PaidTier } from "@/client/features/marketing/tierHighlights";
 import {
+  ORDERED_PLAN_TIERS,
   PLAN_PRICES_USD,
   PLAN_TIER_LABELS,
-  ORDERED_PLAN_TIERS,
   type PlanTier,
 } from "@/shared/plans";
 
@@ -24,32 +26,6 @@ function isPlanTier(value: string): value is PlanTier {
 }
 
 const SUPPORT_EMAIL = "support@seotool.im";
-
-const PLAN_FEATURES: Record<PlanTier, string[]> = {
-  free: [
-    "1 project with 50 saved keywords",
-    "10 keyword searches per day",
-    "1 site audit (max 50 pages) per month",
-  ],
-  lite: [
-    "5 projects with 500 saved keywords",
-    "100 keyword searches per day",
-    "50 tracked keywords",
-    "On-demand SAM agent & MCP tools",
-  ],
-  pro: [
-    "25 projects with 5,000 saved keywords",
-    "500 keyword searches per day",
-    "500 tracked keywords",
-    "White-label client reporting",
-  ],
-  agency: [
-    "Unlimited projects & keyword searches",
-    "5,000 tracked keywords",
-    "50 site audits (max 10k pages) per month",
-    "Unlimited white-label client reporting",
-  ],
-};
 
 type Search = { upgrade?: true; redirect?: string; plan?: PlanTier };
 
@@ -77,7 +53,7 @@ function SubscribePage() {
     plan: defaultPlan,
   }: Search = Route.useSearch();
   const { data: session } = useSession();
-  const [selectedPlan, setSelectedPlan] = useState<PlanTier>(
+  const [selectedPlan, setSelectedPlan] = useState<PaidTier>(
     defaultPlan && defaultPlan !== "free" ? defaultPlan : "lite",
   );
   const [isAttaching, setIsAttaching] = useState(false);
@@ -201,9 +177,18 @@ function SubscribePage() {
     );
   }
 
-  async function handleSubscribe() {
-    if (selectedPlan === "free") return;
+  function selectPlan(tier: PaidTier) {
+    setSelectedPlan(tier);
+    // Keep the selection in the URL so back/forward restores it (and the
+    // pricing page deep-link ?plan= stays consistent).
+    void navigate({
+      to: "/subscribe",
+      search: { upgrade: isUpgradeFlow, redirect, plan: tier },
+      replace: true,
+    });
+  }
 
+  async function handleSubscribe() {
     setError(null);
     setIsAttaching(true);
 
@@ -233,27 +218,25 @@ function SubscribePage() {
 
   const firstName = session?.user?.name?.split(" ")[0] || "";
 
-  const paidTiers = ORDERED_PLAN_TIERS.filter((t) => t !== "free");
-
   return (
-    <div className="w-full max-w-md space-y-6">
+    <div className="w-full max-w-5xl space-y-8">
       <SubscribePageAccountMenu email={session?.user?.email} />
 
-      <div className="text-center space-y-3">
+      <div className="space-y-3 text-center">
         <img
           src="/transparent-logo.png"
           alt="SeoTool.im"
           className="mx-auto size-10 rounded-lg"
         />
-        <h1 className="text-xl font-semibold">
+        <h1 className="text-2xl font-semibold">
           {isUpgradeFlow
             ? "Upgrade your plan"
             : firstName
               ? `Welcome to SeoTool.im, ${firstName}!`
               : "Welcome to SeoTool.im!"}
         </h1>
-        <p className="text-sm text-base-content/60">
-          SEO on your terms. Choose the plan that fits your needs.
+        <p className="text-sm text-base-content/70">
+          SEO on your terms. Pick the plan that fits, cancel anytime.
         </p>
         <p className="text-xs text-base-content/50">
           <Link to="/" className="link">
@@ -262,68 +245,61 @@ function SubscribePage() {
         </p>
       </div>
 
-      <div className="grid gap-3">
-        {paidTiers.map((tier) => (
-          <button
-            key={tier}
-            type="button"
-            className={`flex flex-col gap-3 rounded-lg border p-4 text-left transition-colors ${
-              selectedPlan === tier
-                ? "border-primary bg-primary/5 ring-1 ring-primary"
-                : "border-base-300 hover:border-base-content/30"
-            }`}
-            onClick={() => setSelectedPlan(tier)}
-          >
-            <div className="flex w-full items-center justify-between">
-              <span className="font-semibold">{PLAN_TIER_LABELS[tier]}</span>
-              <span className="font-medium tabular-nums">
-                ${PLAN_PRICES_USD[tier]}/mo
-              </span>
-            </div>
-            <ul className="space-y-1.5 pl-px">
-              {PLAN_FEATURES[tier].map((feature) => (
-                <li
-                  key={feature}
-                  className="flex gap-2 text-xs text-base-content/70"
-                >
-                  <span className="text-base-content/40 mt-[1px] shrink-0">
-                    &mdash;
-                  </span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </button>
-        ))}
-      </div>
+      <PlanPickerGrid
+        selected={selectedPlan}
+        onSelect={selectPlan}
+        disabled={isAttaching}
+      />
 
-      <div className="space-y-4">
-        {error ? <p className="text-sm text-error">{error}</p> : null}
+      <div className="mx-auto w-full max-w-md space-y-4">
+        {error ? (
+          <div role="alert" className="alert alert-error py-2.5 text-sm">
+            {error}
+          </div>
+        ) : null}
 
         <button
-          className="btn btn-primary w-full"
+          className="btn btn-primary btn-md w-full font-semibold shadow-md shadow-primary/25"
           disabled={isAttaching}
           onClick={() => void handleSubscribe()}
         >
-          {isAttaching
-            ? "Redirecting..."
-            : `Subscribe to ${PLAN_TIER_LABELS[selectedPlan]}`}
+          {isAttaching ? (
+            <>
+              <span className="loading loading-spinner loading-xs" />
+              Redirecting to PayPal...
+            </>
+          ) : (
+            <>
+              Subscribe to {PLAN_TIER_LABELS[selectedPlan]}
+              <span className="opacity-70">
+                ${PLAN_PRICES_USD[selectedPlan]}/mo
+              </span>
+            </>
+          )}
         </button>
 
-        <p className="text-center text-xs text-base-content/50">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-base-content/60">
           <span
             className="tooltip before:max-w-60 before:whitespace-normal"
             data-tip={`Not for you yet? Email ${SUPPORT_EMAIL} within 30 days of your charge and we'll refund your subscription.`}
           >
-            <span className="cursor-help underline decoration-dotted">
+            <span className="inline-flex cursor-help items-center gap-1.5 underline decoration-dotted">
+              <ShieldCheck className="size-3.5 shrink-0" />
               30-day money-back guarantee
             </span>
           </span>
-          . Cancel anytime. Powered by PayPal.
-        </p>
+          <span className="inline-flex items-center gap-1.5">
+            <XCircle className="size-3.5 shrink-0" />
+            Cancel anytime
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Lock className="size-3.5 shrink-0" />
+            Secure checkout via PayPal
+          </span>
+        </div>
       </div>
 
-      <div className="text-center space-y-2 pb-6">
+      <div className="space-y-2 pb-6 text-center">
         <p className="text-sm text-base-content/60">
           Questions? Email {SUPPORT_EMAIL}.
         </p>

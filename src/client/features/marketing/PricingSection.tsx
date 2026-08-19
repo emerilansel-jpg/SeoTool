@@ -1,57 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
+import { PLAN_PRICES_USD, PLAN_TIER_LABELS } from "@/shared/plans";
 import {
-  PLAN_PRICES_USD,
-  PLAN_TIER_LABELS,
-  type PlanTier,
-} from "@/shared/plans";
-import { MONTHLY_CREDIT_GRANTS } from "@/shared/billing";
-
-type PaidTier = Exclude<PlanTier, "free">;
-
-const PAID_TIERS: PaidTier[] = ["lite", "pro", "agency"];
-
-// Shown per card. Numbers come from the single source of truth in
-// src/shared/plans.ts so the marketing copy can never drift from enforcement.
-const TIER_HIGHLIGHTS: Record<
-  PaidTier,
-  { blurb: string; bullets: string[]; popular: boolean }
-> = {
-  lite: {
-    blurb: "For solo founders validating one site.",
-    bullets: [
-      "5 projects",
-      "100 keyword searches per day",
-      "50 tracked keywords",
-      "3 site audits per month",
-      `${MONTHLY_CREDIT_GRANTS.lite.toLocaleString()} monthly data credits`,
-    ],
-    popular: false,
-  },
-  pro: {
-    blurb: "For growing teams that live in SEO data.",
-    bullets: [
-      "25 projects",
-      "500 keyword searches per day",
-      "500 tracked keywords",
-      "100 backlink checks per day",
-      "AI Visibility and Content Intelligence",
-      `${MONTHLY_CREDIT_GRANTS.pro.toLocaleString()} monthly data credits`,
-    ],
-    popular: true,
-  },
-  agency: {
-    blurb: "For agencies running many client sites.",
-    bullets: [
-      "Unlimited projects",
-      "500 backlink checks per day",
-      "50 site audits per month",
-      "SAM AI agent and MCP access",
-      `${MONTHLY_CREDIT_GRANTS.agency.toLocaleString()} monthly data credits`,
-    ],
-    popular: false,
-  },
-};
+  PAID_TIERS,
+  TIER_HIGHLIGHTS,
+} from "@/client/features/marketing/tierHighlights";
 
 export function PricingSection({ signedIn = false }: { signedIn?: boolean }) {
   return (
@@ -80,11 +33,7 @@ export function PricingSection({ signedIn = false }: { signedIn?: boolean }) {
                   {PLAN_TIER_LABELS[tier]}
                 </h3>
                 <span className="badge badge-sm badge-outline font-medium text-xs text-base-content/60">
-                  {tier === "agency"
-                    ? "Scale"
-                    : tier === "pro"
-                      ? "Growth"
-                      : "Starter"}
+                  {highlight.badge}
                 </span>
               </div>
 
