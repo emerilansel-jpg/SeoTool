@@ -74,7 +74,7 @@ function StatCard({
   const hasDelta = delta != null && delta !== 0;
   const isUp = (delta ?? 0) > 0;
   return (
-    <div className="rounded-lg border border-base-300 bg-base-50 p-3">
+    <div className="rounded-lg border border-base-300 bg-base-100 p-3">
       <div className="flex items-center gap-1.5 text-xs text-base-content/50">
         {icon}
         {label}

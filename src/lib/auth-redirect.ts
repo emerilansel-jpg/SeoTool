@@ -2,9 +2,13 @@ const OAUTH_AUTHORIZE_PATH = "/api/auth/oauth2/authorize";
 const OAUTH_SIGNED_QUERY_END = "sig";
 const OAUTH_AUTHORIZE_MARKERS = ["response_type", "client_id", "redirect_uri"];
 
+/** Where a signed-in user lands when no explicit redirect target exists.
+ * The public landing lives at "/", so the post-auth default is the app. */
+export const DEFAULT_APP_ENTRY = "/projects";
+
 export function normalizeAuthRedirect(value: string | null | undefined) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/";
+    return DEFAULT_APP_ENTRY;
   }
 
   return value;

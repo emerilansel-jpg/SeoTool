@@ -70,14 +70,9 @@ export async function handlePaypalWebhookRequest(request: Request) {
     try {
       await syncPaypalCustomerStatus(orgId, payload);
     } catch (error) {
-      console.error(
-        `PayPal ${payload.event_type} sync failed`,
-        orgId,
-        error,
-        {
-          cause: error instanceof Error ? error.cause : undefined,
-        },
-      );
+      console.error(`PayPal ${payload.event_type} sync failed`, orgId, error, {
+        cause: error instanceof Error ? error.cause : undefined,
+      });
       await captureServerError(error, {
         source: "paypal_webhook",
         organization_id: orgId,
@@ -101,7 +96,8 @@ function getOrganizationId(payload: PayPalWebhookEvent): string | null {
     ? (resource.purchase_units as Array<Record<string, unknown>>)
     : [];
   for (const unit of purchaseUnits) {
-    const refId = typeof unit.reference_id === "string" ? unit.reference_id : null;
+    const refId =
+      typeof unit.reference_id === "string" ? unit.reference_id : null;
     if (refId) {
       // reference_id format: "topup-{orgId}-{timestamp}"
       const match = refId.match(/^topup-([^-]+(?:-[^-]+)*)-\d+$/);

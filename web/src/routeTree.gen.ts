@@ -25,6 +25,7 @@ import { Route as DocsSplatRouteImport } from './routes/docs/$'
 import { Route as BlogsSplatRouteImport } from './routes/blogs/$'
 import { Route as ApiSubscribeRouteImport } from './routes/api/subscribe'
 import { Route as ApiEventRouteImport } from './routes/api/event'
+import { Route as ApiAiVisibilityRouteImport } from './routes/api/ai-visibility'
 import { Route as MarketingPricingRouteImport } from './routes/_marketing/pricing'
 import { Route as MarketingOpenSourceSeoRouteImport } from './routes/_marketing/open-source-seo'
 import { Route as MarketingGoogleSearchConsoleMcpRouteImport } from './routes/_marketing/google-search-console-mcp'
@@ -33,7 +34,9 @@ import { Route as MarketingChangelogRouteImport } from './routes/_marketing/chan
 import { Route as MarketingCareersRouteImport } from './routes/_marketing/careers'
 import { Route as MarketingAffiliatesRouteImport } from './routes/_marketing/affiliates'
 import { Route as MarketingAboutRouteImport } from './routes/_marketing/about'
+import { Route as MarketingFreeToolsIndexRouteImport } from './routes/_marketing/free-tools/index'
 import { Route as MarketingFeaturesIndexRouteImport } from './routes/_marketing/features/index'
+import { Route as MarketingFreeToolsAiVisibilityCheckerRouteImport } from './routes/_marketing/free-tools/ai-visibility-checker'
 import { Route as MarketingFeaturesSiteAuditRouteImport } from './routes/_marketing/features/site-audit'
 import { Route as MarketingFeaturesSavedKeywordsRouteImport } from './routes/_marketing/features/saved-keywords'
 import { Route as MarketingFeaturesRankTrackingRouteImport } from './routes/_marketing/features/rank-tracking'
@@ -44,10 +47,13 @@ import { Route as MarketingFeaturesBacklinkCheckerRouteImport } from './routes/_
 import { Route as MarketingFeaturesAiSearchPromptsRouteImport } from './routes/_marketing/features/ai-search-prompts'
 import { Route as MarketingFeaturesAiBrandVisibilityRouteImport } from './routes/_marketing/features/ai-brand-visibility'
 import { Route as MarketingLibraryKeywordResearchIndexRouteImport } from './routes/_marketing/library/keyword-research/index'
+import { Route as MarketingLibraryAiSearchGeoIndexRouteImport } from './routes/_marketing/library/ai-search-geo/index'
 import { Route as MarketingLibraryKeywordResearchSeedFromConversationRouteImport } from './routes/_marketing/library/keyword-research/seed-from-conversation'
 import { Route as MarketingLibraryKeywordResearchSearchIntentMappingRouteImport } from './routes/_marketing/library/keyword-research/search-intent-mapping'
 import { Route as MarketingLibraryKeywordResearchLongTailQuestionMiningRouteImport } from './routes/_marketing/library/keyword-research/long-tail-question-mining'
 import { Route as MarketingLibraryKeywordResearchClusterTopicalHubsRouteImport } from './routes/_marketing/library/keyword-research/cluster-topical-hubs'
+import { Route as MarketingLibraryAiSearchGeoTrackAiVisibilityRouteImport } from './routes/_marketing/library/ai-search-geo/track-ai-visibility'
+import { Route as MarketingLibraryAiSearchGeoAppearInChatgptResultsRouteImport } from './routes/_marketing/library/ai-search-geo/appear-in-chatgpt-results'
 
 const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
   id: '/terms-and-conditions',
@@ -128,6 +134,11 @@ const ApiEventRoute = ApiEventRouteImport.update({
   path: '/api/event',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiVisibilityRoute = ApiAiVisibilityRouteImport.update({
+  id: '/api/ai-visibility',
+  path: '/api/ai-visibility',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketingPricingRoute = MarketingPricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
@@ -169,11 +180,22 @@ const MarketingAboutRoute = MarketingAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => MarketingRoute,
 } as any)
+const MarketingFreeToolsIndexRoute = MarketingFreeToolsIndexRouteImport.update({
+  id: '/free-tools/',
+  path: '/free-tools/',
+  getParentRoute: () => MarketingRoute,
+} as any)
 const MarketingFeaturesIndexRoute = MarketingFeaturesIndexRouteImport.update({
   id: '/features/',
   path: '/features/',
   getParentRoute: () => MarketingRoute,
 } as any)
+const MarketingFreeToolsAiVisibilityCheckerRoute =
+  MarketingFreeToolsAiVisibilityCheckerRouteImport.update({
+    id: '/free-tools/ai-visibility-checker',
+    path: '/free-tools/ai-visibility-checker',
+    getParentRoute: () => MarketingRoute,
+  } as any)
 const MarketingFeaturesSiteAuditRoute =
   MarketingFeaturesSiteAuditRouteImport.update({
     id: '/features/site-audit',
@@ -233,6 +255,12 @@ const MarketingLibraryKeywordResearchIndexRoute =
     path: '/library/keyword-research/',
     getParentRoute: () => MarketingRoute,
   } as any)
+const MarketingLibraryAiSearchGeoIndexRoute =
+  MarketingLibraryAiSearchGeoIndexRouteImport.update({
+    id: '/library/ai-search-geo/',
+    path: '/library/ai-search-geo/',
+    getParentRoute: () => MarketingRoute,
+  } as any)
 const MarketingLibraryKeywordResearchSeedFromConversationRoute =
   MarketingLibraryKeywordResearchSeedFromConversationRouteImport.update({
     id: '/library/keyword-research/seed-from-conversation',
@@ -257,6 +285,18 @@ const MarketingLibraryKeywordResearchClusterTopicalHubsRoute =
     path: '/library/keyword-research/cluster-topical-hubs',
     getParentRoute: () => MarketingRoute,
   } as any)
+const MarketingLibraryAiSearchGeoTrackAiVisibilityRoute =
+  MarketingLibraryAiSearchGeoTrackAiVisibilityRouteImport.update({
+    id: '/library/ai-search-geo/track-ai-visibility',
+    path: '/library/ai-search-geo/track-ai-visibility',
+    getParentRoute: () => MarketingRoute,
+  } as any)
+const MarketingLibraryAiSearchGeoAppearInChatgptResultsRoute =
+  MarketingLibraryAiSearchGeoAppearInChatgptResultsRouteImport.update({
+    id: '/library/ai-search-geo/appear-in-chatgpt-results',
+    path: '/library/ai-search-geo/appear-in-chatgpt-results',
+    getParentRoute: () => MarketingRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
@@ -273,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/google-search-console-mcp': typeof MarketingGoogleSearchConsoleMcpRoute
   '/open-source-seo': typeof MarketingOpenSourceSeoRoute
   '/pricing': typeof MarketingPricingRoute
+  '/api/ai-visibility': typeof ApiAiVisibilityRoute
   '/api/event': typeof ApiEventRoute
   '/api/subscribe': typeof ApiSubscribeRoute
   '/blogs/$': typeof BlogsSplatRoute
@@ -291,11 +332,16 @@ export interface FileRoutesByFullPath {
   '/features/rank-tracking': typeof MarketingFeaturesRankTrackingRoute
   '/features/saved-keywords': typeof MarketingFeaturesSavedKeywordsRoute
   '/features/site-audit': typeof MarketingFeaturesSiteAuditRoute
+  '/free-tools/ai-visibility-checker': typeof MarketingFreeToolsAiVisibilityCheckerRoute
   '/features/': typeof MarketingFeaturesIndexRoute
+  '/free-tools/': typeof MarketingFreeToolsIndexRoute
+  '/library/ai-search-geo/appear-in-chatgpt-results': typeof MarketingLibraryAiSearchGeoAppearInChatgptResultsRoute
+  '/library/ai-search-geo/track-ai-visibility': typeof MarketingLibraryAiSearchGeoTrackAiVisibilityRoute
   '/library/keyword-research/cluster-topical-hubs': typeof MarketingLibraryKeywordResearchClusterTopicalHubsRoute
   '/library/keyword-research/long-tail-question-mining': typeof MarketingLibraryKeywordResearchLongTailQuestionMiningRoute
   '/library/keyword-research/search-intent-mapping': typeof MarketingLibraryKeywordResearchSearchIntentMappingRoute
   '/library/keyword-research/seed-from-conversation': typeof MarketingLibraryKeywordResearchSeedFromConversationRoute
+  '/library/ai-search-geo/': typeof MarketingLibraryAiSearchGeoIndexRoute
   '/library/keyword-research/': typeof MarketingLibraryKeywordResearchIndexRoute
 }
 export interface FileRoutesByTo {
@@ -312,6 +358,7 @@ export interface FileRoutesByTo {
   '/google-search-console-mcp': typeof MarketingGoogleSearchConsoleMcpRoute
   '/open-source-seo': typeof MarketingOpenSourceSeoRoute
   '/pricing': typeof MarketingPricingRoute
+  '/api/ai-visibility': typeof ApiAiVisibilityRoute
   '/api/event': typeof ApiEventRoute
   '/api/subscribe': typeof ApiSubscribeRoute
   '/blogs/$': typeof BlogsSplatRoute
@@ -331,11 +378,16 @@ export interface FileRoutesByTo {
   '/features/rank-tracking': typeof MarketingFeaturesRankTrackingRoute
   '/features/saved-keywords': typeof MarketingFeaturesSavedKeywordsRoute
   '/features/site-audit': typeof MarketingFeaturesSiteAuditRoute
+  '/free-tools/ai-visibility-checker': typeof MarketingFreeToolsAiVisibilityCheckerRoute
   '/features': typeof MarketingFeaturesIndexRoute
+  '/free-tools': typeof MarketingFreeToolsIndexRoute
+  '/library/ai-search-geo/appear-in-chatgpt-results': typeof MarketingLibraryAiSearchGeoAppearInChatgptResultsRoute
+  '/library/ai-search-geo/track-ai-visibility': typeof MarketingLibraryAiSearchGeoTrackAiVisibilityRoute
   '/library/keyword-research/cluster-topical-hubs': typeof MarketingLibraryKeywordResearchClusterTopicalHubsRoute
   '/library/keyword-research/long-tail-question-mining': typeof MarketingLibraryKeywordResearchLongTailQuestionMiningRoute
   '/library/keyword-research/search-intent-mapping': typeof MarketingLibraryKeywordResearchSearchIntentMappingRoute
   '/library/keyword-research/seed-from-conversation': typeof MarketingLibraryKeywordResearchSeedFromConversationRoute
+  '/library/ai-search-geo': typeof MarketingLibraryAiSearchGeoIndexRoute
   '/library/keyword-research': typeof MarketingLibraryKeywordResearchIndexRoute
 }
 export interface FileRoutesById {
@@ -354,6 +406,7 @@ export interface FileRoutesById {
   '/_marketing/google-search-console-mcp': typeof MarketingGoogleSearchConsoleMcpRoute
   '/_marketing/open-source-seo': typeof MarketingOpenSourceSeoRoute
   '/_marketing/pricing': typeof MarketingPricingRoute
+  '/api/ai-visibility': typeof ApiAiVisibilityRoute
   '/api/event': typeof ApiEventRoute
   '/api/subscribe': typeof ApiSubscribeRoute
   '/blogs/$': typeof BlogsSplatRoute
@@ -373,11 +426,16 @@ export interface FileRoutesById {
   '/_marketing/features/rank-tracking': typeof MarketingFeaturesRankTrackingRoute
   '/_marketing/features/saved-keywords': typeof MarketingFeaturesSavedKeywordsRoute
   '/_marketing/features/site-audit': typeof MarketingFeaturesSiteAuditRoute
+  '/_marketing/free-tools/ai-visibility-checker': typeof MarketingFreeToolsAiVisibilityCheckerRoute
   '/_marketing/features/': typeof MarketingFeaturesIndexRoute
+  '/_marketing/free-tools/': typeof MarketingFreeToolsIndexRoute
+  '/_marketing/library/ai-search-geo/appear-in-chatgpt-results': typeof MarketingLibraryAiSearchGeoAppearInChatgptResultsRoute
+  '/_marketing/library/ai-search-geo/track-ai-visibility': typeof MarketingLibraryAiSearchGeoTrackAiVisibilityRoute
   '/_marketing/library/keyword-research/cluster-topical-hubs': typeof MarketingLibraryKeywordResearchClusterTopicalHubsRoute
   '/_marketing/library/keyword-research/long-tail-question-mining': typeof MarketingLibraryKeywordResearchLongTailQuestionMiningRoute
   '/_marketing/library/keyword-research/search-intent-mapping': typeof MarketingLibraryKeywordResearchSearchIntentMappingRoute
   '/_marketing/library/keyword-research/seed-from-conversation': typeof MarketingLibraryKeywordResearchSeedFromConversationRoute
+  '/_marketing/library/ai-search-geo/': typeof MarketingLibraryAiSearchGeoIndexRoute
   '/_marketing/library/keyword-research/': typeof MarketingLibraryKeywordResearchIndexRoute
 }
 export interface FileRouteTypes {
@@ -397,6 +455,7 @@ export interface FileRouteTypes {
     | '/google-search-console-mcp'
     | '/open-source-seo'
     | '/pricing'
+    | '/api/ai-visibility'
     | '/api/event'
     | '/api/subscribe'
     | '/blogs/$'
@@ -415,11 +474,16 @@ export interface FileRouteTypes {
     | '/features/rank-tracking'
     | '/features/saved-keywords'
     | '/features/site-audit'
+    | '/free-tools/ai-visibility-checker'
     | '/features/'
+    | '/free-tools/'
+    | '/library/ai-search-geo/appear-in-chatgpt-results'
+    | '/library/ai-search-geo/track-ai-visibility'
     | '/library/keyword-research/cluster-topical-hubs'
     | '/library/keyword-research/long-tail-question-mining'
     | '/library/keyword-research/search-intent-mapping'
     | '/library/keyword-research/seed-from-conversation'
+    | '/library/ai-search-geo/'
     | '/library/keyword-research/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -436,6 +500,7 @@ export interface FileRouteTypes {
     | '/google-search-console-mcp'
     | '/open-source-seo'
     | '/pricing'
+    | '/api/ai-visibility'
     | '/api/event'
     | '/api/subscribe'
     | '/blogs/$'
@@ -455,11 +520,16 @@ export interface FileRouteTypes {
     | '/features/rank-tracking'
     | '/features/saved-keywords'
     | '/features/site-audit'
+    | '/free-tools/ai-visibility-checker'
     | '/features'
+    | '/free-tools'
+    | '/library/ai-search-geo/appear-in-chatgpt-results'
+    | '/library/ai-search-geo/track-ai-visibility'
     | '/library/keyword-research/cluster-topical-hubs'
     | '/library/keyword-research/long-tail-question-mining'
     | '/library/keyword-research/search-intent-mapping'
     | '/library/keyword-research/seed-from-conversation'
+    | '/library/ai-search-geo'
     | '/library/keyword-research'
   id:
     | '__root__'
@@ -477,6 +547,7 @@ export interface FileRouteTypes {
     | '/_marketing/google-search-console-mcp'
     | '/_marketing/open-source-seo'
     | '/_marketing/pricing'
+    | '/api/ai-visibility'
     | '/api/event'
     | '/api/subscribe'
     | '/blogs/$'
@@ -496,11 +567,16 @@ export interface FileRouteTypes {
     | '/_marketing/features/rank-tracking'
     | '/_marketing/features/saved-keywords'
     | '/_marketing/features/site-audit'
+    | '/_marketing/free-tools/ai-visibility-checker'
     | '/_marketing/features/'
+    | '/_marketing/free-tools/'
+    | '/_marketing/library/ai-search-geo/appear-in-chatgpt-results'
+    | '/_marketing/library/ai-search-geo/track-ai-visibility'
     | '/_marketing/library/keyword-research/cluster-topical-hubs'
     | '/_marketing/library/keyword-research/long-tail-question-mining'
     | '/_marketing/library/keyword-research/search-intent-mapping'
     | '/_marketing/library/keyword-research/seed-from-conversation'
+    | '/_marketing/library/ai-search-geo/'
     | '/_marketing/library/keyword-research/'
   fileRoutesById: FileRoutesById
 }
@@ -511,6 +587,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   TermsAndConditionsRoute: typeof TermsAndConditionsRoute
+  ApiAiVisibilityRoute: typeof ApiAiVisibilityRoute
   ApiEventRoute: typeof ApiEventRoute
   ApiSubscribeRoute: typeof ApiSubscribeRoute
   BlogsSplatRoute: typeof BlogsSplatRoute
@@ -636,6 +713,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiEventRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai-visibility': {
+      id: '/api/ai-visibility'
+      path: '/api/ai-visibility'
+      fullPath: '/api/ai-visibility'
+      preLoaderRoute: typeof ApiAiVisibilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_marketing/pricing': {
       id: '/_marketing/pricing'
       path: '/pricing'
@@ -692,11 +776,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingAboutRouteImport
       parentRoute: typeof MarketingRoute
     }
+    '/_marketing/free-tools/': {
+      id: '/_marketing/free-tools/'
+      path: '/free-tools'
+      fullPath: '/free-tools/'
+      preLoaderRoute: typeof MarketingFreeToolsIndexRouteImport
+      parentRoute: typeof MarketingRoute
+    }
     '/_marketing/features/': {
       id: '/_marketing/features/'
       path: '/features'
       fullPath: '/features/'
       preLoaderRoute: typeof MarketingFeaturesIndexRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/free-tools/ai-visibility-checker': {
+      id: '/_marketing/free-tools/ai-visibility-checker'
+      path: '/free-tools/ai-visibility-checker'
+      fullPath: '/free-tools/ai-visibility-checker'
+      preLoaderRoute: typeof MarketingFreeToolsAiVisibilityCheckerRouteImport
       parentRoute: typeof MarketingRoute
     }
     '/_marketing/features/site-audit': {
@@ -769,6 +867,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingLibraryKeywordResearchIndexRouteImport
       parentRoute: typeof MarketingRoute
     }
+    '/_marketing/library/ai-search-geo/': {
+      id: '/_marketing/library/ai-search-geo/'
+      path: '/library/ai-search-geo'
+      fullPath: '/library/ai-search-geo/'
+      preLoaderRoute: typeof MarketingLibraryAiSearchGeoIndexRouteImport
+      parentRoute: typeof MarketingRoute
+    }
     '/_marketing/library/keyword-research/seed-from-conversation': {
       id: '/_marketing/library/keyword-research/seed-from-conversation'
       path: '/library/keyword-research/seed-from-conversation'
@@ -797,6 +902,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingLibraryKeywordResearchClusterTopicalHubsRouteImport
       parentRoute: typeof MarketingRoute
     }
+    '/_marketing/library/ai-search-geo/track-ai-visibility': {
+      id: '/_marketing/library/ai-search-geo/track-ai-visibility'
+      path: '/library/ai-search-geo/track-ai-visibility'
+      fullPath: '/library/ai-search-geo/track-ai-visibility'
+      preLoaderRoute: typeof MarketingLibraryAiSearchGeoTrackAiVisibilityRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/library/ai-search-geo/appear-in-chatgpt-results': {
+      id: '/_marketing/library/ai-search-geo/appear-in-chatgpt-results'
+      path: '/library/ai-search-geo/appear-in-chatgpt-results'
+      fullPath: '/library/ai-search-geo/appear-in-chatgpt-results'
+      preLoaderRoute: typeof MarketingLibraryAiSearchGeoAppearInChatgptResultsRouteImport
+      parentRoute: typeof MarketingRoute
+    }
   }
 }
 
@@ -819,11 +938,16 @@ interface MarketingRouteChildren {
   MarketingFeaturesRankTrackingRoute: typeof MarketingFeaturesRankTrackingRoute
   MarketingFeaturesSavedKeywordsRoute: typeof MarketingFeaturesSavedKeywordsRoute
   MarketingFeaturesSiteAuditRoute: typeof MarketingFeaturesSiteAuditRoute
+  MarketingFreeToolsAiVisibilityCheckerRoute: typeof MarketingFreeToolsAiVisibilityCheckerRoute
   MarketingFeaturesIndexRoute: typeof MarketingFeaturesIndexRoute
+  MarketingFreeToolsIndexRoute: typeof MarketingFreeToolsIndexRoute
+  MarketingLibraryAiSearchGeoAppearInChatgptResultsRoute: typeof MarketingLibraryAiSearchGeoAppearInChatgptResultsRoute
+  MarketingLibraryAiSearchGeoTrackAiVisibilityRoute: typeof MarketingLibraryAiSearchGeoTrackAiVisibilityRoute
   MarketingLibraryKeywordResearchClusterTopicalHubsRoute: typeof MarketingLibraryKeywordResearchClusterTopicalHubsRoute
   MarketingLibraryKeywordResearchLongTailQuestionMiningRoute: typeof MarketingLibraryKeywordResearchLongTailQuestionMiningRoute
   MarketingLibraryKeywordResearchSearchIntentMappingRoute: typeof MarketingLibraryKeywordResearchSearchIntentMappingRoute
   MarketingLibraryKeywordResearchSeedFromConversationRoute: typeof MarketingLibraryKeywordResearchSeedFromConversationRoute
+  MarketingLibraryAiSearchGeoIndexRoute: typeof MarketingLibraryAiSearchGeoIndexRoute
   MarketingLibraryKeywordResearchIndexRoute: typeof MarketingLibraryKeywordResearchIndexRoute
 }
 
@@ -847,7 +971,14 @@ const MarketingRouteChildren: MarketingRouteChildren = {
   MarketingFeaturesRankTrackingRoute: MarketingFeaturesRankTrackingRoute,
   MarketingFeaturesSavedKeywordsRoute: MarketingFeaturesSavedKeywordsRoute,
   MarketingFeaturesSiteAuditRoute: MarketingFeaturesSiteAuditRoute,
+  MarketingFreeToolsAiVisibilityCheckerRoute:
+    MarketingFreeToolsAiVisibilityCheckerRoute,
   MarketingFeaturesIndexRoute: MarketingFeaturesIndexRoute,
+  MarketingFreeToolsIndexRoute: MarketingFreeToolsIndexRoute,
+  MarketingLibraryAiSearchGeoAppearInChatgptResultsRoute:
+    MarketingLibraryAiSearchGeoAppearInChatgptResultsRoute,
+  MarketingLibraryAiSearchGeoTrackAiVisibilityRoute:
+    MarketingLibraryAiSearchGeoTrackAiVisibilityRoute,
   MarketingLibraryKeywordResearchClusterTopicalHubsRoute:
     MarketingLibraryKeywordResearchClusterTopicalHubsRoute,
   MarketingLibraryKeywordResearchLongTailQuestionMiningRoute:
@@ -856,6 +987,7 @@ const MarketingRouteChildren: MarketingRouteChildren = {
     MarketingLibraryKeywordResearchSearchIntentMappingRoute,
   MarketingLibraryKeywordResearchSeedFromConversationRoute:
     MarketingLibraryKeywordResearchSeedFromConversationRoute,
+  MarketingLibraryAiSearchGeoIndexRoute: MarketingLibraryAiSearchGeoIndexRoute,
   MarketingLibraryKeywordResearchIndexRoute:
     MarketingLibraryKeywordResearchIndexRoute,
 }
@@ -871,6 +1003,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   TermsAndConditionsRoute: TermsAndConditionsRoute,
+  ApiAiVisibilityRoute: ApiAiVisibilityRoute,
   ApiEventRoute: ApiEventRoute,
   ApiSubscribeRoute: ApiSubscribeRoute,
   BlogsSplatRoute: BlogsSplatRoute,

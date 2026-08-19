@@ -1,11 +1,14 @@
 import { useEffect, useMemo } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import type { OnChangeFn, SortingState } from "@tanstack/react-table";
+import { AnchorsTable } from "./AnchorsTable";
 import { BacklinksFilterPanel } from "./BacklinksFilterPanel";
 import { BacklinksTable } from "./BacklinksTable";
 import { ReferringDomainsTable } from "./ReferringDomainsTable";
 import { TopPagesTable } from "./TopPagesTable";
+import { ToxicLinksTable } from "./ToxicLinksTable";
 import type {
+  BacklinksRow,
   BacklinksSearchState,
   BacklinksTabRows,
 } from "./backlinksPageTypes";
@@ -31,12 +34,15 @@ const BACKLINKS_RESULTS_TABS: Array<{
   { tab: "backlinks", label: "Backlinks" },
   { tab: "domains", label: "Referring Domains" },
   { tab: "pages", label: "Top Pages" },
+  { tab: "anchors", label: "Anchors" },
+  { tab: "toxic", label: "Toxic" },
 ];
 
 export function BacklinksResultsCard({
   projectId,
   activeTab,
   tabRows,
+  toxicRows,
   filters,
   sorting,
   view,
@@ -54,6 +60,7 @@ export function BacklinksResultsCard({
   projectId: string;
   activeTab: BacklinksSearchState["tab"];
   tabRows: BacklinksTabRows;
+  toxicRows: BacklinksRow[];
   filters: BacklinksFiltersState;
   sorting: SortingState;
   view: "all" | undefined;
@@ -79,11 +86,19 @@ export function BacklinksResultsCard({
     isLoading: isLoadingRatings,
     loadRatings,
   } = useAhrefsDomainRatings(projectId);
-  const activeFilterCount = filters[activeTab].activeFilterCount;
+  const activeFilterCount =
+    activeTab === "toxic" ? 0 : filters[activeTab].activeFilterCount;
   const exportTable = useMemo(
     () =>
-      buildBacklinksTabExport({ tab: activeTab, rows: tabRows, domainRatings }),
-    [activeTab, domainRatings, tabRows],
+      buildBacklinksTabExport({
+        tab: activeTab,
+        rows:
+          activeTab === "toxic"
+            ? { ...tabRows, backlinks: toxicRows }
+            : tabRows,
+        domainRatings,
+      }),
+    [activeTab, domainRatings, tabRows, toxicRows],
   );
   // Domains keyed by both tables that the DR column can enrich. Each table
   // holds the currently loaded page, so this changes as the user paginates.
@@ -226,6 +241,16 @@ export function BacklinksResultsCard({
                 onSortingChange={onSortingChange}
               />
             ) : null}
+            {activeTab === "anchors" ? (
+              <AnchorsTable
+                rows={tabRows.anchors}
+                sorting={sorting}
+                onSortingChange={onSortingChange}
+              />
+            ) : null}
+            {activeTab === "toxic" ? (
+              <ToxicLinksTable rows={toxicRows} target={exportTarget} />
+            ) : null}
           </>
         ) : null}
       </div>
@@ -249,6 +274,8 @@ const TAB_LOADING_LABELS: Record<BacklinksTab, string> = {
   backlinks: "Loading backlinks",
   domains: "Loading referring domains",
   pages: "Loading top pages",
+  anchors: "Loading anchor distribution",
+  toxic: "Loading toxic links",
 };
 
 /** Unique domains the DR column keys on, from both the backlinks and referring

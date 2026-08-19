@@ -8,7 +8,6 @@ import {
   LogOut,
   MessageCircle,
   Settings,
-  User,
   X,
 } from "lucide-react";
 import {
@@ -31,18 +30,13 @@ interface SidebarProps {
 }
 
 const navItemBaseClass =
-  "relative flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-base-content/70";
+  "relative flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-base-content/70 transition-all duration-150";
 
-// Hover uses a lighter tint than the active background (bg-base-300/50) so a
-// hovered item next to the active one stays visually distinct instead of
-// merging into a single block.
-const navItemClass = `${navItemBaseClass} transition-colors hover:bg-base-300/30 hover:text-base-content`;
+const navItemClass = `${navItemBaseClass} hover:bg-base-300/50 hover:text-base-content`;
 
 const navItemActiveProps = {
-  // Keep the active tint on hover so the active item does not fall back to the
-  // lighter hover background of navItemClass.
   className:
-    "bg-base-300/50 hover:bg-base-300/50 font-medium text-base-content",
+    "bg-primary/10 hover:bg-primary/15 font-semibold text-primary shadow-sm",
 };
 
 function SidebarNavLink({
@@ -67,9 +61,11 @@ function SidebarNavLink({
       {({ isActive }: { isActive: boolean }) => (
         <>
           {isActive ? (
-            <div className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r-full bg-primary" />
+            <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-primary" />
           ) : null}
-          <Icon className="h-4 w-4 shrink-0" />
+          <Icon
+            className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-base-content/60"}`}
+          />
           <span className="truncate">{label}</span>
         </>
       )}
@@ -120,28 +116,33 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
   };
 
   return (
-    <div className="flex h-full w-60 flex-col bg-base-200">
-      <div className="flex items-center justify-between px-4 pb-2 pt-3">
-        <div className="flex items-center gap-1">
-          <Link
-            to="/"
-            onClick={onNavigate}
-            className="text-base font-semibold text-base-content"
-          >
-            SeoTool.im
-          </Link>
+    <div className="flex h-full w-60 flex-col bg-base-200 border-r border-base-300/60">
+      <div className="flex items-center justify-between px-3.5 pb-2 pt-3.5">
+        <Link
+          to="/"
+          onClick={onNavigate}
+          className="group flex items-center gap-2"
+        >
+          <div className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-indigo-600 to-cyan-400 text-xs font-black text-white shadow-sm shadow-primary/30 transition-transform group-hover:scale-105">
+            S
+          </div>
+          <span className="text-base font-bold tracking-tight text-base-content">
+            SeoTool<span className="text-primary font-black">.im</span>
+          </span>
+        </Link>
+        <div className="flex items-center gap-0.5">
           <NotificationCenter />
+          {onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn btn-ghost btn-xs btn-square"
+              aria-label="Close sidebar"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          ) : null}
         </div>
-        {onClose ? (
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn btn-ghost btn-sm btn-circle"
-            aria-label="Close sidebar"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        ) : null}
       </div>
 
       <div className="px-3 pb-1">
@@ -175,24 +176,26 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
       {view === "chat" && projectId ? (
         <SamSidebarPanel projectId={projectId} onNavigate={onNavigate} />
       ) : (
-        <nav className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
+        <nav className="min-h-0 flex-1 overflow-y-auto px-2 py-2 space-y-3">
           {navGroups.map((group) => (
-            <div key={group.label} className="mb-1">
-              <div className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-base-content/40">
+            <div key={group.label}>
+              <div className="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-base-content/45">
                 {group.label}
               </div>
-              {group.items.map((item) => {
-                const { icon, label, ...linkProps } = item;
-                return (
-                  <SidebarNavLink
-                    key={linkProps.to}
-                    icon={icon}
-                    label={label}
-                    onNavigate={onNavigate}
-                    linkProps={linkProps}
-                  />
-                );
-              })}
+              <div className="space-y-0.5">
+                {group.items.map((item) => {
+                  const { icon, label, ...linkProps } = item;
+                  return (
+                    <SidebarNavLink
+                      key={linkProps.to}
+                      icon={icon}
+                      label={label}
+                      onNavigate={onNavigate}
+                      linkProps={linkProps}
+                    />
+                  );
+                })}
+              </div>
             </div>
           ))}
         </nav>
@@ -220,9 +223,9 @@ function SidebarViewTab({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`tab flex-1 gap-1.5 ${active ? "tab-active" : ""}`}
+      className={`tab flex-1 gap-1.5 text-xs font-semibold ${active ? "tab-active" : ""}`}
     >
-      <Icon className="size-4" />
+      <Icon className="size-3.5" />
       {label}
     </button>
   );
@@ -232,6 +235,7 @@ function SidebarFooter({ onNavigate }: { onNavigate?: () => void }) {
   const { data: session } = useSession();
   const isHostedMode = isHostedClientAuthMode();
   const email = session?.user?.email;
+  const initial = email ? email.charAt(0).toUpperCase() : "U";
 
   const closeMenu = () => {
     closeDropdown();
@@ -239,7 +243,7 @@ function SidebarFooter({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   return (
-    <div className="shrink-0 border-t border-base-300 px-2 py-2 pb-safe">
+    <div className="shrink-0 border-t border-base-300 px-2 py-2 pb-safe space-y-1">
       <SidebarNavLink
         icon={CircleHelp}
         label="Help & Community"
@@ -252,13 +256,17 @@ function SidebarFooter({ onNavigate }: { onNavigate?: () => void }) {
           <button
             type="button"
             tabIndex={0}
-            className={`${navItemClass} w-full`}
+            className={`${navItemClass} w-full justify-between`}
             aria-label="Open account menu"
           >
-            <User className="h-4 w-4 shrink-0" />
-            <span className="truncate" data-ph-mask>
-              {email}
-            </span>
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">
+                {initial}
+              </div>
+              <span className="truncate text-xs" data-ph-mask>
+                {email}
+              </span>
+            </div>
           </button>
           <ul
             tabIndex={0}

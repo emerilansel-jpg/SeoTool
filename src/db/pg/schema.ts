@@ -14,5 +14,6 @@ export * from "./telemetry.schema";
 export * from "./content-strategy.schema";
 export * from "./alerts.schema";
 export * from "./serp-snapshots.schema";
+export * from "./serp-volatility.schema";
 export * from "./notifications.schema";
 export * from "./api-keys.schema";

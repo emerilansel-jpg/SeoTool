@@ -47,12 +47,12 @@ export function BrandLookupMentionTrendCard({ result }: Props) {
           />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11, fill: "#888" }}
+            tick={{ fontSize: 11, fill: "var(--trend-axis-color)" }}
             tickLine={false}
             axisLine={false}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: "#888" }}
+            tick={{ fontSize: 11, fill: "var(--trend-axis-color)" }}
             tickLine={false}
             axisLine={false}
             allowDecimals={false}
@@ -64,7 +64,7 @@ export function BrandLookupMentionTrendCard({ result }: Props) {
           <Line
             type="monotone"
             dataKey="volume"
-            stroke="hsl(220 70% 50%)"
+            stroke="#2563eb"
             strokeWidth={2}
             dot={false}
           />

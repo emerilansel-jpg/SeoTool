@@ -67,8 +67,8 @@ export function WelcomeMessage({
         <div className="space-y-3 text-base-content/80">
           <p>Hey, I’m Sam — welcome to SeoTool.im.</p>
           <p>
-            To get full access to SeoTool.im, you need to upgrade to the paid plan.
-            But, I’m here if you have any questions.
+            To get full access to SeoTool.im, you need to upgrade to the paid
+            plan. But, I’m here if you have any questions.
           </p>
           <p>
             You can also{" "}
@@ -146,7 +146,9 @@ export function UpgradeSidebar({
           <Globe className="size-4" />
         </span>
         <div className="min-w-0">
-          <p className="font-medium text-base-content/80">Previewing SeoTool.im</p>
+          <p className="font-medium text-base-content/80">
+            Previewing SeoTool.im
+          </p>
           <p className="truncate" title={domain}>
             {domain}
           </p>

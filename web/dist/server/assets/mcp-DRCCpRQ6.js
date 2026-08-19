@@ -1,0 +1,696 @@
+import { jsx, jsxs, Fragment } from "react/jsx-runtime";
+let frontmatter = {
+  "title": "Set up SeoTool.im MCP",
+  "description": "Connect SeoTool.im MCP to Claude, Codex, and other AI clients."
+};
+let extractedReferences = [{
+  "href": "https://seotool.im/ai"
+}, {
+  "href": "/docs/skills/setup"
+}, {
+  "href": "/docs/skills/seo-project-setup"
+}, {
+  "href": "/docs/skills/seo-coach"
+}, {
+  "href": "/docs/skills/keyword-research"
+}, {
+  "href": "/docs/skills/competitive-landscape"
+}, {
+  "href": "/docs/skills/competitor-analysis"
+}, {
+  "href": "/docs/skills/keyword-clustering"
+}, {
+  "href": "/docs/skills/link-prospecting"
+}];
+let structuredData = {
+  "contents": [{
+    "heading": void 0,
+    "content": "SeoTool.im MCP lets compatible AI clients call SeoTool.im tools for keyword research, SERP inspection, local business research, competitive search intelligence, domain research, backlink overview, saved keywords, rank tracking, and Google Search Console performance and URL inspection."
+  }, {
+    "heading": void 0,
+    "content": "The hosted MCP server URL is:"
+  }, {
+    "heading": void 0,
+    "content": "The first connection sends you through SeoTool.im login. After authorization, your MCP client can call SeoTool.im tools with the project context and account scopes you approved."
+  }, {
+    "heading": void 0,
+    "content": "For the most current setup UI and a copyable endpoint, open AI & MCP in SeoTool.im."
+  }, {
+    "heading": "claude-code",
+    "content": "Use user scope to make SeoTool.im available across projects. Use local scope for the current repository."
+  }, {
+    "heading": "claude-code",
+    "content": "After adding the server, approve the SeoTool.im login when prompted."
+  }, {
+    "heading": "claude-desktop",
+    "content": "Open Settings -> Connectors."
+  }, {
+    "heading": "claude-desktop",
+    "content": "Click Add custom connector."
+  }, {
+    "heading": "claude-desktop",
+    "content": "Paste https://seotool.im/mcp."
+  }, {
+    "heading": "claude-desktop",
+    "content": "Approve the SeoTool.im login when prompted."
+  }, {
+    "heading": "claude-desktop",
+    "content": "Claude Desktop custom connectors require a Claude plan that supports custom connectors."
+  }, {
+    "heading": "cursor",
+    "content": "Open Cursor Settings -> Tools & Integrations -> MCP Tools."
+  }, {
+    "heading": "cursor",
+    "content": "Click New MCP Server. Cursor opens mcp.json."
+  }, {
+    "heading": "cursor",
+    "content": "Add:"
+  }, {
+    "heading": "cursor",
+    "content": "Approve the SeoTool.im login when prompted."
+  }, {
+    "heading": "codex-cli",
+    "content": "Run this in your terminal:"
+  }, {
+    "heading": "codex-cli",
+    "content": "Approve the login when prompted."
+  }, {
+    "heading": "codex-desktop",
+    "content": "Open Settings -> Integrations & MCP."
+  }, {
+    "heading": "codex-desktop",
+    "content": "Click Add your own."
+  }, {
+    "heading": "codex-desktop",
+    "content": "Paste https://seotool.im/mcp."
+  }, {
+    "heading": "codex-desktop",
+    "content": "Approve the SeoTool.im login when prompted."
+  }, {
+    "heading": "available-tools",
+    "content": "SeoTool.im MCP exposes tools for SEO research workflows:"
+  }, {
+    "heading": "available-tools",
+    "content": "Research keywords with volume, difficulty, and CPC."
+  }, {
+    "heading": "available-tools",
+    "content": "Fetch live Google organic SERP results for keywords."
+  }, {
+    "heading": "available-tools",
+    "content": "Find exact keyword, page, rank, volume, CPC, intent, and traffic rows for a domain or page."
+  }, {
+    "heading": "available-tools",
+    "content": "Compare SERP competitors across a supplied keyword set."
+  }, {
+    "heading": "available-tools",
+    "content": "Search local businesses near a coordinate, fetch one Maps or Local Finder SERP, and read Google Business Q&A when needed."
+  }, {
+    "heading": "available-tools",
+    "content": "Hydrate keywords with search volume, difficulty, intent, CPC, and trends."
+  }, {
+    "heading": "available-tools",
+    "content": "List saved keywords from an SeoTool.im project."
+  }, {
+    "heading": "available-tools",
+    "content": "Save useful keywords back to SeoTool.im."
+  }, {
+    "heading": "available-tools",
+    "content": "Read rank tracker configs and latest keyword positions."
+  }, {
+    "heading": "available-tools",
+    "content": "Summarize a domain's organic footprint."
+  }, {
+    "heading": "available-tools",
+    "content": "Find keywords a domain already ranks for."
+  }, {
+    "heading": "available-tools",
+    "content": "Check backlink and referring-domain overview data."
+  }, {
+    "heading": "available-tools",
+    "content": "Read first-party Google Search Console performance (clicks, impressions, CTR, position)."
+  }, {
+    "heading": "available-tools",
+    "content": "Inspect index status, crawl, and canonical for specific URLs (up to 10 per call)."
+  }, {
+    "heading": "what-to-do-after-setup",
+    "content": "Once SeoTool.im MCP is connected, set up SeoTool.im Agent Skills. MCP gives your agent access to SeoTool.im data. Skills are separate SKILL.md files that tell your agent how to use that data for specific SEO jobs."
+  }, {
+    "heading": "what-to-do-after-setup",
+    "content": 'Start with one focused workflow instead of asking your agent to "do SEO" broadly.'
+  }, {
+    "heading": "what-to-do-after-setup",
+    "content": "Use SEO project setup to capture your SEO goals and website context in a local workspace."
+  }, {
+    "heading": "what-to-do-after-setup",
+    "content": "Use SEO coach if you are new to SEO or are not sure which workflow to run first."
+  }, {
+    "heading": "what-to-do-after-setup",
+    "content": "Use keyword research to discover keyword opportunities."
+  }, {
+    "heading": "what-to-do-after-setup",
+    "content": "Use competitive landscape to map a market before choosing competitors or pages."
+  }, {
+    "heading": "what-to-do-after-setup",
+    "content": "Use competitor analysis to study one competitor."
+  }, {
+    "heading": "what-to-do-after-setup",
+    "content": "Use keyword clustering to turn keywords into page groups."
+  }, {
+    "heading": "what-to-do-after-setup",
+    "content": "Use link prospecting to find outreach prospects for a linkable asset."
+  }, {
+    "heading": "troubleshooting",
+    "content": "If your client cannot connect, check that the server URL is exactly https://seotool.im/mcp."
+  }, {
+    "heading": "troubleshooting",
+    "content": "If authorization fails, disconnect the SeoTool.im server in your client, add it again, and repeat the login flow."
+  }, {
+    "heading": "troubleshooting",
+    "content": "If your agent cannot find a project, ask it to list SeoTool.im projects first and use the returned project ID in later tool calls."
+  }],
+  "headings": [{
+    "id": "claude-code",
+    "content": "Claude Code"
+  }, {
+    "id": "claude-desktop",
+    "content": "Claude Desktop"
+  }, {
+    "id": "cursor",
+    "content": "Cursor"
+  }, {
+    "id": "codex-cli",
+    "content": "Codex CLI"
+  }, {
+    "id": "codex-desktop",
+    "content": "Codex Desktop"
+  }, {
+    "id": "available-tools",
+    "content": "Available tools"
+  }, {
+    "id": "what-to-do-after-setup",
+    "content": "What to do after setup"
+  }, {
+    "id": "troubleshooting",
+    "content": "Troubleshooting"
+  }]
+};
+const toc = [{
+  depth: 2,
+  url: "#claude-code",
+  title: jsx(Fragment, {
+    children: "Claude Code"
+  })
+}, {
+  depth: 2,
+  url: "#claude-desktop",
+  title: jsx(Fragment, {
+    children: "Claude Desktop"
+  })
+}, {
+  depth: 2,
+  url: "#cursor",
+  title: jsx(Fragment, {
+    children: "Cursor"
+  })
+}, {
+  depth: 2,
+  url: "#codex-cli",
+  title: jsx(Fragment, {
+    children: "Codex CLI"
+  })
+}, {
+  depth: 2,
+  url: "#codex-desktop",
+  title: jsx(Fragment, {
+    children: "Codex Desktop"
+  })
+}, {
+  depth: 2,
+  url: "#available-tools",
+  title: jsx(Fragment, {
+    children: "Available tools"
+  })
+}, {
+  depth: 2,
+  url: "#what-to-do-after-setup",
+  title: jsx(Fragment, {
+    children: "What to do after setup"
+  })
+}, {
+  depth: 2,
+  url: "#troubleshooting",
+  title: jsx(Fragment, {
+    children: "Troubleshooting"
+  })
+}];
+function _createMdxContent(props) {
+  const _components = {
+    a: "a",
+    code: "code",
+    h2: "h2",
+    li: "li",
+    ol: "ol",
+    p: "p",
+    pre: "pre",
+    span: "span",
+    ul: "ul",
+    ...props.components
+  };
+  return jsxs(Fragment, {
+    children: [jsx(_components.p, {
+      children: "SeoTool.im MCP lets compatible AI clients call SeoTool.im tools for keyword research, SERP inspection, local business research, competitive search intelligence, domain research, backlink overview, saved keywords, rank tracking, and Google Search Console performance and URL inspection."
+    }), "\n", jsx(_components.p, {
+      children: "The hosted MCP server URL is:"
+    }), "\n", jsx(Fragment, {
+      children: jsx(_components.pre, {
+        className: "shiki shiki-themes github-light github-dark",
+        style: {
+          "--shiki-light": "#24292e",
+          "--shiki-dark": "#e1e4e8",
+          "--shiki-light-bg": "#fff",
+          "--shiki-dark-bg": "#24292e"
+        },
+        tabIndex: "0",
+        icon: '<svg viewBox="0 0 24 24"><path d="M 6,1 C 4.354992,1 3,2.354992 3,4 v 16 c 0,1.645008 1.354992,3 3,3 h 12 c 1.645008,0 3,-1.354992 3,-3 V 8 7 A 1.0001,1.0001 0 0 0 20.707031,6.2929687 l -5,-5 A 1.0001,1.0001 0 0 0 15,1 h -1 z m 0,2 h 7 v 3 c 0,1.645008 1.354992,3 3,3 h 3 v 11 c 0,0.564129 -0.435871,1 -1,1 H 6 C 5.4358712,21 5,20.564129 5,20 V 4 C 5,3.4358712 5.4358712,3 6,3 Z M 15,3.4140625 18.585937,7 H 16 C 15.435871,7 15,6.5641288 15,6 Z" fill="currentColor" /></svg>',
+        children: jsx(_components.code, {
+          children: jsx(_components.span, {
+            className: "line",
+            children: jsx(_components.span, {
+              children: "https://seotool.im/mcp"
+            })
+          })
+        })
+      })
+    }), "\n", jsx(_components.p, {
+      children: "The first connection sends you through SeoTool.im login. After authorization, your MCP client can call SeoTool.im tools with the project context and account scopes you approved."
+    }), "\n", jsxs(_components.p, {
+      children: ["For the most current setup UI and a copyable endpoint, open ", jsx(_components.a, {
+        href: "https://seotool.im/ai",
+        children: "AI & MCP in SeoTool.im"
+      }), "."]
+    }), "\n", jsx(_components.h2, {
+      id: "claude-code",
+      children: "Claude Code"
+    }), "\n", jsx(_components.p, {
+      children: "Use user scope to make SeoTool.im available across projects. Use local scope for the current repository."
+    }), "\n", jsx(Fragment, {
+      children: jsx(_components.pre, {
+        className: "shiki shiki-themes github-light github-dark",
+        style: {
+          "--shiki-light": "#24292e",
+          "--shiki-dark": "#e1e4e8",
+          "--shiki-light-bg": "#fff",
+          "--shiki-dark-bg": "#24292e"
+        },
+        tabIndex: "0",
+        icon: '<svg viewBox="0 0 24 24"><path d="m 4,4 a 1,1 0 0 0 -0.7070312,0.2929687 1,1 0 0 0 0,1.4140625 L 8.5859375,11 3.2929688,16.292969 a 1,1 0 0 0 0,1.414062 1,1 0 0 0 1.4140624,0 l 5.9999998,-6 a 1.0001,1.0001 0 0 0 0,-1.414062 L 4.7070312,4.2929687 A 1,1 0 0 0 4,4 Z m 8,14 a 1,1 0 0 0 -1,1 1,1 0 0 0 1,1 h 8 a 1,1 0 0 0 1,-1 1,1 0 0 0 -1,-1 z" fill="currentColor" /></svg>',
+        children: jsx(_components.code, {
+          children: jsxs(_components.span, {
+            className: "line",
+            children: [jsx(_components.span, {
+              style: {
+                "--shiki-light": "#6F42C1",
+                "--shiki-dark": "#B392F0"
+              },
+              children: "claude"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#032F62",
+                "--shiki-dark": "#9ECBFF"
+              },
+              children: " mcp"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#032F62",
+                "--shiki-dark": "#9ECBFF"
+              },
+              children: " add"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#005CC5",
+                "--shiki-dark": "#79B8FF"
+              },
+              children: " --transport"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#032F62",
+                "--shiki-dark": "#9ECBFF"
+              },
+              children: " http"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#005CC5",
+                "--shiki-dark": "#79B8FF"
+              },
+              children: " --scope"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#032F62",
+                "--shiki-dark": "#9ECBFF"
+              },
+              children: " user"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#032F62",
+                "--shiki-dark": "#9ECBFF"
+              },
+              children: " seotool"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#032F62",
+                "--shiki-dark": "#9ECBFF"
+              },
+              children: " https://seotool.im/mcp"
+            })]
+          })
+        })
+      })
+    }), "\n", jsx(_components.p, {
+      children: "After adding the server, approve the SeoTool.im login when prompted."
+    }), "\n", jsx(_components.h2, {
+      id: "claude-desktop",
+      children: "Claude Desktop"
+    }), "\n", jsxs(_components.ol, {
+      children: ["\n", jsx(_components.li, {
+        children: "Open Settings -> Connectors."
+      }), "\n", jsx(_components.li, {
+        children: "Click Add custom connector."
+      }), "\n", jsxs(_components.li, {
+        children: ["Paste ", jsx(_components.code, {
+          children: "https://seotool.im/mcp"
+        }), "."]
+      }), "\n", jsx(_components.li, {
+        children: "Approve the SeoTool.im login when prompted."
+      }), "\n"]
+    }), "\n", jsx(_components.p, {
+      children: "Claude Desktop custom connectors require a Claude plan that supports custom connectors."
+    }), "\n", jsx(_components.h2, {
+      id: "cursor",
+      children: "Cursor"
+    }), "\n", jsxs(_components.ol, {
+      children: ["\n", jsx(_components.li, {
+        children: "Open Cursor Settings -> Tools & Integrations -> MCP Tools."
+      }), "\n", jsxs(_components.li, {
+        children: ["Click New MCP Server. Cursor opens ", jsx(_components.code, {
+          children: "mcp.json"
+        }), "."]
+      }), "\n", jsx(_components.li, {
+        children: "Add:"
+      }), "\n"]
+    }), "\n", jsx(Fragment, {
+      children: jsx(_components.pre, {
+        className: "shiki shiki-themes github-light github-dark",
+        style: {
+          "--shiki-light": "#24292e",
+          "--shiki-dark": "#e1e4e8",
+          "--shiki-light-bg": "#fff",
+          "--shiki-dark-bg": "#24292e"
+        },
+        tabIndex: "0",
+        icon: '<svg viewBox="0 0 24 24"><path d="M 6,1 C 4.354992,1 3,2.354992 3,4 v 16 c 0,1.645008 1.354992,3 3,3 h 12 c 1.645008,0 3,-1.354992 3,-3 V 8 7 A 1.0001,1.0001 0 0 0 20.707031,6.2929687 l -5,-5 A 1.0001,1.0001 0 0 0 15,1 h -1 z m 0,2 h 7 v 3 c 0,1.645008 1.354992,3 3,3 h 3 v 11 c 0,0.564129 -0.435871,1 -1,1 H 6 C 5.4358712,21 5,20.564129 5,20 V 4 C 5,3.4358712 5.4358712,3 6,3 Z M 15,3.4140625 18.585937,7 H 16 C 15.435871,7 15,6.5641288 15,6 Z" fill="currentColor" /></svg>',
+        children: jsxs(_components.code, {
+          children: [jsx(_components.span, {
+            className: "line",
+            children: jsx(_components.span, {
+              style: {
+                "--shiki-light": "#24292E",
+                "--shiki-dark": "#E1E4E8"
+              },
+              children: "{"
+            })
+          }), "\n", jsxs(_components.span, {
+            className: "line",
+            children: [jsx(_components.span, {
+              style: {
+                "--shiki-light": "#005CC5",
+                "--shiki-dark": "#79B8FF"
+              },
+              children: '  "mcpServers"'
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#24292E",
+                "--shiki-dark": "#E1E4E8"
+              },
+              children: ": {"
+            })]
+          }), "\n", jsxs(_components.span, {
+            className: "line",
+            children: [jsx(_components.span, {
+              style: {
+                "--shiki-light": "#005CC5",
+                "--shiki-dark": "#79B8FF"
+              },
+              children: '    "seotool"'
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#24292E",
+                "--shiki-dark": "#E1E4E8"
+              },
+              children: ": {"
+            })]
+          }), "\n", jsxs(_components.span, {
+            className: "line",
+            children: [jsx(_components.span, {
+              style: {
+                "--shiki-light": "#005CC5",
+                "--shiki-dark": "#79B8FF"
+              },
+              children: '      "url"'
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#24292E",
+                "--shiki-dark": "#E1E4E8"
+              },
+              children: ": "
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#032F62",
+                "--shiki-dark": "#9ECBFF"
+              },
+              children: '"https://seotool.im/mcp"'
+            })]
+          }), "\n", jsx(_components.span, {
+            className: "line",
+            children: jsx(_components.span, {
+              style: {
+                "--shiki-light": "#24292E",
+                "--shiki-dark": "#E1E4E8"
+              },
+              children: "    }"
+            })
+          }), "\n", jsx(_components.span, {
+            className: "line",
+            children: jsx(_components.span, {
+              style: {
+                "--shiki-light": "#24292E",
+                "--shiki-dark": "#E1E4E8"
+              },
+              children: "  }"
+            })
+          }), "\n", jsx(_components.span, {
+            className: "line",
+            children: jsx(_components.span, {
+              style: {
+                "--shiki-light": "#24292E",
+                "--shiki-dark": "#E1E4E8"
+              },
+              children: "}"
+            })
+          })]
+        })
+      })
+    }), "\n", jsxs(_components.ol, {
+      start: "4",
+      children: ["\n", jsx(_components.li, {
+        children: "Approve the SeoTool.im login when prompted."
+      }), "\n"]
+    }), "\n", jsx(_components.h2, {
+      id: "codex-cli",
+      children: "Codex CLI"
+    }), "\n", jsx(_components.p, {
+      children: "Run this in your terminal:"
+    }), "\n", jsx(Fragment, {
+      children: jsx(_components.pre, {
+        className: "shiki shiki-themes github-light github-dark",
+        style: {
+          "--shiki-light": "#24292e",
+          "--shiki-dark": "#e1e4e8",
+          "--shiki-light-bg": "#fff",
+          "--shiki-dark-bg": "#24292e"
+        },
+        tabIndex: "0",
+        icon: '<svg viewBox="0 0 24 24"><path d="m 4,4 a 1,1 0 0 0 -0.7070312,0.2929687 1,1 0 0 0 0,1.4140625 L 8.5859375,11 3.2929688,16.292969 a 1,1 0 0 0 0,1.414062 1,1 0 0 0 1.4140624,0 l 5.9999998,-6 a 1.0001,1.0001 0 0 0 0,-1.414062 L 4.7070312,4.2929687 A 1,1 0 0 0 4,4 Z m 8,14 a 1,1 0 0 0 -1,1 1,1 0 0 0 1,1 h 8 a 1,1 0 0 0 1,-1 1,1 0 0 0 -1,-1 z" fill="currentColor" /></svg>',
+        children: jsx(_components.code, {
+          children: jsxs(_components.span, {
+            className: "line",
+            children: [jsx(_components.span, {
+              style: {
+                "--shiki-light": "#6F42C1",
+                "--shiki-dark": "#B392F0"
+              },
+              children: "codex"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#032F62",
+                "--shiki-dark": "#9ECBFF"
+              },
+              children: " mcp"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#032F62",
+                "--shiki-dark": "#9ECBFF"
+              },
+              children: " add"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#032F62",
+                "--shiki-dark": "#9ECBFF"
+              },
+              children: " seotool"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#005CC5",
+                "--shiki-dark": "#79B8FF"
+              },
+              children: " --url"
+            }), jsx(_components.span, {
+              style: {
+                "--shiki-light": "#032F62",
+                "--shiki-dark": "#9ECBFF"
+              },
+              children: " https://seotool.im/mcp"
+            })]
+          })
+        })
+      })
+    }), "\n", jsx(_components.p, {
+      children: "Approve the login when prompted."
+    }), "\n", jsx(_components.h2, {
+      id: "codex-desktop",
+      children: "Codex Desktop"
+    }), "\n", jsxs(_components.ol, {
+      children: ["\n", jsx(_components.li, {
+        children: "Open Settings -> Integrations & MCP."
+      }), "\n", jsx(_components.li, {
+        children: "Click Add your own."
+      }), "\n", jsxs(_components.li, {
+        children: ["Paste ", jsx(_components.code, {
+          children: "https://seotool.im/mcp"
+        }), "."]
+      }), "\n", jsx(_components.li, {
+        children: "Approve the SeoTool.im login when prompted."
+      }), "\n"]
+    }), "\n", jsx(_components.h2, {
+      id: "available-tools",
+      children: "Available tools"
+    }), "\n", jsx(_components.p, {
+      children: "SeoTool.im MCP exposes tools for SEO research workflows:"
+    }), "\n", jsxs(_components.ul, {
+      children: ["\n", jsx(_components.li, {
+        children: "Research keywords with volume, difficulty, and CPC."
+      }), "\n", jsx(_components.li, {
+        children: "Fetch live Google organic SERP results for keywords."
+      }), "\n", jsx(_components.li, {
+        children: "Find exact keyword, page, rank, volume, CPC, intent, and traffic rows for a domain or page."
+      }), "\n", jsx(_components.li, {
+        children: "Compare SERP competitors across a supplied keyword set."
+      }), "\n", jsx(_components.li, {
+        children: "Search local businesses near a coordinate, fetch one Maps or Local Finder SERP, and read Google Business Q&A when needed."
+      }), "\n", jsx(_components.li, {
+        children: "Hydrate keywords with search volume, difficulty, intent, CPC, and trends."
+      }), "\n", jsx(_components.li, {
+        children: "List saved keywords from an SeoTool.im project."
+      }), "\n", jsx(_components.li, {
+        children: "Save useful keywords back to SeoTool.im."
+      }), "\n", jsx(_components.li, {
+        children: "Read rank tracker configs and latest keyword positions."
+      }), "\n", jsx(_components.li, {
+        children: "Summarize a domain's organic footprint."
+      }), "\n", jsx(_components.li, {
+        children: "Find keywords a domain already ranks for."
+      }), "\n", jsx(_components.li, {
+        children: "Check backlink and referring-domain overview data."
+      }), "\n", jsx(_components.li, {
+        children: "Read first-party Google Search Console performance (clicks, impressions, CTR, position)."
+      }), "\n", jsx(_components.li, {
+        children: "Inspect index status, crawl, and canonical for specific URLs (up to 10 per call)."
+      }), "\n"]
+    }), "\n", jsx(_components.h2, {
+      id: "what-to-do-after-setup",
+      children: "What to do after setup"
+    }), "\n", jsxs(_components.p, {
+      children: ["Once SeoTool.im MCP is connected, ", jsx(_components.a, {
+        href: "/docs/skills/setup",
+        children: "set up SeoTool.im Agent Skills"
+      }), ". MCP gives your agent access to SeoTool.im data. Skills are separate ", jsx(_components.code, {
+        children: "SKILL.md"
+      }), " files that tell your agent how to use that data for specific SEO jobs."]
+    }), "\n", jsx(_components.p, {
+      children: 'Start with one focused workflow instead of asking your agent to "do SEO" broadly.'
+    }), "\n", jsxs(_components.ul, {
+      children: ["\n", jsxs(_components.li, {
+        children: ["Use ", jsx(_components.a, {
+          href: "/docs/skills/seo-project-setup",
+          children: "SEO project setup"
+        }), " to capture your SEO goals and website context in a local workspace."]
+      }), "\n", jsxs(_components.li, {
+        children: ["Use ", jsx(_components.a, {
+          href: "/docs/skills/seo-coach",
+          children: "SEO coach"
+        }), " if you are new to SEO or are not sure which workflow to run first."]
+      }), "\n", jsxs(_components.li, {
+        children: ["Use ", jsx(_components.a, {
+          href: "/docs/skills/keyword-research",
+          children: "keyword research"
+        }), " to discover keyword opportunities."]
+      }), "\n", jsxs(_components.li, {
+        children: ["Use ", jsx(_components.a, {
+          href: "/docs/skills/competitive-landscape",
+          children: "competitive landscape"
+        }), " to map a market before choosing competitors or pages."]
+      }), "\n", jsxs(_components.li, {
+        children: ["Use ", jsx(_components.a, {
+          href: "/docs/skills/competitor-analysis",
+          children: "competitor analysis"
+        }), " to study one competitor."]
+      }), "\n", jsxs(_components.li, {
+        children: ["Use ", jsx(_components.a, {
+          href: "/docs/skills/keyword-clustering",
+          children: "keyword clustering"
+        }), " to turn keywords into page groups."]
+      }), "\n", jsxs(_components.li, {
+        children: ["Use ", jsx(_components.a, {
+          href: "/docs/skills/link-prospecting",
+          children: "link prospecting"
+        }), " to find outreach prospects for a linkable asset."]
+      }), "\n"]
+    }), "\n", jsx(_components.h2, {
+      id: "troubleshooting",
+      children: "Troubleshooting"
+    }), "\n", jsxs(_components.p, {
+      children: ["If your client cannot connect, check that the server URL is exactly ", jsx(_components.code, {
+        children: "https://seotool.im/mcp"
+      }), "."]
+    }), "\n", jsx(_components.p, {
+      children: "If authorization fails, disconnect the SeoTool.im server in your client, add it again, and repeat the login flow."
+    }), "\n", jsx(_components.p, {
+      children: "If your agent cannot find a project, ask it to list SeoTool.im projects first and use the returned project ID in later tool calls."
+    })]
+  });
+}
+function MDXContent(props = {}) {
+  const { wrapper: MDXLayout } = props.components || {};
+  return MDXLayout ? jsx(MDXLayout, {
+    ...props,
+    children: jsx(_createMdxContent, {
+      ...props
+    })
+  }) : _createMdxContent(props);
+}
+export {
+  MDXContent as default,
+  extractedReferences,
+  frontmatter,
+  structuredData,
+  toc
+};

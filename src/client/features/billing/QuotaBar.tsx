@@ -15,7 +15,7 @@ export function QuotaBar({
     ? 0
     : Math.min(100, Math.max(0, (used / limit) * 100));
 
-  let colorClass = "bg-[var(--color-brand-accent)]";
+  let colorClass = "bg-primary";
   if (!isUnlimited) {
     if (percent >= 100) {
       colorClass = "bg-error";

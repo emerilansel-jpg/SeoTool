@@ -3,18 +3,15 @@ import { normalizeClientRegistrationRequest } from "@/server/mcp/oauth-registrat
 
 describe("normalizeClientRegistrationRequest", () => {
   it("converts public dynamic registration requests to confidential clients", async () => {
-    const request = new Request(
-      "https://seotool.im/api/auth/oauth2/register",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          redirect_uris: ["https://www.perplexity.ai/api/mcp/oauth/callback"],
-          client_name: "Perplexity",
-          token_endpoint_auth_method: "none",
-        }),
-      },
-    );
+    const request = new Request("https://seotool.im/api/auth/oauth2/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        redirect_uris: ["https://www.perplexity.ai/api/mcp/oauth/callback"],
+        client_name: "Perplexity",
+        token_endpoint_auth_method: "none",
+      }),
+    });
 
     const normalized = await normalizeClientRegistrationRequest(request);
 
@@ -24,17 +21,14 @@ describe("normalizeClientRegistrationRequest", () => {
   });
 
   it("defaults omitted token auth methods to confidential clients", async () => {
-    const request = new Request(
-      "https://seotool.im/api/auth/oauth2/register",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          redirect_uris: ["https://www.perplexity.ai/api/mcp/oauth/callback"],
-          client_name: "Perplexity",
-        }),
-      },
-    );
+    const request = new Request("https://seotool.im/api/auth/oauth2/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        redirect_uris: ["https://www.perplexity.ai/api/mcp/oauth/callback"],
+        client_name: "Perplexity",
+      }),
+    });
 
     const normalized = await normalizeClientRegistrationRequest(request);
 
@@ -44,17 +38,14 @@ describe("normalizeClientRegistrationRequest", () => {
   });
 
   it("keeps explicit confidential registration methods", async () => {
-    const request = new Request(
-      "https://seotool.im/api/auth/oauth2/register",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          redirect_uris: ["https://www.perplexity.ai/api/mcp/oauth/callback"],
-          token_endpoint_auth_method: "client_secret_post",
-        }),
-      },
-    );
+    const request = new Request("https://seotool.im/api/auth/oauth2/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        redirect_uris: ["https://www.perplexity.ai/api/mcp/oauth/callback"],
+        token_endpoint_auth_method: "client_secret_post",
+      }),
+    });
 
     const normalized = await normalizeClientRegistrationRequest(request);
 
@@ -69,17 +60,14 @@ describe("normalizeClientRegistrationRequest", () => {
       client_name: "a".repeat(1024 * 1024),
       token_endpoint_auth_method: "none",
     });
-    const request = new Request(
-      "https://seotool.im/api/auth/oauth2/register",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": String(body.length),
-        },
-        body,
+    const request = new Request("https://seotool.im/api/auth/oauth2/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": String(body.length),
       },
-    );
+      body,
+    });
 
     await expect(normalizeClientRegistrationRequest(request)).resolves.toBe(
       request,

@@ -136,7 +136,7 @@ export function ContentScoresView({
       <div className="card bg-base-100 border border-base-300">
         <div className="card-body gap-2 p-0">
           <div className="overflow-x-auto">
-            <table className="table table-zebra">
+            <table className="table table-sm">
               <thead>
                 <tr>
                   <th>Page</th>

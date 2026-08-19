@@ -82,6 +82,11 @@ export function createDataforseoClient(customer: BillingCustomerContext) {
       referringDomains: meter(customer, (s) => s.fetchReferringDomains),
       domainPages: meter(customer, (s) => s.fetchDomainPagesSummary),
       history: meter(customer, (s) => s.fetchBacklinksHistory),
+      anchors: meter(customer, (s) => s.fetchAnchors),
+      domainIntersection: meter(
+        customer,
+        (s) => s.fetchBacklinksDomainIntersection,
+      ),
     },
     keywords: {
       related: meter(customer, (s) => s.fetchRelatedKeywords),
@@ -108,6 +113,16 @@ export function createDataforseoClient(customer: BillingCustomerContext) {
         "rank_tracking",
       ),
       local: meter(customer, (s) => s.fetchLocalSerp, "local_seo"),
+      bingRankCheck: meter(
+        customer,
+        (s) => s.fetchBingRankCheckSerp,
+        "rank_tracking",
+      ),
+      bingRankCheckTaskPost: meter(
+        customer,
+        (s) => s.postBingRankCheckTasks,
+        "rank_tracking",
+      ),
     },
     labs: {
       // Callers (e.g. the keyword-metrics MCP tool) can attribute the spend to

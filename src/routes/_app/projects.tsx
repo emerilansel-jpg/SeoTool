@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -8,15 +8,20 @@ import {
   getProjects,
   restoreProject,
 } from "@/serverFunctions/projects";
-import { getStandardErrorMessage } from "@/client/lib/error-messages";
+import {
+  getErrorCode,
+  getStandardErrorMessage,
+} from "@/client/lib/error-messages";
 import { getLastProjectId } from "@/client/lib/active-project";
 import { CreateProjectModal } from "@/client/features/projects/CreateProjectModal";
+import { SUBSCRIBE_ROUTE } from "@/shared/billing";
 
 export const Route = createFileRoute("/_app/projects")({
   component: ProjectsPage,
 });
 
 function ProjectsPage() {
+  const navigate = useNavigate();
   const [creating, setCreating] = React.useState(false);
   // Read after mount to keep SSR/first render stable.
   const [currentProjectId, setCurrentProjectId] = React.useState<string | null>(
@@ -30,6 +35,12 @@ function ProjectsPage() {
     queryFn: () => getProjects(),
   });
   const projects = projectsQuery.data ?? [];
+
+  React.useEffect(() => {
+    if (getErrorCode(projectsQuery.error) === "PAYMENT_REQUIRED") {
+      void navigate({ href: `${SUBSCRIBE_ROUTE}?redirect=/projects` });
+    }
+  }, [projectsQuery.error, navigate]);
 
   return (
     <div className="h-full overflow-auto bg-base-100 px-4 py-8 pb-24 md:px-6 md:py-12 md:pb-8">

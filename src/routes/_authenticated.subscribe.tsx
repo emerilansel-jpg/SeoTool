@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { User } from "lucide-react";
 import { ThemePreferenceMenuItems } from "@/client/components/ThemePreferenceMenuItems";
@@ -255,6 +255,11 @@ function SubscribePage() {
         <p className="text-sm text-base-content/60">
           SEO on your terms. Choose the plan that fits your needs.
         </p>
+        <p className="text-xs text-base-content/50">
+          <Link to="/" className="link">
+            Back to homepage
+          </Link>
+        </p>
       </div>
 
       <div className="grid gap-3">
@@ -264,7 +269,7 @@ function SubscribePage() {
             type="button"
             className={`flex flex-col gap-3 rounded-lg border p-4 text-left transition-colors ${
               selectedPlan === tier
-                ? "border-[var(--color-brand-accent)] bg-base-150 ring-1 ring-[var(--color-brand-accent)]"
+                ? "border-primary bg-primary/5 ring-1 ring-primary"
                 : "border-base-300 hover:border-base-content/30"
             }`}
             onClick={() => setSelectedPlan(tier)}
@@ -296,7 +301,7 @@ function SubscribePage() {
         {error ? <p className="text-sm text-error">{error}</p> : null}
 
         <button
-          className="btn btn-neutral w-full bg-[var(--color-brand-accent)] text-white hover:bg-[var(--color-brand-accent)]/90"
+          className="btn btn-primary w-full"
           disabled={isAttaching}
           onClick={() => void handleSubscribe()}
         >

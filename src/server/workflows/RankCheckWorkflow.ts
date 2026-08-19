@@ -37,6 +37,7 @@ interface RankCheckParams {
   locationName?: string;
   devices: "both" | "desktop" | "mobile";
   serpDepth: number;
+  searchEngine: "google" | "bing";
   trigger: "manual" | "scheduled";
   keywordIds?: string[];
 }
@@ -260,6 +261,7 @@ export class RankCheckWorkflow extends WorkflowEntrypoint<
       locationName,
       devices,
       serpDepth,
+      searchEngine,
       trigger,
       keywordIds,
     } = event.payload;
@@ -318,6 +320,7 @@ export class RankCheckWorkflow extends WorkflowEntrypoint<
           keywords,
           devices,
           serpDepth,
+          searchEngine,
           domain,
           locationCode,
           languageCode,

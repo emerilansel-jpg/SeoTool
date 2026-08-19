@@ -127,16 +127,16 @@ export function AuthenticatedAppLayout({
           onOpenDrawer={() => setDrawerOpen(true)}
         />
 
-        {/* PostHog-style cutout: the main content sits on a raised panel with a
+        {/* Linear/PostHog-style cutout: the main content sits on a raised panel with a
             thin strip of the sidebar background above it and a hairline border.
-            A subtle primary radial glow at the top adds depth (Supastarter-style). */}
+            A subtle primary radial glow at the top adds depth. */}
         <div className="flex min-h-0 flex-1 flex-col md:pt-2">
-          <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-base-100 md:rounded-tl-lg md:border-l md:border-t md:border-base-300">
+          <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-base-100 shadow-sm md:rounded-tl-xl md:border-l md:border-t md:border-base-300">
             <div
-              className="pointer-events-none absolute inset-x-0 top-0 h-64 opacity-[0.04]"
+              className="pointer-events-none absolute inset-x-0 top-0 h-80 opacity-[0.06] transition-opacity"
               style={{
                 background:
-                  "radial-gradient(ellipse 60% 100% at 50% 0%, var(--color-primary), transparent)",
+                  "radial-gradient(ellipse 70% 100% at 50% 0%, var(--color-primary), var(--color-accent), transparent)",
               }}
             />
             <SeoApiStatusBanners

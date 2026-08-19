@@ -28,8 +28,8 @@ function PrivacyPage() {
         <h2>Who operates this site</h2>
         <p>
           badseo.dev is operated by Every App, Inc. as a public test site for
-          SeoTool.im. The site has no accounts, forms, purchases, or user-submitted
-          content. Privacy questions and requests can be sent to{" "}
+          SeoTool.im. The site has no accounts, forms, purchases, or
+          user-submitted content. Privacy questions and requests can be sent to{" "}
           <a href="mailto:support@seotool.im">support@seotool.im</a>.
         </p>
 

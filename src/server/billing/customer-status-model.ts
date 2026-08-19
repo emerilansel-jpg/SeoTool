@@ -28,20 +28,16 @@ export function deriveBillingCustomerStatusSnapshot(args: {
 }): BillingCustomerStatusSnapshot {
   const { organizationId, subscription: sub } = args;
 
-  const planId =
-    typeof sub.plan_id === "string" ? sub.plan_id : null;
+  const planId = typeof sub.plan_id === "string" ? sub.plan_id : null;
   const planTier = planTierFromPaypalPlanId(planId) ?? "free";
 
   // Map PayPal statuses to our internal status strings
-  const paypalStatus =
-    typeof sub.status === "string" ? sub.status : "UNKNOWN";
+  const paypalStatus = typeof sub.status === "string" ? sub.status : "UNKNOWN";
   const internalStatus = mapPaypalStatus(paypalStatus);
 
   // next_billing_time is ISO-8601
   const currentPeriodEnd =
-    typeof sub.next_billing_time === "string"
-      ? sub.next_billing_time
-      : null;
+    typeof sub.next_billing_time === "string" ? sub.next_billing_time : null;
 
   return {
     organizationId,
@@ -49,8 +45,7 @@ export function deriveBillingCustomerStatusSnapshot(args: {
     paidPlanId: planId,
     paidPlanStatus: internalStatus,
     planTier,
-    paypalSubscriptionId:
-      typeof sub.id === "string" ? sub.id : null,
+    paypalSubscriptionId: typeof sub.id === "string" ? sub.id : null,
     currentPeriodEnd,
     customerJson: JSON.stringify(sub),
     syncedAt: new Date().toISOString(),

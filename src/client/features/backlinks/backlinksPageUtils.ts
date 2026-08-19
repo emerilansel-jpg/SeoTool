@@ -8,6 +8,10 @@ export const TAB_DESCRIPTIONS: Record<BacklinksTab, string> = {
     "View the unique domains linking to your target, grouped at the site level instead of by individual link.",
   pages:
     "See which pages on the target site attract the most backlinks and referring domains.",
+  anchors:
+    "View the distribution of anchor texts used in backlinks pointing to your target.",
+  toxic:
+    "Identify potentially harmful backlinks with high spam scores. Generate a Google disavow file to protect your site.",
 };
 
 export function buildSummaryStats(data: BacklinksOverviewData | undefined) {

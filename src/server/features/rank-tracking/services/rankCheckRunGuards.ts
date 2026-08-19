@@ -43,6 +43,7 @@ type RankCheckConfigForStart = Pick<
   | "locationName"
   | "devices"
   | "serpDepth"
+  | "searchEngine"
 >;
 
 const ACTIVE_WORKFLOW_STATUSES = new Set<RankCheckWorkflowStatus["status"]>([
@@ -173,6 +174,7 @@ export async function beginRankCheckRun(input: {
             locationName: input.config.locationName ?? undefined,
             devices: input.config.devices,
             serpDepth: input.config.serpDepth,
+            searchEngine: input.config.searchEngine ?? "google",
             trigger: input.trigger,
             keywordIds: input.keywordIds,
           },

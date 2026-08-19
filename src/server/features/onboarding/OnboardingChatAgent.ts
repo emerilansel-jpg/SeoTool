@@ -16,7 +16,7 @@ import {
 } from "@/server/lib/chatAgent";
 import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import {
-  customerHasManagedAccess,
+  customerHasPaidPlan,
   checkUsageCreditsDepleted,
   trackUsageCreditSpend,
 } from "@/server/billing/subscription";
@@ -132,7 +132,7 @@ export class OnboardingChatAgent extends AIChatAgent {
       ).length;
       if (
         questionCount > FREE_ONBOARDING_QUESTION_LIMIT &&
-        !(await customerHasManagedAccess(organizationId))
+        !(await customerHasPaidPlan(organizationId))
       ) {
         return staticAssistantResponse(
           "You've used all your free strategy questions. Subscribe to continue.",

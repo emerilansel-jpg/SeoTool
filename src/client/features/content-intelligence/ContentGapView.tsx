@@ -1,6 +1,15 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { createColumnHelper } from "@tanstack/react-table";
+import type { SortingState } from "@tanstack/react-table";
 import { AlertCircle, Search } from "lucide-react";
+import { toast } from "sonner";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
+import {
+  AppDataTable,
+  useAppTable,
+} from "@/client/components/table/AppDataTable";
+import { SortableHeader } from "@/client/components/table/SortableHeader";
 import { getContentGap } from "@/serverFunctions/content-intelligence";
 import { getProjects } from "@/serverFunctions/projects";
 import {
@@ -11,8 +20,6 @@ import {
 import type { GapKeyword } from "@/server/features/content-intelligence/contentGap";
 
 type GapResult = Awaited<ReturnType<typeof getContentGap>>;
-
-type SortKey = "searchVolume" | "keywordDifficulty" | "competitors";
 
 const MAX_COMPETITORS = 3;
 
@@ -33,6 +40,61 @@ function parseCompetitors(text: string): string[] {
   return result;
 }
 
+const gapColumnHelper = createColumnHelper<GapKeyword>();
+
+const gapColumns = [
+  gapColumnHelper.accessor("keyword", {
+    header: "Keyword",
+    cell: ({ getValue }) => (
+      <span className="block max-w-[280px] truncate" title={getValue()}>
+        {getValue()}
+      </span>
+    ),
+  }),
+  gapColumnHelper.accessor((row) => row.searchVolume ?? 0, {
+    id: "searchVolume",
+    header: ({ column }) => <SortableHeader column={column} label="Volume" />,
+    cell: ({ row }) => (
+      <span className="tabular-nums text-base-content/70">
+        {row.original.searchVolume != null
+          ? row.original.searchVolume.toLocaleString()
+          : "—"}
+      </span>
+    ),
+    sortDescFirst: true,
+  }),
+  gapColumnHelper.accessor((row) => row.keywordDifficulty ?? 0, {
+    id: "keywordDifficulty",
+    header: ({ column }) => (
+      <SortableHeader column={column} label="Difficulty" />
+    ),
+    cell: ({ row }) => (
+      <DifficultyPill value={row.original.keywordDifficulty} />
+    ),
+    sortDescFirst: false,
+  }),
+  gapColumnHelper.accessor((row) => row.competitors.length, {
+    id: "competitors",
+    header: "Competitors",
+    cell: ({ getValue }) =>
+      getValue() > 0 ? (
+        <span className="badge badge-ghost badge-sm">{getValue()}</span>
+      ) : (
+        <span className="text-base-content/30">—</span>
+      ),
+  }),
+  gapColumnHelper.accessor((row) => row.cpc ?? 0, {
+    id: "cpc",
+    header: ({ column }) => <SortableHeader column={column} label="CPC" />,
+    cell: ({ row }) => (
+      <span className="tabular-nums text-base-content/70">
+        {row.original.cpc != null ? `$${row.original.cpc.toFixed(2)}` : "—"}
+      </span>
+    ),
+    sortDescFirst: true,
+  }),
+];
+
 export function ContentGapView({ projectId }: { projectId: string }) {
   const projectsQuery = useQuery({
     queryKey: ["projects"],
@@ -46,26 +108,20 @@ export function ContentGapView({ projectId }: { projectId: string }) {
   const domain = domainInput || project?.domain || "";
 
   const [formError, setFormError] = useState<string | null>(null);
-  const [sortKey, setSortKey] = useState<SortKey>("searchVolume");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const mutation = useMutation({
     mutationFn: (vars: { domain: string; competitors: string[] }) =>
       getContentGap({
         data: { projectId, domain: vars.domain, competitors: vars.competitors },
       }),
+    onError: (error) => {
+      toast.error(
+        getStandardErrorMessage(error, "Failed to compute content gap"),
+      );
+    },
   });
 
   const result = mutation.data;
-
-  const sortedKeywords = useMemo(() => {
-    const keywords = result?.keywords ?? [];
-    return keywords.toSorted((a, b) => {
-      const av = sortValue(a, sortKey);
-      const bv = sortValue(b, sortKey);
-      return sortDir === "asc" ? av - bv : bv - av;
-    });
-  }, [result, sortKey, sortDir]);
 
   function handleRun() {
     const competitors = parseCompetitors(competitorsText).slice(
@@ -94,8 +150,8 @@ export function ContentGapView({ projectId }: { projectId: string }) {
           </p>
 
           <div className="grid gap-3 md:grid-cols-2">
-            <label className="form-control">
-              <span className="label-text mb-1 text-xs font-medium uppercase tracking-wider text-base-content/50">
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium uppercase tracking-wider text-base-content/50">
                 Your domain
               </span>
               <input
@@ -106,8 +162,8 @@ export function ContentGapView({ projectId }: { projectId: string }) {
                 onChange={(e) => setDomainInput(e.target.value)}
               />
             </label>
-            <label className="form-control">
-              <span className="label-text mb-1 text-xs font-medium uppercase tracking-wider text-base-content/50">
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium uppercase tracking-wider text-base-content/50">
                 Competitors (up to {MAX_COMPETITORS}, one per line)
               </span>
               <textarea
@@ -124,13 +180,6 @@ export function ContentGapView({ projectId }: { projectId: string }) {
               <AlertCircle className="size-4" /> {formError}
             </p>
           )}
-          {mutation.isError && (
-            <p className="flex items-center gap-2 text-sm text-error">
-              <AlertCircle className="size-4" /> Could not compute the gap.
-              Check your credits and competitor domains, then try again.
-            </p>
-          )}
-
           <div>
             <button
               type="button"
@@ -153,32 +202,13 @@ export function ContentGapView({ projectId }: { projectId: string }) {
         </div>
       </div>
 
-      {result && (
-        <Results
-          result={result}
-          keywords={sortedKeywords}
-          sortKey={sortKey}
-          sortDir={sortDir}
-          onSort={toggleSort(setSortKey, setSortDir, sortKey, sortDir)}
-        />
-      )}
+      {result && <Results result={result} />}
     </div>
   );
 }
 
-function Results({
-  result,
-  keywords,
-  sortKey,
-  sortDir,
-  onSort,
-}: {
-  result: GapResult;
-  keywords: GapKeyword[];
-  sortKey: SortKey;
-  sortDir: "asc" | "desc";
-  onSort: (key: SortKey) => void;
-}) {
+function Results({ result }: { result: GapResult }) {
+  const keywords = result.keywords;
   return (
     <>
       <GapSummaryCards
@@ -214,67 +244,11 @@ function Results({
           </div>
           {keywords.length === 0 ? (
             <p className="px-4 pb-4 text-sm text-base-content/50">
-              No gap keywords found — your domain already covers what these
+              No gap keywords found. Your domain already covers what these
               competitors rank for.
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table table-zebra">
-                <thead>
-                  <tr>
-                    <th>Keyword</th>
-                    <SortHeader
-                      label="Volume"
-                      active={sortKey === "searchVolume"}
-                      dir={sortDir}
-                      onClick={() => onSort("searchVolume")}
-                    />
-                    <SortHeader
-                      label="Difficulty"
-                      active={sortKey === "keywordDifficulty"}
-                      dir={sortDir}
-                      onClick={() => onSort("keywordDifficulty")}
-                    />
-                    <th>Competitors</th>
-                    <SortHeader
-                      label="CPC"
-                      active={sortKey === "competitors"}
-                      dir={sortDir}
-                      onClick={() => onSort("competitors")}
-                    />
-                  </tr>
-                </thead>
-                <tbody>
-                  {keywords.map((kw) => (
-                    <tr key={kw.keyword}>
-                      <td className="max-w-[280px] truncate" title={kw.keyword}>
-                        {kw.keyword}
-                      </td>
-                      <td className="tabular-nums text-base-content/70">
-                        {kw.searchVolume != null
-                          ? kw.searchVolume.toLocaleString()
-                          : "—"}
-                      </td>
-                      <td>
-                        <DifficultyPill value={kw.keywordDifficulty} />
-                      </td>
-                      <td>
-                        {kw.competitors.length > 0 ? (
-                          <span className="badge badge-ghost badge-sm">
-                            {kw.competitors.length}
-                          </span>
-                        ) : (
-                          <span className="text-base-content/30">—</span>
-                        )}
-                      </td>
-                      <td className="tabular-nums text-base-content/70">
-                        {kw.cpc != null ? `$${kw.cpc.toFixed(2)}` : "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <GapKeywordsTable keywords={keywords} />
           )}
         </div>
       </div>
@@ -282,52 +256,17 @@ function Results({
   );
 }
 
-function SortHeader({
-  label,
-  active,
-  dir,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  dir: "asc" | "desc";
-  onClick: () => void;
-}) {
-  return (
-    <th>
-      <button
-        type="button"
-        className={`flex items-center gap-1 hover:text-base-content ${active ? "text-base-content" : "text-base-content/60"}`}
-        onClick={onClick}
-      >
-        {label}
-        {active && (
-          <span className="text-[10px]">{dir === "asc" ? "▲" : "▼"}</span>
-        )}
-      </button>
-    </th>
-  );
-}
+function GapKeywordsTable({ keywords }: { keywords: GapKeyword[] }) {
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "searchVolume", desc: true },
+  ]);
+  const table = useAppTable({
+    data: keywords,
+    columns: gapColumns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    withSorting: true,
+  });
 
-function sortValue(row: GapKeyword, key: SortKey): number {
-  if (key === "searchVolume") return row.searchVolume ?? 0;
-  if (key === "keywordDifficulty") return row.keywordDifficulty ?? 0;
-  return row.competitors.length;
-}
-
-function toggleSort(
-  setSortKey: (key: SortKey) => void,
-  setSortDir: (dir: "asc" | "desc") => void,
-  sortKey: SortKey,
-  sortDir: "asc" | "desc",
-) {
-  return (key: SortKey) => {
-    if (key === sortKey) {
-      setSortDir(sortDir === "asc" ? "desc" : "asc");
-    } else {
-      setSortKey(key);
-      // Difficulty default asc (easy first), others desc.
-      setSortDir(key === "keywordDifficulty" ? "asc" : "desc");
-    }
-  };
+  return <AppDataTable table={table} />;
 }

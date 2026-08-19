@@ -19,29 +19,29 @@
   exclude: properties;
 }
 
-/* Light theme — Supastarter palette (indigo-blue #4e6df5, warm #fafafe) */
+/* Light theme — Crisp High-Contrast Modern SaaS (Electric Indigo #4f46e5, Slate-50 base) */
 @plugin "daisyui/theme" {
   name: "seotool";
   default: true;
   prefersdark: false;
   color-scheme: light;
-  --color-base-100: #fafafe;
+  --color-base-100: #ffffff;
   --color-base-200: #f8fafc;
-  --color-base-300: #e3ebf6;
-  --color-base-content: #292b35;
-  --color-primary: #4e6df5;
-  --color-primary-content: #f6f7f9;
-  --color-secondary: #292b35;
+  --color-base-300: #e2e8f0;
+  --color-base-content: #0f172a;
+  --color-primary: #4f46e5;
+  --color-primary-content: #ffffff;
+  --color-secondary: #0f172a;
   --color-secondary-content: #ffffff;
-  --color-accent: #4e6df5;
-  --color-accent-content: #f6f7f9;
-  --color-neutral: #292b35;
+  --color-accent: #06b6d4;
+  --color-accent-content: #ffffff;
+  --color-neutral: #1e293b;
   --color-neutral-content: #ffffff;
-  --color-info: #4e6df5;
-  --color-info-content: #f6f7f9;
-  --color-success: #39a561;
+  --color-info: #0284c7;
+  --color-info-content: #ffffff;
+  --color-success: #10b981;
   --color-success-content: #ffffff;
-  --color-warning: #e5a158;
+  --color-warning: #f59e0b;
   --color-warning-content: #ffffff;
   --color-error: #ef4444;
   --color-error-content: #ffffff;
@@ -55,30 +55,30 @@
   --noise: 0;
 }
 
-/* Dark theme — Supastarter palette (near-black blue #070d12, indigo #5581f7) */
+/* Dark theme — Dark Command Center (Deep Slate-Navy #090d16, Electric Indigo & Cyan Glow) */
 @plugin "daisyui/theme" {
   name: "seotool-dark";
   prefersdark: true;
   color-scheme: dark;
-  --color-base-100: #0d1116;
-  --color-base-200: #070d12;
-  --color-base-300: #2b303d;
-  --color-base-content: #e9eef3;
-  --color-primary: #5581f7;
-  --color-primary-content: #091521;
-  --color-secondary: #e9eef3;
-  --color-secondary-content: #091521;
-  --color-accent: #5581f7;
-  --color-accent-content: #091521;
-  --color-neutral: #e9eef3;
-  --color-neutral-content: #091521;
-  --color-info: #5581f7;
-  --color-info-content: #091521;
-  --color-success: #39a561;
+  --color-base-100: #0e131f;
+  --color-base-200: #090c15;
+  --color-base-300: #1e2638;
+  --color-base-content: #f1f5f9;
+  --color-primary: #6366f1;
+  --color-primary-content: #ffffff;
+  --color-secondary: #f1f5f9;
+  --color-secondary-content: #090c15;
+  --color-accent: #00e5ff;
+  --color-accent-content: #090c15;
+  --color-neutral: #f1f5f9;
+  --color-neutral-content: #090c15;
+  --color-info: #38bdf8;
+  --color-info-content: #090c15;
+  --color-success: #10b981;
   --color-success-content: #ffffff;
-  --color-warning: #e5a158;
+  --color-warning: #f59e0b;
   --color-warning-content: #ffffff;
-  --color-error: #ef4444;
+  --color-error: #f43f5e;
   --color-error-content: #ffffff;
   --radius-selector: 0.5rem;
   --radius-field: 0.5rem;
@@ -92,16 +92,54 @@
 
 html,
 body {
-  @apply m-0 bg-base-200;
+  @apply m-0 bg-base-200 text-base-content;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* Supastarter-style card polish: slightly larger radius for a softer look */
+/* Modern Card & Glass Polish */
 .card {
   border-radius: 0.75rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.glass-card {
+  background-color: color-mix(in oklab, var(--color-base-100) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in oklab, var(--color-base-300) 80%, transparent);
+}
+
+.glass-panel {
+  background-color: color-mix(in oklab, var(--color-base-100) 90%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Glow effects */
+.glow-primary {
+  box-shadow: 0 0 24px -4px
+    color-mix(in oklab, var(--color-primary) 35%, transparent);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 24px -4px rgba(0, 229, 255, 0.35);
+}
+
+.glow-subtle {
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.05),
+    0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="seotool-dark"] .glow-subtle {
+  box-shadow:
+    0 4px 20px -2px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
 
 /* Prevent Safari mobile from zooming on input focus (requires 16px minimum) */
@@ -279,6 +317,63 @@ html[data-theme="seotool-dark"] .tag-chip-violet {
 }
 html[data-theme="seotool-dark"] .tag-chip-fuchsia {
   color: #f5d0fe;
+}
+
+/* Solid tag color dots (swatches, legends) - same hues as the tag chips above
+   so dots and chips stay visually paired in both themes. */
+.tag-dot-slate {
+  background-color: #64748b;
+}
+.tag-dot-rose {
+  background-color: #f43f5e;
+}
+.tag-dot-amber {
+  background-color: #f59e0b;
+}
+.tag-dot-lime {
+  background-color: #84cc16;
+}
+.tag-dot-emerald {
+  background-color: #10b981;
+}
+.tag-dot-sky {
+  background-color: #0ea5e9;
+}
+.tag-dot-violet {
+  background-color: #8b5cf6;
+}
+.tag-dot-fuchsia {
+  background-color: #d946ef;
+}
+
+/* AI platform accents - border-left + dot hues for model/platform cards.
+   Defined here so raw palette classes stay out of JSX. */
+.platform-border-chatgpt {
+  border-left-color: #10b981;
+}
+.platform-border-claude {
+  border-left-color: #f97316;
+}
+.platform-border-gemini {
+  border-left-color: #0ea5e9;
+}
+.platform-border-perplexity {
+  border-left-color: #8b5cf6;
+}
+.platform-dot-chatgpt {
+  background-color: #10b981;
+}
+.platform-dot-claude {
+  background-color: #f97316;
+}
+.platform-dot-gemini {
+  background-color: #0ea5e9;
+}
+.platform-dot-perplexity {
+  background-color: #8b5cf6;
+}
+.platform-dot-google {
+  background-color: #0ea5e9;
 }
 
 /* Keyword difficulty score badges — muted/transparent style to match tag chips */

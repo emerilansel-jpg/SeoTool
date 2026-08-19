@@ -223,6 +223,9 @@ export const rankTrackingConfigs = pgTable(
       .notNull()
       .default("both"),
     serpDepth: integer("serp_depth").notNull(),
+    searchEngine: text("search_engine", { enum: ["google", "bing"] })
+      .notNull()
+      .default("google"),
     scheduleInterval: text("schedule_interval", {
       enum: ["daily", "weekly", "monthly", "manual"],
     })

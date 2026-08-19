@@ -34,6 +34,10 @@ export const fetchRankCheckTaskResult: DataforseoSections["fetchRankCheckTaskRes
   async (input) =>
     (await loadDataforseoSections()).fetchRankCheckTaskResult(input);
 
+export const fetchBingRankCheckTaskResult: DataforseoSections["fetchBingRankCheckTaskResult"] =
+  async (input) =>
+    (await loadDataforseoSections()).fetchBingRankCheckTaskResult(input);
+
 export type {
   LabsKeywordDataItem,
   DomainRankedKeywordItem,
@@ -50,9 +54,12 @@ export type {
 } from "@/server/lib/dataforseo/serp";
 
 export type {
+  AnchorsItem,
   BacklinksSummaryItem,
   BacklinksItem,
   ReferringDomainItem,
   DomainPageSummaryItem,
   BacklinksHistoryItem,
 } from "@/server/lib/dataforseo/backlinks";
+
+export type { IntersectItem } from "@/server/lib/dataforseo/backlinks-intersect";

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Modal } from "@/client/components/Modal";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import {
   listReports,
@@ -61,8 +62,8 @@ export function ReportsListPage({ projectId }: { projectId: string }) {
             ))}
           </div>
         ) : reports.length === 0 ? (
-          <div className="rounded-xl border border-base-300 bg-base-100 p-8 text-center">
-            <p className="text-sm text-base-content/60">
+          <div className="rounded-xl border border-dashed border-base-300 p-10 text-center">
+            <p className="text-sm text-base-content/55">
               No reports yet. Create your first white-label report to start
               delivering value to clients.
             </p>
@@ -247,137 +248,135 @@ function ReportBuilderModal({
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-base-300/60">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-base-300 bg-base-100 p-6 shadow-xl">
-        <h2 className="mb-4 text-lg font-semibold">
-          {report ? "Edit report" : "New report"}
-        </h2>
-        <form
-          className="space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            // oxlint-disable-next-line eslint/no-unused-expressions -- ternary dispatch
-            report ? updateMutation.mutate() : createMutation.mutate();
-          }}
-        >
+    <Modal maxWidth="max-w-lg" onClose={onClose} labelledBy="report-form-title">
+      <h2 id="report-form-title" className="text-lg font-semibold">
+        {report ? "Edit report" : "New report"}
+      </h2>
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          // oxlint-disable-next-line eslint/no-unused-expressions -- ternary dispatch
+          report ? updateMutation.mutate() : createMutation.mutate();
+        }}
+      >
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="font-medium">Report name</span>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="input input-bordered w-full"
+            required
+          />
+        </label>
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="font-medium">Client name</span>
+          <input
+            type="text"
+            value={clientName}
+            onChange={(e) => setClientName(e.target.value)}
+            className="input input-bordered w-full"
+            placeholder="Acme Corp"
+          />
+        </label>
+        <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium">Report name</span>
+            <span className="font-medium">Schedule</span>
+            <select
+              value={schedule}
+              onChange={(e) => setSchedule(e.target.value as ReportSchedule)}
+              className="select select-bordered w-full"
+            >
+              <option value="none">On-demand</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="font-medium">Recipients</span>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={recipients}
+              onChange={(e) => setRecipients(e.target.value)}
               className="input input-bordered w-full"
-              required
+              placeholder="alice@acme.com,bob@acme.com"
+            />
+          </label>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="font-medium">Brand color</span>
+            <input
+              type="color"
+              value={brandColor || "#000000"}
+              onChange={(e) => setBrandColor(e.target.value)}
+              className="input input-bordered h-10 w-full p-1"
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium">Client name</span>
+            <span className="font-medium">Accent color</span>
             <input
-              type="text"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              className="input input-bordered w-full"
-              placeholder="Acme Corp"
+              type="color"
+              value={accentColor || "#000000"}
+              onChange={(e) => setAccentColor(e.target.value)}
+              className="input input-bordered h-10 w-full p-1"
             />
           </label>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium">Schedule</span>
-              <select
-                value={schedule}
-                onChange={(e) => setSchedule(e.target.value as ReportSchedule)}
-                className="select select-bordered w-full"
-              >
-                <option value="none">On-demand</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-              </select>
-            </label>
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium">Recipients</span>
-              <input
-                type="text"
-                value={recipients}
-                onChange={(e) => setRecipients(e.target.value)}
-                className="input input-bordered w-full"
-                placeholder="alice@acme.com,bob@acme.com"
-              />
-            </label>
+        </div>
+        <div>
+          <span className="mb-1.5 block text-sm font-medium">Sections</span>
+          <div className="flex flex-wrap gap-2">
+            {REPORT_SECTION_TYPES.map((type) => (
+              <label key={type} className="flex items-center gap-1.5 text-sm">
+                <input
+                  type="checkbox"
+                  checked={sections.includes(type)}
+                  onChange={(e) =>
+                    setSections(
+                      e.target.checked
+                        ? [...sections, type]
+                        : sections.filter((s) => s !== type),
+                    )
+                  }
+                  className="checkbox checkbox-sm"
+                />
+                {type}
+              </label>
+            ))}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium">Brand color</span>
-              <input
-                type="color"
-                value={brandColor || "#000000"}
-                onChange={(e) => setBrandColor(e.target.value)}
-                className="input input-bordered h-10 w-full p-1"
-              />
-            </label>
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium">Accent color</span>
-              <input
-                type="color"
-                value={accentColor || "#000000"}
-                onChange={(e) => setAccentColor(e.target.value)}
-                className="input input-bordered h-10 w-full p-1"
-              />
-            </label>
-          </div>
+        </div>
+        <div className="flex justify-between pt-2">
           <div>
-            <span className="mb-1.5 block text-sm font-medium">Sections</span>
-            <div className="flex flex-wrap gap-2">
-              {REPORT_SECTION_TYPES.map((type) => (
-                <label key={type} className="flex items-center gap-1.5 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={sections.includes(type)}
-                    onChange={(e) =>
-                      setSections(
-                        e.target.checked
-                          ? [...sections, type]
-                          : sections.filter((s) => s !== type),
-                      )
-                    }
-                    className="checkbox checkbox-sm"
-                  />
-                  {type}
-                </label>
-              ))}
-            </div>
-          </div>
-          <div className="flex justify-between pt-2">
-            <div>
-              {report ? (
-                <button
-                  type="button"
-                  className="btn btn-error btn-sm"
-                  onClick={() => deleteMutation.mutate()}
-                  disabled={deleteMutation.isPending}
-                >
-                  Delete
-                </button>
-              ) : null}
-            </div>
-            <div className="flex gap-2">
+            {report ? (
               <button
                 type="button"
-                className="btn btn-ghost btn-sm"
-                onClick={onClose}
+                className="btn btn-error btn-sm"
+                onClick={() => deleteMutation.mutate()}
+                disabled={deleteMutation.isPending}
               >
-                Cancel
+                Delete
               </button>
-              <button
-                type="submit"
-                className="btn btn-primary btn-sm"
-                disabled={isLoading || !name.trim()}
-              >
-                {isLoading ? "Saving…" : report ? "Update" : "Create"}
-              </button>
-            </div>
+            ) : null}
           </div>
-        </form>
-      </div>
-    </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary btn-sm"
+              disabled={isLoading || !name.trim()}
+            >
+              {isLoading ? "Saving…" : report ? "Update" : "Create"}
+            </button>
+          </div>
+        </div>
+      </form>
+    </Modal>
   );
 }

@@ -198,18 +198,25 @@ export function ProjectSwitcher({
         aria-haspopup="listbox"
         onClick={() => (open ? closePanel() : openPanel())}
         onKeyDown={handleTriggerKeyDown}
-        className="flex w-full items-center justify-between gap-2 rounded-lg border border-base-300 bg-base-100 px-3 py-1.5 text-left transition-colors hover:border-base-content/25"
+        className="flex w-full items-center justify-between gap-2.5 rounded-xl border border-base-300 bg-base-100 px-3 py-2 text-left shadow-xs transition-all hover:border-primary/40 hover:bg-base-100"
       >
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate text-sm font-medium text-base-content">
-            {activeProject?.name ?? "Select project"}
-          </span>
-          {activeProject?.domain ? (
-            <span className="truncate text-xs font-normal text-base-content/50">
-              {activeProject.domain}
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
+            {activeProject?.name
+              ? activeProject.name.charAt(0).toUpperCase()
+              : "P"}
+          </div>
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate text-xs font-bold text-base-content">
+              {activeProject?.name ?? "Select project"}
             </span>
-          ) : null}
-        </span>
+            {activeProject?.domain ? (
+              <span className="truncate text-[11px] font-normal text-base-content/50">
+                {activeProject.domain}
+              </span>
+            ) : null}
+          </div>
+        </div>
         <ChevronsUpDown className="size-3.5 shrink-0 text-base-content/40" />
       </button>
 

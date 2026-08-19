@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo } from "react";
 import { AlertCircle, ArrowLeft } from "lucide-react";
+import { Modal } from "@/client/components/Modal";
 import { getErrorCode } from "@/client/lib/error-messages";
 import { BILLING_ROUTE } from "@/shared/billing";
 import { useKeywordResearchController } from "@/client/features/keywords/state/useKeywordResearchController";
@@ -316,32 +317,27 @@ function KeywordSaveDialog({
   if (!controller.showSaveDialog) return null;
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box">
-        <h3 className="font-bold text-lg">
-          Save {controller.selectedRows.size} Keywords
-        </h3>
-        <div className="py-4">
-          <p className="text-base-content/70 text-sm">
-            These keywords will be saved to your current project.
-          </p>
-        </div>
-        <div className="modal-action">
-          <button
-            className="btn"
-            onClick={() => controller.setShowSaveDialog(false)}
-          >
-            Cancel
-          </button>
-          <button className="btn btn-primary" onClick={controller.confirmSave}>
-            Save
-          </button>
-        </div>
+    <Modal
+      onClose={() => controller.setShowSaveDialog(false)}
+      labelledBy="keyword-save-title"
+    >
+      <h3 id="keyword-save-title" className="text-lg font-semibold">
+        Save {controller.selectedRows.size} Keywords
+      </h3>
+      <p className="text-sm text-base-content/70">
+        These keywords will be saved to your current project.
+      </p>
+      <div className="flex justify-end gap-2">
+        <button
+          className="btn"
+          onClick={() => controller.setShowSaveDialog(false)}
+        >
+          Cancel
+        </button>
+        <button className="btn btn-primary" onClick={controller.confirmSave}>
+          Save
+        </button>
       </div>
-      <div
-        className="modal-backdrop"
-        onClick={() => controller.setShowSaveDialog(false)}
-      />
-    </div>
+    </Modal>
   );
 }

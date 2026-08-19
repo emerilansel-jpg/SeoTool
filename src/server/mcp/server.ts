@@ -35,6 +35,12 @@ import {
   getPageEntitiesTool,
 } from "@/server/mcp/tools/content-intelligence-tools";
 import { getContentGapTool } from "@/server/mcp/tools/content-gap-tools";
+import { analyzeCrawlBudgetTool } from "@/server/mcp/tools/analyze-crawl-budget";
+import { clusterKeywordsTool } from "@/server/mcp/tools/cluster-keywords";
+import { getLinkIntersectTool } from "@/server/mcp/tools/get-link-intersect";
+import { checkOnPageSeoTool } from "@/server/mcp/tools/check-onpage-seo";
+import { validateSitemapTool } from "@/server/mcp/tools/validate-sitemap";
+import { getSerpVolatilityTool } from "@/server/mcp/tools/get-serp-volatility";
 import { whoamiTool } from "@/server/mcp/tools/whoami";
 
 // Each handler is wrapped with instrumentMcpToolHandler so failures reach
@@ -288,12 +294,66 @@ export function registerSeoToolMcpTools(server: McpServer) {
     ),
   );
   server.registerTool(
+    getLinkIntersectTool.name,
+    getLinkIntersectTool.config,
+    instrumentMcpToolHandler(
+      getLinkIntersectTool.name,
+      getLinkIntersectTool.config.outputSchema,
+      getLinkIntersectTool.handler,
+    ),
+  );
+  server.registerTool(
     getPageEntitiesTool.name,
     getPageEntitiesTool.config,
     instrumentMcpToolHandler(
       getPageEntitiesTool.name,
       getPageEntitiesTool.config.outputSchema,
       getPageEntitiesTool.handler,
+    ),
+  );
+  server.registerTool(
+    validateSitemapTool.name,
+    validateSitemapTool.config,
+    instrumentMcpToolHandler(
+      validateSitemapTool.name,
+      validateSitemapTool.config.outputSchema,
+      validateSitemapTool.handler,
+    ),
+  );
+  server.registerTool(
+    checkOnPageSeoTool.name,
+    checkOnPageSeoTool.config,
+    instrumentMcpToolHandler(
+      checkOnPageSeoTool.name,
+      checkOnPageSeoTool.config.outputSchema,
+      checkOnPageSeoTool.handler,
+    ),
+  );
+  server.registerTool(
+    analyzeCrawlBudgetTool.name,
+    analyzeCrawlBudgetTool.config,
+    instrumentMcpToolHandler(
+      analyzeCrawlBudgetTool.name,
+      analyzeCrawlBudgetTool.config.outputSchema,
+      analyzeCrawlBudgetTool.handler,
+    ),
+  );
+  server.registerTool(
+    clusterKeywordsTool.name,
+    clusterKeywordsTool.config,
+    instrumentMcpToolHandler(
+      clusterKeywordsTool.name,
+      clusterKeywordsTool.config.outputSchema,
+      clusterKeywordsTool.handler,
+    ),
+  );
+  server.registerTool(
+    getSerpVolatilityTool.name,
+    getSerpVolatilityTool.config,
+    instrumentMcpToolHandler(
+      getSerpVolatilityTool.name,
+      getSerpVolatilityTool.config.outputSchema,
+      getSerpVolatilityTool.handler,
     ),
   );
 }

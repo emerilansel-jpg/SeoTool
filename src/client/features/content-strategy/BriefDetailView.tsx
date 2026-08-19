@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { ArrowLeft, Sparkles, ExternalLink, Link2 } from "lucide-react";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import {
   getContentBrief,
   generateBriefAi,
@@ -35,6 +37,11 @@ export function BriefDetailView({
         queryKey: ["content_brief", briefId],
       });
     },
+    onError: (error) => {
+      toast.error(
+        getStandardErrorMessage(error, "Failed to generate brief outline"),
+      );
+    },
   });
 
   const updateMutation = useMutation({
@@ -48,12 +55,44 @@ export function BriefDetailView({
       });
       setIsEditing(false);
     },
+    onError: (error) => {
+      toast.error(
+        getStandardErrorMessage(error, "Failed to update brief details"),
+      );
+    },
   });
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <span className="loading loading-spinner loading-lg" />
+      <div className="mx-auto max-w-5xl p-6" aria-busy="true">
+        <div className="mb-6 flex items-center justify-between">
+          <div className="skeleton h-8 w-36" />
+          <div className="skeleton h-8 w-48" />
+        </div>
+        <div className="card mb-6 border border-base-300 bg-base-100">
+          <div className="card-body gap-3">
+            <div className="skeleton h-6 w-28" />
+            <div className="skeleton h-8 w-2/3" />
+            <div className="skeleton h-4 w-1/2" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="card border border-base-300 bg-base-100 lg:col-span-2">
+            <div className="card-body gap-4">
+              <div className="skeleton h-6 w-44" />
+              <div className="skeleton h-4 w-full" />
+              <div className="skeleton h-4 w-5/6" />
+              <div className="skeleton h-4 w-2/3" />
+            </div>
+          </div>
+          <div className="card border border-base-300 bg-base-100">
+            <div className="card-body gap-4">
+              <div className="skeleton h-6 w-32" />
+              <div className="skeleton h-4 w-full" />
+              <div className="skeleton h-4 w-3/4" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -92,7 +131,7 @@ export function BriefDetailView({
           params={{ projectId }}
           className="btn btn-ghost btn-sm"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Strategy
+          <ArrowLeft className="size-4" /> Back to Strategy
         </Link>
 
         <div className="flex items-center gap-2">
@@ -101,7 +140,7 @@ export function BriefDetailView({
             onClick={() => generateMutation.mutate()}
             disabled={generateMutation.isPending}
           >
-            <Sparkles className="w-4 h-4 mr-2" />
+            <Sparkles className="size-4" />
             {generateMutation.isPending
               ? "Generating..."
               : briefData
@@ -111,18 +150,8 @@ export function BriefDetailView({
         </div>
       </div>
 
-      {/* Mutation error display */}
-      {generateMutation.isError && (
-        <div className="alert alert-error mb-4 text-sm">
-          <span>
-            Failed to generate brief outline. Please check your AI quota or try
-            again.
-          </span>
-        </div>
-      )}
-
       {/* Brief metadata */}
-      <div className="card bg-base-100 shadow mb-6">
+      <div className="card bg-base-100 border border-base-300 mb-6">
         <div className="card-body">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
@@ -138,10 +167,10 @@ export function BriefDetailView({
                   <div className="badge badge-primary badge-outline mb-2">
                     {brief.status}
                   </div>
-                  <h1 className="text-2xl font-bold">
+                  <h1 className="text-2xl font-semibold">
                     {brief.title || brief.targetKeyword}
                   </h1>
-                  <p className="text-base-content/60 mt-1">
+                  <p className="text-sm text-base-content/70 mt-1">
                     Target Keyword:{" "}
                     <span className="font-mono">{brief.targetKeyword}</span>
                   </p>
@@ -191,7 +220,7 @@ export function BriefDetailView({
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Outline */}
-          <div className="lg:col-span-2 card bg-base-100 shadow">
+          <div className="lg:col-span-2 card bg-base-100 border border-base-300">
             <div className="card-body">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">Content Outline</h2>
@@ -259,7 +288,7 @@ export function BriefDetailView({
           </div>
 
           {/* Sidebar: Internal Links */}
-          <div className="card bg-base-100 shadow">
+          <div className="card bg-base-100 border border-base-300">
             <div className="card-body">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Link2 className="w-5 h-5" /> Internal Links
@@ -326,24 +355,24 @@ function BriefEditForm({
 
   return (
     <div className="space-y-3">
-      <label className="form-control">
-        <span className="label-text mb-1">Target Keyword</span>
+      <label className="block">
+        <span className="mb-1 block text-sm">Target Keyword</span>
         <input
           className="input input-bordered input-sm"
           value={targetKeyword}
           onChange={(e) => setTargetKeyword(e.target.value)}
         />
       </label>
-      <label className="form-control">
-        <span className="label-text mb-1">Title</span>
+      <label className="block">
+        <span className="mb-1 block text-sm">Title</span>
         <input
           className="input input-bordered input-sm"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
       </label>
-      <label className="form-control">
-        <span className="label-text mb-1">Target URL</span>
+      <label className="block">
+        <span className="mb-1 block text-sm">Target URL</span>
         <input
           className="input input-bordered input-sm"
           value={targetUrl}
@@ -351,8 +380,8 @@ function BriefEditForm({
           placeholder="https://..."
         />
       </label>
-      <label className="form-control">
-        <span className="label-text mb-1">Priority Score (0-100)</span>
+      <label className="block">
+        <span className="mb-1 block text-sm">Priority Score (0-100)</span>
         <input
           type="number"
           min={0}

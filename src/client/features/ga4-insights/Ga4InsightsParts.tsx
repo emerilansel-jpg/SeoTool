@@ -256,14 +256,14 @@ export function SessionsTrendChart({ trend }: { trend: Report["trend"] }) {
           <XAxis
             dataKey="date"
             tickFormatter={formatDateTick}
-            tick={{ fontSize: 10, fill: "#888" }}
+            tick={{ fontSize: 10, fill: "var(--trend-axis-color)" }}
             tickLine={false}
             axisLine={false}
             minTickGap={32}
           />
           <YAxis
             tickFormatter={formatCompact}
-            tick={{ fontSize: 10, fill: "#888" }}
+            tick={{ fontSize: 10, fill: "var(--trend-axis-color)" }}
             tickLine={false}
             axisLine={false}
             width={36}
@@ -289,13 +289,13 @@ export function SessionsTrendChart({ trend }: { trend: Report["trend"] }) {
                 </div>
               );
             }}
-            cursor={{ stroke: "rgba(150,150,150,0.3)" }}
+            cursor={{ stroke: "var(--trend-grid-color)" }}
           />
           <Line
             type="monotone"
             dataKey="sessions"
             name="Sessions"
-            stroke="#4285F4"
+            stroke="#2563eb"
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 4 }}
@@ -305,7 +305,7 @@ export function SessionsTrendChart({ trend }: { trend: Report["trend"] }) {
             type="monotone"
             dataKey="users"
             name="Users"
-            stroke="#34A853"
+            stroke="#16a34a"
             strokeWidth={1.5}
             strokeDasharray="4 3"
             dot={false}
@@ -415,7 +415,7 @@ export function DimensionTable({
   return (
     <AppDataTable
       table={table}
-      className="table table-zebra table-sm"
+      className="table table-sm"
       wrapperClassName="overflow-x-auto"
       empty={
         <p className="p-6 text-sm text-base-content/60">

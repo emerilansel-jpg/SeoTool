@@ -109,6 +109,8 @@ export function BacklinksPage({
     rowsQuery,
     searchCardInitialValues,
     topPagesQuery,
+    anchorsQuery,
+    toxicQuery,
   } = useBacklinksPageData({
     projectId,
     searchState,
@@ -214,6 +216,8 @@ export function BacklinksPage({
           backlinksRowsPage={rowsQuery.data}
           referringDomainsPage={referringDomainsQuery.data}
           topPagesPage={topPagesQuery.data}
+          anchorsPage={anchorsQuery.data}
+          toxicPage={toxicQuery.data}
           searchState={searchState}
           filters={filters}
           sorting={sorting}

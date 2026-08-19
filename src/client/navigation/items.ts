@@ -1,11 +1,16 @@
 import {
+  Activity,
   BarChart3,
   Bell,
   Bookmark,
   Bot,
+  Bug,
   ClipboardCheck,
+  FileCode,
+  FileCheck,
   Globe,
   LayoutDashboard,
+  Layers,
   Link2,
   MessageSquare,
   FileText,
@@ -14,6 +19,7 @@ import {
   Swords,
   TrendingUp,
   Target,
+  Waypoints,
 } from "lucide-react";
 import { linkOptions } from "@tanstack/react-router";
 import { GoogleGlyphMuted } from "@/client/features/gsc/GoogleGlyph";
@@ -97,6 +103,36 @@ const projectNavItems = [
     label: "Alerts",
     icon: Bell,
   },
+  {
+    to: "/p/$projectId/sitemap-validator" as const,
+    label: "Sitemap Validator",
+    icon: FileCode,
+  },
+  {
+    to: "/p/$projectId/on-page-checker" as const,
+    label: "On-Page SEO",
+    icon: FileCheck,
+  },
+  {
+    to: "/p/$projectId/keyword-clustering" as const,
+    label: "Keyword Clustering",
+    icon: Layers,
+  },
+  {
+    to: "/p/$projectId/link-intersect" as const,
+    label: "Link Intersect",
+    icon: Waypoints,
+  },
+  {
+    to: "/p/$projectId/crawl-budget" as const,
+    label: "Crawl Budget",
+    icon: Bug,
+  },
+  {
+    to: "/p/$projectId/serp-volatility" as const,
+    label: "SERP Volatility",
+    icon: Activity,
+  },
 ] as const;
 
 const aiNavItem = linkOptions({
@@ -139,6 +175,10 @@ export function getProjectNavGroups(projectId: string) {
         byPath("/p/$projectId/keywords"),
         byPath("/p/$projectId/domain"),
         byPath("/p/$projectId/backlinks"),
+        byPath("/p/$projectId/sitemap-validator"),
+        byPath("/p/$projectId/on-page-checker"),
+        byPath("/p/$projectId/keyword-clustering"),
+        byPath("/p/$projectId/link-intersect"),
         byPath("/p/$projectId/brand-lookup"),
         byPath("/p/$projectId/prompt-explorer"),
       ],
@@ -153,6 +193,8 @@ export function getProjectNavGroups(projectId: string) {
         byPath("/p/$projectId/audit"),
         byPath("/p/$projectId/content-gap"),
         byPath("/p/$projectId/strategy"),
+        byPath("/p/$projectId/crawl-budget"),
+        byPath("/p/$projectId/serp-volatility"),
         byPath("/p/$projectId/reports"),
         byPath("/p/$projectId/alerts"),
       ],

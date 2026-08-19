@@ -1,20 +1,12 @@
 // oxlint-disable @typescript-eslint/no-unsafe-type-assertion
 import { expect, test, type Page } from "@playwright/test";
+import { getE2EProjectId } from "./e2e-helpers";
 
 async function getProjectId(page: Page) {
-  // Inject E2E auth bypass flag before any app JS loads so the hosted auth
-  // guard skips the real sign-in flow during automated testing.
   await page.addInitScript(() => {
     (window as unknown as Record<string, boolean>).__E2E_BYPASS_AUTH = true;
   });
-  await page.goto("/");
-  await page.waitForURL(/\/p\/([^/]+)\/?$/, {
-    timeout: 30_000,
-  });
-
-  const match = page.url().match(/\/p\/([^/]+)/);
-  if (!match) throw new Error(`Could not read project id from ${page.url()}`);
-  return match[1];
+  return getE2EProjectId(page);
 }
 
 test.describe("Keyword Research navigation", () => {

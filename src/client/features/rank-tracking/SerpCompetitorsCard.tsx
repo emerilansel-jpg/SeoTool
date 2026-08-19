@@ -63,7 +63,7 @@ export function SerpCompetitorsCard({
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.domain} className="hover:bg-base-50">
+                <tr key={row.domain} className="hover:bg-base-200">
                   <td className="pl-4">
                     <span className="text-sm font-medium">{row.domain}</span>
                   </td>

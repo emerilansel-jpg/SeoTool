@@ -23,10 +23,10 @@ const oauthSearch = new URLSearchParams({
 }).toString();
 
 describe("auth redirect helpers", () => {
-  it("defaults unsafe or missing redirects to the app root", () => {
-    expect(normalizeAuthRedirect(undefined)).toBe("/");
-    expect(normalizeAuthRedirect("https://evil.example/app")).toBe("/");
-    expect(normalizeAuthRedirect("//evil.example/app")).toBe("/");
+  it("defaults unsafe or missing redirects to the app entry", () => {
+    expect(normalizeAuthRedirect(undefined)).toBe("/projects");
+    expect(normalizeAuthRedirect("https://evil.example/app")).toBe("/projects");
+    expect(normalizeAuthRedirect("//evil.example/app")).toBe("/projects");
   });
 
   it("keeps same-origin relative redirects", () => {
@@ -36,8 +36,8 @@ describe("auth redirect helpers", () => {
   });
 
   it("rejects external and protocol-relative redirects", () => {
-    expect(normalizeAuthRedirect("https://evil.test")).toBe("/");
-    expect(normalizeAuthRedirect("//evil.test")).toBe("/");
+    expect(normalizeAuthRedirect("https://evil.test")).toBe("/projects");
+    expect(normalizeAuthRedirect("//evil.test")).toBe("/projects");
   });
 
   it("builds sign-in links with the redirect query only when needed", () => {

@@ -17,7 +17,13 @@ interface TrackCallArg {
 const { checkMock, trackMock, getOrCreateMock, isHostedServerAuthModeMock } =
   vi.hoisted(() => ({
     checkMock: vi.fn(),
-    trackMock: vi.fn<(arg: TrackCallArg) => void>(),
+    trackMock:
+      vi.fn<
+        (
+          organizationId: string,
+          amount: number,
+        ) => { monthlyDeducted: number; topupDeducted: number }
+      >(),
     getOrCreateMock: vi.fn(),
     isHostedServerAuthModeMock: vi.fn(),
   }));
@@ -135,6 +141,10 @@ function mockBalances(monthly: number, topup: number) {
     topupRemaining: topup,
     totalRemaining: monthly + topup,
   });
+  trackMock.mockImplementation((_orgId: string, amount: number) => ({
+    monthlyDeducted: Math.min(monthly, amount),
+    topupDeducted: Math.max(0, amount - monthly),
+  }));
 }
 
 function mockDataforseoResult(costUsd: number) {

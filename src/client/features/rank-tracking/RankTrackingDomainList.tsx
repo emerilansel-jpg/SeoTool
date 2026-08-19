@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { LOCATIONS } from "@/client/features/keywords/locations";
 import {
   AlertTriangle,
@@ -79,6 +80,11 @@ export function RankTrackingDomainList({
         queryKey: ["rankTrackingConfigs", projectId],
       });
       toast.success("Domain archived");
+    },
+    onError: (error) => {
+      toast.error(
+        getStandardErrorMessage(error, "Failed to archive domain list"),
+      );
     },
   });
 

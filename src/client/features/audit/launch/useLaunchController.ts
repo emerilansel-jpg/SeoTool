@@ -121,6 +121,9 @@ function useLaunchMutations({
       maxPages: number;
       lighthouseStrategy: "auto" | "none";
     }) => startAudit({ data }),
+    onError: (error) => {
+      toast.error(getStandardErrorMessage(error, "Failed to start audit"));
+    },
   });
 
   const deleteMutation = useMutation({
@@ -129,6 +132,9 @@ function useLaunchMutations({
     onSuccess: () => {
       void historyRefetch();
       toast.success("Audit deleted");
+    },
+    onError: (error) => {
+      toast.error(getStandardErrorMessage(error, "Failed to delete audit"));
     },
   });
 

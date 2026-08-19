@@ -114,6 +114,7 @@ async function getDueConfigsWithOrganization(nowIso: string) {
       locationName: rankTrackingConfigs.locationName,
       devices: rankTrackingConfigs.devices,
       serpDepth: rankTrackingConfigs.serpDepth,
+      searchEngine: rankTrackingConfigs.searchEngine,
       scheduleInterval: rankTrackingConfigs.scheduleInterval,
       nextCheckAt: rankTrackingConfigs.nextCheckAt,
       organizationId: projects.organizationId,

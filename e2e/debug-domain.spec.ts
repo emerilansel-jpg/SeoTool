@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { getE2EProjectId } from "./e2e-helpers";
 
 test("debug domain overview", async ({ page }) => {
   const errors: string[] = [];
@@ -11,11 +12,7 @@ test("debug domain overview", async ({ page }) => {
     (window as any).__E2E_BYPASS_AUTH = true;
   });
 
-  // Go to root and wait for project redirect
-  await page.goto("/");
-  await page.waitForURL(/\/p\/([^/]+)\/?$/, { timeout: 30000 });
-  const match = page.url().match(/\/p\/([^/]+)/);
-  const projectId = match![1];
+  const projectId = await getE2EProjectId(page);
   console.log("Project ID:", projectId);
 
   // Navigate to domain page

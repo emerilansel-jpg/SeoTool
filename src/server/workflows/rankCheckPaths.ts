@@ -81,6 +81,7 @@ interface CheckContext {
   languageCode: string;
   locationName?: string;
   runId: string;
+  searchEngine: "google" | "bing";
 }
 
 /** Expand keywords into one task input per keyword/device pair. */
@@ -115,20 +116,23 @@ async function checkBatchLive(
   tasks: RankCheckTaskInput[],
 ): Promise<number> {
   const settled = await Promise.allSettled(
-    tasks.map((task) =>
-      ctx.client.serp
-        .rankCheck({
-          keyword: task.keyword,
-          keywordId: task.keywordId,
-          locationCode: ctx.locationCode,
-          languageCode: ctx.languageCode,
-          locationName: ctx.locationName,
-          device: task.device,
-          targetDomain: ctx.domain,
-          depth: ctx.serpDepth,
-        })
-        .then((r) => ({ ...r, device: task.device })),
-    ),
+    tasks.map((task) => {
+      const rankCheckInput = {
+        keyword: task.keyword,
+        keywordId: task.keywordId,
+        locationCode: ctx.locationCode,
+        languageCode: ctx.languageCode,
+        locationName: ctx.locationName,
+        device: task.device,
+        targetDomain: ctx.domain,
+        depth: ctx.serpDepth,
+      };
+      const call =
+        ctx.searchEngine === "bing"
+          ? ctx.client.serp.bingRankCheck(rankCheckInput)
+          : ctx.client.serp.rankCheck(rankCheckInput);
+      return call.then((r) => ({ ...r, device: task.device }));
+    }),
   );
   const results: RankCheckResultWithDevice[] = [];
   for (const outcome of settled) {
@@ -346,15 +350,19 @@ export async function runQueuedCheck(
         step,
         `post-tasks-${postIndex}`,
         SINGLE_ATTEMPT_STEP_CONFIG,
-        async () =>
-          ctx.client.serp.rankCheckTaskPost({
+        async () => {
+          const taskPostInput = {
             tasks: chunk,
             locationCode: ctx.locationCode,
             languageCode: ctx.languageCode,
             locationName: ctx.locationName,
             depth: ctx.serpDepth,
             targetDomain: ctx.domain,
-          }),
+          };
+          return ctx.searchEngine === "bing"
+            ? ctx.client.serp.bingRankCheckTaskPost(taskPostInput)
+            : ctx.client.serp.rankCheckTaskPost(taskPostInput);
+        },
       );
     } catch (error) {
       console.warn(

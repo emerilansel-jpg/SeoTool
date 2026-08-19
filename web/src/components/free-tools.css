@@ -1,0 +1,699 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Free tools pages (Dark Command Center)
+   Page-specific surfaces for /free-tools/* built on the .itc token system
+   in landing-page.css (import it and wrap the page in .itc). Classes are
+   prefixed .ft- and reference the .itc custom properties (--canvas,
+   --surface, --hairline, --cyan, --orange, --green, --ink*).
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* ── Hero ── */
+
+.ft-hero {
+  padding: 88px 0 24px;
+  text-align: center;
+}
+
+.ft-hero-title {
+  margin: 18px auto 0;
+  max-width: 720px;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: clamp(32px, 4.4vw, 52px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.ft-hero-sub {
+  margin: 18px auto 0;
+  max-width: 620px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.ft-hero-form {
+  margin: 36px auto 0;
+}
+
+/* ── Result zone: fixed min-height so the check never shifts the page ── */
+
+.ft-result-zone {
+  max-width: 760px;
+  margin: 0 auto;
+  min-height: 200px;
+  padding: 32px 0 8px;
+}
+
+.ft-idle {
+  border: 1px dashed var(--hairline);
+  border-radius: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--ink-subtle);
+  font-size: 14px;
+}
+
+.ft-idle .itc-mono {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--cyan);
+  font-size: 12px;
+}
+
+/* ── Loading: radar sweep + scanned answer transcript ── */
+
+.ft-loading {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.ft-radar {
+  position: relative;
+  flex-shrink: 0;
+  width: 148px;
+  height: 148px;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  background:
+    repeating-radial-gradient(
+      circle at center,
+      transparent 0 34px,
+      var(--hairline-soft) 34px 35px
+    ),
+    radial-gradient(circle at center, var(--cyan-dim) 0%, transparent 72%);
+  overflow: hidden;
+}
+
+.ft-radar::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--hairline);
+}
+
+.ft-radar-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(0, 229, 255, 0.35) 0deg,
+    transparent 70deg
+  );
+  animation: ft-sweep 2.2s linear infinite;
+}
+
+.ft-blip {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.7);
+  animation: ft-blip 2.2s ease-in-out infinite;
+}
+
+.ft-blip-1 {
+  top: 30%;
+  left: 62%;
+}
+
+.ft-blip-2 {
+  top: 58%;
+  left: 30%;
+  animation-delay: 0.7s;
+}
+
+.ft-blip-3 {
+  top: 70%;
+  left: 66%;
+  animation-delay: 1.3s;
+}
+
+@keyframes ft-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ft-blip {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  45% {
+    opacity: 1;
+  }
+}
+
+/* ── Mock AI answer transcript (loading + explainer) ── */
+
+.ft-chat {
+  flex: 1;
+  min-width: 0;
+  max-width: 420px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.ft-chat-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--hairline-soft);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--ink-subtle);
+}
+
+.ft-chat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+}
+
+.ft-chat-q {
+  padding: 12px 14px 4px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.ft-chat-a {
+  position: relative;
+  padding: 8px 14px 14px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+
+.ft-chat-a strong {
+  color: var(--cyan);
+  font-weight: 500;
+}
+
+.ft-chat-a .ft-cite {
+  color: var(--orange);
+  font-weight: 500;
+}
+
+.ft-scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  opacity: 0.8;
+  animation: ft-scan 1.8s ease-in-out infinite;
+}
+
+@keyframes ft-scan {
+  0% {
+    top: 4px;
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  85% {
+    opacity: 0.8;
+  }
+  100% {
+    top: calc(100% - 4px);
+    opacity: 0;
+  }
+}
+
+/* ── Result panel ── */
+
+.ft-result {
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 28px;
+}
+
+.ft-result-grid {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.ft-result-main {
+  flex: 1;
+  min-width: 220px;
+}
+
+.ft-result-label {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-subtle);
+}
+
+.ft-number {
+  margin-top: 6px;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(48px, 7vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.ft-number-unit {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ink-subtle);
+}
+
+.ft-verdict {
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.ft-verdict strong {
+  font-weight: 600;
+}
+
+.ft-verdict-zero strong {
+  color: var(--orange);
+}
+
+.ft-verdict-low strong {
+  color: var(--cyan);
+}
+
+.ft-verdict-strong strong {
+  color: var(--green);
+}
+
+.ft-tier {
+  margin-top: 18px;
+  display: flex;
+  gap: 6px;
+}
+
+.ft-tier-seg {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline-soft);
+}
+
+.ft-tier-seg.on-zero {
+  background: var(--orange);
+  border-color: var(--orange);
+  box-shadow: 0 0 12px rgba(255, 86, 0, 0.35);
+}
+
+.ft-tier-seg.on-low {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+}
+
+.ft-tier-seg.on-strong {
+  background: var(--green);
+  border-color: var(--green);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.35);
+}
+
+.ft-tier-caption {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--ink-subtle);
+}
+
+.ft-result-side {
+  flex: 1;
+  min-width: 220px;
+  border-left: 1px solid var(--hairline);
+  padding-left: 28px;
+}
+
+.ft-side-title {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+}
+
+.ft-side-list {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.ft-side-list li {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.ft-side-list li::before {
+  content: "+";
+  flex-shrink: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  color: var(--cyan);
+}
+
+.ft-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.ft-meta {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--ink-subtle);
+}
+
+/* ── Error / rate-limit box ── */
+
+.ft-error {
+  border: 1px solid rgba(255, 86, 0, 0.4);
+  background: var(--orange-dim);
+  border-radius: 12px;
+  padding: 16px 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+/* ── Steps (01/02/03) ── */
+
+.ft-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.ft-step-num {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--cyan);
+}
+
+.ft-step-title {
+  margin-top: 8px;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--ink);
+}
+
+.ft-step-body {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+/* ── Two-column explainer ── */
+
+.ft-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+
+.ft-cols-copy p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-muted);
+}
+
+.ft-cols-copy p + p {
+  margin-top: 14px;
+}
+
+/* ── Free vs full compare list ── */
+
+.ft-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.ft-compare-col {
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 22px;
+}
+
+.ft-compare-col.is-full {
+  border-color: rgba(0, 229, 255, 0.35);
+  box-shadow: 0 0 32px -12px rgba(0, 229, 255, 0.25);
+}
+
+.ft-compare-title {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-subtle);
+}
+
+.ft-compare-col.is-full .ft-compare-title {
+  color: var(--cyan);
+}
+
+.ft-compare-list {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.ft-compare-list li {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.ft-compare-list li::before {
+  content: attr(data-mark);
+  flex-shrink: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  color: var(--ink-subtle);
+}
+
+.ft-compare-col.is-full .ft-compare-list li::before {
+  content: "+";
+  color: var(--cyan);
+}
+
+/* ── FAQ (divide list, no accordions) ── */
+
+.ft-faq {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.ft-faq-item {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--hairline-soft);
+}
+
+.ft-faq-item:first-child {
+  border-top: 1px solid var(--hairline-soft);
+}
+
+.ft-faq-q {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.ft-faq-a {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+
+/* ── Final CTA ── */
+
+.ft-cta {
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse 60% 100% at 50% 0%, var(--cyan-dim), transparent),
+    var(--surface);
+  padding: 56px 32px;
+  text-align: center;
+}
+
+/* ── Free tools index grid ── */
+
+.ft-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.ft-tool-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ft-status-chip {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  color: var(--ink-subtle);
+  white-space: nowrap;
+}
+
+.ft-status-live {
+  border-color: rgba(0, 229, 255, 0.45);
+  color: var(--cyan);
+  background: var(--cyan-dim);
+}
+
+.ft-tool-name {
+  margin-top: 14px;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.ft-tool-desc {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.ft-tool-kw {
+  display: block;
+  margin-top: 12px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--ink-subtle);
+}
+
+.ft-tool-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+.ft-tool-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.itc-card.is-soon {
+  opacity: 0.75;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 960px) {
+  .ft-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ft-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .ft-cols,
+  .ft-compare {
+    grid-template-columns: 1fr;
+  }
+
+  .ft-result-side {
+    border-left: none;
+    border-top: 1px solid var(--hairline);
+    padding-left: 0;
+    padding-top: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ft-hero {
+    padding-top: 64px;
+  }
+
+  .ft-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ft-loading {
+    flex-direction: column;
+  }
+
+  .ft-chat {
+    max-width: none;
+    width: 100%;
+  }
+
+  .ft-result {
+    padding: 20px;
+  }
+}
+
+/* ── Reduced motion ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .ft-radar-sweep,
+  .ft-blip,
+  .ft-scanline {
+    animation: none;
+  }
+
+  .ft-radar-sweep {
+    background: conic-gradient(
+      from 0deg,
+      rgba(0, 229, 255, 0.35) 0deg,
+      transparent 90deg
+    );
+  }
+}

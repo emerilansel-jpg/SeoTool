@@ -187,13 +187,13 @@ export async function openDomainOverview(page: Page, tab: DomainTab) {
     }
     window.sessionStorage.setItem("domain-overview-e2e-cleared", "1");
   });
-  await page.goto("/");
-  await page.waitForURL(/\/p\/([^/]+)\/?$/, {
-    timeout: 30_000,
-  });
+  const projectLink = page.locator('a[href^="/p/"]').first();
+  await page.goto("/projects");
+  await projectLink.waitFor({ state: "visible", timeout: 30_000 });
 
-  const match = page.url().match(/\/p\/([^/]+)/);
-  if (!match) throw new Error(`Could not read project id from ${page.url()}`);
+  const href = await projectLink.getAttribute("href");
+  const match = href?.match(/\/p\/([^/]+)/);
+  if (!match) throw new Error(`Could not read project id from ${href}`);
 
   const params = new URLSearchParams({
     domain: PRIMARY_TEST_DOMAIN,

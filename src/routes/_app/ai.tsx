@@ -50,8 +50,9 @@ function AiPage() {
       <div className="mx-auto max-w-3xl">
         <h1 className="text-2xl font-semibold">AI & MCP</h1>
         <p className="mt-2 text-sm text-base-content/70 leading-relaxed">
-          Connect your AI agent to SeoTool.im. Run keyword research, SERP analysis,
-          domain lookups, and backlink reviews from your editor or chat.
+          Connect your AI agent to SeoTool.im. Run keyword research, SERP
+          analysis, domain lookups, and backlink reviews from your editor or
+          chat.
         </p>
 
         <section className="mt-8">

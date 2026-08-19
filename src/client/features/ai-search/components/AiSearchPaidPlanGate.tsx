@@ -10,7 +10,7 @@ type Props = {
 
 export function AiSearchPaidPlanGate({ feature, description, bullets }: Props) {
   return (
-    <div className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
+    <div className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-base-300 bg-base-100">
       <div className="flex flex-col gap-5 px-6 py-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-xl space-y-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">

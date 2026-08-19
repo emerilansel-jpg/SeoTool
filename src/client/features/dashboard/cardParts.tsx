@@ -1,5 +1,5 @@
 // Shared building blocks for the dashboard cards. Same visual language as
-// the GSC IntegrationCard (rounded-xl, shadow-sm, header row + divider) so
+// the GSC IntegrationCard (rounded-xl, header row + divider) so
 // the embedded SearchConsoleConnectionCard doesn't read as a different
 // design system.
 export function CardShell({
@@ -14,15 +14,19 @@ export function CardShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
-      <div className="flex items-center justify-between gap-4 px-5 py-4">
-        <h2 className="text-base font-semibold leading-tight">{title}</h2>
+    <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-xs transition-all duration-200 hover:border-base-content/20 hover:shadow-md">
+      <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-base-300/80 bg-base-200/20">
+        <h2 className="text-sm font-bold tracking-tight text-base-content leading-tight">
+          {title}
+        </h2>
         {action}
       </div>
-      <div className="border-t border-base-300 p-5">
+      <div className="p-5">
         {children}
         {stamp ? (
-          <p className="mt-4 text-[11px] text-base-content/45">{stamp}</p>
+          <p className="mt-4 text-[11px] font-medium text-base-content/45">
+            {stamp}
+          </p>
         ) : null}
       </div>
     </div>
@@ -37,8 +41,8 @@ export function EmptyCardBody({
   cta: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-start gap-3">
-      <p className="text-sm text-base-content/70">{message}</p>
+    <div className="flex flex-col items-start gap-3.5 py-2">
+      <p className="text-sm text-base-content/70 leading-relaxed">{message}</p>
       {cta}
     </div>
   );
@@ -56,16 +60,22 @@ export function Stat({
   sub?: React.ReactNode;
 }) {
   const toneClass =
-    tone === "success" ? "text-success" : tone === "error" ? "text-error" : "";
+    tone === "success"
+      ? "text-emerald-500"
+      : tone === "error"
+        ? "text-rose-500"
+        : "text-base-content";
   return (
-    <div>
-      <p className="text-xs uppercase tracking-wide text-base-content/60">
+    <div className="rounded-xl border border-base-300/60 bg-base-200/30 p-3">
+      <p className="text-[11px] font-bold uppercase tracking-wider text-base-content/50">
         {label}
       </p>
-      <p className={`text-2xl font-semibold tabular-nums ${toneClass}`}>
+      <p
+        className={`mt-1 text-2xl font-bold tracking-tight tabular-nums ${toneClass}`}
+      >
         {value}
       </p>
-      {sub}
+      {sub ? <div className="mt-1">{sub}</div> : null}
     </div>
   );
 }
@@ -81,15 +91,25 @@ export function PercentDelta({
   const pct = ((current - previous) / previous) * 100;
   if (!Number.isFinite(pct)) return null;
   const rounded = Math.round(pct);
-  const tone = rounded > 0 ? "text-success" : rounded < 0 ? "text-error" : "";
+  const isPositive = rounded > 0;
+  const isNegative = rounded < 0;
+  const tone = isPositive
+    ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
+    : isNegative
+      ? "text-rose-600 dark:text-rose-400 bg-rose-500/10"
+      : "text-base-content/60 bg-base-200";
   return (
-    <p className={`text-xs tabular-nums ${tone}`}>
-      {rounded > 0 ? "▲" : rounded < 0 ? "▼" : ""} {Math.abs(rounded)}%
-    </p>
+    <span
+      className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[11px] font-semibold tabular-nums ${tone}`}
+    >
+      {isPositive ? "▲ +" : isNegative ? "▼ " : ""}
+      {Math.abs(rounded)}%
+    </span>
   );
 }
 
-export const moreDetailsClass = "btn btn-ghost btn-xs";
+export const moreDetailsClass =
+  "btn btn-ghost btn-xs font-semibold text-primary hover:bg-primary/10";
 
 export function newLost(value: number | null): string {
   return value === null ? "—" : String(value);

@@ -17,6 +17,7 @@ import * as sqliteTelemetry from "./telemetry.schema";
 import * as sqliteContentStrategy from "./content-strategy.schema";
 import * as sqliteAlerts from "./alerts.schema";
 import * as sqliteSerpSnapshots from "./serp-snapshots.schema";
+import * as sqliteSerpVolatility from "./serp-volatility.schema";
 import * as sqliteAudit from "./audit.schema";
 import * as sqliteContentIntelligence from "./content-intelligence.schema";
 import * as sqliteNotifications from "./notifications.schema";
@@ -33,6 +34,7 @@ import * as pgTelemetry from "./pg/telemetry.schema";
 import * as pgContentStrategy from "./pg/content-strategy.schema";
 import * as pgAlerts from "./pg/alerts.schema";
 import * as pgSerpSnapshots from "./pg/serp-snapshots.schema";
+import * as pgSerpVolatility from "./pg/serp-volatility.schema";
 import * as pgAudit from "./pg/audit.schema";
 import * as pgContentIntelligence from "./pg/content-intelligence.schema";
 import * as pgNotifications from "./pg/notifications.schema";
@@ -164,6 +166,7 @@ const sqliteAppTables = tablesFrom(
   sqliteContentStrategy,
   sqliteAlerts,
   sqliteSerpSnapshots,
+  sqliteSerpVolatility,
   sqliteAudit,
   sqliteContentIntelligence,
   sqliteNotifications,
@@ -181,6 +184,7 @@ const pgAppTables = tablesFrom(
   pgContentStrategy,
   pgAlerts,
   pgSerpSnapshots,
+  pgSerpVolatility,
   pgAudit,
   pgContentIntelligence,
   pgNotifications,

@@ -10,6 +10,7 @@ seotool.im {
     @marketingRoutes {
         path / /pricing /about /contact /careers /affiliates /changelog
         path /features /features/*
+        path /free-tools /free-tools/*
         path /open-source-seo /google-search-console-mcp
         path /privacy /terms-and-conditions /cookie-policy /refund-policy /dpa
     }
@@ -32,7 +33,7 @@ seotool.im {
 
     # Blog, docs, guides content (marketing subpaths)
     @marketingContent {
-        path /blogs* /docs* /guides*
+        path /blogs* /docs* /guides* /library*
     }
     handle @marketingContent {
         root * /srv/marketing

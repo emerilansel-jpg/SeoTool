@@ -1,14 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  getPlanTierMock,
-  upsertSubscriptionMock,
-  grantMonthlyCreditsMock,
-} = vi.hoisted(() => ({
-  getPlanTierMock: vi.fn(),
-  upsertSubscriptionMock: vi.fn(),
-  grantMonthlyCreditsMock: vi.fn(),
-}));
+const { getPlanTierMock, upsertSubscriptionMock, grantMonthlyCreditsMock } =
+  vi.hoisted(() => ({
+    getPlanTierMock: vi.fn(),
+    upsertSubscriptionMock: vi.fn(),
+    grantMonthlyCreditsMock: vi.fn(),
+  }));
 
 vi.mock("@/server/billing/credits", () => ({
   getCreditBalance: vi.fn().mockResolvedValue({

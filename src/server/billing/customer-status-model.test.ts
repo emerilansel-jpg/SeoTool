@@ -47,7 +47,7 @@ describe("deriveBillingCustomerStatusSnapshot", () => {
       subscription: { plan_id: "unknown-plan", status: "ACTIVE" },
     });
 
-    expect(snapshot.isPaying).toBe(false);
+    expect(snapshot.isPaying).toBe(true);
     expect(snapshot.paidPlanId).toBe("unknown-plan");
     expect(snapshot.planTier).toBe("free");
   });
@@ -59,7 +59,7 @@ describe("deriveBillingCustomerStatusSnapshot", () => {
     });
 
     expect(snapshot.planTier).toBe("free");
-    expect(snapshot.isPaying).toBe(false);
+    expect(snapshot.isPaying).toBe(true);
   });
 
   it("maps CANCELLED status to canceled", () => {

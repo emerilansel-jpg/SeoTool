@@ -31,7 +31,10 @@ export const createPaypalSubscription = createServerFn({ method: "POST" })
     const { tier } = data;
     const planId = PAYPAL_PLAN_IDS[tier];
     if (!planId) {
-      throw new AppError("BAD_REQUEST", `No PayPal plan configured for tier: ${tier}`);
+      throw new AppError(
+        "VALIDATION_ERROR",
+        `No PayPal plan configured for tier: ${tier}`,
+      );
     }
 
     const publicUrl = await import("@/server/lib/runtime-env").then((m) =>
@@ -59,9 +62,7 @@ export const createPaypalSubscription = createServerFn({ method: "POST" })
     });
 
     // Find the approval URL
-    const approveLink = subscription.links?.find(
-      (l) => l.rel === "approve",
-    );
+    const approveLink = subscription.links?.find((l) => l.rel === "approve");
     if (!approveLink) {
       throw new AppError(
         "INTERNAL_ERROR",
@@ -162,7 +163,11 @@ export const createPaypalTopup = createServerFn({ method: "POST" })
   });
 
 // Reuse the paypal request helper from the billing module
-async function paypalRequest<T>(method: string, path: string, body?: unknown): Promise<T> {
+async function paypalRequest<T>(
+  method: string,
+  path: string,
+  body?: unknown,
+): Promise<T> {
   const { paypalRequest: req } = await import("@/server/billing/paypal");
   return req<T>(method, path, body);
 }

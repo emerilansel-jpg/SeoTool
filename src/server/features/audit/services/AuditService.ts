@@ -1,6 +1,5 @@
 import { env } from "cloudflare:workers";
 import {
-  customerHasManagedAccess,
   customerHasPaidPlan,
   type BillingCustomerContext,
 } from "@/server/billing/subscription";
@@ -23,16 +22,13 @@ import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 
 // Plan-tier limits are the abuse bound in hosted mode: free accounts get one
 // small audit at a time, paid keeps the full limits, and customers with no
-// Autumn product at all are turned away. Self-hosted isn't gated.
+// subscription at all are turned away. Self-hosted isn't gated.
 async function resolveAuditLimitTier(
   organizationId: string,
 ): Promise<AuditLimitTier> {
   if (!(await isHostedServerAuthMode())) return "paid";
-  const [hasManagedAccess, hasPaidPlan] = await Promise.all([
-    customerHasManagedAccess(organizationId),
-    customerHasPaidPlan(organizationId),
-  ]);
-  if (!hasManagedAccess) {
+  const hasPaidPlan = await customerHasPaidPlan(organizationId);
+  if (!hasPaidPlan) {
     throw new AppError("PAYMENT_REQUIRED", "Subscribe to run site audits");
   }
   return hasPaidPlan ? "paid" : "free";

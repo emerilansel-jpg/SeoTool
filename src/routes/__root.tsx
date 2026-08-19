@@ -173,30 +173,27 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ClientOnly>
-            <QueryClientProvider client={queryClient}>
-              <>
-                <PostHogBootstrap />
-                {children}
-                <ExportToSheetsModal />
-                <Toaster
-                  position="bottom-right"
-                  mobileOffset={{ bottom: 100 }}
+          <QueryClientProvider client={queryClient}>
+            <>
+              <PostHogBootstrap />
+              {children}
+              <ExportToSheetsModal />
+              <Toaster position="bottom-right" mobileOffset={{ bottom: 100 }} />
+              {showDevtools ? (
+                <TanStackDevtools
+                  config={{ position: "bottom-right" }}
+                  eventBusConfig={{ connectToServerBus: true }}
+                  plugins={[
+                    {
+                      name: "TanStack Router",
+                      render: <TanStackRouterDevtoolsPanel />,
+                      defaultOpen: true,
+                    },
+                  ]}
                 />
-                {showDevtools ? (
-                  <TanStackDevtools
-                    config={{ position: "bottom-right" }}
-                    eventBusConfig={{ connectToServerBus: true }}
-                    plugins={[
-                      {
-                        name: "TanStack Router",
-                        render: <TanStackRouterDevtoolsPanel />,
-                        defaultOpen: true,
-                      },
-                    ]}
-                  />
-                ) : null}
-              </>
-            </QueryClientProvider>
+              ) : null}
+            </>
+          </QueryClientProvider>
         </ClientOnly>
         <Scripts />
       </body>

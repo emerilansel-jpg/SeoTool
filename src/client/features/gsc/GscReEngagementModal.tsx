@@ -1,5 +1,7 @@
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { Modal } from "@/client/components/Modal";
 import { GoogleGlyph } from "@/client/features/gsc/GoogleGlyph";
 import { startGscLink } from "@/client/features/gsc/startGscLink";
@@ -45,6 +47,9 @@ export function GscReEngagementModal({
     mutationFn: () => dismissGscNudge(),
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: ["onboardingAnswers"] });
+    },
+    onError: (error) => {
+      toast.error(getStandardErrorMessage(error, "Failed to dismiss nudge"));
     },
   });
 

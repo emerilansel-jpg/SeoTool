@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { useEffect, useState } from "react";
 import { Archive, Loader2, Plus, X } from "lucide-react";
 import { archiveSamSession, createSamSession } from "@/serverFunctions/sam";
@@ -37,8 +39,8 @@ function BetaNotice() {
         </button>
       </div>
       <p className="mt-1.5 text-xs text-base-content/70">
-        For more powerful AI workflows, use the SeoTool.im MCP with your own agent
-        like Claude Code or Hermes.
+        For more powerful AI workflows, use the SeoTool.im MCP with your own
+        agent like Claude Code or Hermes.
       </p>
       <Link to="/ai" className="link link-primary mt-1.5 inline-block text-xs">
         Set up the MCP →
@@ -96,6 +98,11 @@ export function SamSidebarPanel({
       invalidateSamSessions(projectId);
       goToSession(id);
     },
+    onError: (error) => {
+      toast.error(
+        getStandardErrorMessage(error, "Failed to create chat session"),
+      );
+    },
   });
 
   const archiveSession = useMutation({
@@ -106,6 +113,11 @@ export function SamSidebarPanel({
       if (sessionId === activeSessionId) {
         goToSession(sessions.find((s) => s.id !== sessionId)?.id);
       }
+    },
+    onError: (error) => {
+      toast.error(
+        getStandardErrorMessage(error, "Failed to archive chat session"),
+      );
     },
   });
 

@@ -1,4 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { useNavigate } from "@tanstack/react-router";
 import { Suspense, useCallback, useEffect } from "react";
 import { Loader2, Plus, Wrench } from "lucide-react";
@@ -45,6 +47,11 @@ export function SamChat({
     onSuccess: ({ id }) => {
       invalidateSamSessions(projectId);
       goToSession(id);
+    },
+    onError: (error) => {
+      toast.error(
+        getStandardErrorMessage(error, "Failed to create chat session"),
+      );
     },
   });
 

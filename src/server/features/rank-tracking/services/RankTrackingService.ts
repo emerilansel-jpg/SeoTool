@@ -38,6 +38,7 @@ async function createConfig(input: {
   devices?: RankTrackingConfig["devices"];
   serpDepth: number;
   scheduleInterval?: RankTrackingConfig["scheduleInterval"];
+  searchEngine?: "google" | "bing";
 }) {
   const normalizedDomain = normalizeDomain(input.domain);
 
@@ -111,6 +112,7 @@ async function createConfig(input: {
     locationName,
     devices: input.devices ?? "both",
     serpDepth: input.serpDepth,
+    searchEngine: input.searchEngine ?? "google",
     scheduleInterval,
     nextCheckAt,
   });
@@ -130,6 +132,7 @@ async function updateConfig(
     serpDepth?: number;
     scheduleInterval?: RankTrackingConfig["scheduleInterval"];
     isActive?: boolean;
+    searchEngine?: "google" | "bing";
   },
 ) {
   const updates: typeof input & { nextCheckAt?: string | null } = {};
@@ -145,6 +148,8 @@ async function updateConfig(
   if (input.devices !== undefined) updates.devices = input.devices;
   if (input.serpDepth !== undefined) updates.serpDepth = input.serpDepth;
   if (input.isActive !== undefined) updates.isActive = input.isActive;
+  if (input.searchEngine !== undefined)
+    updates.searchEngine = input.searchEngine;
 
   if (input.scheduleInterval !== undefined) {
     updates.scheduleInterval = input.scheduleInterval;

@@ -235,7 +235,7 @@ export function DimensionTable({
   return (
     <AppDataTable
       table={table}
-      className="table table-zebra table-sm"
+      className="table table-sm"
       wrapperClassName="overflow-x-auto"
       empty={
         <p className="p-6 text-sm text-base-content/60">
@@ -336,7 +336,7 @@ export function StrikingDistanceTable({
         </p>
         <AppDataTable
           table={table}
-          className="table table-zebra table-sm"
+          className="table table-sm"
           wrapperClassName="overflow-x-auto"
         />
       </div>

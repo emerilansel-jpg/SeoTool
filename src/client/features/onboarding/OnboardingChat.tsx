@@ -1,4 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { DEFAULT_LOCATION_CODE } from "@/shared/keyword-locations";
@@ -70,6 +72,11 @@ function SiteForm({ projectId }: { projectId: string }) {
     mutationFn: () =>
       saveOnboardingSite({ data: { projectId, domain, locationCode } }),
     onSuccess: invalidateOnboardingChatState,
+    onError: (error) => {
+      toast.error(
+        getStandardErrorMessage(error, "Failed to save onboarding details"),
+      );
+    },
   });
 
   return (
@@ -95,7 +102,7 @@ function SiteForm({ projectId }: { projectId: string }) {
           </p>
         </div>
 
-        <div className="space-y-4 rounded-lg border border-base-300 bg-base-100 p-5 shadow-sm">
+        <div className="space-y-4 rounded-lg border border-base-300 bg-base-100 p-5">
           <label className="block space-y-1">
             <span className="text-sm font-medium">Your website</span>
             <input

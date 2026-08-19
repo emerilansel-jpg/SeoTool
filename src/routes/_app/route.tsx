@@ -4,6 +4,7 @@ import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { useHostedAuthRouteGuard } from "@/client/features/auth/useHostedAuthRouteGuard";
 import { AuthenticatedAppLayout } from "@/client/layout/AppShell";
 import { useOnboardingRedirect } from "@/client/features/onboarding/useOnboardingRedirect";
+import { usePaidPlanGuard } from "@/client/features/billing/use-paid-plan-guard";
 
 export const Route = createFileRoute("/_app")({
   beforeLoad: () => {
@@ -26,9 +27,22 @@ export const Route = createFileRoute("/_app")({
 function AppRouteLayout() {
   const authGate = useHostedAuthRouteGuard();
   useOnboardingRedirect();
+  const paywall = usePaidPlanGuard();
 
   if (!authGate.canRenderAuthenticatedContent) {
-    return null;
+    return (
+      <div className="flex h-full items-center justify-center">
+        <span className="loading loading-spinner loading-md" />
+      </div>
+    );
+  }
+
+  if (!paywall.canUseTools) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <span className="loading loading-spinner loading-md" />
+      </div>
+    );
   }
 
   return (

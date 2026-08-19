@@ -35,14 +35,14 @@ export function resolveTagColor(tag: {
 }
 
 const COLOR_CLASS: Record<TagColorKey, string> = {
-  slate: "bg-slate-500",
-  rose: "bg-rose-500",
-  amber: "bg-amber-500",
-  lime: "bg-lime-500",
-  emerald: "bg-emerald-500",
-  sky: "bg-sky-500",
-  violet: "bg-violet-500",
-  fuchsia: "bg-fuchsia-500",
+  slate: "tag-dot-slate",
+  rose: "tag-dot-rose",
+  amber: "tag-dot-amber",
+  lime: "tag-dot-lime",
+  emerald: "tag-dot-emerald",
+  sky: "tag-dot-sky",
+  violet: "tag-dot-violet",
+  fuchsia: "tag-dot-fuchsia",
 };
 
 export function tagChipClass(color: TagColorKey): string {

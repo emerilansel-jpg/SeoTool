@@ -125,7 +125,7 @@ function BillingPage() {
 
       <div className="grid gap-5 md:grid-cols-2">
         {/* Subscription card */}
-        <div className="flex flex-col justify-between rounded-lg border border-[var(--color-brand-accent)] bg-base-150 p-4 gap-4 ring-1 ring-[var(--color-brand-accent)]">
+        <div className="flex flex-col justify-between rounded-lg border border-primary/50 bg-primary/5 p-4 gap-4 ring-1 ring-primary/30">
           <div>
             <div className="flex items-center justify-between">
               <span className="font-medium">Current Plan</span>
@@ -146,7 +146,7 @@ function BillingPage() {
               <Link
                 to="/subscribe"
                 search={{ upgrade: true }}
-                className="btn btn-neutral w-full bg-[var(--color-brand-accent)] text-white hover:bg-[var(--color-brand-accent)]/90"
+                className="btn btn-primary w-full"
               >
                 Upgrade Plan
               </Link>
@@ -209,7 +209,7 @@ function BillingPage() {
       </div>
 
       <div className="rounded-lg border border-base-300 bg-base-100 overflow-hidden">
-        <div className="border-b border-base-300 bg-base-50 p-4">
+        <div className="border-b border-base-300 bg-base-200 p-4">
           <h2 className="font-medium">Current Usage limits</h2>
           <p className="mt-1 text-xs text-base-content/50">
             Windowed features reset daily or monthly. Gauge features match your
@@ -218,7 +218,7 @@ function BillingPage() {
         </div>
 
         <div className="divide-y divide-base-300">
-          {(quotaQuery.data ?? []).map((quota) => (
+          {(quotaQuery.data?.quotas ?? []).map((quota) => (
             <div key={quota.feature} className="p-4">
               <QuotaBar
                 label={formatFeatureName(quota.feature)}
@@ -249,8 +249,8 @@ function BillingPage() {
         </button>
       </div>
       <p className="text-sm text-base-content/70 -mt-3">
-        Any limits exceeded will draw from your credit pool if available.
-        Top up anytime, credits roll over and never expire.
+        Any limits exceeded will draw from your credit pool if available. Top up
+        anytime, credits roll over and never expire.
       </p>
 
       <BillingUsageChart />

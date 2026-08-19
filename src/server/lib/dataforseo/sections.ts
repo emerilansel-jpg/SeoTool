@@ -12,12 +12,15 @@ export {
 } from "@/server/lib/dataforseo/business";
 
 export {
+  fetchAnchors,
   fetchBacklinksHistory,
   fetchBacklinksRows,
   fetchBacklinksSummary,
   fetchDomainPagesSummary,
   fetchReferringDomains,
 } from "@/server/lib/dataforseo/backlinks";
+
+export { fetchBacklinksDomainIntersection } from "@/server/lib/dataforseo/backlinks-intersect";
 
 export {
   fetchDomainIntersection,
@@ -43,6 +46,12 @@ export {
   fetchRankCheckTaskResult,
   postRankCheckTasks,
 } from "@/server/lib/dataforseo/serp";
+
+export {
+  fetchBingRankCheckSerp,
+  fetchBingRankCheckTaskResult,
+  postBingRankCheckTasks,
+} from "@/server/lib/dataforseo/bing-serp";
 
 export { fetchLighthouseResult } from "@/server/lib/dataforseo/lighthouse";
 

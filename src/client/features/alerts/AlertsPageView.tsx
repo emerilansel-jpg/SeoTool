@@ -1,7 +1,10 @@
 // oxlint-disable typescript-eslint/no-unsafe-type-assertion -- form values narrowed to DB enum types
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Bell, Plus, Trash2, Power } from "lucide-react";
+import { Modal } from "@/client/components/Modal";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import {
   listAlertRules,
   createAlertRule,
@@ -46,6 +49,11 @@ export function AlertsPageView({ projectId }: { projectId: string }) {
         queryKey: ["alert_rules", projectId],
       });
     },
+    onError: (error) => {
+      toast.error(
+        getStandardErrorMessage(error, "Failed to update alert rule"),
+      );
+    },
   });
 
   const deleteMutation = useMutation({
@@ -55,22 +63,43 @@ export function AlertsPageView({ projectId }: { projectId: string }) {
         queryKey: ["alert_rules", projectId],
       });
     },
+    onError: (error) => {
+      toast.error(
+        getStandardErrorMessage(error, "Failed to delete alert rule"),
+      );
+    },
   });
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <span className="loading loading-spinner loading-lg" />
+      <div className="mx-auto max-w-7xl p-6" aria-busy="true">
+        <div className="mb-8 flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="skeleton h-8 w-40" />
+            <div className="skeleton h-4 w-80" />
+          </div>
+          <div className="skeleton h-10 w-28" />
+        </div>
+        <div className="space-y-3">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="card border border-base-300 bg-base-100">
+              <div className="card-body p-4">
+                <div className="skeleton h-5 w-64" />
+                <div className="skeleton h-3.5 w-96" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Alerts</h1>
-          <p className="text-base-content/70">
+          <h1 className="text-2xl font-semibold">Alerts</h1>
+          <p className="text-sm text-base-content/70">
             Get notified when rankings drop or audit issues are found.
           </p>
         </div>
@@ -81,7 +110,7 @@ export function AlertsPageView({ projectId }: { projectId: string }) {
             setIsModalOpen(true);
           }}
         >
-          <Plus className="w-4 h-4 mr-2" /> New Alert
+          <Plus className="size-4" /> New Alert
         </button>
       </div>
 
@@ -97,7 +126,7 @@ export function AlertsPageView({ projectId }: { projectId: string }) {
             className="btn btn-primary"
             onClick={() => setIsModalOpen(true)}
           >
-            <Plus className="w-4 h-4 mr-2" /> Create Alert Rule
+            <Plus className="size-4" /> Create Alert Rule
           </button>
         </div>
       ) : (
@@ -105,7 +134,7 @@ export function AlertsPageView({ projectId }: { projectId: string }) {
           {rules.map((rule) => (
             <div
               key={rule.id}
-              className="card bg-base-100 shadow border border-base-200"
+              className="card bg-base-100 border border-base-300"
             >
               <div className="card-body p-4 flex-row items-center justify-between gap-4">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -142,14 +171,14 @@ export function AlertsPageView({ projectId }: { projectId: string }) {
                     title={rule.enabled ? "Disable" : "Enable"}
                     onClick={() => toggleMutation.mutate(rule)}
                   >
-                    <Power className="w-4 h-4" />
+                    <Power className="size-4" />
                   </button>
                   <button
                     className="btn btn-ghost btn-sm btn-square text-error"
                     title="Delete"
                     onClick={() => deleteMutation.mutate(rule.id)}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="size-4" />
                   </button>
                 </div>
               </div>
@@ -230,119 +259,112 @@ function AlertRuleModal({
       });
       onClose();
     },
+    onError: (error) => {
+      toast.error(getStandardErrorMessage(error, "Failed to save alert rule"));
+    },
   });
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box">
-        <h3 className="font-bold text-lg">
-          {isEditing ? "Edit Alert Rule" : "Create Alert Rule"}
-        </h3>
+    <Modal maxWidth="max-w-lg" onClose={onClose} labelledBy="alert-rule-title">
+      <h3 id="alert-rule-title" className="text-lg font-semibold">
+        {isEditing ? "Edit Alert Rule" : "Create Alert Rule"}
+      </h3>
 
-        <div className="py-4 space-y-4">
-          <label className="form-control">
-            <span className="label-text mb-1">Alert Name</span>
+      <div className="space-y-4">
+        <label className="block">
+          <span className="mb-1 block text-sm">Alert Name</span>
+          <input
+            className="input input-bordered"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g., Keyword ranking drop alert"
+          />
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-sm">Alert Type</span>
+          <select
+            className="select select-bordered"
+            value={metricType}
+            onChange={(e) => setMetricType(e.target.value)}
+          >
+            <option value="rank_drop">
+              Rank Drop (keywords losing positions)
+            </option>
+            <option value="audit_critical">
+              Audit Critical Issues (new critical issues found)
+            </option>
+          </select>
+        </label>
+
+        <div className="grid grid-cols-2 gap-4">
+          <label className="block">
+            <span className="mb-1 block text-sm">
+              {metricType === "rank_drop"
+                ? "Position Drop Threshold"
+                : "Critical Issue Threshold"}
+            </span>
             <input
+              type="number"
+              min={1}
               className="input input-bordered"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Keyword ranking drop alert"
+              value={threshold}
+              onChange={(e) => setThreshold(e.target.value)}
             />
           </label>
 
-          <label className="form-control">
-            <span className="label-text mb-1">Alert Type</span>
+          <label className="block">
+            <span className="mb-1 block text-sm">Frequency</span>
             <select
               className="select select-bordered"
-              value={metricType}
-              onChange={(e) => setMetricType(e.target.value)}
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value)}
             >
-              <option value="rank_drop">
-                Rank Drop (keywords losing positions)
-              </option>
-              <option value="audit_critical">
-                Audit Critical Issues (new critical issues found)
-              </option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
             </select>
           </label>
+        </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <label className="form-control">
-              <span className="label-text mb-1">
-                {metricType === "rank_drop"
-                  ? "Position Drop Threshold"
-                  : "Critical Issue Threshold"}
-              </span>
-              <input
-                type="number"
-                min={1}
-                className="input input-bordered"
-                value={threshold}
-                onChange={(e) => setThreshold(e.target.value)}
-              />
-            </label>
-
-            <label className="form-control">
-              <span className="label-text mb-1">Frequency</span>
-              <select
-                className="select select-bordered"
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value)}
-              >
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-              </select>
-            </label>
-          </div>
-
-          {metricType === "rank_drop" && (
-            <label className="form-control">
-              <span className="label-text mb-1">
-                Specific Keyword (optional — leave empty for all tracked
-                keywords)
-              </span>
-              <input
-                className="input input-bordered"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                placeholder="e.g., best seo tools"
-              />
-            </label>
-          )}
-
-          <label className="form-control">
-            <span className="label-text mb-1">
-              Recipient Emails (comma-separated)
+        {metricType === "rank_drop" && (
+          <label className="block">
+            <span className="mb-1 block text-sm">
+              Specific Keyword (optional, leave empty for all tracked keywords)
             </span>
             <input
               className="input input-bordered"
-              value={recipients}
-              onChange={(e) => setRecipients(e.target.value)}
-              placeholder="user@example.com, team@example.com"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="e.g., best seo tools"
             />
           </label>
-        </div>
-
-        {mutation.isError && (
-          <div className="alert alert-error text-sm mb-4">
-            <span>Failed to save alert rule. Please try again.</span>
-          </div>
         )}
 
-        <div className="modal-action">
-          <button className="btn btn-ghost" onClick={onClose}>
-            Cancel
-          </button>
-          <button
-            className="btn btn-primary"
-            disabled={mutation.isPending || !name || !recipients}
-            onClick={() => mutation.mutate()}
-          >
-            {mutation.isPending ? "Saving..." : isEditing ? "Update" : "Create"}
-          </button>
-        </div>
+        <label className="block">
+          <span className="mb-1 block text-sm">
+            Recipient Emails (comma-separated)
+          </span>
+          <input
+            className="input input-bordered"
+            value={recipients}
+            onChange={(e) => setRecipients(e.target.value)}
+            placeholder="user@example.com, team@example.com"
+          />
+        </label>
       </div>
-      <div className="modal-backdrop" onClick={onClose} />
-    </div>
+
+      <div className="flex justify-end gap-2">
+        <button className="btn btn-ghost" onClick={onClose}>
+          Cancel
+        </button>
+        <button
+          className="btn btn-primary"
+          disabled={mutation.isPending || !name || !recipients}
+          onClick={() => mutation.mutate()}
+        >
+          {mutation.isPending ? "Saving..." : isEditing ? "Update" : "Create"}
+        </button>
+      </div>
+    </Modal>
   );
 }

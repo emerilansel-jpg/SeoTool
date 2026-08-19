@@ -137,56 +137,89 @@ function OnboardingChecklist({
     }
   };
 
+  const completedCount = STEP_ORDER.filter((s) =>
+    isStepDone(activation, s),
+  ).length;
+  const progressPercent = Math.round(
+    (completedCount / STEP_ORDER.length) * 100,
+  );
+
   return (
-    <div className="rounded-xl border border-primary/25 bg-primary/5 shadow-sm">
-      <div className="flex items-center justify-between gap-4 px-5 pt-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-primary">
-          Onboarding checklist
-        </p>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            className={`btn btn-ghost btn-xs btn-square ${
-              index === 0 ? "invisible" : ""
-            }`}
-            aria-label="Previous step"
-            disabled={index === 0}
-            onClick={() => page(-1)}
-          >
-            <ChevronLeft className="size-4" />
-          </button>
-          <span className="text-xs tabular-nums text-base-content/60">
-            {index + 1} / {STEP_ORDER.length}
-          </span>
-          <button
-            type="button"
-            className={`btn btn-ghost btn-xs btn-square ${
-              index === STEP_ORDER.length - 1 ? "invisible" : ""
-            }`}
-            aria-label="Next step"
-            disabled={index === STEP_ORDER.length - 1}
-            onClick={() => page(1)}
-          >
-            <ChevronRight className="size-4" />
-          </button>
+    <div className="overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-b from-primary/[0.04] to-base-100 shadow-xs">
+      <div className="flex items-center justify-between gap-4 border-b border-primary/10 px-5 py-3.5 bg-primary/[0.02]">
+        <div className="flex items-center gap-3">
+          <div className="flex size-6 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
+            {completedCount}/{STEP_ORDER.length}
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-primary">
+              Getting Started Checklist
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* Visual Mini Progress Bar */}
+          <div className="hidden sm:flex items-center gap-2">
+            <div className="h-1.5 w-24 overflow-hidden rounded-full bg-base-300">
+              <div
+                className="h-full rounded-full bg-primary transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            <span className="text-[11px] font-semibold text-base-content/60 tabular-nums">
+              {progressPercent}%
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              className={`btn btn-ghost btn-xs btn-square ${
+                index === 0 ? "invisible" : ""
+              }`}
+              aria-label="Previous step"
+              disabled={index === 0}
+              onClick={() => page(-1)}
+            >
+              <ChevronLeft className="size-4" />
+            </button>
+            <span className="text-xs font-medium tabular-nums text-base-content/60">
+              {index + 1} / {STEP_ORDER.length}
+            </span>
+            <button
+              type="button"
+              className={`btn btn-ghost btn-xs btn-square ${
+                index === STEP_ORDER.length - 1 ? "invisible" : ""
+              }`}
+              aria-label="Next step"
+              disabled={index === STEP_ORDER.length - 1}
+              onClick={() => page(1)}
+            >
+              <ChevronRight className="size-4" />
+            </button>
+          </div>
         </div>
       </div>
-      <div className="flex flex-row flex-wrap items-center justify-between gap-4 p-5 pt-2">
+
+      <div className="flex flex-row flex-wrap items-center justify-between gap-4 p-5">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold">{copy.title}</h2>
-          <p className="mt-1 max-w-xl text-sm text-base-content/70">
+          <h2 className="text-base font-bold text-base-content">
+            {copy.title}
+          </h2>
+          <p className="mt-1 max-w-xl text-sm leading-relaxed text-base-content/70">
             {copy.body}
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-3">
           {done ? (
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-success">
-              <Check className="size-4" />
-              Done
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-500">
+              <Check className="size-3.5 stroke-[3]" />
+              Completed
             </span>
           ) : step === "domain" ? (
             <form
-              className="join"
+              className="join shadow-xs"
               onSubmit={(event) => {
                 event.preventDefault();
                 onSubmitDomain();
@@ -194,7 +227,7 @@ function OnboardingChecklist({
             >
               <input
                 type="text"
-                className="input input-bordered join-item w-52"
+                className="input input-sm input-bordered join-item w-52"
                 placeholder="acme.com"
                 value={domainInput}
                 onChange={(event) => setDomainInput(event.target.value)}
@@ -202,7 +235,7 @@ function OnboardingChecklist({
               />
               <button
                 type="submit"
-                className="btn btn-primary join-item"
+                className="btn btn-primary btn-sm join-item font-semibold"
                 disabled={
                   domainMutation.isPending ||
                   normalizeDomainInput(domainInput) === ""
@@ -214,15 +247,20 @@ function OnboardingChecklist({
           ) : step === "mcp" ? (
             <Link
               to="/ai"
-              className="link link-primary text-sm font-medium"
+              className="btn btn-primary btn-sm font-semibold gap-1"
               onClick={() =>
                 captureClientEvent("dashboard:next_move_click", { step })
               }
             >
-              {copy.cta} →
+              {copy.cta}
+              <ChevronRight className="size-3.5" />
             </Link>
           ) : (
-            <button type="button" className="btn btn-primary" onClick={onCta}>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm font-semibold"
+              onClick={onCta}
+            >
               {copy.cta}
             </button>
           )}
@@ -301,9 +339,38 @@ export function DashboardPage({ projectId }: { projectId: string }) {
   const gscConnected = activation.gsc.connected;
 
   return (
-    <div className="px-4 py-4 pb-24 md:px-6 md:py-6 md:pb-8">
-      <div className="mx-auto flex max-w-5xl flex-col gap-5">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+    <div className="px-4 py-6 pb-24 md:px-8 md:py-8 md:pb-12">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6">
+        {/* Dashboard Header with Domain & Quick Status */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-base-content">
+              Dashboard
+            </h1>
+            {activation.domain ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content/80 shadow-2xs">
+                <span className="size-2 rounded-full bg-emerald-500" />
+                {activation.domain}
+              </span>
+            ) : null}
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/p/$projectId/audit"
+              params={{ projectId }}
+              className="btn btn-outline btn-xs font-semibold border-base-300 hover:border-primary hover:bg-primary/5"
+            >
+              Run Audit
+            </Link>
+            <Link
+              to="/p/$projectId/keywords"
+              params={{ projectId }}
+              className="btn btn-primary btn-xs font-semibold shadow-2xs"
+            >
+              Research Keywords
+            </Link>
+          </div>
+        </div>
 
         <OnboardingChecklist projectId={projectId} activation={activation} />
 

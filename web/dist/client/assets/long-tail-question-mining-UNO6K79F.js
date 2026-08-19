@@ -1,1 +1,0 @@
-import{j as t,aA as o,aB as n,d as e}from"./main-9otM4Lfa.js";import{L as i}from"./library-page-Cxr4X2MY.js";const a=()=>t.jsx(i,{title:o.title,description:o.description,crumb:"Long-tail & question mining",children:t.jsx(n,{components:{...e}})});export{a as component};

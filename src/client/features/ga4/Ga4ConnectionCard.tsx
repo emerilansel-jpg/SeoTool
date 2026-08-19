@@ -219,7 +219,7 @@ function IntegrationCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-base-300 bg-base-100">
       <div className="flex items-start justify-between gap-4 p-5 sm:p-6">
         <h2 className="text-base font-semibold leading-tight">
           Google Analytics 4

@@ -10,8 +10,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { featureGroups } from "@/lib/feature-pages";
 
 const GITHUB_REPO = "emerilansel-jpg/SeoTool";
-const PRODUCT_HUNT_URL =
-  "https://www.producthunt.com/products/seotool-im";
+const PRODUCT_HUNT_URL = "https://www.producthunt.com/products/seotool-im";
 // Used if GitHub is unreachable at build time so the header never renders empty.
 const FALLBACK_STAR_COUNT = "2.1k";
 
@@ -54,6 +53,7 @@ function getMobileNavItems(githubStarCount: string) {
       label: "Product",
       links: [
         { label: "Features", href: "/features" },
+        { label: "Free Tools", href: "/free-tools" },
         { label: "Pricing", href: "/pricing" },
       ],
     },
@@ -139,8 +139,10 @@ function MarketingLayout() {
 
   const mobileNavItems = getMobileNavItems(githubStarCount);
   // The home route owns the full viewport width (and its own footer/CTA band);
-  // every other marketing page gets the shared marketing canvas and footer.
+  // the free-tools routes render full-bleed Dark Command Center sections.
+  // Every other marketing page gets the shared marketing canvas and footer.
   const isHome = pathname === "/";
+  const isFreeTools = pathname.startsWith("/free-tools");
 
   // On the landing route, paint html/body cream so the area behind the
   // floating nav and any overscroll matches the landing canvas.
@@ -188,6 +190,12 @@ function MarketingLayout() {
 
             <div className="hidden items-center justify-center gap-5 md:flex">
               <FeatureDropdown />
+              <Link
+                to="/free-tools"
+                className="text-sm font-semibold text-[var(--color-brand-muted)] transition-colors hover:text-[var(--color-brand)]"
+              >
+                Free Tools
+              </Link>
               <ResourcesDropdown />
               <Link
                 to="/pricing"
@@ -216,7 +224,9 @@ function MarketingLayout() {
               >
                 <GitHubIcon size={16} />
                 <span>GitHub</span>
-                <span className="text-[var(--color-brand-muted)]">{githubStarCount}</span>
+                <span className="text-[var(--color-brand-muted)]">
+                  {githubStarCount}
+                </span>
               </a>
               <a
                 href="https://seotool.im/sign-in"
@@ -272,8 +282,15 @@ function MarketingLayout() {
         </div>
       </div>
 
-      {isHome ? (
-        <Outlet />
+      {isHome || isFreeTools ? (
+        <>
+          <Outlet />
+          {isFreeTools ? (
+            <div className="mx-auto max-w-5xl px-6 pb-16">
+              <MarketingFooter />
+            </div>
+          ) : null}
+        </>
       ) : (
         <div className="mx-auto max-w-5xl px-6 py-16 md:py-24">
           <Outlet />

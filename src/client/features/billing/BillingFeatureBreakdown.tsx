@@ -140,7 +140,9 @@ export function BillingFeatureBreakdown() {
     staleTime: 60_000,
   });
 
-  const rows = getBillingFeatureBreakdownRows(eventsQuery.data ?? []);
+  const rows = getBillingFeatureBreakdownRows(
+    (eventsQuery.data ?? []) as BillingUsageEvent[],
+  );
   const total = rows.reduce((sum, row) => sum + row.usd, 0);
 
   return (
@@ -172,7 +174,7 @@ export function BillingFeatureBreakdown() {
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-base-200">
                 <div
-                  className="h-full rounded-full bg-[#7c3aed]"
+                  className="h-full rounded-full bg-primary"
                   style={{ width: `${(row.usd / total) * 100}%` }}
                 />
               </div>

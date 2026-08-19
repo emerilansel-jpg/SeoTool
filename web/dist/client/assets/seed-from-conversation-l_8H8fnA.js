@@ -1,1 +1,0 @@
-import{j as t,aw as o,ax as e,d as n}from"./main-9otM4Lfa.js";import{L as r}from"./library-page-Cxr4X2MY.js";const i=()=>t.jsx(r,{title:o.title,description:o.description,crumb:"Seed from conversation",children:t.jsx(e,{components:{...n}})});export{i as component};

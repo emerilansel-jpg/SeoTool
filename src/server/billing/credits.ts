@@ -2,6 +2,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { usageQuota } from "@/db/schema";
 import {
+  MONTHLY_CREDIT_GRANTS,
   PAYPAL_CREDITS_FEATURE_ID,
   PAYPAL_TOPUP_CREDITS_FEATURE_ID,
 } from "@/shared/billing";
@@ -15,15 +16,6 @@ import type { PlanTier } from "@/shared/plans";
 // pools: `monthly_credits` (granted per billing cycle) and `topup_credits`
 // (purchased one-time, roll over until exhausted).
 // ---------------------------------------------------------------------------
-
-/** Monthly credit grants per tier. These are the starting balances a paid
- *  customer receives each billing cycle. */
-export const MONTHLY_CREDIT_GRANTS: Record<PlanTier, number> = {
-  free: 100,
-  lite: 5_000,
-  pro: 25_000,
-  agency: 100_000,
-};
 
 // ---------------------------------------------------------------------------
 // Read balances
@@ -129,8 +121,7 @@ export async function deductCredits(
   organizationId: string,
   amount: number,
 ): Promise<{ monthlyDeducted: number; topupDeducted: number }> {
-  if (amount <= 0)
-    return { monthlyDeducted: 0, topupDeducted: 0 };
+  if (amount <= 0) return { monthlyDeducted: 0, topupDeducted: 0 };
 
   const balance = await getCreditBalance(organizationId);
   if (balance.totalRemaining < amount) {

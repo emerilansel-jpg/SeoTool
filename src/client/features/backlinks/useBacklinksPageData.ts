@@ -9,6 +9,7 @@ import {
   getStandardErrorMessage,
 } from "@/client/lib/error-messages";
 import {
+  getBacklinksAnchors,
   getBacklinksOverview,
   getBacklinksReferringDomains,
   getBacklinksRows,
@@ -16,12 +17,14 @@ import {
 } from "@/serverFunctions/backlinks";
 import {
   BACKLINKS_DEFAULT_SORT,
+  anchorsSortFieldSchema,
   backlinksRowsSortFieldSchema,
   referringDomainsSortFieldSchema,
   topPagesSortFieldSchema,
   type BacklinksSortOrder,
 } from "@/types/schemas/backlinks";
 import {
+  toAnchorsFiltersPayload,
   toBacklinksFiltersPayload,
   toReferringDomainsFiltersPayload,
   toTopPagesFiltersPayload,
@@ -196,6 +199,72 @@ export function useBacklinksPageData({
       }),
   });
 
+  const anchorsSort = toSort(
+    sort,
+    order,
+    anchorsSortFieldSchema.options,
+    BACKLINKS_DEFAULT_SORT.anchors,
+  );
+  const anchorsFilters = useMemo(
+    () => toAnchorsFiltersPayload(filters.anchors.values),
+    [filters.anchors.values],
+  );
+  const anchorsQuery = useQuery({
+    queryKey: [
+      "backlinksAnchors",
+      ...baseQueryKeyParts,
+      page,
+      pageSize,
+      anchorsSort.field,
+      anchorsSort.order,
+      anchorsFilters,
+    ],
+    enabled: targetReady && tab === "anchors",
+    staleTime: BACKLINKS_QUERY_STALE_TIME_MS,
+    queryFn: () =>
+      getBacklinksAnchors({
+        data: {
+          ...pageInputBase,
+          sortField: anchorsSort.field,
+          sortOrder: anchorsSort.order,
+          filters: anchorsFilters,
+        },
+      }),
+  });
+
+  // Toxic tab: reuses backlinks rows with high spam score filter
+  const toxicSort = toSort(
+    sort,
+    order,
+    backlinksRowsSortFieldSchema.options,
+    BACKLINKS_DEFAULT_SORT.toxic as {
+      field: (typeof backlinksRowsSortFieldSchema.options)[number];
+      order: BacklinksSortOrder;
+    },
+  );
+  const toxicQuery = useQuery({
+    queryKey: [
+      "backlinksToxic",
+      ...baseQueryKeyParts,
+      page,
+      pageSize,
+      toxicSort.field,
+      toxicSort.order,
+    ],
+    enabled: targetReady && tab === "toxic",
+    staleTime: BACKLINKS_QUERY_STALE_TIME_MS,
+    queryFn: () =>
+      getBacklinksRows({
+        data: {
+          ...pageInputBase,
+          sortField: toxicSort.field,
+          sortOrder: toxicSort.order,
+          filters: { minSpamScore: 70 },
+          mode: "one_per_domain",
+        },
+      }),
+  });
+
   const overviewErrorMessage = getBacklinksErrorMessage(
     overviewQuery.error,
     "Could not load backlinks data.",
@@ -205,7 +274,11 @@ export function useBacklinksPageData({
       ? rowsQuery
       : tab === "domains"
         ? referringDomainsQuery
-        : topPagesQuery;
+        : tab === "pages"
+          ? topPagesQuery
+          : tab === "anchors"
+            ? anchorsQuery
+            : toxicQuery;
   const activeTabErrorMessage = getBacklinksErrorMessage(
     activeTabQuery.error,
     "Could not load this tab.",
@@ -220,6 +293,8 @@ export function useBacklinksPageData({
     rowsQuery,
     searchCardInitialValues,
     topPagesQuery,
+    anchorsQuery,
+    toxicQuery,
   };
 }
 

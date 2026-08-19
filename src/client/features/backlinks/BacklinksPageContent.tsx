@@ -9,6 +9,7 @@ import {
 import { BacklinksHistorySection } from "./BacklinksHistorySection";
 import type { BacklinksSearchHistoryItem } from "@/client/hooks/useBacklinksSearchHistory";
 import type {
+  BacklinksAnchorsData,
   BacklinksOverviewData,
   BacklinksReferringDomainsData,
   BacklinksRowsPageData,
@@ -16,6 +17,7 @@ import type {
   BacklinksTabRows,
   BacklinksTopPagesData,
 } from "./backlinksPageTypes";
+import type { BacklinksRowsPageResult } from "@/server/features/backlinks/services/backlinksOverviewSchema";
 import { buildSummaryStats } from "./backlinksPageUtils";
 import type { BacklinksDomainExpansion } from "./useBacklinksDomainExpansion";
 import type { BacklinksFiltersState } from "./useBacklinksFilters";
@@ -34,6 +36,8 @@ type BacklinksBodyProps = {
   backlinksRowsPage: BacklinksRowsPageData | undefined;
   referringDomainsPage: BacklinksReferringDomainsData | undefined;
   topPagesPage: BacklinksTopPagesData | undefined;
+  anchorsPage: BacklinksAnchorsData | undefined;
+  toxicPage: BacklinksRowsPageResult | undefined;
   searchState: BacklinksSearchState;
   filters: BacklinksFiltersState;
   sorting: SortingState;
@@ -67,6 +71,8 @@ export function BacklinksBody({
   backlinksRowsPage,
   referringDomainsPage,
   topPagesPage,
+  anchorsPage,
+  toxicPage,
   searchState,
   filters,
   sorting,
@@ -88,15 +94,20 @@ export function BacklinksBody({
       backlinks: backlinksRowsPage?.rows ?? [],
       referringDomains: referringDomainsPage?.rows ?? [],
       topPages: topPagesPage?.rows ?? [],
+      anchors: anchorsPage?.rows ?? [],
     }),
-    [backlinksRowsPage, referringDomainsPage, topPagesPage],
+    [backlinksRowsPage, referringDomainsPage, topPagesPage, anchorsPage],
   );
   const activeTabPage =
     searchState.tab === "backlinks"
       ? backlinksRowsPage
       : searchState.tab === "domains"
         ? referringDomainsPage
-        : topPagesPage;
+        : searchState.tab === "pages"
+          ? topPagesPage
+          : searchState.tab === "anchors"
+            ? anchorsPage
+            : toxicPage;
   const summaryStats = useMemo(
     () => buildSummaryStats(overviewData),
     [overviewData],
@@ -156,6 +167,7 @@ export function BacklinksBody({
         projectId={projectId}
         activeTab={searchState.tab}
         tabRows={tabRows}
+        toxicRows={toxicPage?.rows ?? []}
         filters={filters}
         sorting={sorting}
         view={searchState.view}

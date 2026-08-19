@@ -73,6 +73,7 @@ describe("buildBacklinksTabExport", () => {
         backlinks: [makeBacklinkRow()],
         referringDomains: [],
         topPages: [],
+        anchors: [],
       },
     });
 
@@ -90,6 +91,7 @@ describe("buildBacklinksTabExport", () => {
         backlinks: [],
         referringDomains: [makeReferringDomainRow()],
         topPages: [],
+        anchors: [],
       },
     });
 
@@ -105,6 +107,7 @@ describe("buildBacklinksTabExport", () => {
         backlinks: [makeBacklinkRow({ domainFrom: "www.example.org" })],
         referringDomains: [],
         topPages: [],
+        anchors: [],
       },
     });
 
@@ -119,6 +122,7 @@ describe("buildBacklinksTabExport", () => {
         backlinks: [],
         referringDomains: [makeReferringDomainRow()],
         topPages: [],
+        anchors: [],
       },
     });
 
@@ -141,6 +145,7 @@ describe("buildBacklinksTabExport", () => {
             brokenBacklinks: 0,
           },
         ],
+        anchors: [],
       },
     });
 
@@ -166,6 +171,7 @@ describe("buildBacklinksTabExport", () => {
         ],
         referringDomains: [],
         topPages: [],
+        anchors: [],
       },
     });
 

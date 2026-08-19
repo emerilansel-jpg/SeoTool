@@ -351,7 +351,7 @@ function GscSection({ data }: { data: Record<string, unknown> }) {
             <Line
               type="monotone"
               dataKey="clicks"
-              stroke="#4285F4"
+              stroke="#2563eb"
               strokeWidth={1.5}
               dot={false}
               isAnimationActive={false}

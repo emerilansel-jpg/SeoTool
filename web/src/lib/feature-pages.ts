@@ -584,6 +584,10 @@ export const featurePages = {
       "SeoTool.im helps teams connect AI mention and citation research to concrete SEO planning.",
     ],
     related: [
+      {
+        label: "Free AI Visibility Checker",
+        href: "/free-tools/ai-visibility-checker",
+      },
       { label: "AI Search Prompts", href: "/features/ai-search-prompts" },
       { label: "Domain Overview", href: "/features/domain-overview" },
       { label: "SeoTool.im MCP", href: "/features/mcp" },

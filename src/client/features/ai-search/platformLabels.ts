@@ -16,9 +16,10 @@ const MODEL_LABELS: Record<PromptExplorerModel, string> = {
 };
 
 /**
- * Per-model accent colors. Applied as left-border + dot on response cards so
+ * Per-model accent classes. Applied as left-border + dot on response cards so
  * the model header is unambiguously separated from the markdown content that
- * follows. Values are Tailwind color tokens that work in light + dark themes.
+ * follows. Classes come from app.css (platform-border/dot-*) so raw palette
+ * colors stay out of JSX and work in light + dark themes.
  */
 type ModelAccent = {
   border: string;
@@ -27,20 +28,20 @@ type ModelAccent = {
 
 const MODEL_ACCENTS: Record<PromptExplorerModel, ModelAccent> = {
   chat_gpt: {
-    border: "border-l-emerald-500",
-    dot: "bg-emerald-500",
+    border: "platform-border-chatgpt",
+    dot: "platform-dot-chatgpt",
   },
   claude: {
-    border: "border-l-orange-500",
-    dot: "bg-orange-500",
+    border: "platform-border-claude",
+    dot: "platform-dot-claude",
   },
   gemini: {
-    border: "border-l-sky-500",
-    dot: "bg-sky-500",
+    border: "platform-border-gemini",
+    dot: "platform-dot-gemini",
   },
   perplexity: {
-    border: "border-l-violet-500",
-    dot: "bg-violet-500",
+    border: "platform-border-perplexity",
+    dot: "platform-dot-perplexity",
   },
 };
 
@@ -50,8 +51,8 @@ export function formatPlatformLabel(platform: "chat_gpt" | "google"): string {
 
 /** Shared per-platform accent dot + short label for compact table/KPI rows. */
 export const PLATFORM_DOT_CLASS: Record<"chat_gpt" | "google", string> = {
-  chat_gpt: "bg-emerald-500",
-  google: "bg-sky-500",
+  chat_gpt: "platform-dot-chatgpt",
+  google: "platform-dot-google",
 };
 
 export const PLATFORM_SHORT_LABEL: Record<"chat_gpt" | "google", string> = {

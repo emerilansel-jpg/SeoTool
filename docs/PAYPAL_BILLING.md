@@ -74,7 +74,7 @@ The plan IDs are defined in `src/shared/plans.ts`:
 
 ```typescript
 export const PAYPAL_PLAN_IDS: Record<PlanTier, string | null> = {
-  free: null,        // No subscription needed
+  free: null, // No subscription needed
   lite: "lite-plan",
   pro: "pro-plan",
   agency: "agency-plan",
@@ -113,6 +113,7 @@ POST /v1/billing/subscriptions/{id}/revise
 
 This redirects the user to PayPal's hosted billing management page where they
 can:
+
 - Update payment method
 - Cancel subscription
 - View invoices

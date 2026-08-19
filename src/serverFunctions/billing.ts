@@ -6,7 +6,10 @@ import {
   isHostedServerAuthMode,
 } from "@/server/lib/runtime-env";
 import { requireAuthenticatedContext } from "@/serverFunctions/middleware";
-import { getQuotaState } from "@/server/features/billing/services/QuotaService";
+import {
+  getQuotaState,
+  getPlanTier,
+} from "@/server/features/billing/services/QuotaService";
 import { customerHasPaidPlan } from "@/server/billing/subscription";
 import { getCreditBalance } from "@/server/billing/credits";
 import { QuotaRepository } from "@/server/features/billing/repositories/QuotaRepository";
@@ -19,16 +22,24 @@ const billingUsageRangeSchema = z.object({
 
 export type BillingUsageEvent = {
   value: number;
-  properties: Record<string, unknown>;
+  properties: Record<
+    string,
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | (string | number | boolean | null)[]
+  >;
 };
 
 /** Fetch usage events from the local DB (replaces Autumn events.list). */
 export const getBillingUsageEvents = createServerFn({ method: "POST" })
   .middleware([requireAuthenticatedContext])
   .validator(billingUsageRangeSchema)
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<BillingUsageEvent[]> => {
     if (!(await isHostedServerAuthMode())) {
-      return [];
+      return [] as BillingUsageEvent[];
     }
 
     // Read credit consumption from the usage_quota table.
@@ -55,7 +66,11 @@ export const getBillingUsageEvents = createServerFn({ method: "POST" })
 export const getQuotaStateSummary = createServerFn({ method: "POST" })
   .middleware([requireAuthenticatedContext])
   .handler(async ({ context }) => {
-    return getQuotaState(context.organizationId);
+    const [tier, quotas] = await Promise.all([
+      getPlanTier(context.organizationId),
+      getQuotaState(context.organizationId),
+    ]);
+    return { planTier: tier, quotas };
   });
 
 /** Open the PayPal customer billing portal for subscription management. */

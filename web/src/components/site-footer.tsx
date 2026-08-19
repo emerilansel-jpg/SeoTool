@@ -15,7 +15,7 @@ export function SiteFooter({ className }: { className?: string }) {
         SeoTool.im
       </Link>
 
-      <div className="mt-6 grid grid-cols-2 gap-8 md:grid-cols-5">
+      <div className="mt-6 grid grid-cols-2 gap-8 md:grid-cols-6">
         <div>
           <p className="font-semibold text-[var(--color-brand)]">Features</p>
           <div className="mt-2 flex flex-col gap-1.5">
@@ -46,6 +46,17 @@ export function SiteFooter({ className }: { className?: string }) {
             <Link to="/blogs">Blog</Link>
             <a href="/docs">Docs</a>
             <a href="/docs/skills">Skills</a>
+          </div>
+        </div>
+
+        <div>
+          <p className="font-semibold text-[var(--color-brand)]">Free tools</p>
+          <div className="mt-2 flex flex-col gap-1.5">
+            <Link to="/free-tools">All free tools</Link>
+            <Link to="/free-tools/ai-visibility-checker">
+              AI Visibility Checker
+            </Link>
+            <a href="/library/ai-search-geo">AI Search Library</a>
           </div>
         </div>
 

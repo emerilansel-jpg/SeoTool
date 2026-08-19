@@ -28,8 +28,20 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
 
   if (!project) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <span className="loading loading-spinner loading-md" />
+      <div
+        className="mx-auto w-full max-w-2xl space-y-8 p-4 py-8 sm:p-6 md:py-12"
+        aria-busy="true"
+      >
+        <div className="space-y-4">
+          <div className="skeleton h-4 w-24" />
+          <div className="space-y-2">
+            <div className="skeleton h-8 w-56" />
+            <div className="skeleton h-4 w-40" />
+          </div>
+        </div>
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="skeleton h-40 rounded-xl" />
+        ))}
       </div>
     );
   }
@@ -45,10 +57,8 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
           Projects
         </Link>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Project settings
-          </h1>
-          <p className="text-sm text-base-content/60">{project.name}</p>
+          <h1 className="text-2xl font-semibold">Project settings</h1>
+          <p className="text-sm text-base-content/70">{project.name}</p>
         </div>
       </div>
 

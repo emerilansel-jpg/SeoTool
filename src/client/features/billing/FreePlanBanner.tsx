@@ -5,10 +5,10 @@ import { getQuotaStateSummary } from "@/serverFunctions/billing";
 import {
   BILLING_ROUTE,
   LOW_CREDITS_THRESHOLD_USD,
+  MONTHLY_CREDIT_GRANTS,
   SUBSCRIBE_ROUTE,
   creditsToUsd,
 } from "@/shared/billing";
-import { MONTHLY_CREDIT_GRANTS } from "@/server/billing/credits";
 import type { PlanTier } from "@/shared/plans";
 
 export function FreePlanBanner() {
@@ -33,9 +33,7 @@ export function FreePlanBanner() {
   const isFreePlan = planTier === "free";
 
   // Estimate remaining credits from tier defaults (actual balance is server-side)
-  const monthlyRemaining = creditsToUsd(
-    MONTHLY_CREDIT_GRANTS[planTier] ?? 0,
-  );
+  const monthlyRemaining = creditsToUsd(MONTHLY_CREDIT_GRANTS[planTier] ?? 0);
   const totalRemaining = monthlyRemaining;
 
   const isOutOfCredits = totalRemaining <= 0 && !isFreePlan;

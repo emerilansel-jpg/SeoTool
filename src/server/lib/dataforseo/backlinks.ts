@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  BacklinksAnchorsLiveRequestInfo,
   BacklinksBacklinksLiveRequestInfo,
   BacklinksDomainPagesSummaryLiveRequestInfo,
   BacklinksHistoryLiveRequestInfo,
@@ -134,6 +135,26 @@ export const backlinksHistoryItemSchema = z
     lost_reffering_domains: z.number().nullable().optional(),
     new_referring_domains: z.number().nullable().optional(),
     lost_referring_domains: z.number().nullable().optional(),
+  })
+  .passthrough();
+
+export const anchorsItemSchema = z
+  .object({
+    anchor: z.string().nullable().optional(),
+    backlinks: z.number().nullable().optional(),
+    rank: z.number().nullable().optional(),
+    first_seen: z.string().nullable().optional(),
+    lost_date: z.string().nullable().optional(),
+    backlinks_spam_score: z.number().nullable().optional(),
+    referring_domains: z.number().nullable().optional(),
+    referring_pages: z.number().nullable().optional(),
+    referring_domains_nofollow: z.number().nullable().optional(),
+    broken_backlinks: z.number().nullable().optional(),
+    broken_pages: z.number().nullable().optional(),
+    referring_links_types: z
+      .record(z.string(), z.number())
+      .nullable()
+      .optional(),
   })
   .passthrough();
 
@@ -318,8 +339,36 @@ export async function fetchBacklinksHistory(input: BacklinksTimeseriesRequest) {
   };
 }
 
+export async function fetchAnchors(input: BacklinksListRequest) {
+  const spamFilterOptions = normalizeBacklinksSpamFilterOptions(input);
+  const filters = combineFilters(
+    input.filters,
+    spamFilterOptions.hideSpam
+      ? ["backlinks_spam_score", "<=", spamFilterOptions.spamThreshold]
+      : undefined,
+  );
+  const response = await backlinksApi(classifyBacklinksError).anchorsLive([
+    new BacklinksAnchorsLiveRequestInfo({
+      ...buildCommonPayload(input),
+      limit: input.limit ?? 100,
+      offset: input.offset,
+      order_by: input.orderBy ?? ["backlinks,desc"],
+      ...(filters ? { filters } : {}),
+    }),
+  ]);
+  const task = assertOk(response, assertOptions("/v3/backlinks/anchors/live"));
+  return {
+    data: {
+      items: parseTaskItems("anchors-live", task, anchorsItemSchema),
+      totalCount: parseTaskTotalCount(task),
+    },
+    billing: buildTaskBilling(task),
+  };
+}
+
 export type BacklinksSummaryItem = z.infer<typeof backlinksSummaryItemSchema>;
 export type BacklinksItem = z.infer<typeof backlinksItemSchema>;
 export type ReferringDomainItem = z.infer<typeof referringDomainItemSchema>;
 export type DomainPageSummaryItem = z.infer<typeof domainPageSummaryItemSchema>;
 export type BacklinksHistoryItem = z.infer<typeof backlinksHistoryItemSchema>;
+export type AnchorsItem = z.infer<typeof anchorsItemSchema>;

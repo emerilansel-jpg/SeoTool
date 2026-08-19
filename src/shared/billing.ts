@@ -1,3 +1,5 @@
+import type { PlanTier } from "@/shared/plans";
+
 export const BILLING_ROUTE = "/billing";
 export const SUBSCRIBE_ROUTE = "/subscribe";
 
@@ -17,6 +19,15 @@ export const PAYPAL_TOPUP_CREDITS_FEATURE_ID = "topup_credits";
 export const CREDITS_PER_USD = 1000;
 export const SEO_DATA_COST_MARKUP = 1.28;
 export const LOW_CREDITS_THRESHOLD_USD = 0.25;
+
+/** Monthly credit grant per tier. Must stay importable from client code, so
+ *  it lives here rather than in the server-only credits service. */
+export const MONTHLY_CREDIT_GRANTS: Record<PlanTier, number> = {
+  free: 100,
+  lite: 5_000,
+  pro: 25_000,
+  agency: 100_000,
+};
 
 export function roundUsdForBilling(value: number) {
   return Math.round(value * 100000) / 100000;

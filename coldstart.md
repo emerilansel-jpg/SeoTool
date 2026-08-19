@@ -14,6 +14,8 @@ Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 
 **Rebrand OpenSEO → SeoTool.im (2026-08-17)**: Semua user-facing + internal code identifiers cleaned (themes, localStorage, MCP commands, env examples, docs, marketing). Hanya infra IDs yang tersisa (DB names, Hyperdrive, HMAC salts). Commit `1343430`.
 
+**In-App Landing Page + Hard Paywall (2026-08-19)**: SaaS app kini punya homepage publik di `/` (landing page DaisyUI) dan halaman pricing publik di `/pricing`. Hard paywall: server function gate (`paidPlanGateMiddleware`) + client guard (`usePaidPlanGuard`) — user free-tier tidak bisa memakai tools sampai berlangganan. E2E bypass tetap jalan (BY PASS_AUTH). Funnel: sign-up → onboarding → /projects → /subscribe → bayar → tools terbuka.
+
 ---
 
 ## Tech stack
@@ -25,7 +27,7 @@ Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 | DB         | Drizzle ORM, dual-backend: Postgres (hosted SaaS, primary) / D1 (SQLite, dev fallback)                                                          |
 | Auth       | Better Auth **hosted-only** (email/password + Google OAuth + Turnstile captcha). Self-host modes (`cloudflare_access`, `local_noauth`) dihapus. |
 | Data SEO   | `dataforseo-client` (metered), GSC (first-party, gratis)                                                                                        |
-| AI         | Cloudflare Agents SDK, OpenRouter, MCP SDK (24 tools)                                                                                           |
+| AI         | Cloudflare Agents SDK, OpenRouter, MCP SDK (36 tools)                                                                                           |
 | Billing    | PayPal Subscriptions (Billing Plans) — **4-tier plan** (Free/Lite/Pro/Agency) + per-feature quotas + local credits system                       |
 | Quota      | `QuotaService` — 11 features (daily/monthly/gauge windows), atomic upsert enforcement                                                           |
 | UI         | Tailwind v4 + DaisyUI v5, lucide-react, recharts, jspdf (client PDF)                                                                            |
@@ -47,6 +49,8 @@ Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 - **`requireProjectRole`**: role di-fetch on-demand dari DB via `MemberRepository.getMemberRole` (bukan di shared context — TanStack inference quirk).
 - **Quota enforcement**: sebelum operasi metered, panggil `assertFeatureQuota(orgId, feature)` (windowed) atau `assertGaugeFeature(orgId, feature)` (live count). Untuk feature access (SAM, MCP), panggil `assertFeatureAccess(orgId, "samAgent")`. Import dari `@/server/billing/quota-gate`.
 - **Plan tier config**: single source of truth di `src/shared/plans.ts`. Marketing pricing page + in-app billing + QuotaService semua baca dari sini.
+- **Request middleware**: gating request-scoped (redirect, headers) pakai `createMiddleware().server()` type `request` di `src/start.ts` requestMiddleware array. BEFORELOAD TIDAK punya akses ke Request di versi Start ini (serverContext kosong).
+- **Hard paywall**: `paidPlanGateMiddleware` (function middleware) di `globalServerFunctionMiddleware` setelah `ensureUserMiddleware`. Allowlist via `serverFnMeta.filename`/`.name`. Lewati untuk self-host dan E2E (`BYPASS_AUTH`).
 
 ---
 
@@ -332,11 +336,11 @@ Monitoring notifikasi berbasis cron: `alert_rules` + Loops email + `AlertWorkflo
 
 ## Fase 7 — PayPal Customer Portal (LENGKAP)
 
-| File                             | Keterangan                                                                                                                                                                                  |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/server/billing/paypal.ts`   | `billingPortal.createSession(subscriptionId)` — PayPal subscription revision URL → redirects to PayPal hosted billing management page.                                                        |
-| `src/serverFunctions/billing.ts` | +`getCustomerPortalUrl` server fn: `requireAuthenticatedContext` → gate hosted + `customerHasPaidPlan` → read `paypalSubscriptionId` from DB → `paypal.billingPortal.createSession()` → URL.  |
-| `src/routes/_app/billing.tsx`    | +Tombol "Manage Subscription" (icon CreditCard, loading spinner) untuk paid users. Redirect ke PayPal Billing Portal. Cancel via portal → webhook sudah sync quotas.                        |
+| File                             | Keterangan                                                                                                                                                                                   |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/server/billing/paypal.ts`   | `billingPortal.createSession(subscriptionId)` — PayPal subscription revision URL → redirects to PayPal hosted billing management page.                                                       |
+| `src/serverFunctions/billing.ts` | +`getCustomerPortalUrl` server fn: `requireAuthenticatedContext` → gate hosted + `customerHasPaidPlan` → read `paypalSubscriptionId` from DB → `paypal.billingPortal.createSession()` → URL. |
+| `src/routes/_app/billing.tsx`    | +Tombol "Manage Subscription" (icon CreditCard, loading spinner) untuk paid users. Redirect ke PayPal Billing Portal. Cancel via portal → webhook sudah sync quotas.                         |
 
 ---
 
@@ -391,7 +395,7 @@ Foundation: plan tier definitions, quota DB schema, QuotaService, gauge counts.
 | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/shared/plans.ts`                                                        | **Single source of truth**: 4 tier (Free/Lite/Pro/Agency), 11 QuotaFeature, PLAN_LIMITS, QUOTA_FEATURE_PERIODS (daily/monthly/gauge), PLAN_FEATURE_ACCESS (SAM/MCP gates), PAYPAL_PLAN_IDS mapping, `planTierFromPaypalPlanId()`, `creditFeatureToQuotaFeature()` |
 | `src/db/quota.schema.ts` + `src/db/pg/quota.schema.ts`                       | Tabel `usage_quota` (per-feature windowed counter, unique on org+feature+period) + `subscription` (org→plan tier, paypal sub id, period end) dual-dialect                                                                                                         |
-| `src/server/features/billing/repositories/QuotaRepository.ts`                | `getPlanTier`, `upsertSubscription` (paypalSubscriptionId), `getUsageQuota`, `incrementUsageQuota` (atomic upsert + conditional window reset via SQL CASE), `peekUsageQuota`, `resetUsageQuotaForOrg`                                                               |
+| `src/server/features/billing/repositories/QuotaRepository.ts`                | `getPlanTier`, `upsertSubscription` (paypalSubscriptionId), `getUsageQuota`, `incrementUsageQuota` (atomic upsert + conditional window reset via SQL CASE), `peekUsageQuota`, `resetUsageQuotaForOrg`                                                             |
 | `src/server/features/billing/services/QuotaService.ts`                       | `checkQuota` (no-increment read), `assertQuotaAvailable` (windowed: atomic increment + throw QUOTA_EXCEEDED), `assertGaugeLimit` (live count compare), `getQuotaState` (UI summary), `resetQuotasOnPlanChange`                                                    |
 | `src/server/features/billing/services/gaugeCounts.ts`                        | Live-count helpers: `countOrgProjects`, `countOrgSavedKeywords`, `countOrgTrackedKeywords`, `countOrgReports`, `gaugeCount` dispatcher                                                                                                                            |
 | `src/server/billing/quota-gate.ts`                                           | **High-level API**: `assertFeatureQuota`, `assertGaugeFeature`, `assertFeatureAccess`, `isFeatureAvailable`                                                                                                                                                       |
@@ -437,29 +441,29 @@ Hook quota gates ke setiap feature call site.
 
 ### Fase 4 — PayPal Plan Config + Webhook + Sync (LENGKAP)
 
-| File                                          | Keterangan                                                                                                                                                                    |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| File                                          | Keterangan                                                                                                                                                                   |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/server/billing/customer-status-model.ts` | Derive `planTier` dari PayPal subscription (`plan_id` + `PAYPAL_PLAN_IDS`). Extract `paypalSubscriptionId`, `currentPeriodEnd`. Maps PayPal statuses (ACTIVE/CANCELLED/etc). |
-| `src/server/billing/customer-status-sync.ts`  | `syncPaypalCustomerStatus` → upsert `billing_customer_status` + upsert `subscription` + **reset windowed quotas on tier change** + grant credits + sync to Loops              |
+| `src/server/billing/customer-status-sync.ts`  | `syncPaypalCustomerStatus` → upsert `billing_customer_status` + upsert `subscription` + **reset windowed quotas on tier change** + grant credits + sync to Loops             |
 | `src/server/billing/paypal-webhook.ts`        | Handle events: `BILLING.SUBSCRIPTION.CREATED/UPDATED/CANCELLED/EXPIRED/ACTIVATED/SUSPENDED`, `PAYMENT.CAPTURE.COMPLETED`. Semua converge ke `syncPaypalCustomerStatus`.      |
-| `src/server/billing/paypal-webhook-verify.ts` | PayPal webhook signature verification via `/v1/notifications/verify-webhook-signature` API.                                                                                    |
-| `src/server/billing/subscription.ts`          | `getOrCreateOrganizationCustomer` → lazily create default free-tier subscription row + grant free credits. `customerHasPaidPlan` → baca dari QuotaRepository (local DB).       |
-| `src/server/billing/credits.ts`               | Local credits management: `grantMonthlyCredits`, `getCreditBalance`, `deductCredits`, `addTopupCredits`. Menggunakan `usage_quota` table.                                     |
-| `src/server/billing/paypal.ts`                | PayPal REST API client: OAuth2 token caching, typed facade untuk subscriptions/billingPlans/billingPortal/webhooks.                                                           |
+| `src/server/billing/paypal-webhook-verify.ts` | PayPal webhook signature verification via `/v1/notifications/verify-webhook-signature` API.                                                                                  |
+| `src/server/billing/subscription.ts`          | `getOrCreateOrganizationCustomer` → lazily create default free-tier subscription row + grant free credits. `customerHasPaidPlan` → baca dari QuotaRepository (local DB).     |
+| `src/server/billing/credits.ts`               | Local credits management: `grantMonthlyCredits`, `getCreditBalance`, `deductCredits`, `addTopupCredits`. Menggunakan `usage_quota` table.                                    |
+| `src/server/billing/paypal.ts`                | PayPal REST API client: OAuth2 token caching, typed facade untuk subscriptions/billingPlans/billingPortal/webhooks.                                                          |
 | `docs/PAYPAL_BILLING.md`                      | Setup guide: 4 plan tiers di PayPal dashboard, webhook events, plan tier resolution flow, credits system                                                                     |
 
 ### Fase 5 — UI: Pricing, Billing, Quota Bars, Paywall (LENGKAP)
 
-| File                                             | Keterangan                                                                                                                                                                        |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/client/features/billing/plan-detection.ts`  | `getCustomerPlanTier()` — resolve PlanTier dari PayPal subs. `getCustomerPlanStatus()` — backward-compat free/paid. Uses `PAYPAL_PLAN_IDS`.                                       |
+| File                                             | Keterangan                                                                                                                                                                       |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/client/features/billing/plan-detection.ts`  | `getCustomerPlanTier()` — resolve PlanTier dari PayPal subs. `getCustomerPlanStatus()` — backward-compat free/paid. Uses `PAYPAL_PLAN_IDS`.                                      |
 | `src/client/features/billing/HostedPlanGate.tsx` | `HostedPlanGateState` +`planTier: PlanTier`. Uses `usePlanTier()` hook (local DB, no Autumn).                                                                                    |
-| `src/client/features/billing/use-billing.ts`     | Local hooks: `usePlanTier()`, `useIsPaidPlan()`, `useSubscriptionProblemStatus()`. Fetch dari `getQuotaStateSummary`.                                                             |
-| `src/client/features/billing/QuotaBar.tsx`       | Komponen: label, used/limit, progress bar (green/yellow/red), reset time, "Unlimited" badge                                                                                       |
-| `src/routes/_authenticated.subscribe.tsx`        | **3-tier picker** (Lite $49 / Pro $149 / Agency $499). Radio-style selection. Checkout via `createPaypalSubscription` → redirect ke PayPal approval URL. PostHog events.          |
-| `src/routes/_app/billing.tsx`                    | Current plan card + quota usage section (QuotaBar per feature via `getQuotaStateSummary`). Tombol Manage Subscription → PayPal portal. Buy Credits → PayPal one-time payment.       |
-| `src/serverFunctions/billing.ts`                 | +`getQuotaStateSummary` server fn. +`getCustomerPortalUrl` → PayPal billing portal via subscription revision URL.                                                                 |
-| `src/serverFunctions/paypal-checkout.ts`         | `createPaypalSubscription` (creates PayPal subscription + returns approve URL). `verifyPaypalSubscription` (post-checkout verification). `createPaypalTopup` (one-time payment).  |
+| `src/client/features/billing/use-billing.ts`     | Local hooks: `usePlanTier()`, `useIsPaidPlan()`, `useSubscriptionProblemStatus()`. Fetch dari `getQuotaStateSummary`.                                                            |
+| `src/client/features/billing/QuotaBar.tsx`       | Komponen: label, used/limit, progress bar (green/yellow/red), reset time, "Unlimited" badge                                                                                      |
+| `src/routes/_authenticated.subscribe.tsx`        | **3-tier picker** (Lite $49 / Pro $149 / Agency $499). Radio-style selection. Checkout via `createPaypalSubscription` → redirect ke PayPal approval URL. PostHog events.         |
+| `src/routes/_app/billing.tsx`                    | Current plan card + quota usage section (QuotaBar per feature via `getQuotaStateSummary`). Tombol Manage Subscription → PayPal portal. Buy Credits → PayPal one-time payment.    |
+| `src/serverFunctions/billing.ts`                 | +`getQuotaStateSummary` server fn. +`getCustomerPortalUrl` → PayPal billing portal via subscription revision URL.                                                                |
+| `src/serverFunctions/paypal-checkout.ts`         | `createPaypalSubscription` (creates PayPal subscription + returns approve URL). `verifyPaypalSubscription` (post-checkout verification). `createPaypalTopup` (one-time payment). |
 
 ### Fase 6 — Landing Page Polish (LENGKAP)
 
@@ -470,16 +474,16 @@ Hook quota gates ke setiap feature call site.
 
 ### Fase 7 — VPS Deployment Config (LENGKAP)
 
-| File                         | Keterangan                                                                                                                                                                                            |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docker-compose.hosted.yaml` | 2 services: `open-seo` (workerd, AUTH_MODE=hosted, DATABASE_PROVIDER=postgres) + `postgres` (17-alpine, healthcheck). Caddy TIDAK termasuk — ditangani oleh gateway-caddy shared (lihat bawah). Volumes: app data + pg data. |
-| `gateway-caddy/Caddyfile`    | **Running reverse proxy** untuk SEMUA app di VPS (seotool.im, omniroute, pesat). Marketing static + SaaS proxy routing + auto TLS + security headers + WebSocket. Lihat detail di section "Produksi LIVE" bawah. |
-| `Caddyfile`                  | Template standalone (seotool.im only). **STALE** — masih punya bug `/assets/*` collision. Gunakan `gateway-caddy/Caddyfile` sebagai source of truth.                                                  |
-| `.env.hosted.example`        | Template: POSTGRES_PASSWORD, BETTER_AUTH_SECRET/URL, GOOGLE_CLIENT_ID/SECRET, TURNSTILE, LOOPS, DATAFORSEO_API_KEY, PAYPAL_CLIENT_ID/SECRET/MODE/WEBHOOK_ID, OPENROUTER_API_KEY, POSTHOG.          |
-| `scripts/deploy-vps.sh`      | Deploy script: pre-flight checks (env, placeholders, docker) + compose up --build + health wait loop + summary.                                                                                       |
-| `auto-deploy.sh`             | Wrapper untuk CI: backup `.env.hosted` → `git fetch + reset --hard origin/main` → restore `.env.hosted` → `scripts/deploy-vps.sh --build`. Dipanggil oleh GitHub Action.                               |
-| `.github/workflows/deploy.yml` | CI/CD: `appleboy/ssh-action` SSH ke VPS → jalankan `auto-deploy.sh`. Trigger: push ke `main`.                                                                                                         |
-| `docker-entrypoint.sh`       | Detect `DATABASE_PROVIDER=postgres` → run `db:migrate:pg` (bukan `db:migrate:local`).                                                                                                                 |
+| File                           | Keterangan                                                                                                                                                                                                                   |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docker-compose.hosted.yaml`   | 2 services: `open-seo` (workerd, AUTH_MODE=hosted, DATABASE_PROVIDER=postgres) + `postgres` (17-alpine, healthcheck). Caddy TIDAK termasuk — ditangani oleh gateway-caddy shared (lihat bawah). Volumes: app data + pg data. |
+| `gateway-caddy/Caddyfile`      | **Running reverse proxy** untuk SEMUA app di VPS (seotool.im, omniroute, pesat). Marketing static + SaaS proxy routing + auto TLS + security headers + WebSocket. Lihat detail di section "Produksi LIVE" bawah.             |
+| `Caddyfile`                    | Template standalone (seotool.im only). **STALE** — masih punya bug `/assets/*` collision. Gunakan `gateway-caddy/Caddyfile` sebagai source of truth.                                                                         |
+| `.env.hosted.example`          | Template: POSTGRES_PASSWORD, BETTER_AUTH_SECRET/URL, GOOGLE_CLIENT_ID/SECRET, TURNSTILE, LOOPS, DATAFORSEO_API_KEY, PAYPAL_CLIENT_ID/SECRET/MODE/WEBHOOK_ID, OPENROUTER_API_KEY, POSTHOG.                                    |
+| `scripts/deploy-vps.sh`        | Deploy script: pre-flight checks (env, placeholders, docker) + compose up --build + health wait loop + summary.                                                                                                              |
+| `auto-deploy.sh`               | Wrapper untuk CI: backup `.env.hosted` → `git fetch + reset --hard origin/main` → restore `.env.hosted` → `scripts/deploy-vps.sh --build`. Dipanggil oleh GitHub Action.                                                     |
+| `.github/workflows/deploy.yml` | CI/CD: `appleboy/ssh-action` SSH ke VPS → jalankan `auto-deploy.sh`. Trigger: push ke `main`.                                                                                                                                |
+| `docker-entrypoint.sh`         | Detect `DATABASE_PROVIDER=postgres` → run `db:migrate:pg` (bukan `db:migrate:local`).                                                                                                                                        |
 
 ---
 
@@ -494,7 +498,7 @@ VPS menjalankan **satu container gateway-caddy** (`/opt/gateway/compose.yaml`, r
 - **Marketing static files** (`/srv/marketing`) adalah writable layer di gateway-caddy, BUKAN volume `marketing_dist`. Di-populate dari pre-built `web/dist/client` (built locally, committed via `!web/dist/` gitignore exception).
 - Config source of truth: `gateway-caddy/Caddyfile`. File `/opt/gateway/Caddyfile` di VPS harus mirror ini. Reload: `docker exec gateway-caddy caddy reload --config /etc/caddy/Caddyfile`.
 
-### Bug /assets/* collision (FIXED 2026-08-13, commit d9959dc)
+### Bug /assets/\* collision (FIXED 2026-08-13, commit d9959dc)
 
 Marketing static site dan SaaS app **sama-sama** serve JS/CSS bundles di `/assets/*`. Caddy matcher `@marketingAssets path /assets/*` lama meng-claim semua `/assets/*` untuk marketing → SaaS lazy-loaded route chunks (mis. `/assets/_auth-*.js` di sign-in page) **404** → "Failed to fetch dynamically imported module".
 
@@ -511,22 +515,125 @@ Push ke `main` → GitHub Action (`.github/workflows/deploy.yml`) → `appleboy/
 Audit lengkap di `plan.md` di repo root. **Product mature untuk classic SEO + STRONG di AI/GEO** (brand lookup, SoV, cited sources, prompt explorer, SAM agent, MCP server). Keyword difficulty, search intent, SERP feature tags (incl. AI Overview/PAA), new/lost backlinks, anchor text SUDAH ada — jangan re-flag.
 
 **IMPLEMENTATION STATUS (2026-08-13):**
+
 - **Sprint 1 (P0) DONE + verified**: team invite email (Better Auth `sendInvitationEmail` org hook + `/accept-invitation` route), Content Strategy create forms (cluster + brief), OAuth-only account deletion, Buy-Credits top-up button, alert/report email PostHog visibility.
 - **Sprint 2 (P1) DONE + verified**: GDPR data export (`exportAccountData`), welcome email (`sendHostedWelcomeEmail`), dunning banner (`BillingStatusBanner`), legal footer (LegalFooter), in-app notification center (`notifications` table + bell in Sidebar).
 - **Sprint 3 (P2 partial) DONE + verified**: P2-3 SoV in rank tracking, P2-5 New/lost backlinks view, P2-11 Keyword trends, P2-2 SERP competitors view, P2-8 Schema validation audit issue.
 - **ALL Sprint 1-3 DEPLOYED** (commit `5a0b3e0`): 47 files changed, 13,287 insertions. VPS auto-deploy, health check OK.
 
-**Remaining P2 items (not yet implemented):**
-- P2-1: Bing support (DataForSEO supports, needs config/UI)
-- P2-4: Link intersect (`backlinks_domain_intersection`)
-- P2-6: Anchor distribution (`/backlinks/anchors/live`)
-- P2-7: Sitemap validator
-- P2-9: Crawl budget/log analysis
-- P2-10: On-page SEO checker
-- P2-12: Keyword clustering
-- P2-13: Disavow/toxic link flagging
-- P2-14: PPC integration
-- P2-15: SERP volatility
+**Remaining P2 items — ALL IMPLEMENTED (2026-08-18):**
+
+- ✅ P2-1: Bing support — `searchEngine` column on `rank_tracking_configs` (default "google"), `bing-serp.ts` fetchers, workflow dispatch to Bing/Google, Zod schema `searchEngine` field
+- ✅ P2-4: Link intersect — `backlinks/domain_intersection/live` DataForSEO endpoint, `LinkIntersectService` (R2 cache 12h), `LinkIntersectView` (target + 1-3 competitors form + results table), MCP tool `get_link_intersect`
+- ✅ P2-6: Anchor distribution — New "Anchors" tab on Backlinks page, `fetchAnchors` DataForSEO fetcher, `AnchorsTable` component, filters/sort/export support
+- ✅ P2-7: Sitemap validator — Standalone page, `fetchAndParseSitemap` (XML parse + sitemap index recursion), `validateSitemapUrls` (URL validation, duplicates, lastmod, priorities), R2 cache 1h, MCP tool `validate_sitemap`
+- ✅ P2-9: Crawl budget/log analysis — `accessLogParser.ts` (Apache/Nginx auto-detect), `filterBotTraffic` (20+ bot patterns), `analyzeCrawlBudget` (bot types, top URLs, wasted budget), MCP tool `analyze_crawl_budget`
+- ✅ P2-10: On-page SEO checker — Standalone page, uses existing `page-analyzer.ts` (zero API cost), `onPageAnalysis.ts` (7 categories: title, meta, headings, images, links, content, technical, each scored A-F), MCP tool `check_onpage_seo`
+- ✅ P2-12: Keyword clustering — `clusteringEngine.ts` (Jaccard SERP-overlap, hierarchical agglomerative clustering), `KeywordClusteringService` (R2 cache 24h, max 20 keywords), MCP tool `cluster_keywords`
+- ✅ P2-13: Disavow/toxic link flagging — New "Toxic" tab on Backlinks page, `identifyToxicLinks` (spam threshold 70), `generateDisavowFile` (Google format), client-side `.txt` download
+- ✅ P2-15: SERP volatility — New table `serp_volatility_snapshots` (dual-dialect), `volatilityCalculation.ts` (normalized std dev 0-100, categories: low/moderate/high/extreme), `SerpVolatilityService` (compute from rank_snapshots), MCP tool `get_serp_volatility`
+- ❌ P2-14: PPC integration — Kecualikan (butuh Google Ads API, produk terpisah)
+
+| File                                                                                         | Keterangan                                                                                                                               |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **P2-1 Bing Support**                                                                        |                                                                                                                                          |
+| `src/server/lib/dataforseo/bing-serp.ts`                                                     | `fetchBingRankCheckSerp`, `postBingRankCheckTasks`, `fetchBingRankCheckTaskResult` (mirror Google)                                       |
+| `src/server/lib/dataforseo/serp.ts`                                                          | Export `serpSnapshotItemSchema` (sebelumnya private)                                                                                     |
+| `src/server/lib/dataforseo/sections.ts`                                                      | +3 Bing fetcher exports                                                                                                                  |
+| `src/server/lib/dataforseo/client.ts`                                                        | +`bingRankCheck`, `bingRankCheckTaskPost` di `serp` namespace                                                                            |
+| `src/db/app.schema.ts` + `src/db/pg/app.schema.ts`                                           | +`searchEngine` column on `rankTrackingConfigs` (default "google")                                                                       |
+| `src/types/schemas/rank-tracking.ts`                                                         | +`searchEngine` di create/update schemas                                                                                                 |
+| `src/server/features/rank-tracking/repositories/RankTrackingRepository.ts`                   | +`searchEngine` di select                                                                                                                |
+| `src/server/features/rank-tracking/services/`                                                | Dispatch ke Bing/Google berdasarkan config                                                                                               |
+| `src/server/workflows/rankCheckPaths.ts`                                                     | `checkBatchLive` + `postRankCheckTasks` dispatch berdasarkan `searchEngine`                                                              |
+| `src/server/workflows/RankCheckWorkflow.ts`                                                  | +`searchEngine` di params                                                                                                                |
+| `src/server/features/rank-tracking/services/rankCheckRunGuards.ts`                           | +`searchEngine` di config pick + workflow params                                                                                         |
+| **P2-4 Link Intersect**                                                                      |                                                                                                                                          |
+| `src/server/lib/dataforseo/backlinks-intersect.ts`                                           | `fetchBacklinksDomainIntersection` via `backlinksApi().domainIntersectionLive()`                                                         |
+| `src/server/features/link-intersect/services/linkIntersectTypes.ts`                          | Zod cache/view schemas                                                                                                                   |
+| `src/server/features/link-intersect/services/LinkIntersectService.ts`                        | R2-cached 12h (pattern: ContentGapService)                                                                                               |
+| `src/serverFunctions/link-intersect.ts`                                                      | `getLinkIntersect` server fn                                                                                                             |
+| `src/client/features/link-intersect/LinkIntersectView.tsx`                                   | Form + results table                                                                                                                     |
+| `src/client/features/link-intersect/LinkIntersectParts.tsx`                                  | Summary cards                                                                                                                            |
+| `src/routes/_project/p/$projectId/link-intersect.tsx`                                        | Route                                                                                                                                    |
+| `src/server/mcp/tools/get-link-intersect.ts`                                                 | MCP tool `get_link_intersect`                                                                                                            |
+| **P2-6 Anchor Distribution**                                                                 |                                                                                                                                          |
+| `src/server/lib/dataforseo/backlinks.ts`                                                     | +`fetchAnchors`, `anchorsItemSchema`, `AnchorsItem` type                                                                                 |
+| `src/server/features/backlinks/services/backlinksOverviewSchema.ts`                          | +`anchorRowSchema`, `anchorsPageResultSchema`                                                                                            |
+| `src/server/features/backlinks/services/backlinksServiceData.ts`                             | +`profileAnchorsPage`, `mapAnchorsRows`                                                                                                  |
+| `src/server/features/backlinks/services/BacklinksService.ts`                                 | +`profileAnchorsPage` method                                                                                                             |
+| `src/server/features/backlinks/services/backlinksApiFilters.ts`                              | +`buildAnchorsOrderBy`, `buildAnchorsApiFilters`                                                                                         |
+| `src/types/schemas/backlinks.ts`                                                             | +"anchors" tab, sort fields, filters, page request                                                                                       |
+| `src/serverFunctions/backlinks.ts`                                                           | +`getBacklinksAnchors` server fn                                                                                                         |
+| `src/client/features/backlinks/AnchorsTable.tsx`                                             | New table component                                                                                                                      |
+| `src/client/features/backlinks/BacklinksPageSections.tsx`                                    | +anchors tab                                                                                                                             |
+| `src/client/features/backlinks/BacklinksPageContent.tsx`                                     | +`anchorsPage` prop                                                                                                                      |
+| `src/client/features/backlinks/BacklinksPage.tsx`                                            | +`anchorsQuery` wiring                                                                                                                   |
+| `src/client/features/backlinks/useBacklinksPageData.ts`                                      | +anchors query                                                                                                                           |
+| `src/client/features/backlinks/backlinksPageTypes.ts`                                        | +`AnchorRow`, `BacklinksAnchorsData`                                                                                                     |
+| `src/client/features/backlinks/backlinksFilterTypes.ts`                                      | +anchors filter types                                                                                                                    |
+| `src/client/features/backlinks/useBacklinksFilters.ts`                                       | +anchors filter state                                                                                                                    |
+| `src/client/features/backlinks/BacklinksFilterPanel.tsx`                                     | +anchors filter panel                                                                                                                    |
+| `src/client/features/backlinks/export.ts`                                                    | +anchors export                                                                                                                          |
+| `src/client/features/backlinks/export.test.ts`                                               | +`anchors: []` ke semua fixtures                                                                                                         |
+| `src/server/lib/dataforseo/index.ts`                                                         | +`AnchorsItem` type export                                                                                                               |
+| **P2-7 Sitemap Validator**                                                                   |                                                                                                                                          |
+| `src/server/lib/sitemap/sitemapTypes.ts`                                                     | Zod schemas: SitemapUrl, SitemapIssue, ValidationReport                                                                                  |
+| `src/server/lib/sitemap/fetchSitemap.ts`                                                     | `fetchAndParseSitemap` (XML parse, sitemap index recursion, max depth 2)                                                                 |
+| `src/server/lib/sitemap/validateSitemap.ts`                                                  | `validateSitemapUrls` (URL format, duplicates, lastmod, priorities, sample HEAD)                                                         |
+| `src/server/features/sitemap-validation/services/SitemapValidationService.ts`                | R2-cached 1h                                                                                                                             |
+| `src/serverFunctions/sitemap-validation.ts`                                                  | `validateSitemapFn` server fn                                                                                                            |
+| `src/client/features/sitemap-validation/SitemapValidationView.tsx`                           | Form + validation report                                                                                                                 |
+| `src/routes/_project/p/$projectId/sitemap-validator.tsx`                                     | Route                                                                                                                                    |
+| `src/server/mcp/tools/validate-sitemap.ts`                                                   | MCP tool `validate_sitemap`                                                                                                              |
+| **P2-9 Crawl Budget**                                                                        |                                                                                                                                          |
+| `src/server/lib/log-parser/logParserTypes.ts`                                                | Zod schemas: AccessLogEntry, CrawlBudgetReport                                                                                           |
+| `src/server/lib/log-parser/accessLogParser.ts`                                               | `parseAccessLogLines` (Apache/Nginx auto-detect), `filterBotTraffic` (20+ bots), `analyzeCrawlBudget`                                    |
+| `src/server/features/crawl-budget/services/CrawlBudgetService.ts`                            | `analyzeFromLogs`                                                                                                                        |
+| `src/serverFunctions/crawl-budget.ts`                                                        | `analyzeCrawlBudgetFn` server fn                                                                                                         |
+| `src/client/features/crawl-budget/CrawlBudgetView.tsx`                                       | Log upload form + results dashboard                                                                                                      |
+| `src/routes/_project/p/$projectId/crawl-budget.tsx`                                          | Route                                                                                                                                    |
+| `src/server/mcp/tools/analyze-crawl-budget.ts`                                               | MCP tool `analyze_crawl_budget`                                                                                                          |
+| **P2-10 On-Page SEO Checker**                                                                |                                                                                                                                          |
+| `src/server/features/on-page-checker/services/onPageTypes.ts`                                | Zod: OnPageReport, OnPageCategoryScore, OnPageIssue                                                                                      |
+| `src/server/features/on-page-checker/services/onPageAnalysis.ts`                             | `analyzeOnPage` — 7 category scorers (title/meta/headings/images/links/content/technical)                                                |
+| `src/server/features/on-page-checker/services/OnPageCheckerService.ts`                       | `checkOnPageSeo` — fetch URL + reuse `page-analyzer.ts`, R2 cache 6h                                                                     |
+| `src/serverFunctions/on-page-checker.ts`                                                     | `checkOnPageSeoFn` server fn                                                                                                             |
+| `src/client/features/on-page-checker/OnPageCheckerView.tsx`                                  | URL input + score gauge + category cards + issues list                                                                                   |
+| `src/routes/_project/p/$projectId/on-page-checker.tsx`                                       | Route                                                                                                                                    |
+| `src/server/mcp/tools/check-onpage-seo.ts`                                                   | MCP tool `check_onpage_seo`                                                                                                              |
+| **P2-12 Keyword Clustering**                                                                 |                                                                                                                                          |
+| `src/server/features/keyword-clustering/services/clusteringEngine.ts`                        | `extractSerpDomains`, `computeSerpOverlap` (Jaccard), `buildSimilarityMatrix`, `clusterKeywords` (agglomerative), `generateClusterLabel` |
+| `src/server/features/keyword-clustering/services/clusteringTypes.ts`                         | Zod: Cluster, ClusteringResult                                                                                                           |
+| `src/server/features/keyword-clustering/services/KeywordClusteringService.ts`                | `getKeywordClusters` — fetch SERPs, R2 cache 24h, max 20 keywords                                                                        |
+| `src/serverFunctions/keyword-clustering.ts`                                                  | `getKeywordClustersFn` server fn                                                                                                         |
+| `src/client/features/keyword-clustering/KeywordClusteringView.tsx`                           | Textarea input + cluster cards + similarity bars                                                                                         |
+| `src/routes/_project/p/$projectId/keyword-clustering.tsx`                                    | Route                                                                                                                                    |
+| `src/server/mcp/tools/cluster-keywords.ts`                                                   | MCP tool `cluster_keywords`                                                                                                              |
+| **P2-13 Toxic Links**                                                                        |                                                                                                                                          |
+| `src/server/features/backlinks/services/toxicLinks.ts`                                       | `identifyToxicLinks` — spam threshold 70, top toxic domains                                                                              |
+| `src/server/features/backlinks/services/generateDisavow.ts`                                  | `generateDisavowFile` — Google disavow format                                                                                            |
+| `src/client/features/backlinks/ToxicLinksTable.tsx`                                          | Table + download disavow button                                                                                                          |
+| `src/client/features/backlinks/disavowExport.ts`                                             | Client-side `.txt` download                                                                                                              |
+| `src/types/schemas/backlinks.ts`                                                             | +"toxic" tab, spam score sort default                                                                                                    |
+| `src/client/features/backlinks/BacklinksPageSections.tsx`                                    | +toxic tab                                                                                                                               |
+| `src/client/features/backlinks/BacklinksPageContent.tsx`                                     | +`toxicPage` prop                                                                                                                        |
+| `src/client/features/backlinks/BacklinksPage.tsx`                                            | +`toxicQuery` wiring                                                                                                                     |
+| `src/client/features/backlinks/useBacklinksPageData.ts`                                      | +toxic query (reuses getBacklinksRows with minSpamScore:70)                                                                              |
+| `src/client/features/backlinks/export.ts`                                                    | +toxic tab export + filename                                                                                                             |
+| **P2-15 SERP Volatility**                                                                    |                                                                                                                                          |
+| `src/db/serp-volatility.schema.ts` + `src/db/pg/serp-volatility.schema.ts`                   | Table `serp_volatility_snapshots` dual-dialect (id, projectId, date, volatilityScore, keywordsSampled, avgPositionChange, topMoversJson) |
+| `src/db/d1/schema.ts` + `src/db/pg/schema.ts` + `src/db/schema.ts` + `schema-parity.test.ts` | Barrel registration + parity test                                                                                                        |
+| `src/server/features/serp-volatility/services/volatilityCalculation.ts`                      | `calculateVolatilityScore` (normalized std dev 0-100), `identifyTopMovers` (top 5), `categorizeVolatility` (low/moderate/high/extreme)   |
+| `src/server/features/serp-volatility/repositories/SerpVolatilityRepository.ts`               | `getLatestForProject`, `upsertForProjectDate`, `getForProjectDateRange`                                                                  |
+| `src/server/features/serp-volatility/services/SerpVolatilityService.ts`                      | `computeVolatility` (from rank_snapshots), `getVolatilityTrend`, `getLatestVolatility`                                                   |
+| `src/serverFunctions/serp-volatility.ts`                                                     | `getSerpVolatility` (GET) + `computeSerpVolatility` (POST)                                                                               |
+| `src/client/features/serp-volatility/SerpVolatilityView.tsx`                                 | Score gauge + summary + top movers + trend                                                                                               |
+| `src/client/features/serp-volatility/VolatilityChart.tsx`                                    | Table with CSS bar chart                                                                                                                 |
+| `src/routes/_project/p/$projectId/serp-volatility.tsx`                                       | Route                                                                                                                                    |
+| `src/server/mcp/tools/get-serp-volatility.ts`                                                | MCP tool `get_serp_volatility`                                                                                                           |
+
+**New nav items**: Sitemap Validator, On-Page SEO, Keyword Clustering, Link Intersect (Research group) + Crawl Budget, SERP Volatility (My Site group). **New backlinks tabs**: Anchors, Toxic.
 
 **P3 platform:** manager/viewer roles unassignable via UI (RBAC dead code), no trial period, no invoice PDF, no roll-up reports. **P4 local SEO:** geo-grid, GBP audit, citation, review monitoring. **P5 AI/GEO:** AI Overviews rank tracking, AI-bot log analysis, llms.txt, GEO content recs.
 
@@ -538,18 +645,18 @@ Audit lengkap di `plan.md` di repo root. **Product mature untuk classic SEO + ST
 
 Marketing site redesign ke dark theme. Near-black canvas (`#0a0b14`), dot-grid background, cyan data-glow (`#00e5ff`), orange CTA (`#ff5600`). Typography: Space Grotesk (display) + Inter (body) + JetBrains Mono (data). CSS-only animations (PageSpeed-safe), `prefers-reduced-motion` guards, `content-visibility: auto` on below-fold sections.
 
-| File | Keterangan |
-|---|---|
-| `web/src/styles/app.css` | Dark palette `@theme` tokens, Space Grotesk font, `color-scheme: dark` |
-| `web/src/routes/_marketing/index.tsx` | Font preload (Space Grotesk wght 500/600/700) |
-| `web/src/routes/_marketing.tsx` | Dark glassmorphic nav, dark mobile menu, body bg `#0a0b14` |
-| `web/src/components/landing-page.css` | Complete rewrite (~800 lines): dot-grid hero, cyan glow, glass cards, staggered animations, reveal classes |
-| `web/src/components/landing-page.tsx` | Hero with floating live-data cards, `LiveMetrics` section (IntersectionObserver count-up), dark feature cards, CTA band |
-| `web/src/routes/_marketing/pricing.tsx` | Dark pricing cards, cyan gradient border on featured tier, orange CTA buttons |
-| `web/src/routes/_marketing/features/index.tsx` | Dark feature cards with cyan hover glow |
-| `web/src/components/site-footer.tsx` | Dark footer with theme-aware text colors |
-| `web/src/components/newsletter-signup.tsx` | Dark form inputs, cyan focus ring, orange button |
-| `web/src/routes/__root.tsx` | `data-theme="dark"` for fumadocs components |
+| File                                           | Keterangan                                                                                                              |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `web/src/styles/app.css`                       | Dark palette `@theme` tokens, Space Grotesk font, `color-scheme: dark`                                                  |
+| `web/src/routes/_marketing/index.tsx`          | Font preload (Space Grotesk wght 500/600/700)                                                                           |
+| `web/src/routes/_marketing.tsx`                | Dark glassmorphic nav, dark mobile menu, body bg `#0a0b14`                                                              |
+| `web/src/components/landing-page.css`          | Complete rewrite (~800 lines): dot-grid hero, cyan glow, glass cards, staggered animations, reveal classes              |
+| `web/src/components/landing-page.tsx`          | Hero with floating live-data cards, `LiveMetrics` section (IntersectionObserver count-up), dark feature cards, CTA band |
+| `web/src/routes/_marketing/pricing.tsx`        | Dark pricing cards, cyan gradient border on featured tier, orange CTA buttons                                           |
+| `web/src/routes/_marketing/features/index.tsx` | Dark feature cards with cyan hover glow                                                                                 |
+| `web/src/components/site-footer.tsx`           | Dark footer with theme-aware text colors                                                                                |
+| `web/src/components/newsletter-signup.tsx`     | Dark form inputs, cyan focus ring, orange button                                                                        |
+| `web/src/routes/__root.tsx`                    | `data-theme="dark"` for fumadocs components                                                                             |
 
 **Commit**: `d85a798` + `a99ee84` (marketing dist rebuild).
 
@@ -641,14 +748,14 @@ User → Subscribe Page → createPaypalSubscription (server fn)
 
 ### Key Files
 
-| File | Purpose |
-|---|---|
-| `src/server/billing/paypal.ts` | PayPal REST API client (OAuth2 + typed facade) |
-| `src/server/billing/credits.ts` | Local credits management (monthly + topup pools) |
-| `src/server/billing/paypal-webhook.ts` | Webhook handler (events → sync) |
-| `src/server/billing/paypal-webhook-verify.ts` | Webhook signature verification |
-| `src/serverFunctions/paypal-checkout.ts` | Checkout server functions |
-| `src/client/features/billing/use-billing.ts` | Local React hooks for billing state |
+| File                                          | Purpose                                          |
+| --------------------------------------------- | ------------------------------------------------ |
+| `src/server/billing/paypal.ts`                | PayPal REST API client (OAuth2 + typed facade)   |
+| `src/server/billing/credits.ts`               | Local credits management (monthly + topup pools) |
+| `src/server/billing/paypal-webhook.ts`        | Webhook handler (events → sync)                  |
+| `src/server/billing/paypal-webhook-verify.ts` | Webhook signature verification                   |
+| `src/serverFunctions/paypal-checkout.ts`      | Checkout server functions                        |
+| `src/client/features/billing/use-billing.ts`  | Local React hooks for billing state              |
 
 ### Setup Steps
 
@@ -692,6 +799,7 @@ pnpm drizzle-kit push --config=drizzle-pg.config.ts
 ```
 
 Migration files:
+
 - `drizzle/0047_rename_autumn_to_paypal.sql`
 - `drizzle-pg/0024_rename_autumn_to_paypal.sql`
 
@@ -699,14 +807,15 @@ Migration files:
 
 PayPal has no native credits/balance. Credits are managed locally:
 
-| Tier | Monthly Credits | Top-up Available |
-|---|---|---|
-| Free | 100 | No |
-| Lite | 5,000 | Yes |
-| Pro | 25,000 | Yes |
-| Agency | 100,000 | Yes |
+| Tier   | Monthly Credits | Top-up Available |
+| ------ | --------------- | ---------------- |
+| Free   | 100             | No               |
+| Lite   | 5,000           | Yes              |
+| Pro    | 25,000          | Yes              |
+| Agency | 100,000         | Yes              |
 
 Credits are stored in `usage_quota` table with special feature names:
+
 - `usage_credits` — monthly pool (granted on plan creation/renewal)
 - `topup_credits` — one-time purchase pool (rolls over)
 
@@ -725,19 +834,20 @@ Credits are stored in `usage_quota` table with special feature names:
 
 ### Webhook Events
 
-| Event | Action |
-|---|---|
-| `BILLING.SUBSCRIPTION.CREATED` | Sync subscription, grant credits |
-| `BILLING.SUBSCRIPTION.UPDATED` | Sync tier changes, reset quotas if changed |
-| `BILLING.SUBSCRIPTION.CANCELLED` | Sync to free tier, reset quotas |
-| `BILLING.SUBSCRIPTION.EXPIRED` | Sync to free tier |
-| `BILLING.SUBSCRIPTION.ACTIVATED` | Sync subscription status |
-| `BILLING.SUBSCRIPTION.SUSPENDED` | Sync to past_due status |
-| `PAYMENT.CAPTURE.COMPLETED` | Handle top-up credit purchase |
+| Event                            | Action                                     |
+| -------------------------------- | ------------------------------------------ |
+| `BILLING.SUBSCRIPTION.CREATED`   | Sync subscription, grant credits           |
+| `BILLING.SUBSCRIPTION.UPDATED`   | Sync tier changes, reset quotas if changed |
+| `BILLING.SUBSCRIPTION.CANCELLED` | Sync to free tier, reset quotas            |
+| `BILLING.SUBSCRIPTION.EXPIRED`   | Sync to free tier                          |
+| `BILLING.SUBSCRIPTION.ACTIVATED` | Sync subscription status                   |
+| `BILLING.SUBSCRIPTION.SUSPENDED` | Sync to past_due status                    |
+| `PAYMENT.CAPTURE.COMPLETED`      | Handle top-up credit purchase              |
 
 ### Customer Portal
 
 PayPal's customer portal is accessed via the subscription revision URL:
+
 - `POST /v1/billing/subscriptions/{id}/revise`
 - Redirects to PayPal's hosted billing management page
 - User can: update payment method, cancel subscription, view invoices
@@ -758,17 +868,69 @@ PayPal's customer portal is accessed via the subscription revision URL:
 
 ---
 
+## In-App Landing Page + Hard Paywall (LENGKAP, end-to-end)
+
+Landing page publik di `/` (DaisyUI, bukan `.itc-*` webfont), pricing publik di `/pricing` (import harga dari `src/shared/plans.ts`), dan hard paywall server+client yang memblokir tools untuk user free-tier.
+
+### Bagian A: Landing + Pricing Publik
+
+| File                                                | Keterangan                                                                                                                                                                                                                 |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/client/features/marketing/MarketingChrome.tsx` | Navbar (logo, Pricing, Sign in/Dashboard, Get started) + Footer (Product, Resources, Legal links ke seotool.im). `useMarketingSession()` hook.                                                                             |
+| `src/client/features/marketing/LandingPage.tsx`     | Full landing: Hero (badge, h1, CTAs, 4 stat cards), FeatureGrid (8 fitur: Keyword Research, Rank Tracking, Site Audit, Backlinks, AI Visibility, Content Intelligence, Reports, SAM+MCP), PricingBlock, CtaBand.           |
+| `src/client/features/marketing/PricingSection.tsx`  | Kartu 3 tier (Lite/Pro/Agency), impor `PLAN_PRICES_USD` + `PLAN_TIER_LABELS` + `MONTHLY_CREDIT_GRANTS` dari single source of truth. `signedIn` prop menentukan CTA (`/sign-up?redirect=/subscribe` vs `/subscribe?plan=`). |
+| `src/routes/index.tsx`                              | Route `/` publik, render `LandingPage`                                                                                                                                                                                     |
+| `src/routes/pricing.tsx`                            | Route `/pricing` publik, render `PricingSection` + FAQ (5 item) + CTA                                                                                                                                                      |
+| `src/middleware/unauthenticated-redirect.ts`        | Exempt `pathname === "/"` (exact) + `"/pricing"` prefix                                                                                                                                                                    |
+| `src/lib/auth-redirect.ts`                          | `DEFAULT_APP_ENTRY = "/projects"` (default post-login, bukan `/`); `normalizeAuthRedirect` fallback diubah dari `"/"` ke `"/projects"`                                                                                     |
+| `src/lib/auth-redirect.test.ts`                     | Test expectations diperbarui: `"/projects"` sebagai default                                                                                                                                                                |
+| `src/routes/_auth.tsx`                              | `getCurrentAuthRedirect` → default `/projects` (via auth-redirect)                                                                                                                                                         |
+| `src/routes/_authenticated.subscribe.tsx`           | +Link "Back to homepage" (`to="/"`) di bawah subheading                                                                                                                                                                    |
+
+**Hapus**: `src/routes/_app/index.tsx` (auto-redirect proyek lama, bentrok path dengan `routes/index.tsx`).
+
+### Bagian B: Hard Paywall
+
+| File                                                    | Keterangan                                                                                                                                                        |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/middleware/paid-plan-gate.ts`                      | Function middleware: hosted + !BYPASS_AUTH → allowlist (`ALWAYS_ALLOWED_FILES` + `ALWAYS_ALLOWED_FUNCTIONS`) → `customerHasPaidPlan(orgId)` → `PAYMENT_REQUIRED`. |
+| `src/serverFunctions/middleware.ts`                     | `globalServerFunctionMiddleware = [errorHandlingMiddleware, ensureUserMiddleware, paidPlanGateMiddleware]`                                                        |
+| `src/client/features/billing/use-paid-plan-guard.ts`    | Client guard: hosted + !E2E + `!isPaid` → navigate `/subscribe?redirect=...`. Mirror `useHostedAuthRouteGuard`.                                                   |
+| `src/routes/_app/route.tsx`                             | +`usePaidPlanGuard()` setelah auth gate; spinner saat pending                                                                                                     |
+| `src/routes/_app/projects.tsx`                          | +PAYMENT_REQUIRED → /subscribe redirect (port dari \_app/index.tsx)                                                                                               |
+| `src/server/features/audit/services/AuditService.ts`    | Fix: `customerHasManagedAccess` → `customerHasPaidPlan` (broken import)                                                                                           |
+| `src/server/features/onboarding/OnboardingChatAgent.ts` | Fix: `customerHasManagedAccess` → `customerHasPaidPlan` (broken import)                                                                                           |
+
+### Bagian C: E2E Fix
+
+| File                                      | Keterangan                                                                              |
+| ----------------------------------------- | --------------------------------------------------------------------------------------- |
+| `e2e/e2e-helpers.ts`                      | Shared `getE2EProjectId(page)`: navigasi `/projects`, extract project ID dari link href |
+| `e2e/keyword-research-navigation.spec.ts` | `getProjectId` → `getE2EProjectId`                                                      |
+| `e2e/debug-domain.spec.ts`                | Inline redirect → `getE2EProjectId`                                                     |
+| `e2e/domain-overview-test-utils.ts`       | Inline redirect → `/projects` + extract link                                            |
+
+- tsc: 12 error (14 P2 lama - 2 fix impor), semua billing/paypal
+- unit tests: `auth-redirect.test.ts` 10/10 pass
+- E2E: keyword-research 3/3 pass, domain-overview 5/5 pass
+- Browser: `/` render landing page (hero, fitur, pricing, CTA), `/pricing` render pricing + FAQ
+- Funnel: anonim `/` → Get started → `/sign-up` → onboarding → `/projects` → `/subscribe` → bayar → tools
+
+---
+
 ## Quality gate yang wajib dijalankan
 
 ```bash
 # Type check (abaikan Supastarter)
 pnpm exec tsc --noEmit 2>&1 | grep -v "Supastarter" | grep -c "error TS"
-# Harus 0
+# Harus ≤12 (pre-existing billing/paypal/billingChart errors)
+# Verifikasi TIDAK ada error baru dari perubahan sendiri:
+pnpm exec tsc --noEmit 2>&1 | grep -v "Supastarter" | grep "error TS" | grep -v "billing\|Billing\|subscribe\|FreePlan\|paypal-checkout\|BAD_REQUEST\|ServerFn<"
 
 # Tests
 pnpm test
-# Harus: ~928 pass, 12 pre-existing fail (promptExplorer, customer-status-model, dataforseo/client, page-reporters)
-# 5 test files gagal — ini pre-existing dari QA Sprints + PayPal migration, BUKAN regressions baru
+# Harus: ~933 pass, 11 pre-existing fail (promptExplorer, customer-status-model, dataforseo/client, page-reporters)
+# 4 test files gagal — ini pre-existing dari QA Sprints + PayPal migration, BUKAN regressions baru
 
 # Lint (file baru/berubah)
 pnpm exec oxlint <files> --type-aware
@@ -787,21 +949,23 @@ pnpm db:generate  # D1 + PG
 
 ## Roadmap: Fase berikutnya
 
-| Fase     | Fitur                                                         | Depends On                            | Catatan                                                                                                                                                                                                                                              |
-| -------- | ------------------------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 3a       | **Content Intelligence — Content-Quality Scoring** ✅         | `audit_pages`                         | DONE. Skor deterministik 0-100 per halaman dari sinyal crawl. Tabel `content_scores`.                                                                                                                                                                |
-| 3b       | **Content Intelligence — Content Gap (Entity/Topic Gap)** ✅  | DataForSEO Labs `domain_intersection` | DONE. Domain-level keyword gap vs 1–3 kompetitor, di-cluster jadi topics. R2-cached (no migration). Credit feature `content_intelligence`.                                                                                                           |
-| 3c       | **Content Intelligence — Entity Extraction (Topical/LLM)** ✅ | OpenRouter (`generateText`)           | DONE. Per-page entity/topic extraction via LLM. Tabel `page_entities`. Best-effort workflow phase. Graceful skip tanpa OPENROUTER_API_KEY.                                                                                                           |
-| **SaaS** | **Transformasi Hosted-Only + Tiered Billing** ✅              | —                                     | DONE (7 fase). Hosted-only auth, 4-tier plan (Free/Lite/Pro/Agency), per-feature quotas, PayPal webhook sync, VPS deploy config.                                                                                                                      |
-| 4        | **Content Strategy** ✅                                       | Fase 3                                | DONE (2 slice). Topic clusters + content briefs (Slice A, CRUD). Programmatic AI content briefs + internal linking (Slice B, OpenRouter).                                                                                                            |
-| 5        | **Alerts** ✅                                                 | Rank/Audit data                       | DONE (Slice A). `alert_rules` + `alertEvaluator` (rank_drop + audit_critical) + `AlertWorkflow` cron dispatch + Loops email. GSC/GA4 alerts deferred.                                                                                                |
-| 6        | **Semi-gap** ✅ (Slice A)                                     | —                                     | DONE (Slice A). SERP snapshot persistence — full top-20 SERP composition persisted per rank check, zero extra API cost. Competitor table + tracked domain highlight. Domain first-class entity (Slice B) + Local SEO persistence (Slice C) deferred. |
-| 7        | **PayPal Customer Portal** ✅                                 | PayPal SDK                            | DONE. `getCustomerPortalUrl` server fn + "Manage Subscription" button di billing page. Cancellation via PayPal portal → webhook sync.                                                                                                                 |
-| 8        | **Quota Analytics Dashboard** ✅                              | QuotaService                          | DONE. Admin dashboard: plan distribution, MRR estimate, quota usage summary, recent orgs. `requirePlatformAdmin` middleware (env-var allowlist). Route `/admin`.                                                                                     |
-| QA       | **QA Sprint 1-3** ✅                                          | All features                          | DONE (commit `5a0b3e0`). 15 features, 47 files. P0 fixes, P1 compliance, P2 partial. Deployed to production.                                                                                                                                       |
-| Billing  | **PayPal Migration** ✅                                       | Autumn/Stripe                         | DONE (commit `0510bbd`). Autumn/Stripe → PayPal Subscriptions. ~40 files. Credits in `usage_quota` table. New env vars `PAYPAL_*`.                                                                                                                 |
-| Marketing | **Dark Command Center** ✅                                   | —                                     | DONE (commits `d85a798`, `a99ee84`). Dark theme redesign + conversion UX (hero analyzer, tooltips, pricing toggle, structured data). CSS-only animations.                                                                                          |
-| Cleanup  | **Rebrand OpenSEO → SeoTool.im** ✅                           | —                                     | DONE (commit `1343430`). All user-facing identifiers cleaned. Only infra IDs remain.                                                                                                                                                               |
+| Fase                  | Fitur                                                         | Depends On                            | Catatan                                                                                                                                                                                                                                                                |
+| --------------------- | ------------------------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3a                    | **Content Intelligence — Content-Quality Scoring** ✅         | `audit_pages`                         | DONE. Skor deterministik 0-100 per halaman dari sinyal crawl. Tabel `content_scores`.                                                                                                                                                                                  |
+| 3b                    | **Content Intelligence — Content Gap (Entity/Topic Gap)** ✅  | DataForSEO Labs `domain_intersection` | DONE. Domain-level keyword gap vs 1–3 kompetitor, di-cluster jadi topics. R2-cached (no migration). Credit feature `content_intelligence`.                                                                                                                             |
+| 3c                    | **Content Intelligence — Entity Extraction (Topical/LLM)** ✅ | OpenRouter (`generateText`)           | DONE. Per-page entity/topic extraction via LLM. Tabel `page_entities`. Best-effort workflow phase. Graceful skip tanpa OPENROUTER_API_KEY.                                                                                                                             |
+| **SaaS**              | **Transformasi Hosted-Only + Tiered Billing** ✅              | —                                     | DONE (7 fase). Hosted-only auth, 4-tier plan (Free/Lite/Pro/Agency), per-feature quotas, PayPal webhook sync, VPS deploy config.                                                                                                                                       |
+| 4                     | **Content Strategy** ✅                                       | Fase 3                                | DONE (2 slice). Topic clusters + content briefs (Slice A, CRUD). Programmatic AI content briefs + internal linking (Slice B, OpenRouter).                                                                                                                              |
+| 5                     | **Alerts** ✅                                                 | Rank/Audit data                       | DONE (Slice A). `alert_rules` + `alertEvaluator` (rank_drop + audit_critical) + `AlertWorkflow` cron dispatch + Loops email. GSC/GA4 alerts deferred.                                                                                                                  |
+| 6                     | **Semi-gap** ✅ (Slice A)                                     | —                                     | DONE (Slice A). SERP snapshot persistence — full top-20 SERP composition persisted per rank check, zero extra API cost. Competitor table + tracked domain highlight. Domain first-class entity (Slice B) + Local SEO persistence (Slice C) deferred.                   |
+| 7                     | **PayPal Customer Portal** ✅                                 | PayPal SDK                            | DONE. `getCustomerPortalUrl` server fn + "Manage Subscription" button di billing page. Cancellation via PayPal portal → webhook sync.                                                                                                                                  |
+| 8                     | **Quota Analytics Dashboard** ✅                              | QuotaService                          | DONE. Admin dashboard: plan distribution, MRR estimate, quota usage summary, recent orgs. `requirePlatformAdmin` middleware (env-var allowlist). Route `/admin`.                                                                                                       |
+| QA                    | **QA Sprint 1-3** ✅                                          | All features                          | DONE (commit `5a0b3e0`). 15 features, 47 files. P0 fixes, P1 compliance, P2 partial. Deployed to production.                                                                                                                                                           |
+| Billing               | **PayPal Migration** ✅                                       | Autumn/Stripe                         | DONE (commit `0510bbd`). Autumn/Stripe → PayPal Subscriptions. ~40 files. Credits in `usage_quota` table. New env vars `PAYPAL_*`.                                                                                                                                     |
+| Marketing             | **Dark Command Center** ✅                                    | —                                     | DONE (commits `d85a798`, `a99ee84`). Dark theme redesign + conversion UX (hero analyzer, tooltips, pricing toggle, structured data). CSS-only animations.                                                                                                              |
+| Cleanup               | **Rebrand OpenSEO → SeoTool.im** ✅                           | —                                     | DONE (commit `1343430`). All user-facing identifiers cleaned. Only infra IDs remain.                                                                                                                                                                                   |
+| **P2**                | **P2 Features Batch (9 fitur)** ✅                            | All features                          | DONE (2026-08-18). P2-1 Bing support, P2-4 Link intersect, P2-6 Anchor distribution, P2-7 Sitemap validator, P2-9 Crawl budget, P2-10 On-page checker, P2-12 Keyword clustering, P2-13 Toxic links, P2-15 SERP volatility. ~60 files. 8 MCP tools. P2-14 PPC excluded. |
+| **Landing + Paywall** | **In-App Landing Page + Hard Paywall** ✅                     | —                                     | DONE (2026-08-19). Public landing at `/` (DaisyUI), pricing at `/pricing` (import from plans.ts), hard paywall server+client. E2E bypass preserved. Funnel: signup → onboarding → /projects → /subscribe. Fixed broken `customerHasManagedAccess` imports.             |
 
 ---
 

@@ -104,7 +104,9 @@ export async function paypalRequest<T = unknown>(
     const msg =
       details.map((d) => d.description ?? d.issue).join("; ") ??
       response.statusText;
-    throw new Error(`PayPal ${method} ${path} failed (${response.status}): ${msg}`);
+    throw new Error(
+      `PayPal ${method} ${path} failed (${response.status}): ${msg}`,
+    );
   }
 
   return data as T;
@@ -158,10 +160,7 @@ export interface PayPalBillingPlan {
 export const paypal = {
   /** Get or create a PayPal product (cached per tier). */
   products: {
-    create: (args: {
-      name: string;
-      description: string;
-    }) =>
+    create: (args: { name: string; description: string }) =>
       paypalRequest<{ id: string }>("POST", "/v1/catalogs/products", {
         name: args.name,
         description: args.description,

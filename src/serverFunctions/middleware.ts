@@ -3,6 +3,7 @@ import { z } from "zod";
 import { AppError } from "@/server/lib/errors";
 import { getOptionalEnvValue } from "@/server/lib/runtime-env";
 import { errorHandlingMiddleware } from "@/middleware/errorHandling";
+import { paidPlanGateMiddleware } from "@/middleware/paid-plan-gate";
 import type { EnsuredUserContext } from "@/middleware/ensure-user/types";
 import { ensureUserMiddleware } from "@/middleware/ensureUser";
 import { type Role, roleAtLeast } from "@/shared/rbac";
@@ -30,6 +31,7 @@ function getAuthenticatedContext(context: unknown): EnsuredUserContext {
 export const globalServerFunctionMiddleware = [
   errorHandlingMiddleware,
   ensureUserMiddleware,
+  paidPlanGateMiddleware,
 ] as const;
 
 export const requireAuthenticatedContext = createMiddleware({

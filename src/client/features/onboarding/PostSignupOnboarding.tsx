@@ -78,7 +78,7 @@ export function PostSignupOnboarding({
         </p>
       </div>
 
-      <div className="rounded-lg border border-base-300 bg-base-100 p-5 shadow-sm">
+      <div className="rounded-lg border border-base-300 bg-base-100 p-5">
         {step === 0 ? (
           <OnboardingChoiceGroup
             title="What tasks matter to you most?"

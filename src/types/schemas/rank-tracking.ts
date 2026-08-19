@@ -61,6 +61,7 @@ export const createConfigSchema = z.object({
   devices: devicesEnum.optional(),
   serpDepth: z.number().int().min(10).max(100).multipleOf(10),
   scheduleInterval: scheduleEnum.optional(),
+  searchEngine: z.enum(["google", "bing"]).optional().default("google"),
 });
 
 export const updateConfigSchema = z.object({
@@ -74,6 +75,7 @@ export const updateConfigSchema = z.object({
   serpDepth: z.number().int().min(10).max(100).multipleOf(10).optional(),
   scheduleInterval: scheduleEnum.optional(),
   isActive: z.boolean().optional(),
+  searchEngine: z.enum(["google", "bing"]).optional(),
 });
 
 export const triggerCheckSchema = z.object({

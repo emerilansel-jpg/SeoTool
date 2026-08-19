@@ -43,7 +43,7 @@ export function AuthMethodChooser({
     <div className="space-y-3">
       <button
         type="button"
-        className="btn w-full border border-black/10 bg-white text-neutral-900 hover:border-black/20 hover:bg-neutral-50 disabled:bg-white disabled:text-neutral-500 disabled:opacity-70"
+        className="btn w-full border border-base-300 bg-base-100 text-base-content hover:border-base-content/20 hover:bg-base-200 disabled:bg-base-100 disabled:text-base-content/50 disabled:opacity-70"
         onClick={onContinueWithGoogle}
         disabled={disabled || isBusy}
       >
@@ -98,41 +98,41 @@ export function AuthPageCard({
   footer?: React.ReactNode;
 }) {
   return (
-    <div className="w-full max-w-sm space-y-6">
+    <div className="w-full max-w-md rounded-2xl border border-base-300 bg-base-100 p-8 shadow-xl shadow-base-content/5 space-y-6">
       <div className="text-center space-y-3">
-        <img
-          src="/transparent-logo.png"
-          alt="SeoTool.im"
-          className="mx-auto size-10 rounded-lg"
-        />
+        <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-indigo-600 to-cyan-400 text-lg font-black text-white shadow-md shadow-primary/25">
+          S
+        </div>
         <div>
-          <h1 className="text-xl font-semibold">{title}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-base-content">
+            {title}
+          </h1>
           {helperText ? (
-            <p className="text-sm text-base-content/60 mt-1">{helperText}</p>
+            <p className="text-sm text-base-content/65 mt-1">{helperText}</p>
           ) : null}
         </div>
       </div>
 
       {children}
 
-      {footer ? <div className="text-center">{footer}</div> : null}
+      {footer ? (
+        <div className="text-center pt-2 border-t border-base-300/60">
+          {footer}
+        </div>
+      ) : null}
     </div>
   );
 }
 
 export function AuthPageShell({ children }: { children: React.ReactNode }) {
   return (
-    // `h-[100dvh]` + `overflow-y-auto` makes this a scroll container, and the
-    // auto-margin child centers when it fits but stays fully reachable (top and
-    // bottom) when it's taller than the viewport. Plain `justify-center` clips
-    // the overflow with no way to scroll to it.
-    <div className="relative h-[100dvh] flex flex-col items-center overflow-y-auto bg-base-200">
-      {/* Supastarter-style primary glow behind auth card */}
+    <div className="relative h-[100dvh] flex flex-col items-center overflow-y-auto bg-base-200 selection:bg-primary/20 selection:text-primary">
+      {/* Primary gradient aura behind auth card */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-96 opacity-[0.07]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[450px] opacity-15 blur-3xl"
         style={{
           background:
-            "radial-gradient(ellipse 50% 100% at 50% 0%, var(--color-primary), transparent)",
+            "radial-gradient(ellipse 60% 80% at 50% 0%, var(--color-primary), var(--color-accent), transparent)",
         }}
       />
       <div className="relative m-auto flex w-full flex-col items-center p-4">

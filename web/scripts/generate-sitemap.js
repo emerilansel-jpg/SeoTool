@@ -25,6 +25,8 @@ const STATIC_PATHS = [
   "/docs",
   "/features",
   "/features/mcp",
+  "/free-tools",
+  "/free-tools/ai-visibility-checker",
   "/open-source-seo",
   "/google-search-console-mcp",
   ...Object.values(FEATURE_PAGE_SLUGS).map((slug) => `/features/${slug}`),

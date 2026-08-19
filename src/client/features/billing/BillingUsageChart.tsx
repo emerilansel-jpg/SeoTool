@@ -1,7 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
-import { getBillingUsageEvents } from "@/serverFunctions/billing";
+import {
+  getBillingUsageEvents,
+  type BillingUsageEvent,
+} from "@/serverFunctions/billing";
 import { useSession } from "@/lib/auth-client";
 
 export function BillingUsageChart() {
@@ -38,12 +41,17 @@ export function BillingUsageChart() {
     staleTime: 60_000,
   });
 
-  const chartData = (eventsQuery.data ?? []).map((event) => ({
-    date: new Date().toISOString(),
-    credits: (event.properties.monthly_remaining as number ?? 0) / 1000,
-  }));
+  const chartData = ((eventsQuery.data ?? []) as BillingUsageEvent[]).map(
+    (event) => ({
+      date: new Date().toISOString(),
+      credits: ((event.properties.monthly_remaining as number) ?? 0) / 1000,
+    }),
+  );
 
-  const totalSpend = chartData.reduce((sum, d) => sum + d.credits, 0);
+  const totalSpend = chartData.reduce(
+    (sum: number, d: { credits: number }) => sum + d.credits,
+    0,
+  );
 
   return (
     <div className="rounded-lg border border-base-300 bg-base-100 p-4 space-y-3">
@@ -79,25 +87,28 @@ export function BillingUsageChart() {
             <XAxis
               dataKey="date"
               tickFormatter={formatShortDate}
-              tick={{ fontSize: 10, fill: "#888" }}
+              tick={{ fontSize: 10, fill: "var(--trend-axis-color)" }}
               tickLine={false}
               axisLine={false}
               minTickGap={40}
             />
             <YAxis
               tickFormatter={formatUsdAxis}
-              tick={{ fontSize: 10, fill: "#888" }}
+              tick={{ fontSize: 10, fill: "var(--trend-axis-color)" }}
               tickLine={false}
               axisLine={false}
               width={44}
             />
             <Tooltip
               content={<UsageTooltip />}
-              cursor={{ fill: "rgba(150,150,150,0.1)" }}
+              cursor={{
+                fill: "var(--color-base-content)",
+                fillOpacity: 0.06,
+              }}
             />
             <Bar
               dataKey="credits"
-              fill="#7c3aed"
+              fill="var(--color-primary)"
               radius={[2, 2, 0, 0]}
               maxBarSize={12}
             />

@@ -21,7 +21,7 @@ const BUCKETS = [
   { key: "top3", label: "Top 3", color: "#16a34a" },
   { key: "top4to10", label: "4–10", color: "#2563eb" },
   { key: "top11to20", label: "11–20", color: "#f59e0b" },
-  { key: "notRanking", label: "Not in top 20", color: "#6b7280" },
+  { key: "notRanking", label: "Not in top 20", color: "var(--color-neutral)" },
 ] as const;
 
 /** Narrowed recharts tooltip payload entry (typed `any` upstream). */
@@ -121,14 +121,14 @@ export function RankTrackingOverview({
                   scale="time"
                   domain={["dataMin", "dataMax"]}
                   tickFormatter={formatDateTick}
-                  tick={{ fontSize: 10, fill: "#888" }}
+                  tick={{ fontSize: 10, fill: "var(--trend-axis-color)" }}
                   tickLine={false}
                   axisLine={false}
                   minTickGap={32}
                 />
                 <YAxis
                   allowDecimals={false}
-                  tick={{ fontSize: 10, fill: "#888" }}
+                  tick={{ fontSize: 10, fill: "var(--trend-axis-color)" }}
                   tickLine={false}
                   axisLine={false}
                   width={28}
@@ -151,7 +151,7 @@ export function RankTrackingOverview({
                     );
                     return <DistributionTooltip label={label} byKey={byKey} />;
                   }}
-                  cursor={{ stroke: "rgba(150,150,150,0.3)" }}
+                  cursor={{ stroke: "var(--trend-grid-color)" }}
                 />
                 {BUCKETS.map((b) => (
                   <Area
@@ -183,7 +183,7 @@ function DistributionTooltip({
   byKey: Map<string, number>;
 }) {
   return (
-    <div className="rounded-md border border-base-300 bg-base-100 px-3 py-2 shadow-sm space-y-0.5">
+    <div className="rounded-md border border-base-300 bg-base-100 px-3 py-2 space-y-0.5">
       <p className="text-xs text-base-content/60">
         {new Date(label).toLocaleDateString("en-US", {
           month: "short",

@@ -16,6 +16,7 @@ data, or sensitive paths.
 - [ ] `2026-07-14T01:28:30Z` — `claude` — Regenerating the lockfile (adding or moving a dep) makes `pnpm install` re-run the `minimumReleaseAge` gate on transitive peers already pinned at that exact version (`mysql2`, `sql-escaper`, `@aws-sdk/credential-providers`), failing the install even though nothing about them changed. `pnpm install --config.minimumReleaseAge=0` — then confirm the lockfile diff stays version-neutral — unblocks it; worth documenting that regen step so the gate doesn't re-block already-pinned versions.
 - [ ] `2026-07-10T21:28:46Z` — `codex` — `pnpm --dir badseo run typecheck` works through the root toolchain but `pnpm --dir badseo run build` can't find Vite because `badseo/node_modules` is absent. Document or enforce the package-local install before validating the `badseo/` subpackage.
 - [ ] `2026-07-10T21:32:10Z` — `codex` — Formatting the `badseo/` workspace with `pnpm exec prettier` fails because Prettier is only available from the repository root. Document the root-only formatter command or expose a workspace-local formatting script.
+- [ ] `2026-08-19T02:15:00Z` — `zcode` — After a dependency update, `npm run dev` serves a stale SSR manifest and every server function call 500s with `Invalid server function ID` (client sees `Failed to fetch`); the dev server never self-heals. Deleting `node_modules/.vite`, `node_modules/.cache`, and `.tanstack/tmp` then restarting fixes it. Add a `dev:fresh` script that clears those caches before `vite dev` so the workaround is one command.
 
 ## Resolved
 

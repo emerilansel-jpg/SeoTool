@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-export const backlinksTabSchema = z.enum(["backlinks", "domains", "pages"]);
+export const backlinksTabSchema = z.enum([
+  "backlinks",
+  "domains",
+  "pages",
+  "anchors",
+  "toxic",
+]);
 export const backlinksTargetScopeSchema = z.enum(["domain", "page"]);
 const DEFAULT_BACKLINKS_SPAM_THRESHOLD = 40;
 
@@ -108,6 +114,19 @@ export const topPagesFiltersSchema = z.object({
   maxRank: optionalNumber,
 });
 
+export const anchorsFiltersSchema = z.object({
+  include: z.string().optional(),
+  exclude: z.string().optional(),
+  minBacklinks: optionalNumber,
+  maxBacklinks: optionalNumber,
+  minReferringDomains: optionalNumber,
+  maxReferringDomains: optionalNumber,
+  minRank: optionalNumber,
+  maxRank: optionalNumber,
+  minSpamScore: optionalNumber,
+  maxSpamScore: optionalNumber,
+});
+
 export const backlinksSortOrderSchema = z.enum(["asc", "desc"]);
 // Sort field names double as table column ids on the client; the server maps
 // them to DataForSEO field names.
@@ -132,13 +151,23 @@ export const topPagesSortFieldSchema = z.enum([
   "rank",
   "brokenBacklinks",
 ]);
+export const anchorsSortFieldSchema = z.enum([
+  "anchor",
+  "backlinks",
+  "referringDomains",
+  "rank",
+  "spamScore",
+  "firstSeen",
+]);
 
 /** Single source for each tab's default sort, shared by the request-schema
  * defaults and the client's header indicators / query fallbacks. */
 export const BACKLINKS_DEFAULT_SORT = {
-  backlinks: { field: "firstSeen", order: "desc" },
+  backlinks: { field: "spamScore", order: "desc" },
   domains: { field: "backlinks", order: "desc" },
   pages: { field: "backlinks", order: "desc" },
+  anchors: { field: "backlinks", order: "desc" },
+  toxic: { field: "spamScore", order: "desc" },
 } as const satisfies Record<
   z.infer<typeof backlinksTabSchema>,
   { field: string; order: z.infer<typeof backlinksSortOrderSchema> }
@@ -178,6 +207,13 @@ export const topPagesPageRequestSchema = backlinksPageRequestBase.extend({
     BACKLINKS_DEFAULT_SORT.pages.field,
   ),
   filters: topPagesFiltersSchema.default({}),
+});
+
+export const anchorsPageRequestSchema = backlinksPageRequestBase.extend({
+  sortField: anchorsSortFieldSchema.default(
+    BACKLINKS_DEFAULT_SORT.anchors.field,
+  ),
+  filters: anchorsFiltersSchema.default({}),
 });
 
 export const backlinksSearchSchema = z.object({
@@ -225,3 +261,6 @@ export type ReferringDomainsPageInput = z.infer<
   typeof referringDomainsPageRequestSchema
 >;
 export type TopPagesPageInput = z.infer<typeof topPagesPageRequestSchema>;
+export type AnchorsPageInput = z.infer<typeof anchorsPageRequestSchema>;
+export type AnchorsSortField = z.infer<typeof anchorsSortFieldSchema>;
+export type AnchorsFilters = z.infer<typeof anchorsFiltersSchema>;

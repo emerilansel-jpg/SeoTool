@@ -335,7 +335,7 @@ function ChartTooltip({
   bottomBandKeys: Set<string>;
 }) {
   return (
-    <div className="rounded-md border border-base-300 bg-base-100 px-3 py-2 shadow-sm space-y-0.5">
+    <div className="rounded-md border border-base-300 bg-base-100 px-3 py-2 space-y-0.5">
       <p className="text-xs text-base-content/60">
         {new Date(label).toLocaleDateString("en-US", {
           month: "short",

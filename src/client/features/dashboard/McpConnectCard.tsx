@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { CopyButton } from "@/client/features/ai-mcp/SetupControls";
 import { captureClientEvent } from "@/client/lib/posthog";
 import type { DashboardActivation } from "@/server/features/dashboard/services/DashboardService";
@@ -32,6 +34,9 @@ export function McpConnectCard({
       void queryClient.invalidateQueries({
         queryKey: ["dashboardActivation", projectId],
       }),
+    onError: (error) => {
+      toast.error(getStandardErrorMessage(error, "Failed to dismiss card"));
+    },
   });
 
   if (activation.mcp.firstToolCallAt || activation.mcp.cardDismissedAt) {
@@ -41,7 +46,7 @@ export function McpConnectCard({
   const connected = activation.mcp.authorizedAt !== null;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-base-300 bg-base-100">
       <div className="flex items-center justify-between gap-4 px-5 py-4">
         <h2 className="text-base font-semibold leading-tight">
           Connect your AI agent
@@ -100,8 +105,8 @@ export function McpConnectCard({
           <>
             <div className="space-y-2 text-sm text-base-content/70">
               <p>
-                SeoTool.im is designed to give your AI agent the data it needs to
-                build a great SEO strategy and help you execute it.
+                SeoTool.im is designed to give your AI agent the data it needs
+                to build a great SEO strategy and help you execute it.
               </p>
               <p>
                 This way you aren&rsquo;t limited on &ldquo;AI credits&rdquo;.

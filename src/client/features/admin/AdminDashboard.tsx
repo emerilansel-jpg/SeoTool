@@ -16,10 +16,17 @@ import { getAnalyticsOverview } from "@/serverFunctions/analytics";
 import { PLAN_TIER_LABELS, PLAN_PRICES_USD } from "@/shared/plans";
 
 const TIER_COLORS: Record<string, string> = {
-  free: "#94a3b8",
-  lite: "#3b82f6",
-  pro: "#8b5cf6",
+  free: "var(--color-base-content)",
+  lite: "#2563eb",
+  pro: "#16a34a",
   agency: "#f59e0b",
+};
+
+const TIER_BADGE_CLASS: Record<string, string> = {
+  free: "badge-neutral",
+  lite: "badge-primary",
+  pro: "badge-success",
+  agency: "badge-warning",
 };
 
 export function AdminDashboard() {
@@ -32,8 +39,15 @@ export function AdminDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <span className="loading loading-spinner loading-lg" />
+      <div className="p-6" aria-busy="true">
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-24 rounded-lg" />
+          ))}
+        </div>
+        <div className="mb-6 skeleton h-64 rounded-lg" />
+        <div className="mb-6 skeleton h-64 rounded-lg" />
+        <div className="skeleton h-64 rounded-lg" />
       </div>
     );
   }
@@ -111,7 +125,7 @@ export function AdminDashboard() {
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={TIER_COLORS[entry.tier] ?? "#3b82f6"}
+                  fill={TIER_COLORS[entry.tier] ?? "#2563eb"}
                 />
               ))}
             </Bar>
@@ -121,7 +135,7 @@ export function AdminDashboard() {
 
       {/* Quota Usage Summary */}
       <div className="rounded-lg border border-base-300 bg-base-100 overflow-hidden">
-        <div className="border-b border-base-300 bg-base-50 p-4">
+        <div className="border-b border-base-300 bg-base-200 p-4">
           <h2 className="font-medium">Quota Usage (Current Window)</h2>
           <p className="mt-1 text-xs text-base-content/50">
             Aggregated usage across all orgs. Only windowed features are shown
@@ -169,7 +183,7 @@ export function AdminDashboard() {
 
       {/* Recent Organizations */}
       <div className="rounded-lg border border-base-300 bg-base-100 overflow-hidden">
-        <div className="border-b border-base-300 bg-base-50 p-4">
+        <div className="border-b border-base-300 bg-base-200 p-4">
           <h2 className="font-medium">Recent Organizations</h2>
         </div>
         <div className="overflow-x-auto">
@@ -188,11 +202,9 @@ export function AdminDashboard() {
                   <td className="font-medium">{org.name}</td>
                   <td>
                     <span
-                      className="badge badge-sm"
-                      style={{
-                        backgroundColor: TIER_COLORS[org.planTier] ?? "#94a3b8",
-                        color: "white",
-                      }}
+                      className={`badge badge-sm ${
+                        TIER_BADGE_CLASS[org.planTier] ?? "badge-neutral"
+                      }`}
                     >
                       {PLAN_TIER_LABELS[
                         org.planTier as keyof typeof PLAN_TIER_LABELS

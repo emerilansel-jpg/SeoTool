@@ -13,9 +13,9 @@ export function Ga4SelfHostedSetupWarning() {
       <div className="space-y-1">
         <p className="font-medium">Google OAuth client not configured</p>
         <p className="text-base-content/70">
-          Add your Google client ID and secret to this SeoTool.im deployment before
-          connecting Google Analytics. The Google Cloud project must also have
-          the Google Analytics Data API and Admin API enabled.
+          Add your Google client ID and secret to this SeoTool.im deployment
+          before connecting Google Analytics. The Google Cloud project must also
+          have the Google Analytics Data API and Admin API enabled.
         </p>
         <SafeExternalLink
           url={GA4_SELF_HOSTED_SETUP_DOCS_URL}

@@ -18,11 +18,22 @@ export default defineConfig({
     trace: "retain-on-failure",
     video: "retain-on-failure",
   },
-  /* webServer: {
-    command:
-      "BYPASS_AUTH=true BYPASS_EMAIL_VERIFICATION=true VITE_E2E_BYPASS_AUTH=true VITE_E2E_DOMAIN_FIXTURES=1 VITE_E2E_KEYWORD_FIXTURES=1 PORT=3101 pnpm exec vite dev --host 127.0.0.1 --strictPort",
+  webServer: {
+    // E2E isolation: the test server is launched with the auth-bypass and
+    // fixture flags injected here so they never leak into `npm run dev` via
+    // .dev.vars. `env` is used instead of a shell `VAR=x` prefix because that
+    // syntax fails on Windows cmd.
+    command: "pnpm exec vite dev --host 127.0.0.1 --strictPort",
     url: "http://localhost:3101",
+    env: {
+      BYPASS_AUTH: "true",
+      BYPASS_EMAIL_VERIFICATION: "true",
+      VITE_E2E_BYPASS_AUTH: "true",
+      VITE_E2E_DOMAIN_FIXTURES: "1",
+      VITE_E2E_KEYWORD_FIXTURES: "1",
+      PORT: "3101",
+    },
     reuseExistingServer: false,
-    timeout: 120_000,
-  }, */
+    timeout: 180_000,
+  },
 });

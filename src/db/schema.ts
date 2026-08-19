@@ -29,6 +29,8 @@ import * as sqliteAlerts from "./alerts.schema";
 import * as pgAlerts from "./pg/alerts.schema";
 import * as sqliteSerpSnapshots from "./serp-snapshots.schema";
 import * as pgSerpSnapshots from "./pg/serp-snapshots.schema";
+import * as sqliteSerpVolatility from "./serp-volatility.schema";
+import * as pgSerpVolatility from "./pg/serp-volatility.schema";
 import * as sqliteApiKeys from "./api-keys.schema";
 import * as pgApiKeys from "./pg/api-keys.schema";
 import * as sqliteNotifications from "./notifications.schema";
@@ -59,6 +61,7 @@ type AppSchema = typeof sqliteApp &
   typeof sqliteContentStrategy &
   typeof sqliteAlerts &
   typeof sqliteSerpSnapshots &
+  typeof sqliteSerpVolatility &
   typeof sqliteApiKeys &
   typeof sqliteNotifications;
 
@@ -80,6 +83,7 @@ const runtimeSchema =
         ...pgContentStrategy,
         ...pgAlerts,
         ...pgSerpSnapshots,
+        ...pgSerpVolatility,
         ...pgApiKeys,
         ...pgNotifications,
       }
@@ -99,6 +103,7 @@ const runtimeSchema =
         ...sqliteContentStrategy,
         ...sqliteAlerts,
         ...sqliteSerpSnapshots,
+        ...sqliteSerpVolatility,
         ...sqliteApiKeys,
         ...sqliteNotifications,
       };
@@ -151,6 +156,7 @@ export const {
   contentBriefs,
   alertRules,
   serpSnapshots,
+  serpVolatilitySnapshots,
   apiKeys,
   notifications,
 } = schema;
