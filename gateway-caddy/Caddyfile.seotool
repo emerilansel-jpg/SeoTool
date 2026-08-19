@@ -1,10 +1,13 @@
 # ============================================================
 # SeoTool.im — Dedicated Caddyfile (separated from pesat)
-# Only seotool.im + www.seotool.im routing
+# ============================================================
+# Sits BEHIND pesat-caddy on the shared docker network (internal only,
+# no host ports). pesat-caddy terminates TLS for seotool.im and forwards
+# to this container over plain HTTP. All SeoTool routing (marketing
+# static files + SaaS reverse proxy) lives here, not in pesat.
 # ============================================================
 
-seotool.im {
-    tls internal
+:80 {
     encode gzip zstd
 
     # Marketing static files (prerendered HTML from web/dist/client).
@@ -25,9 +28,7 @@ seotool.im {
 
     # Marketing static assets (images, videos, avatars, blog).
     # NOTE: /assets/* is intentionally EXCLUDED here. The SaaS app also
-    # serves its JS/CSS bundles under /assets/, so claiming that path
-    # wholesale starved the SaaS app of its lazy-loaded route chunks (e.g.
-    # /assets/_auth-*.js on the sign-in page -> 404). /assets/* is handled
+    # serves its JS/CSS bundles under /assets/. /assets/* is handled
     # separately below with a file matcher.
     @marketingAssets {
         path /avatars/* /blog/*
@@ -65,7 +66,9 @@ seotool.im {
         file_server
     }
 
-    # Everything else goes to the SaaS app
+    # Everything else goes to the SaaS app.
+    # header_up Host localhost: Vite preview server rejects non-localhost
+    # Host headers ("Blocked request. This host ... is not allowed").
     handle {
         reverse_proxy open-seo:3001 {
             header_up Host localhost
@@ -85,9 +88,4 @@ seotool.im {
     reverse_proxy @websockets open-seo:3001 {
         header_up Host localhost
     }
-}
-
-www.seotool.im {
-    tls internal
-    redir https://seotool.im{uri} permanent
 }
