@@ -16,6 +16,8 @@ Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 
 **In-App Landing Page + Hard Paywall (2026-08-19)**: SaaS app kini punya homepage publik di `/` (landing page DaisyUI) dan halaman pricing publik di `/pricing`. Hard paywall: server function gate (`paidPlanGateMiddleware`) + client guard (`usePaidPlanGuard`) — user free-tier tidak bisa memakai tools sampai berlangganan. E2E bypass tetap jalan (BY PASS_AUTH). Funnel: sign-up → onboarding → /projects → /subscribe → bayar → tools terbuka.
 
+**Production Deploy + Caddy Re-architecture (2026-08-19/20)**: Seluruh P2 batch + landing/paywall deployed ke VPS (commit `751d389`, migrations D1 0048 + PG 0025). Ingress di-re-arsitektur: dedicated container `seotool-caddy` (127.0.0.1:8080) memisahkan routing seotool.im dari `pesat-control-plane-caddy-1` (host network, forward-only). Verified end-to-end: health, homepage marketing, /pricing. Detail + gotchas di section "Produksi LIVE" dan "Deploy 2026-08-19/20".
+
 ---
 
 ## Tech stack
@@ -33,7 +35,7 @@ Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 | UI         | Tailwind v4 + DaisyUI v5, lucide-react, recharts, jspdf (client PDF)                                                                            |
 | Email      | Loops (transactional)                                                                                                                           |
 | Analytics  | PostHog                                                                                                                                         |
-| Deploy VPS | Docker Compose (workerd + Postgres 17 + Caddy reverse proxy + TLS)                                                                              |
+| Deploy VPS | Docker Compose (workerd + Postgres 17) di belakang dedicated seotool-caddy + pesat-caddy forward (TLS via Cloudflare)                           |
 
 **Kunci**: `pnpm dev:agents` (portless), `pnpm ci:check`, `pnpm test:ci`. File di bawah `Supastarter/` diabaikan (unrelated starter kit).
 
@@ -474,39 +476,82 @@ Hook quota gates ke setiap feature call site.
 
 ### Fase 7 — VPS Deployment Config (LENGKAP)
 
-| File                           | Keterangan                                                                                                                                                                                                                   |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docker-compose.hosted.yaml`   | 2 services: `open-seo` (workerd, AUTH_MODE=hosted, DATABASE_PROVIDER=postgres) + `postgres` (17-alpine, healthcheck). Caddy TIDAK termasuk — ditangani oleh gateway-caddy shared (lihat bawah). Volumes: app data + pg data. |
-| `gateway-caddy/Caddyfile`      | **Running reverse proxy** untuk SEMUA app di VPS (seotool.im, omniroute, pesat). Marketing static + SaaS proxy routing + auto TLS + security headers + WebSocket. Lihat detail di section "Produksi LIVE" bawah.             |
-| `Caddyfile`                    | Template standalone (seotool.im only). **STALE** — masih punya bug `/assets/*` collision. Gunakan `gateway-caddy/Caddyfile` sebagai source of truth.                                                                         |
-| `.env.hosted.example`          | Template: POSTGRES_PASSWORD, BETTER_AUTH_SECRET/URL, GOOGLE_CLIENT_ID/SECRET, TURNSTILE, LOOPS, DATAFORSEO_API_KEY, PAYPAL_CLIENT_ID/SECRET/MODE/WEBHOOK_ID, OPENROUTER_API_KEY, POSTHOG.                                    |
-| `scripts/deploy-vps.sh`        | Deploy script: pre-flight checks (env, placeholders, docker) + compose up --build + health wait loop + summary.                                                                                                              |
-| `auto-deploy.sh`               | Wrapper untuk CI: backup `.env.hosted` → `git fetch + reset --hard origin/main` → restore `.env.hosted` → `scripts/deploy-vps.sh --build`. Dipanggil oleh GitHub Action.                                                     |
-| `.github/workflows/deploy.yml` | CI/CD: `appleboy/ssh-action` SSH ke VPS → jalankan `auto-deploy.sh`. Trigger: push ke `main`.                                                                                                                                |
-| `docker-entrypoint.sh`         | Detect `DATABASE_PROVIDER=postgres` → run `db:migrate:pg` (bukan `db:migrate:local`).                                                                                                                                        |
+| File                                                     | Keterangan                                                                                                                                                                                                                                                      |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docker-compose.hosted.yaml`                             | 2 services: `open-seo` (workerd, AUTH_MODE=hosted, DATABASE_PROVIDER=postgres) + `postgres` (17-alpine, healthcheck). Caddy TIDAK termasuk — ditangani oleh seotool-caddy dedicated + pesat forward (lihat "Produksi LIVE" bawah). Volumes: app data + pg data. |
+| `gateway-caddy/docker-compose.yml` + `Caddyfile.seotool` | **Config ingress seotool.im yang aktif** (2026-08-20): seotool-caddy binds 127.0.0.1:8080, network jetdigitalseo_default. Semua routing seotool.im (marketing static + proxy SaaS) di sini. Ada juga `deploy.sh` + `MANUAL-DEPLOY.md`.                          |
+| `gateway-caddy/Caddyfile` + `Caddyfile`                  | **STALE** — arsitektur lama shared gateway-caddy (`/opt/gateway/`) sudah tidak dipakai. Source of truth sekarang `Caddyfile.seotool` + forward block di Caddyfile pesat.                                                                                        |
+| `.env.hosted.example`                                    | Template: POSTGRES_PASSWORD, BETTER_AUTH_SECRET/URL, GOOGLE_CLIENT_ID/SECRET, TURNSTILE, LOOPS, DATAFORSEO_API_KEY, PAYPAL_CLIENT_ID/SECRET/MODE/WEBHOOK_ID, OPENROUTER_API_KEY, POSTHOG.                                                                       |
+| `scripts/deploy-vps.sh`                                  | Deploy script: pre-flight checks (env, placeholders, docker) + compose up --build + health wait loop + summary.                                                                                                                                                 |
+| `auto-deploy.sh`                                         | Wrapper untuk CI: backup `.env.hosted` → `git fetch + reset --hard origin/main` → restore `.env.hosted` → `scripts/deploy-vps.sh --build`. Dipanggil oleh GitHub Action.                                                                                        |
+| `.github/workflows/deploy.yml`                           | CI/CD: `appleboy/ssh-action` SSH ke VPS → jalankan `auto-deploy.sh`. Trigger: push ke `main`.                                                                                                                                                                   |
+| `docker-entrypoint.sh`                                   | Detect `DATABASE_PROVIDER=postgres` → run `db:migrate:pg` (bukan `db:migrate:local`).                                                                                                                                                                           |
 
 ---
 
-## Produksi LIVE (seotool.im) — arsitektur gateway-caddy
+## Produksi LIVE (seotool.im) — arsitektur seotool-caddy dedicated (2026-08-20)
 
-**VPS**: 148.230.103.98, user `seotool` (uid 1005, docker group, NO sudo). Domain `seotool.im` live dengan TLS.
+**VPS**: 148.230.103.98, user `seotool` (uid 1005, docker group, NO sudo; root login tersedia). Domain `seotool.im` live dengan TLS via Cloudflare (mode Full non-strict).
 
-### Shared gateway-caddy (BUKAN per-app Caddy)
+### Topologi ingress (VERIFIED WORKING 2026-08-20)
 
-VPS menjalankan **satu container gateway-caddy** (`/opt/gateway/compose.yaml`, root-owned) yang reverse-proxy SEMUA app: seotool.im (marketing + SaaS), api.jetdigitalpro.com (omniroute), pesat.ai subdomain. Container ini terpisah dari `docker-compose.hosted.yaml` (yang hanya open-seo + postgres).
+```
+Cloudflare (public TLS)
+  → pesat-control-plane-caddy-1 :443 (HOST network, origin.crt/key, forward-only)
+    → 127.0.0.1:8080 (seotool-caddy, dedicated container, plain HTTP :80)
+      → /srv/marketing (static marketing HTML)
+      → open-seo:3001 (SaaS app, header_up Host localhost)
+```
 
-- **Marketing static files** (`/srv/marketing`) adalah writable layer di gateway-caddy, BUKAN volume `marketing_dist`. Di-populate dari pre-built `web/dist/client` (built locally, committed via `!web/dist/` gitignore exception).
-- Config source of truth: `gateway-caddy/Caddyfile`. File `/opt/gateway/Caddyfile` di VPS harus mirror ini. Reload: `docker exec gateway-caddy caddy reload --config /etc/caddy/Caddyfile`.
+- **pesat-control-plane-caddy-1** (host network mode, owns public 80/443): hanya carry 2 site block forward untuk seotool.im → `reverse_proxy 127.0.0.1:8080` + redirect www. Semua routing seotool.im TIDAK ada di sini. Caddyfile: `/opt/pesat-control-plane/caddy/Caddyfile` (root-owned, bind-mount single-file ke `/etc/caddy/Caddyfile`).
+- **seotool-caddy** (dedicated, `gateway-caddy/docker-compose.yml`): binds `127.0.0.1:8080:80` ONLY (tidak reachable dari luar), network `jetdigitalseo_default` (external). Semua routing seotool.im ada di `gateway-caddy/Caddyfile.seotool` (block `:80` plain HTTP — TLS diterminasi di pesat). Marketing files di volume `marketing_files:/srv/marketing`, populate via `docker cp web/dist/client/. seotool-caddy:/srv/marketing/`.
+- `gateway-caddy/Caddyfile` (lama) + `/opt/gateway/` setup **STALE** — digantikan arsitektur ini. `gateway-caddy/deploy.sh` + `gateway-caddy/MANUAL-DEPLOY.md` ada sebagai referensi.
 
-### Bug /assets/\* collision (FIXED 2026-08-13, commit d9959dc)
+### Gotchas infra VPS (dipelajari 2026-08-19/20, keras)
 
-Marketing static site dan SaaS app **sama-sama** serve JS/CSS bundles di `/assets/*`. Caddy matcher `@marketingAssets path /assets/*` lama meng-claim semua `/assets/*` untuk marketing → SaaS lazy-loaded route chunks (mis. `/assets/_auth-*.js` di sign-in page) **404** → "Failed to fetch dynamically imported module".
+1. **pesat-caddy = host network + `auto_https off`**: site block WAJIB port eksplisit (`seotool.im:443`) + file certs (`tls /opt/pesat-control-plane/certs/origin.crt /opt/pesat-control-plane/certs/origin.key`). `tls internal` TIDAK provision cert saat auto_https off → TLS alert internal error. Cloudflare Full non-strict terima cert mismatched.
+2. **Tidak bisa `docker network connect` ke pesat-caddy** (host network). Backend container harus publish `127.0.0.1:<port>` lalu pesat proxy ke situ.
+3. **Cloud provider firewall hanya allow 22/80/443** — port 4443/8080 time out dari luar walau `ufw allow` (upstream filtering). Jangan pakai non-standard port untuk public service di VPS ini. Cloudflare Origin Rule port 4443 lama SUDAH tidak dipakai — pastikan tidak ada rule tersisa (menyebabkan 522).
+4. **`sed -i`/vim pada Caddyfile pesat mengganti inode** → single-file bind mount di container tetap menunjuk inode lama → edit tidak terlihat oleh Caddy. FIX: setelah edit apapun, `docker restart pesat-control-plane-caddy-1`. (Append `cat >>` aman — same inode.) Diagnosa: `docker exec pesat-control-plane-caddy-1 wget -qO- http://localhost:2019/config/ | grep -c seotool`.
+5. **Vite preview Tolak Host non-localhost**: `reverse_proxy open-seo:3001` mengirim `Host: open-seo` → 403 "Blocked request". WAJIB `header_up Host localhost` di semua reverse_proxy block ke open-seo (catch-all + websockets).
+6. **Marketing prerender hanya jalan TANPA `DOCKER_BUILD=1`** (perlu Cloudflare SSR plugin). Build di local `cd web && npm run build` → commit `web/dist/client/` → VPS `git pull` → `docker cp` ke seotool-caddy. Build Docker (entrypoint) menghasilkan dist TANPA HTML → homepage kosong.
+7. **Caddy TLS test lokal**: `curl -sk https://localhost:PORT` gagal SNI mismatch; pakai `curl -sk --resolve seotool.im:PORT:127.0.0.1 https://seotool.im:PORT/...`.
+8. **Cloudflare error codes**: 525 = TLS handshake fail di origin; 522 = connection timeout (port tidak reachable/firewall).
 
-**Fix**: `/assets/*` di-exclude dari `@marketingAssets`. Ditambah matcher `@marketingAssetFile` dengan `file { root /srv/marketing }` — serve dari marketing HANYA jika file-nya ada di sana; otherwise fall through ke catch-all `handle` yang proxy ke SaaS (`open-seo:3001`). Hash chunk berubah tiap rebuild, jadi verifikasi pakai URL aktual dari SSR HTML.
+### Bug /assets/\* collision (FIXED 2026-08-13, tetap relevan)
+
+Marketing static site dan SaaS app sama-sama serve JS/CSS bundles di `/assets/*`. Fix di `Caddyfile.seotool`: `/assets/*` di-exclude dari `@marketingAssets`, ditambah matcher `@marketingAssetFile` (`file { root /srv/marketing }`) — serve dari marketing HANYA jika file ada; otherwise fall through ke proxy SaaS.
 
 ### CI/CD auto-deploy
 
-Push ke `main` → GitHub Action (`.github/workflows/deploy.yml`) → `appleboy/ssh-action` SSH → `auto-deploy.sh`. **Deployment permission gotcha** (FIXED commit fd5aaf9): `auto-deploy.sh` + `scripts/deploy-vps.sh` wajib executable bit di git (`git update-index --chmod=+x`), else CI error "Permission denied" (exit 126). Repo di VPS sering root-owned (hasil `git reset --hard`); fix ownership via `docker run --rm -v <path>:/repo alpine chown -R 1005:1005 /repo` (docker group = root-equivalent).
+Push ke `main` → GitHub Action (`.github/workflows/deploy.yml`) → `appleboy/ssh-action` SSH → `auto-deploy.sh`. **Deployment permission gotcha** (FIXED commit fd5aaf9): `auto-deploy.sh` + `scripts/deploy-vps.sh` wajib executable bit di git (`git update-index --chmod=+x`), else CI error "Permission denied" (exit 126). Repo di VPS sering root-owned (hasil `git reset --hard`); fix ownership via `docker run --rm -v <path>:/repo alpine chown -R 1005:1005 /repo` (docker group = root-equivalent). **Git pull sebagai root** di VPS perlu `git config --global --add safe.directory /home/seotool/JetDigitalSEO`.
+
+**Auto-deploy HANYA update container SaaS** (`jetdigitalseo-open-seo-1` + migrations otomatis via entrypoint). TIDAK update: (1) marketing static files — perlu `docker cp web/dist/client/. seotool-caddy:/srv/marketing/` manual; (2) routing seotool-caddy — perlu `docker compose -f gateway-caddy/docker-compose.yml up -d` + restart jika Caddyfile.seotool berubah; (3) forward block di pesat Caddyfile — hanya berubah saat menambah domain baru.
+
+**Deploy checklist penuh** (lihat "Deploy 2026-08-19/20" di bawah untuk contoh): commit + push → tunggu auto-deploy selesai (container healthy) → SSH root → `git pull` → `docker cp` marketing → verify `curl -sk --resolve seotool.im:443:127.0.0.1 https://seotool.im/api/health` → verify eksternal `curl -k https://seotool.im/api/health`.
+
+---
+
+## Deploy 2026-08-19/20 — P2 batch + landing/paywall ke production (LENGKAP, verified)
+
+Deploy ~494 files (P2 features, landing + paywall, marketing content) ke VPS via CI/CD + re-arsitektur ingress.
+
+### Yang dideploy (commit `751d389`)
+
+- Semua P2 features + in-app landing/hard paywall + e2e-helpers + docs (DESIGN.md, GROWTH-PLAN.md).
+- **Migrations** (generated via `drizzle-kit generate --custom` — generate biasa butuh TTY, prompt konflik): D1 `drizzle/0048_slim_katie_power.sql` (searchEngine column + serp_volatility_snapshots table) + PG `drizzle-pg/0025_chunky_silver_sable.sql` (sama). Auto-applied oleh docker-entrypoint saat container start.
+- **Type fixes (12 error → 0)**: `getQuotaStateSummary` sekarang return `{ planTier, quotas }` (bukan bare array); `BillingUsageEvent.properties` dipersempit ke serializable union + `as BillingUsageEvent[]` assertion di client; `BAD_REQUEST` → `VALIDATION_ERROR` (BAD_REQUEST tidak ada di error-codes.ts).
+- **Test fixes**: `customer-status-model.test.ts` (isPaying mengikuti PayPal status ACTIVE, bukan plan tier); `dataforseo/client.test.ts` (`deductCredits` mock wajib return `{ monthlyDeducted, topupDeducted }` — destructuring di subscription.ts); `page-reporters.test.ts` (healthy page fixture `hasStructuredData: true` karena reporter missing-structured-data baru).
+- **Marketing rebuild** dengan prerender HTML (55 file index.html) — commit `6995e2f`. WAJIB build tanpa DOCKER_BUILD=1.
+- **Infra**: `gateway-caddy/docker-compose.yml` + `Caddyfile.seotool` + `deploy.sh` + `MANUAL-DEPLOY.md` (commits `fb8415f`..`a0b67c4`).
+
+### Test baseline BARU
+
+`pnpm test:ci`: **943-944 pass**, 2 pre-existing failures: (1) `promptExplorer.test.ts` suite gagal import (cloudflare:workers transitive ke d1/client — pre-existing mock infra issue); (2) `dataforseo/client.test.ts` "skips billing in non-hosted mode" flaky saat full-suite (pass saat solo — mock isolation). tsc **0 error**.
+
+### Debug saga ingress (untuk pembelajaran)
+
+Urutan masalah saat re-arsitektur: config seotool hilang dari pesat Caddyfile → 525 → buat seotool-caddy dedicated :4443 → cloud firewall block non-standard ports → 522 → pindah ke 127.0.0.1:8080 behind pesat → Vite Host header 403 → `tls internal` broken under auto_https off → file certs → sed -i inode bind-mount → restart pesat-caddy → **VERIFIED**: `{"status":"ok"}` end-to-end, homepage + /pricing 200.
 
 ---
 
@@ -921,16 +966,15 @@ Landing page publik di `/` (DaisyUI, bukan `.itc-*` webfont), pricing publik di 
 ## Quality gate yang wajib dijalankan
 
 ```bash
-# Type check (abaikan Supastarter)
-pnpm exec tsc --noEmit 2>&1 | grep -v "Supastarter" | grep -c "error TS"
-# Harus ≤12 (pre-existing billing/paypal/billingChart errors)
-# Verifikasi TIDAK ada error baru dari perubahan sendiri:
-pnpm exec tsc --noEmit 2>&1 | grep -v "Supastarter" | grep "error TS" | grep -v "billing\|Billing\|subscribe\|FreePlan\|paypal-checkout\|BAD_REQUEST\|ServerFn<"
+# Type check
+pnpm exec tsc --noEmit
+# Harus: 0 error (12 error billing/paypal lama SUDAH difix saat deploy 2026-08-19)
 
 # Tests
-pnpm test
-# Harus: ~933 pass, 11 pre-existing fail (promptExplorer, customer-status-model, dataforseo/client, page-reporters)
-# 4 test files gagal — ini pre-existing dari QA Sprints + PayPal migration, BUKAN regressions baru
+pnpm test:ci
+# Harus: ~943 pass, 2 pre-existing failures:
+# 1. promptExplorer.test.ts — suite gagal import (cloudflare:workers → d1/client transitive, mock infra issue)
+# 2. dataforseo/client.test.ts "skips billing in non-hosted mode" — flaky di full-suite (pass saat solo)
 
 # Lint (file baru/berubah)
 pnpm exec oxlint <files> --type-aware
@@ -939,7 +983,11 @@ pnpm exec oxlint <files> --type-aware
 pnpm exec prettier --write "src/path/to/file.ts"
 
 # Migrations (jika schema berubah)
-pnpm db:generate  # D1 + PG
+# drizzle-kit generate biasa BUTUH interactive TTY (prompt konflik kolom) —
+# jika gagal di non-TTY shell, pakai: npx drizzle-kit generate --config <config> --custom
+# lalu tulis SQL manual + snapshot/journal otomatis dibuat drizzle-kit
+npx drizzle-kit generate --config drizzle.config.ts       # D1
+npx drizzle-kit generate --config drizzle-pg.config.ts    # PG
 
 # Route regen (jika route baru ditambah)
 # Jalankan `pnpm exec vite --port 7331` sebentar, lalu Ctrl+C
@@ -966,6 +1014,7 @@ pnpm db:generate  # D1 + PG
 | Cleanup               | **Rebrand OpenSEO → SeoTool.im** ✅                           | —                                     | DONE (commit `1343430`). All user-facing identifiers cleaned. Only infra IDs remain.                                                                                                                                                                                   |
 | **P2**                | **P2 Features Batch (9 fitur)** ✅                            | All features                          | DONE (2026-08-18). P2-1 Bing support, P2-4 Link intersect, P2-6 Anchor distribution, P2-7 Sitemap validator, P2-9 Crawl budget, P2-10 On-page checker, P2-12 Keyword clustering, P2-13 Toxic links, P2-15 SERP volatility. ~60 files. 8 MCP tools. P2-14 PPC excluded. |
 | **Landing + Paywall** | **In-App Landing Page + Hard Paywall** ✅                     | —                                     | DONE (2026-08-19). Public landing at `/` (DaisyUI), pricing at `/pricing` (import from plans.ts), hard paywall server+client. E2E bypass preserved. Funnel: signup → onboarding → /projects → /subscribe. Fixed broken `customerHasManagedAccess` imports.             |
+| **Deploy**            | **Production Deploy + Caddy Re-architecture** ✅              | —                                     | DONE (2026-08-19/20, commits `751d389`..`a0b67c4`). P2 batch + landing deployed; migrations D1 0048 + PG 0025; 12 TS errors + 3 test failures fixed. Dedicated `seotool-caddy` (127.0.0.1:8080) behind pesat-caddy forward. Verified end-to-end.                       |
 
 ---
 
@@ -994,4 +1043,4 @@ pnpm test:ci             # vitest run --reporter=dot
 - `POSTGRES_PASSWORD` — DB password (Docker Compose VPS deploy)
 - `PLATFORM_ADMIN_USER_IDS` — comma-separated user IDs untuk admin dashboard access (`/admin`)
 
-**Deploy VPS**: Push ke `main` → GitHub Action auto-deploy (`auto-deploy.sh`). Manual: `bash auto-deploy.sh` atau `./scripts/deploy-vps.sh --build`. Lihat `docker-compose.hosted.yaml` + `.env.hosted.example` + section "Produksi LIVE" di atas.
+**Deploy VPS**: Push ke `main` → GitHub Action auto-deploy (`auto-deploy.sh`) — hanya rebuild container SaaS + migrations. Marketing files + routing Caddy manual: `docker cp web/dist/client/. seotool-caddy:/srv/marketing/`. Edit Caddyfile pesat → WAJIB `docker restart pesat-control-plane-caddy-1` (sed -i inode gotcha). Lihat section "Produksi LIVE" + "Deploy 2026-08-19/20" di atas, `gateway-caddy/MANUAL-DEPLOY.md`, `.env.hosted.example`.
