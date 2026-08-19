@@ -1,0 +1,43 @@
+# Dedicated Caddy for seotool.im — NOT shared with pesat-control-plane.
+# Runs on jetdigitalseo_default network so it can reach open-seo:3001.
+#
+# To avoid port conflict with pesat-control-plane-caddy-1:
+#   Option A: Stop pesat first, then start this on port 443
+#   Option B: Use port 4443 and set Cloudflare origin rule to connect :4443
+#
+# Usage:
+#   docker compose -f gateway-caddy/docker-compose.yml --env-file .env.hosted up -d
+#
+services:
+  seotool-caddy:
+    image: caddy:2-alpine
+    container_name: seotool-caddy
+    restart: unless-stopped
+    ports:
+      # Change to "4443:443" if pesat-caddy still occupies 443
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./Caddyfile.seotool:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      # Marketing static files — bind mount from host for persistence
+      # Pre-populate: docker cp web/dist/client/. seotool-caddy:/srv/marketing/
+      - marketing_files:/srv/marketing
+    networks:
+      - seotool_net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  seotool_net:
+    name: jetdigitalseo_default
+    external: true
+
+volumes:
+  caddy_data:
+  caddy_config:
+  marketing_files:
