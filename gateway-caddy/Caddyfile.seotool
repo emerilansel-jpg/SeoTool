@@ -67,7 +67,9 @@ seotool.im {
 
     # Everything else goes to the SaaS app
     handle {
-        reverse_proxy open-seo:3001
+        reverse_proxy open-seo:3001 {
+            header_up Host localhost
+        }
     }
 
     header {
@@ -80,7 +82,9 @@ seotool.im {
         header Connection *Upgrade*
         header Upgrade websocket
     }
-    reverse_proxy @websockets open-seo:3001
+    reverse_proxy @websockets open-seo:3001 {
+        header_up Host localhost
+    }
 }
 
 www.seotool.im {
