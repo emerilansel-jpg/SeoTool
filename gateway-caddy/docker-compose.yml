@@ -1,7 +1,7 @@
 # Dedicated Caddy for seotool.im — separated from pesat-control-plane.
-# Cloud provider firewall only allows 80/443 (owned by pesat-caddy), so this
-# container is internal-only: pesat-caddy forwards seotool.im traffic to it
-# over the shared docker network. No host port bindings.
+# pesat-caddy runs in HOST network mode and owns public 80/443. This container
+# binds 127.0.0.1:8080 only (not reachable externally, no cloud-firewall
+# dependency); pesat-caddy forwards seotool.im traffic to 127.0.0.1:8080.
 #
 # Usage:
 #   docker compose -f gateway-caddy/docker-compose.yml up -d
@@ -11,6 +11,9 @@ services:
     image: caddy:2-alpine
     container_name: seotool-caddy
     restart: unless-stopped
+    ports:
+      # Localhost only — pesat-caddy (host network) proxies to this
+      - "127.0.0.1:8080:80"
     volumes:
       - ./Caddyfile.seotool:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
