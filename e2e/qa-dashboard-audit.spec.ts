@@ -49,7 +49,7 @@ test.describe("Full Dashboard UI/UX QA and Screenshot Capture", () => {
         .first()
         .waitFor({ state: "visible", timeout: 10000 })
         .catch(() => {});
-      await page.waitForTimeout(600);
+      await page.waitForTimeout(1200);
 
       const shotPath = path.join(SCREENSHOTS_DIR, `${feat.name}.png`);
       await page.screenshot({ path: shotPath });
@@ -94,9 +94,9 @@ test.describe("Full Dashboard UI/UX QA and Screenshot Capture", () => {
         timeout: 30000,
       });
       await page
-        .locator("nav, aside, main")
+        .locator(".skeleton")
         .first()
-        .waitFor({ state: "visible", timeout: 10000 })
+        .waitFor({ state: "hidden", timeout: 10000 })
         .catch(() => {});
       await page.waitForTimeout(600);
 

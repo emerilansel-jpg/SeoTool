@@ -1,0 +1,20 @@
+{
+  "testId": "f9fb2077-68a4-4cf2-af21-8437136f3711",
+  "status": "blocked",
+  "startedAt": null,
+  "finishedAt": "2026-08-20T11:54:52.984Z",
+  "videoUrl": "https://testsprite-videos.s3.us-east-1.amazonaws.com/20260820-115450-cd68a711.webm",
+  "failureAnalysisUrl": null,
+  "snapshotId": "snap_66d80858891358fa",
+  "runIdIfAvailable": "f0f19e8d-4fe1-4456-82bd-72599845f759",
+  "codeVersion": "v1.0",
+  "targetUrl": null,
+  "targetUrlSource": null,
+  "failedStepIndex": 3,
+  "failureKind": null,
+  "verdict": "blocked",
+  "executionStatus": "completed",
+  "summary": "Blocked before a verdict could be produced: The Cloudflare 502 Bad Gateway indicates the reverse proxy/edge could not get a valid response from the origin server for /sign-in. On the hosting side this is commonly caused by the application server being down, crashing, overloaded, misconfigured, or blocked by firewall/DNS/TLS issues between Cloudflare and the origin, so the sign-in page cannot be served and downstream pages are unreachable. Underlying error: TEST BLOCKED\n\nThe test could not be ru…",
+  "apiOutput": null,
+  "trace": null
+}

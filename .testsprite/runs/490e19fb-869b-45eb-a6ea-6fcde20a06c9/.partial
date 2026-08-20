@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "cli-v1",
+  "snapshotId": "snap_c442297547ca2359",
+  "requestId": "local",
+  "error": "EPERM: operation not permitted, rename 'G:\\SF Project\\JetDigitalSEO\\.testsprite\\runs\\490e19fb-869b-45eb-a6ea-6fcde20a06c9\\.tmp\\steps' -> 'G:\\SF Project\\JetDigitalSEO\\.testsprite\\runs\\490e19fb-869b-45eb-a6ea-6fcde20a06c9\\steps'",
+  "createdAt": "2026-08-20T12:01:56.934Z"
+}

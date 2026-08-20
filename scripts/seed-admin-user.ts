@@ -2,7 +2,12 @@
 import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
 import * as appSchema from "../src/db/app.schema";
-import { user, account, organization, member } from "../src/db/better-auth-schema";
+import {
+  user,
+  account,
+  organization,
+  member,
+} from "../src/db/better-auth-schema";
 
 const schema = { ...appSchema, user, account, organization, member };
 
@@ -16,10 +21,17 @@ async function main() {
     const userId = "qa-admin-user";
     const orgId = "org-qa-admin";
 
-    const existingUser = await db.select().from(user).where(eq(user.email, email)).get();
+    const existingUser = await db
+      .select()
+      .from(user)
+      .where(eq(user.email, email))
+      .get();
     if (existingUser) {
       console.log("User already exists in local D1, updating role to admin...");
-      await db.update(user).set({ role: "admin", emailVerified: true }).where(eq(user.email, email));
+      await db
+        .update(user)
+        .set({ role: "admin", emailVerified: true })
+        .where(eq(user.email, email));
     } else {
       console.log("Inserting qa@tester.com admin user into local D1...");
       await db.insert(user).values({

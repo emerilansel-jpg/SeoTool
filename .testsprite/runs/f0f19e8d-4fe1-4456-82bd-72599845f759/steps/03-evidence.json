@@ -1,0 +1,8 @@
+[
+  {
+    "kind": "snapshot",
+    "stepIndex": 3,
+    "summary": "Step 3 'Could not verify the projects dashboard because the /sign-in page returned a Cloudflare 502 Bad Gateway.' failed. Error: TEST BLOCKED\n\nThe test could not be run — the sign-in page and downstream pages are unreachable due to a server error.\n\nObservations:\n- The /sign-in page displayed a Cloudflare 'Bad gateway' page with 'Error code 502'.\n- The page shows host error for seotool.im and no sign-in form fields or controls are present.\n- Because the sign-in form is inaccessible, it is not possible to submit credentials or navigate to /projects to verify the projects dashboard or project selector.",
+    "path": "steps/03-snapshot.html"
+  }
+]

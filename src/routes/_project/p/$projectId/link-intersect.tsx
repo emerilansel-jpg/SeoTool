@@ -9,12 +9,14 @@ function LinkIntersectRoute() {
   // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment
   const { projectId } = Route.useParams();
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Link Intersect</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-base-content">
+          Link Intersect
+        </h1>
         <p className="text-sm text-base-content/60">
-          Find domains linking to your competitors but not to you — potential
-          link-building opportunities.
+          Find domains linking to your competitors but not to you —
+          high-converting outreach opportunities.
         </p>
       </div>
       {/* oxlint-disable-next-line typescript-eslint/no-unsafe-assignment */}

@@ -2,7 +2,15 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { SortingState } from "@tanstack/react-table";
-import { AlertCircle, Search } from "lucide-react";
+import {
+  AlertCircle,
+  Globe,
+  Layers,
+  Search,
+  Sparkles,
+  Split,
+  TrendingUp,
+} from "lucide-react";
 import { toast } from "sonner";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import {
@@ -22,6 +30,24 @@ import type { GapKeyword } from "@/server/features/content-intelligence/contentG
 type GapResult = Awaited<ReturnType<typeof getContentGap>>;
 
 const MAX_COMPETITORS = 3;
+
+const SAMPLE_PRESETS = [
+  {
+    label: "SaaS Billing (Stripe vs Competitors)",
+    domain: "stripe.com",
+    competitors: "paddle.com\nadyen.com",
+  },
+  {
+    label: "Cloud & Dev (Vercel vs Competitors)",
+    domain: "vercel.com",
+    competitors: "netlify.com\nrender.com",
+  },
+  {
+    label: "Issue Tracking (Linear vs Competitors)",
+    domain: "linear.app",
+    competitors: "asana.com\nmonday.com",
+  },
+];
 
 /** Parse the competitors textarea into a normalized, de-duplicated list. */
 function parseCompetitors(text: string): string[] {
@@ -46,7 +72,10 @@ const gapColumns = [
   gapColumnHelper.accessor("keyword", {
     header: "Keyword",
     cell: ({ getValue }) => (
-      <span className="block max-w-[280px] truncate" title={getValue()}>
+      <span
+        className="block max-w-[280px] font-medium truncate text-base-content"
+        title={getValue()}
+      >
         {getValue()}
       </span>
     ),
@@ -55,7 +84,7 @@ const gapColumns = [
     id: "searchVolume",
     header: ({ column }) => <SortableHeader column={column} label="Volume" />,
     cell: ({ row }) => (
-      <span className="tabular-nums text-base-content/70">
+      <span className="tabular-nums font-semibold text-base-content/80">
         {row.original.searchVolume != null
           ? row.original.searchVolume.toLocaleString()
           : "—"}
@@ -78,7 +107,9 @@ const gapColumns = [
     header: "Competitors",
     cell: ({ getValue }) =>
       getValue() > 0 ? (
-        <span className="badge badge-ghost badge-sm">{getValue()}</span>
+        <span className="badge badge-neutral badge-soft badge-sm font-semibold">
+          {getValue()} {getValue() === 1 ? "domain" : "domains"}
+        </span>
       ) : (
         <span className="text-base-content/30">—</span>
       ),
@@ -123,13 +154,15 @@ export function ContentGapView({ projectId }: { projectId: string }) {
 
   const result = mutation.data;
 
-  function handleRun() {
-    const competitors = parseCompetitors(competitorsText).slice(
+  function handleRun(customDomain?: string, customCompetitors?: string) {
+    const targetDomain = (customDomain ?? domain).trim();
+    const competitorsSource = customCompetitors ?? competitorsText;
+    const competitors = parseCompetitors(competitorsSource).slice(
       0,
       MAX_COMPETITORS,
     );
-    const cleanDomain = domain.trim();
-    if (!cleanDomain) {
+
+    if (!targetDomain) {
       setFormError("Enter your site's domain.");
       return;
     }
@@ -138,37 +171,60 @@ export function ContentGapView({ projectId }: { projectId: string }) {
       return;
     }
     setFormError(null);
-    mutation.mutate({ domain: cleanDomain, competitors });
+    mutation.mutate({ domain: targetDomain, competitors });
+  }
+
+  function applyPreset(preset: (typeof SAMPLE_PRESETS)[number]) {
+    setDomainInput(preset.domain);
+    setCompetitorsText(preset.competitors);
+    handleRun(preset.domain, preset.competitors);
   }
 
   return (
-    <div className="space-y-5">
-      <div className="card bg-base-100 border border-base-300">
-        <div className="card-body gap-3">
-          <p className="text-xs text-base-content/50">
-            Each competitor domain costs credits to analyze.
-          </p>
+    <div className="space-y-6">
+      {/* Controls Form Card */}
+      <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs">
+        <div className="card-body gap-4 p-5 md:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-base-200 pb-3">
+            <div className="flex items-center gap-2">
+              <Split className="size-4 text-primary" />
+              <h2 className="text-sm font-bold tracking-tight text-base-content">
+                Domain & Competitors Configuration
+              </h2>
+            </div>
+            <span className="badge badge-ghost badge-sm text-base-content/60 font-medium">
+              Costs DataForSEO credits
+            </span>
+          </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
-            <label className="block">
-              <span className="mb-1 block text-xs font-medium uppercase tracking-wider text-base-content/50">
-                Your domain
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block space-y-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-base-content/60 flex items-center gap-1.5">
+                <Globe className="size-3.5 text-primary/70" />
+                Your Domain
               </span>
               <input
                 type="text"
-                className="input input-bordered input-sm"
+                className="input input-bordered w-full rounded-xl focus:border-primary focus:outline-hidden"
                 placeholder="example.com"
                 value={domain}
                 onChange={(e) => setDomainInput(e.target.value)}
               />
             </label>
-            <label className="block">
-              <span className="mb-1 block text-xs font-medium uppercase tracking-wider text-base-content/50">
-                Competitors (up to {MAX_COMPETITORS}, one per line)
-              </span>
+
+            <label className="block space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-base-content/60 flex items-center gap-1.5">
+                  <Layers className="size-3.5 text-primary/70" />
+                  Competitors (up to {MAX_COMPETITORS})
+                </span>
+                <span className="text-xs text-base-content/40">1 per line</span>
+              </div>
               <textarea
-                className="textarea textarea-bordered textarea-sm h-20"
-                placeholder={"competitor1.com\ncompetitor2.com"}
+                className="textarea textarea-bordered w-full rounded-xl font-mono text-sm leading-relaxed focus:border-primary focus:outline-hidden h-24"
+                placeholder={
+                  "competitor1.com\ncompetitor2.com\ncompetitor3.com"
+                }
                 value={competitorsText}
                 onChange={(e) => setCompetitorsText(e.target.value)}
               />
@@ -176,25 +232,44 @@ export function ContentGapView({ projectId }: { projectId: string }) {
           </div>
 
           {formError && (
-            <p className="flex items-center gap-2 text-sm text-error">
-              <AlertCircle className="size-4" /> {formError}
-            </p>
+            <div className="rounded-xl border border-error/30 bg-error/10 p-3 text-sm text-error flex items-center gap-2">
+              <AlertCircle className="size-4 shrink-0" />
+              <span>{formError}</span>
+            </div>
           )}
-          <div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-medium text-base-content/50 mr-1">
+                Quick Sets:
+              </span>
+              {SAMPLE_PRESETS.map((p) => (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => applyPreset(p)}
+                  className="badge badge-outline badge-sm hover:badge-primary cursor-pointer transition-colors"
+                >
+                  {p.domain}
+                </button>
+              ))}
+            </div>
+
             <button
               type="button"
-              className="btn btn-primary btn-sm"
-              onClick={handleRun}
+              className="btn btn-primary rounded-xl gap-2 font-semibold shadow-xs"
+              onClick={() => handleRun()}
               disabled={mutation.isPending}
             >
               {mutation.isPending ? (
                 <>
-                  <span className="loading loading-spinner loading-xs" />{" "}
-                  Analyzing…
+                  <span className="loading loading-spinner loading-xs" />
+                  Analyzing Gaps…
                 </>
               ) : (
                 <>
-                  <Search className="size-4" /> Find content gaps
+                  <Search className="size-4" />
+                  Find Content Gaps
                 </>
               )}
             </button>
@@ -202,7 +277,45 @@ export function ContentGapView({ projectId }: { projectId: string }) {
         </div>
       </div>
 
-      {result && <Results result={result} />}
+      {/* Results or Empty State */}
+      {result ? (
+        <Results result={result} />
+      ) : (
+        <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/60 space-y-5">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mx-auto">
+            <Split className="size-7" />
+          </div>
+          <div className="space-y-1.5 max-w-md mx-auto">
+            <p className="text-lg font-bold text-base-content">
+              Find keywords your competitors rank for that you don&apos;t
+            </p>
+            <p className="text-sm text-base-content/70 leading-relaxed">
+              Uncover high-intent organic keywords where competitors are
+              capturing traffic. Enter your domain and up to 3 competitors
+              above, or try one of the instant presets below.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-3">
+              One-click sample comparisons
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2.5 max-w-2xl mx-auto">
+              {SAMPLE_PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => applyPreset(preset)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-200/60 px-3.5 py-1.5 text-xs font-medium text-base-content/80 transition-all duration-150 hover:border-primary/40 hover:bg-primary/10 hover:text-primary active:scale-95 cursor-pointer"
+                >
+                  <Sparkles className="size-3 text-primary/70" />
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -210,49 +323,57 @@ export function ContentGapView({ projectId }: { projectId: string }) {
 function Results({ result }: { result: GapResult }) {
   const keywords = result.keywords;
   return (
-    <>
+    <div className="space-y-6">
       <GapSummaryCards
         summary={result.summary}
         competitorCount={result.competitors.length}
       />
 
       {result.topics.length > 0 && (
-        <div className="card bg-base-100 border border-base-300">
-          <div className="card-body gap-3">
+        <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs overflow-hidden">
+          <div className="px-5 py-4 border-b border-base-300 bg-base-200/20 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-base-content/70">
-                Topic clusters
+              <h3 className="text-sm font-bold tracking-tight text-base-content">
+                Topic Clusters
               </h3>
-              <p className="text-xs text-base-content/40">
-                Gap keywords grouped by their core subject.
+              <p className="text-xs text-base-content/50">
+                Gap keywords grouped by their core subject
               </p>
             </div>
+            <span className="badge badge-ghost badge-sm font-semibold">
+              {result.topics.length} clusters
+            </span>
+          </div>
+          <div className="p-5">
             <TopicList topics={result.topics} />
           </div>
         </div>
       )}
 
-      <div className="card bg-base-100 border border-base-300">
-        <div className="card-body gap-2 p-0">
-          <div className="flex items-center justify-between px-4 pt-4">
-            <h3 className="text-sm font-medium text-base-content/70">
-              Gap keywords
+      <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs overflow-hidden">
+        <div className="px-5 py-4 border-b border-base-300 bg-base-200/20 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-bold tracking-tight text-base-content">
+              Gap Keywords
             </h3>
-            <span className="text-xs text-base-content/40">
-              {keywords.length} shown
-            </span>
-          </div>
-          {keywords.length === 0 ? (
-            <p className="px-4 pb-4 text-sm text-base-content/50">
-              No gap keywords found. Your domain already covers what these
-              competitors rank for.
+            <p className="text-xs text-base-content/50">
+              Keywords where competitors hold search rank positions
             </p>
-          ) : (
-            <GapKeywordsTable keywords={keywords} />
-          )}
+          </div>
+          <span className="badge badge-neutral badge-soft badge-sm font-semibold">
+            {keywords.length} keywords found
+          </span>
         </div>
+        {keywords.length === 0 ? (
+          <div className="p-8 text-center text-sm text-base-content/60">
+            No gap keywords found. Your domain already covers what these
+            competitors rank for.
+          </div>
+        ) : (
+          <GapKeywordsTable keywords={keywords} />
+        )}
       </div>
-    </>
+    </div>
   );
 }
 

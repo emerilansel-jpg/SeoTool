@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "cli-v1",
+  "snapshotId": "snap_66d80858891358fa",
+  "testId": "f9fb2077-68a4-4cf2-af21-8437136f3711",
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "codeVersion": "v1.0",
+  "runIdIfAvailable": "f0f19e8d-4fe1-4456-82bd-72599845f759",
+  "targetUrl": null,
+  "failedStepIndex": 3,
+  "failureKind": null,
+  "capturedAt": "2026-08-20T11:54:52.984Z",
+  "fetchedAt": "2026-08-20T11:56:02.648Z"
+}

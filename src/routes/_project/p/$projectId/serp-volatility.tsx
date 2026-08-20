@@ -9,12 +9,14 @@ function SerpVolatilityRoute() {
   // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment
   const { projectId } = Route.useParams();
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">SERP Volatility</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-base-content">
+          SERP Volatility
+        </h1>
         <p className="text-sm text-base-content/60">
-          Track day-over-day ranking instability across your tracked keywords.
-          High volatility may indicate algorithm updates or competitive shifts.
+          Track day-over-day ranking instability and potential Google algorithm
+          updates across your tracked keywords.
         </p>
       </div>
       {/* oxlint-disable-next-line typescript-eslint/no-unsafe-assignment */}
