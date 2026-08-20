@@ -87,7 +87,7 @@ fi
 # ─── Reload Caddy ───────────────────────────────────────────────────────
 if [ -f "gateway-caddy/docker-compose.yml" ]; then
   echo "🔄 Reloading seotool-caddy..."
-  docker compose -f gateway-caddy/docker-compose.yml up -d --force-recreate 2>/dev/null || docker compose -f gateway-caddy/docker-compose.yml restart seotool-caddy 2>/dev/null || true
+  (cd gateway-caddy && docker compose up -d --force-recreate) 2>/dev/null || docker compose -f gateway-caddy/docker-compose.yml restart seotool-caddy 2>/dev/null || true
 fi
 
 # ─── Summary ────────────────────────────────────────────────────────────
