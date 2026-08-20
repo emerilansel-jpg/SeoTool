@@ -37,6 +37,18 @@ function AppRouteLayout() {
     onboarding.isChecking || onboarding.needsOnboarding,
   );
 
+  const isHelpPath =
+    typeof window !== "undefined" &&
+    window.location.pathname.startsWith("/help");
+
+  if (isHelpPath) {
+    return (
+      <div className="min-h-screen bg-base-200">
+        <Outlet />
+      </div>
+    );
+  }
+
   // 1. Auth not resolved yet (or not authenticated) -> spinner
   if (!authGate.canRenderAuthenticatedContent) {
     return (

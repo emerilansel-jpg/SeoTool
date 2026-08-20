@@ -1,0 +1,21 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "AI Visibility — Prompt Explorer and brand citations",
+  "description": "User can view AI search and LLM citations analysis",
+  "priority": "p2",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /sign-in"
+    },
+    {
+      "type": "action",
+      "description": "Log in with qa@tester.com and Lastalone99"
+    },
+    {
+      "type": "assertion",
+      "description": "The Prompt Explorer or AI Visibility link is available"
+    }
+  ]
+}

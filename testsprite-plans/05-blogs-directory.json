@@ -1,0 +1,17 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Blog — SEO Articles index and links",
+  "description": "User can browse published SEO articles",
+  "priority": "p2",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /blogs"
+    },
+    {
+      "type": "assertion",
+      "description": "The blog header or article listings container is visible"
+    }
+  ]
+}

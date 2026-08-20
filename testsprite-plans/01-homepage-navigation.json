@@ -1,0 +1,25 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Homepage — navigation and pricing page transition",
+  "description": "User can view landing page and navigate to pricing",
+  "priority": "p0",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to the homepage /"
+    },
+    {
+      "type": "assertion",
+      "description": "The page displays the SeoTool brand headline and header navigation links"
+    },
+    {
+      "type": "action",
+      "description": "Click on the pricing navigation link or navigate to /pricing"
+    },
+    {
+      "type": "assertion",
+      "description": "The pricing page loads showing pricing plans and feature comparisons"
+    }
+  ]
+}

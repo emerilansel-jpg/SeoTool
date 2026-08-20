@@ -1,0 +1,21 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "SAM AI Assistant — AI SEO Chat Agent",
+  "description": "User can open SAM AI assistant chat interface",
+  "priority": "p2",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /sign-in"
+    },
+    {
+      "type": "action",
+      "description": "Log in with qa@tester.com and Lastalone99"
+    },
+    {
+      "type": "assertion",
+      "description": "The SAM AI chat or agent interface is reachable"
+    }
+  ]
+}

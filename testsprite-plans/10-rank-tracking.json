@@ -1,0 +1,21 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Rank Tracking — Position tracking overview",
+  "description": "User can view rank tracking interface and scorecards",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /sign-in"
+    },
+    {
+      "type": "action",
+      "description": "Log in with email qa@tester.com and password Lastalone99"
+    },
+    {
+      "type": "assertion",
+      "description": "The dashboard displays Rank Tracking section or navigation link"
+    }
+  ]
+}

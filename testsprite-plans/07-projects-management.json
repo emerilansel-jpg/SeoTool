@@ -1,0 +1,29 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Projects — Project list and workspace selector",
+  "description": "User can view existing projects and project switcher controls",
+  "priority": "p0",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /sign-in"
+    },
+    {
+      "type": "action",
+      "description": "Fill in email qa@tester.com and password Lastalone99 into the sign-in form"
+    },
+    {
+      "type": "action",
+      "description": "Submit the sign-in form"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to /projects"
+    },
+    {
+      "type": "assertion",
+      "description": "The projects dashboard or project selector list is visible"
+    }
+  ]
+}

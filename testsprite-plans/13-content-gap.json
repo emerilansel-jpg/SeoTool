@@ -1,0 +1,21 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Content Gap — Competitor comparison tool",
+  "description": "User can access competitor content gap analysis",
+  "priority": "p2",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /sign-in"
+    },
+    {
+      "type": "action",
+      "description": "Log in with qa@tester.com and Lastalone99"
+    },
+    {
+      "type": "assertion",
+      "description": "Content Gap / Competitor analysis option is accessible"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Documentation — DataForSEO API key help guide",
+  "description": "User can read setup instructions for DataForSEO credentials",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /help/dataforseo-api-key"
+    },
+    {
+      "type": "assertion",
+      "description": "The page heading displays DataForSEO API key setup instructions"
+    },
+    {
+      "type": "assertion",
+      "description": "Step-by-step guidance content is rendered on the page"
+    }
+  ]
+}

@@ -35,11 +35,15 @@ export function usePaidPlanGuard(onboardingIncomplete: boolean = false) {
 
     // Platform admins keep admin-area access even on a free org; the admin
     // server functions enforce requirePlatformAdmin independently.
-    const isAdminPath =
+    const isExemptPath =
       typeof window !== "undefined" &&
-      window.location.pathname.startsWith("/admin");
+      (window.location.pathname.startsWith("/admin") ||
+        window.location.pathname.startsWith("/help") ||
+        window.location.pathname.startsWith("/support") ||
+        window.location.pathname.startsWith("/settings") ||
+        window.location.pathname.startsWith("/billing"));
 
-    if (!isPaid && !isAdminPath) {
+    if (!isPaid && !isExemptPath) {
       void navigate({
         href: `${SUBSCRIBE_ROUTE}?redirect=${encodeURIComponent(
           window.location.pathname + window.location.search,
@@ -56,10 +60,19 @@ export function usePaidPlanGuard(onboardingIncomplete: boolean = false) {
     onboardingIncomplete,
   ]);
 
+  const isExemptPath =
+    typeof window !== "undefined" &&
+    (window.location.pathname.startsWith("/admin") ||
+      window.location.pathname.startsWith("/help") ||
+      window.location.pathname.startsWith("/support") ||
+      window.location.pathname.startsWith("/settings") ||
+      window.location.pathname.startsWith("/billing"));
+
   return {
     canUseTools:
       isE2EBypass ||
       !isHostedMode ||
+      isExemptPath ||
       (!isLoading && !onboardingIncomplete && isPaid),
   };
 }

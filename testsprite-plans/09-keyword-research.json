@@ -1,0 +1,21 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Keyword Research — Search queries and metrics view",
+  "description": "User can access keyword research tool",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /sign-in"
+    },
+    {
+      "type": "action",
+      "description": "Log in with email qa@tester.com and password Lastalone99"
+    },
+    {
+      "type": "assertion",
+      "description": "The navigation bar displays Keyword Research link"
+    }
+  ]
+}

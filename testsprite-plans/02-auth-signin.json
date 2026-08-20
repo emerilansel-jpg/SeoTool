@@ -1,0 +1,25 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Authentication — Sign In form controls and navigation",
+  "description": "User can view the sign in screen and inspect input fields",
+  "priority": "p0",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /sign-in"
+    },
+    {
+      "type": "assertion",
+      "description": "Email and password input fields are visible and editable on the form"
+    },
+    {
+      "type": "assertion",
+      "description": "The Sign In submission button is visible"
+    },
+    {
+      "type": "assertion",
+      "description": "A link to the sign-up page is visible on the form"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Backlinks Explorer — Backlink analysis tool",
+  "description": "User can inspect backlink metrics interface",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /sign-in"
+    },
+    {
+      "type": "action",
+      "description": "Log in with qa@tester.com and Lastalone99"
+    },
+    {
+      "type": "assertion",
+      "description": "The navigation contains Backlinks tool link"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Domain Overview — Domain analytics and search",
+  "description": "User can search a domain and view organic search metrics",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /sign-in"
+    },
+    {
+      "type": "action",
+      "description": "Fill in email qa@tester.com and password Lastalone99 and log in"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to /projects"
+    },
+    {
+      "type": "assertion",
+      "description": "The domain overview or analytics search interface is accessible"
+    }
+  ]
+}

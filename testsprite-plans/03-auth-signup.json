@@ -1,0 +1,21 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Authentication — Sign Up form display",
+  "description": "User can view registration fields and options",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /sign-up"
+    },
+    {
+      "type": "assertion",
+      "description": "Registration email and password fields are present and visible"
+    },
+    {
+      "type": "assertion",
+      "description": "The create account or sign up button is displayed"
+    }
+  ]
+}

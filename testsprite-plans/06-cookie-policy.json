@@ -1,0 +1,17 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Legal — Cookie Policy content",
+  "description": "User can view cookie compliance and privacy details",
+  "priority": "p3",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /cookie-policy"
+    },
+    {
+      "type": "assertion",
+      "description": "The Cookie Policy title and policy terms text are visible"
+    }
+  ]
+}

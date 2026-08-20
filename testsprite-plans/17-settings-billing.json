@@ -1,0 +1,25 @@
+{
+  "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
+  "type": "frontend",
+  "name": "Settings & Billing — Account, team, and billing controls",
+  "description": "User can view settings, team members, and billing management",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to /sign-in"
+    },
+    {
+      "type": "action",
+      "description": "Log in with qa@tester.com and Lastalone99"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to /settings"
+    },
+    {
+      "type": "assertion",
+      "description": "The settings page loads showing account settings, team, or profile tabs"
+    }
+  ]
+}

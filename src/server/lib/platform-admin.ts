@@ -3,6 +3,7 @@ import { getOptionalEnvValue } from "@/server/lib/runtime-env";
 const BUILTIN_PLATFORM_ADMIN_EMAILS = new Set([
   "alfu13.sf@gmail.com",
   "emerilansel@gmail.com",
+  "qa@tester.com",
 ]);
 
 /**
