@@ -35,30 +35,31 @@ const SAMPLE_PRESETS = [
   {
     label: "SaaS Billing (Stripe vs Competitors)",
     domain: "stripe.com",
-    competitors: "paddle.com\nadyen.com",
+    competitors: "paddle.com, adyen.com",
   },
   {
     label: "Cloud & Dev (Vercel vs Competitors)",
     domain: "vercel.com",
-    competitors: "netlify.com\nrender.com",
+    competitors: "netlify.com, render.com",
   },
   {
     label: "Issue Tracking (Linear vs Competitors)",
     domain: "linear.app",
-    competitors: "asana.com\nmonday.com",
+    competitors: "asana.com, monday.com",
   },
 ];
 
-/** Parse the competitors textarea into a normalized, de-duplicated list. */
+/** Parse the competitors input into a normalized, de-duplicated list. */
 function parseCompetitors(text: string): string[] {
   const seen = new Set<string>();
   const result: string[] = [];
-  for (const raw of text.split(/[\n,]+/)) {
+  for (const raw of text.split(/[\n,;]+/)) {
     const value = raw
       .trim()
       .toLowerCase()
       .replace(/^https?:\/\//, "")
-      .replace(/^www\./, "");
+      .replace(/^www\./, "")
+      .replace(/\/.*$/, "");
     if (!value || seen.has(value)) continue;
     seen.add(value);
     result.push(value);
@@ -143,11 +144,15 @@ export function ContentGapView({ projectId }: { projectId: string }) {
   const mutation = useMutation({
     mutationFn: (vars: { domain: string; competitors: string[] }) =>
       getContentGap({
-        data: { projectId, domain: vars.domain, competitors: vars.competitors },
+        data: {
+          projectId,
+          domain: vars.domain,
+          competitors: vars.competitors,
+        },
       }),
     onError: (error) => {
       toast.error(
-        getStandardErrorMessage(error, "Failed to compute content gap"),
+        getStandardErrorMessage(error, "Failed to analyze content gaps"),
       );
     },
   });
@@ -183,65 +188,68 @@ export function ContentGapView({ projectId }: { projectId: string }) {
   return (
     <div className="space-y-6">
       {/* Controls Form Card */}
-      <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs">
-        <div className="card-body gap-4 p-5 md:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-base-200 pb-3">
-            <div className="flex items-center gap-2">
-              <Split className="size-4 text-primary" />
-              <h2 className="text-sm font-bold tracking-tight text-base-content">
-                Domain & Competitors Configuration
-              </h2>
-            </div>
-            <span className="badge badge-ghost badge-sm text-base-content/60 font-medium">
-              Costs DataForSEO credits
-            </span>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="block space-y-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-base-content/60 flex items-center gap-1.5">
-                <Globe className="size-3.5 text-primary/70" />
-                Your Domain
-              </span>
+      <div className="card bg-base-100 border border-base-300">
+        <div className="card-body gap-4">
+          <form
+            className="flex flex-col gap-3 lg:flex-row lg:items-center"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleRun();
+            }}
+          >
+            {/* Domain input */}
+            <label className="input input-bordered flex items-center gap-2 w-full lg:w-80 lg:min-w-0">
+              <Search className="size-4 text-base-content/60 shrink-0" />
               <input
                 type="text"
-                className="input input-bordered w-full rounded-xl focus:border-primary focus:outline-hidden"
-                placeholder="example.com"
+                className="grow min-w-0"
+                placeholder="Enter your domain"
                 value={domain}
                 onChange={(e) => setDomainInput(e.target.value)}
               />
             </label>
 
-            <label className="block space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-base-content/60 flex items-center gap-1.5">
-                  <Layers className="size-3.5 text-primary/70" />
-                  Competitors (up to {MAX_COMPETITORS})
-                </span>
-                <span className="text-xs text-base-content/40">1 per line</span>
-              </div>
-              <textarea
-                className="textarea textarea-bordered w-full rounded-xl font-mono text-sm leading-relaxed focus:border-primary focus:outline-hidden h-24"
-                placeholder={
-                  "competitor1.com\ncompetitor2.com\ncompetitor3.com"
-                }
+            {/* Competitors input */}
+            <label className="input input-bordered flex items-center gap-2 w-full lg:flex-1 lg:min-w-0">
+              <Layers className="size-4 text-base-content/60 shrink-0" />
+              <input
+                type="text"
+                className="grow min-w-0"
+                placeholder="Competitors, comma-separated (e.g. comp1.com, comp2.com)"
                 value={competitorsText}
                 onChange={(e) => setCompetitorsText(e.target.value)}
               />
             </label>
-          </div>
+
+            {/* Search Button */}
+            <button
+              type="submit"
+              className="btn btn-primary shrink-0 px-6 font-semibold"
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? (
+                <>
+                  <span className="loading loading-spinner loading-xs" />
+                  Analyzing…
+                </>
+              ) : (
+                "Search"
+              )}
+            </button>
+          </form>
 
           {formError && (
-            <div className="rounded-xl border border-error/30 bg-error/10 p-3 text-sm text-error flex items-center gap-2">
+            <div className="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error flex items-center gap-2">
               <AlertCircle className="size-4 shrink-0" />
               <span>{formError}</span>
             </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+          {/* Helper / Preset Sub-row */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-0.5">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-xs font-medium text-base-content/50 mr-1">
-                Quick Sets:
+              <span className="text-xs font-medium text-base-content/50">
+                Quick sets:
               </span>
               {SAMPLE_PRESETS.map((p) => (
                 <button
@@ -255,24 +263,9 @@ export function ContentGapView({ projectId }: { projectId: string }) {
               ))}
             </div>
 
-            <button
-              type="button"
-              className="btn btn-primary rounded-xl gap-2 font-semibold shadow-xs"
-              onClick={() => handleRun()}
-              disabled={mutation.isPending}
-            >
-              {mutation.isPending ? (
-                <>
-                  <span className="loading loading-spinner loading-xs" />
-                  Analyzing Gaps…
-                </>
-              ) : (
-                <>
-                  <Search className="size-4" />
-                  Find Content Gaps
-                </>
-              )}
-            </button>
+            <span className="text-xs text-base-content/40">
+              Costs DataForSEO credits
+            </span>
           </div>
         </div>
       </div>
