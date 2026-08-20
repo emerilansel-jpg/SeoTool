@@ -24,7 +24,12 @@ export function asAppError(error: unknown): AppError | null {
 // a full https URL…") that self-hosters need to fix their deployment, and the
 // alternative is a generic card that makes every misconfiguration look the
 // same. Everything else stays stripped to its bare code.
-const CLIENT_DETAIL_ERROR_CODES = new Set<ErrorCode>(["AUTH_CONFIG_MISSING"]);
+const CLIENT_DETAIL_ERROR_CODES = new Set<ErrorCode>([
+  "AUTH_CONFIG_MISSING",
+  "UPSTREAM_UNAVAILABLE",
+  "VALIDATION_ERROR",
+  "DATAFORSEO_AUTH_FAILED",
+]);
 
 export function toClientError(error: unknown): Error {
   const appError = asAppError(error);

@@ -5,8 +5,6 @@ import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import { requireAuthenticatedContext } from "@/serverFunctions/middleware";
 import { paypal } from "@/server/billing/paypal";
 import { getEffectivePaypalPlanId } from "@/server/billing/plan-config";
-import { PLAN_TIER_LABELS } from "@/shared/plans";
-import type { PlanTier } from "@/shared/plans";
 
 const createSubscriptionSchema = z.object({
   tier: z.enum(["lite", "pro", "agency"]),
@@ -42,24 +40,38 @@ export const createPaypalSubscription = createServerFn({ method: "POST" })
     );
 
     // Create the PayPal subscription
-    const subscription = await paypalRequest<{
+    let subscription: {
       id: string;
       links: Array<{ rel: string; href: string; method: string }>;
-    }>("POST", "/v1/billing/subscriptions", {
-      plan_id: planId,
-      custom_id: context.organizationId,
-      subscriber: {
-        email_address: context.userEmail,
-      },
-      application_context: {
-        brand_name: "SeoTool.im",
-        locale: "en-US",
-        shipping_preference: "NO_SHIPPING",
-        user_action: "SUBSCRIBE_NOW",
-        return_url: `${publicUrl}/subscribe?checkout=success`,
-        cancel_url: `${publicUrl}/subscribe?checkout=cancelled`,
-      },
-    });
+    };
+
+    try {
+      subscription = await paypalRequest<{
+        id: string;
+        links: Array<{ rel: string; href: string; method: string }>;
+      }>("POST", "/v1/billing/subscriptions", {
+        plan_id: planId,
+        custom_id: context.organizationId,
+        subscriber: {
+          email_address: context.userEmail,
+        },
+        application_context: {
+          brand_name: "SeoTool.im",
+          locale: "en-US",
+          shipping_preference: "NO_SHIPPING",
+          user_action: "SUBSCRIBE_NOW",
+          return_url: `${publicUrl}/subscribe?checkout=success`,
+          cancel_url: `${publicUrl}/subscribe?checkout=cancelled`,
+        },
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[PayPal Subscription Creation Error]:", msg);
+      throw new AppError(
+        "UPSTREAM_UNAVAILABLE",
+        `PayPal Error: ${msg}`,
+      );
+    }
 
     // Find the approval URL
     const approveLink = subscription.links?.find((l) => l.rel === "approve");
