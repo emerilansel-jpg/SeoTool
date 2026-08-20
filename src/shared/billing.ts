@@ -3,14 +3,8 @@ import type { PlanTier } from "@/shared/plans";
 export const BILLING_ROUTE = "/billing";
 export const SUBSCRIBE_ROUTE = "/subscribe";
 
-/** PayPal Billing Plan ID for each paid tier. Configured in the PayPal
- *  dashboard under Products > Billing Plans. The free tier has no plan. */
-export const PAYPAL_PLAN_IDS: Record<string, string | null> = {
-  free: null,
-  lite: "lite-plan",
-  pro: "pro-plan",
-  agency: "agency-plan",
-};
+// PayPal plan ids live in shared/plans.ts (typed) and are resolved at runtime
+// through the effective plan config (server/billing/plan-config.ts).
 
 // The shared usage-credit pool. Both DataForSEO and onboarding-LLM spend deduct
 // from these (monthly usage_credits first, then rolled-over topup_credits).

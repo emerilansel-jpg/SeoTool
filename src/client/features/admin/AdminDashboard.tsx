@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { Building2, DollarSign, Users, TrendingUp } from "lucide-react";
 import { getAnalyticsOverview } from "@/serverFunctions/analytics";
-import { PLAN_TIER_LABELS, PLAN_PRICES_USD } from "@/shared/plans";
+import { PLAN_TIER_LABELS } from "@/shared/plans";
 
 const TIER_COLORS: Record<string, string> = {
   free: "var(--color-base-content)",
@@ -74,14 +74,7 @@ export function AdminDashboard() {
   }));
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 p-4 py-10 md:p-6 md:py-12">
-      <div>
-        <h1 className="text-xl font-semibold">Platform Analytics</h1>
-        <p className="text-sm text-base-content/60 mt-1">
-          Platform-wide metrics: organizations, revenue, and quota usage.
-        </p>
-      </div>
-
+    <div className="space-y-6">
       {/* Stat Cards */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <StatCard
@@ -239,14 +232,9 @@ export function AdminDashboard() {
         <h2 className="font-medium mb-3">Revenue Breakdown (Estimated)</h2>
         <div className="space-y-2">
           {data.planDistribution
-            .filter(
-              (d) =>
-                PLAN_PRICES_USD[d.planTier as keyof typeof PLAN_PRICES_USD] > 0,
-            )
+            .filter((d) => (data.prices[d.planTier] ?? 0) > 0)
             .map((d) => {
-              const price =
-                PLAN_PRICES_USD[d.planTier as keyof typeof PLAN_PRICES_USD] ??
-                0;
+              const price = data.prices[d.planTier] ?? 0;
               const revenue = price * d.orgCount;
               return (
                 <div

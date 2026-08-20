@@ -4,8 +4,8 @@ import { AppError } from "@/server/lib/errors";
 import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import { requireAuthenticatedContext } from "@/serverFunctions/middleware";
 import { paypal } from "@/server/billing/paypal";
-import { PAYPAL_PLAN_IDS } from "@/shared/billing";
-import { PLAN_PRICES_USD, PLAN_TIER_LABELS } from "@/shared/plans";
+import { getEffectivePaypalPlanId } from "@/server/billing/plan-config";
+import { PLAN_TIER_LABELS } from "@/shared/plans";
 import type { PlanTier } from "@/shared/plans";
 
 const createSubscriptionSchema = z.object({
@@ -29,7 +29,7 @@ export const createPaypalSubscription = createServerFn({ method: "POST" })
     }
 
     const { tier } = data;
-    const planId = PAYPAL_PLAN_IDS[tier];
+    const planId = await getEffectivePaypalPlanId(tier);
     if (!planId) {
       throw new AppError(
         "VALIDATION_ERROR",

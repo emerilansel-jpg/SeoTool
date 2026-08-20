@@ -1,5 +1,9 @@
 import { Check } from "lucide-react";
-import { PLAN_PRICES_USD, PLAN_TIER_LABELS } from "@/shared/plans";
+import {
+  PLAN_PRICES_USD,
+  PLAN_TIER_LABELS,
+  type PlanTier,
+} from "@/shared/plans";
 import {
   PAID_TIERS,
   TIER_HIGHLIGHTS,
@@ -13,14 +17,23 @@ export function PlanPickerGrid({
   selected,
   onSelect,
   disabled = false,
+  prices,
+  hiddenTiers,
 }: {
   selected: PaidTier;
   onSelect: (tier: PaidTier) => void;
   disabled?: boolean;
+  /** Effective prices from the plan config; defaults to deploy constants. */
+  prices?: Record<PlanTier, number>;
+  hiddenTiers?: PlanTier[];
 }) {
+  const effectivePrices = prices ?? PLAN_PRICES_USD;
+  const visibleTiers = PAID_TIERS.filter(
+    (tier) => !(hiddenTiers ?? []).includes(tier),
+  );
   return (
     <div className="grid items-stretch gap-5 md:grid-cols-3 md:gap-6">
-      {PAID_TIERS.map((tier) => {
+      {visibleTiers.map((tier) => {
         const highlight = TIER_HIGHLIGHTS[tier];
         const isSelected = selected === tier;
 
@@ -70,7 +83,7 @@ export function PlanPickerGrid({
 
             <div className="mt-4 flex items-baseline gap-1.5 border-b border-base-300 pb-4">
               <span className="text-4xl font-extrabold tracking-tight tabular-nums text-base-content">
-                ${PLAN_PRICES_USD[tier]}
+                ${effectivePrices[tier]}
               </span>
               <span className="text-sm font-medium text-base-content/50">
                 /month

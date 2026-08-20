@@ -2,10 +2,10 @@ import { eq, and, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { usageQuota } from "@/db/schema";
 import {
-  MONTHLY_CREDIT_GRANTS,
   PAYPAL_CREDITS_FEATURE_ID,
   PAYPAL_TOPUP_CREDITS_FEATURE_ID,
 } from "@/shared/billing";
+import { getEffectiveMonthlyCreditGrant } from "@/server/billing/plan-config";
 import type { PlanTier } from "@/shared/plans";
 
 // ---------------------------------------------------------------------------
@@ -71,12 +71,13 @@ export async function getCreditBalance(
 
 /** Grant the monthly credit allowance for the given tier. Called on plan
  *  creation and on each renewal (via webhook). The grant replaces any
- *  remaining monthly balance (fresh cycle = fresh grant). */
+ *  remaining monthly balance (fresh cycle = fresh grant). The amount comes
+ *  from the effective plan config (admin-editable, DB over constants). */
 export async function grantMonthlyCredits(
   organizationId: string,
   tier: PlanTier,
 ): Promise<void> {
-  const credits = MONTHLY_CREDIT_GRANTS[tier];
+  const credits = await getEffectiveMonthlyCreditGrant(tier);
   if (credits <= 0) return;
 
   const now = new Date();

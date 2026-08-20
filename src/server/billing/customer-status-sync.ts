@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { billingCustomerStatus, subscription } from "@/db/schema";
 import { paypal } from "@/server/billing/paypal";
+import { getEffectivePlanConfigs } from "@/server/billing/plan-config";
 import {
   deriveBillingCustomerStatusSnapshot,
   type BillingCustomerStatusSnapshot,
@@ -9,6 +10,19 @@ import {
 import { syncBillingStatusToLoops } from "./loops-sync";
 import { QuotaRepository } from "@/server/features/billing/repositories/QuotaRepository";
 import { grantMonthlyCredits } from "@/server/billing/credits";
+import { PLAN_TIERS, type PlanTier } from "@/shared/plans";
+
+/** PayPal plan id → tier, from the effective plan config so admin-configured
+ *  plan ids resolve too. */
+async function buildPlanIdToTierMap(): Promise<Map<string, PlanTier>> {
+  const configs = await getEffectivePlanConfigs();
+  const map = new Map<string, PlanTier>();
+  for (const tier of PLAN_TIERS) {
+    const planId = configs[tier].paypalPlanId;
+    if (planId) map.set(planId, tier);
+  }
+  return map;
+}
 
 /** Sync the customer's billing status from PayPal to the local DB.
  *  Called by the webhook handler after verifying the event signature.
@@ -36,6 +50,7 @@ export async function syncPaypalCustomerStatus(
   const snapshot = deriveBillingCustomerStatusSnapshot({
     organizationId,
     subscription: subscriptionResource,
+    planIdToTier: await buildPlanIdToTierMap(),
   });
 
   // Read the previous plan tier before upserting so we can detect a plan change

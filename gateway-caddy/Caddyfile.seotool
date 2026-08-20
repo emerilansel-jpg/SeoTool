@@ -11,14 +11,16 @@
     encode gzip zstd
 
     # Marketing static files (prerendered HTML from web/dist/client).
-    # Known marketing routes are served as static files from /srv/marketing.
-    # All other requests fall through to the SaaS app.
+    # Content marketing routes are served as static files from /srv/marketing.
+    # Homepage (/) and /pricing are handled directly by the SaaS app
+    # (open-seo:3001). Legal pages (/privacy, /terms-and-conditions,
+    # /cookie-policy, /refund-policy, /dpa) and /blogs* are served by the
+    # SaaS app from the CMS tables instead.
     @marketingRoutes {
-        path / /pricing /about /contact /careers /affiliates /changelog
+        path /about /contact /careers /affiliates /changelog
         path /features /features/*
         path /free-tools /free-tools/*
         path /open-source-seo /google-search-console-mcp
-        path /privacy /terms-and-conditions /cookie-policy /refund-policy /dpa
     }
     handle @marketingRoutes {
         root * /srv/marketing
@@ -56,9 +58,10 @@
         file_server
     }
 
-    # Blog, docs, guides, library content
+    # Docs, guides, library content. /blogs* is EXCLUDED: blog posts are
+    # served by the SaaS app from the cms_posts table (admin CMS).
     @marketingContent {
-        path /blogs* /docs* /guides* /library*
+        path /docs* /guides* /library*
     }
     handle @marketingContent {
         root * /srv/marketing

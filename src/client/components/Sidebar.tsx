@@ -12,10 +12,12 @@ import {
 } from "lucide-react";
 import {
   connectNavGroup,
+  adminNavGroup,
   getProjectNavGroups,
 } from "@/client/navigation/items";
 import { ProjectSwitcher } from "@/client/features/projects/ProjectSwitcher";
 import { SamSidebarPanel } from "@/client/features/sam/SamSidebarPanel";
+import { useIsPlatformAdmin } from "@/client/features/admin/useIsPlatformAdmin";
 import { NotificationCenter } from "@/client/features/notifications/NotificationCenter";
 import { ThemePreferenceMenuItems } from "@/client/components/ThemePreferenceMenuItems";
 import { closeDropdown } from "@/client/lib/dropdown";
@@ -74,9 +76,11 @@ function SidebarNavLink({
 }
 
 export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
+  const isAdmin = useIsPlatformAdmin();
   const navGroups = [
     ...(projectId ? getProjectNavGroups(projectId) : []),
     connectNavGroup,
+    ...(isAdmin ? [adminNavGroup] : []),
   ];
   const navigate = useNavigate();
   const location = useLocation();

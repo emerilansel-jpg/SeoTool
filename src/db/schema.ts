@@ -33,6 +33,8 @@ import * as sqliteSerpVolatility from "./serp-volatility.schema";
 import * as pgSerpVolatility from "./pg/serp-volatility.schema";
 import * as sqliteApiKeys from "./api-keys.schema";
 import * as pgApiKeys from "./pg/api-keys.schema";
+import * as sqliteAdmin from "./admin.schema";
+import * as pgAdmin from "./pg/admin.schema";
 import * as sqliteNotifications from "./notifications.schema";
 import * as pgNotifications from "./pg/notifications.schema";
 
@@ -63,7 +65,8 @@ type AppSchema = typeof sqliteApp &
   typeof sqliteSerpSnapshots &
   typeof sqliteSerpVolatility &
   typeof sqliteApiKeys &
-  typeof sqliteNotifications;
+  typeof sqliteNotifications &
+  typeof sqliteAdmin;
 
 const runtimeSchema =
   getDatabaseProvider() === "postgres"
@@ -86,6 +89,7 @@ const runtimeSchema =
         ...pgSerpVolatility,
         ...pgApiKeys,
         ...pgNotifications,
+        ...pgAdmin,
       }
     : {
         ...sqliteApp,
@@ -106,6 +110,7 @@ const runtimeSchema =
         ...sqliteSerpVolatility,
         ...sqliteApiKeys,
         ...sqliteNotifications,
+        ...sqliteAdmin,
       };
 
 // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- guarded by schema-parity.test.ts
@@ -159,4 +164,9 @@ export const {
   serpVolatilitySnapshots,
   apiKeys,
   notifications,
+  appSettings,
+  planConfig,
+  cmsPosts,
+  cmsPages,
+  paypalWebhookEvents,
 } = schema;

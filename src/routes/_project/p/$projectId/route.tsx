@@ -10,6 +10,7 @@ import { setLastProjectId } from "@/client/lib/active-project";
 import { useHostedAuthRouteGuard } from "@/client/features/auth/useHostedAuthRouteGuard";
 import { FreePlanBanner } from "@/client/features/billing/FreePlanBanner";
 import { useOnboardingRedirect } from "@/client/features/onboarding/useOnboardingRedirect";
+import { usePaidPlanGuard } from "@/client/features/billing/use-paid-plan-guard";
 import { getErrorCode } from "@/client/lib/error-messages";
 import { AuthenticatedAppLayout } from "@/client/layout/AppShell";
 import {
@@ -54,7 +55,7 @@ function useProjectAccessRedirect(projectId: string) {
       });
       return;
     }
-    void navigate({ to: "/", replace: true });
+    void navigate({ to: "/projects", replace: true });
   }, [error, navigate]);
 }
 
@@ -62,9 +63,15 @@ function ProjectLayout() {
   // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment
   const { projectId } = Route.useParams();
   const authGate = useHostedAuthRouteGuard();
-  useOnboardingRedirect();
+  const onboarding = useOnboardingRedirect();
   // oxlint-disable-next-line typescript-eslint/no-unsafe-argument
   useProjectAccessRedirect(projectId);
+
+  // Same guard order as _app/route.tsx: auth -> onboarding -> paywall.
+  // The paywall guard is inert while onboarding is still resolving.
+  const paywall = usePaidPlanGuard(
+    onboarding.isChecking || onboarding.needsOnboarding,
+  );
 
   // Remember this as the last-visited project for the landing redirect.
   // Settings is excluded: editing another project's settings is
@@ -79,8 +86,12 @@ function ProjectLayout() {
     setLastProjectId(projectId);
   }, [projectId, isSettingsPage]);
 
-  if (!authGate.canRenderAuthenticatedContent) {
-    return null;
+  if (!authGate.canRenderAuthenticatedContent || !paywall.canUseTools) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <span className="loading loading-spinner loading-md" />
+      </div>
+    );
   }
 
   return (

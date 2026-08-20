@@ -1,15 +1,33 @@
 import { Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
-import { PLAN_PRICES_USD, PLAN_TIER_LABELS } from "@/shared/plans";
+import {
+  PLAN_PRICES_USD,
+  PLAN_TIER_LABELS,
+  type PlanTier,
+} from "@/shared/plans";
 import {
   PAID_TIERS,
   TIER_HIGHLIGHTS,
 } from "@/client/features/marketing/tierHighlights";
 
-export function PricingSection({ signedIn = false }: { signedIn?: boolean }) {
+/** Effective per-tier prices (from the plan config loader). Falls back to the
+ *  deploy-time constants when not provided. */
+export function PricingSection({
+  signedIn = false,
+  prices,
+  hiddenTiers,
+}: {
+  signedIn?: boolean;
+  prices?: Record<PlanTier, number>;
+  hiddenTiers?: PlanTier[];
+}) {
+  const effectivePrices = prices ?? PLAN_PRICES_USD;
+  const visibleTiers = PAID_TIERS.filter(
+    (tier) => !(hiddenTiers ?? []).includes(tier),
+  );
   return (
     <div className="grid gap-8 md:grid-cols-3 items-stretch">
-      {PAID_TIERS.map((tier) => {
+      {visibleTiers.map((tier) => {
         const highlight = TIER_HIGHLIGHTS[tier];
 
         return (
@@ -43,7 +61,7 @@ export function PricingSection({ signedIn = false }: { signedIn?: boolean }) {
 
               <div className="mt-6 flex items-baseline gap-1.5 border-b border-base-300 pb-6">
                 <span className="text-4xl font-extrabold tracking-tight text-base-content md:text-5xl">
-                  ${PLAN_PRICES_USD[tier]}
+                  ${effectivePrices[tier]}
                 </span>
                 <span className="text-sm font-medium text-base-content/50">
                   /month

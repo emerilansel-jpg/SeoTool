@@ -10,10 +10,14 @@ import { isHostedClientAuthMode } from "@/lib/auth-mode";
  * Hard paywall guard for the authenticated app. Mirrors
  * useHostedAuthRouteGuard: once the plan tier is loaded, a free-tier user is
  * redirected to /subscribe (keeping the current path as the return target)
- * before any tool UI renders. The E2E bypass skips the check so Playwright
- * keeps its ungated fake context.
+ * before any tool UI renders.
+ *
+ * When `onboardingIncomplete` is true the guard does NOT redirect, so the
+ * onboarding wizard (which is reachable without payment) can complete before
+ * the paywall kicks in. The caller is responsible for rendering a spinner
+ * while onboarding is still resolving.
  */
-export function usePaidPlanGuard() {
+export function usePaidPlanGuard(onboardingIncomplete: boolean = false) {
   const navigate = useNavigate();
   const { isPaid, isLoading } = useIsPaidPlan();
   const isHostedMode = isHostedClientAuthMode();
@@ -25,11 +29,17 @@ export function usePaidPlanGuard() {
         true);
 
   useEffect(() => {
-    if (isE2EBypass || !isHostedMode || isLoading) {
+    if (isE2EBypass || !isHostedMode || isLoading || onboardingIncomplete) {
       return;
     }
 
-    if (!isPaid) {
+    // Platform admins keep admin-area access even on a free org; the admin
+    // server functions enforce requirePlatformAdmin independently.
+    const isAdminPath =
+      typeof window !== "undefined" &&
+      window.location.pathname.startsWith("/admin");
+
+    if (!isPaid && !isAdminPath) {
       void navigate({
         href: `${SUBSCRIBE_ROUTE}?redirect=${encodeURIComponent(
           window.location.pathname + window.location.search,
@@ -37,9 +47,19 @@ export function usePaidPlanGuard() {
         replace: true,
       });
     }
-  }, [isE2EBypass, isHostedMode, isLoading, isPaid, navigate]);
+  }, [
+    isE2EBypass,
+    isHostedMode,
+    isLoading,
+    isPaid,
+    navigate,
+    onboardingIncomplete,
+  ]);
 
   return {
-    canUseTools: isE2EBypass || !isHostedMode || (!isLoading && isPaid),
+    canUseTools:
+      isE2EBypass ||
+      !isHostedMode ||
+      (!isLoading && !onboardingIncomplete && isPaid),
   };
 }

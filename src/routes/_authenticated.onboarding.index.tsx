@@ -127,7 +127,7 @@ function OnboardingFlow({
       source: answers.source,
     });
     // The dashboard's onboarding checklist owns MCP coaching now.
-    void navigate({ to: "/", replace: true });
+    void navigate({ to: "/projects", replace: true });
   };
 
   return (

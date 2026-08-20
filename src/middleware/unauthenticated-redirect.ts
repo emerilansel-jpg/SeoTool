@@ -5,6 +5,13 @@ import { getOptionalEnvValue } from "@/server/lib/runtime-env";
 // pages, API endpoints, server-function RPC, and static asset roots.
 const PUBLIC_PATH_PREFIXES = [
   "/pricing",
+  "/blogs",
+  "/pages",
+  "/privacy",
+  "/terms-and-conditions",
+  "/cookie-policy",
+  "/refund-policy",
+  "/dpa",
   "/sign-in",
   "/sign-up",
   "/forgot-password",

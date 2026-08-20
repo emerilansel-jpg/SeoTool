@@ -1,0 +1,91 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  MarketingChrome,
+  useMarketingSession,
+} from "@/client/features/marketing/MarketingChrome";
+import { CmsRepository } from "@/server/features/admin/repositories/CmsRepository";
+
+export const Route = createFileRoute("/blogs/")({
+  // Public read path: the loader queries the repository directly, so no
+  // session/server-function middleware is involved.
+  loader: async () => {
+    const posts = await CmsRepository.listPosts(false);
+    return {
+      posts: posts.map((post) => ({
+        slug: post.slug,
+        title: post.title,
+        description: post.description,
+        publishedAt: post.publishedAt,
+      })),
+    };
+  },
+  head: () => ({
+    meta: [
+      { title: "Blog - SeoTool.im" },
+      {
+        name: "description",
+        content:
+          "SEO guides, product updates, and technical write-ups from the SeoTool.im team.",
+      },
+    ],
+  }),
+  component: BlogIndexPage,
+});
+
+function BlogIndexPage() {
+  const { signedIn } = useMarketingSession();
+  const { posts } = Route.useLoaderData();
+
+  return (
+    <MarketingChrome signedIn={signedIn}>
+      <div className="mx-auto w-full max-w-3xl px-4 py-16 md:px-6 md:py-20">
+        <div className="text-center">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">
+            Blog
+          </span>
+          <h1 className="mt-2 text-4xl font-extrabold tracking-tight">
+            SEO, shipped
+          </h1>
+          <p className="mt-4 text-base text-base-content/70">
+            Guides and notes from building SeoTool.im.
+          </p>
+        </div>
+
+        <div className="mt-12 space-y-4">
+          {posts.length === 0 ? (
+            <div className="border border-dashed border-base-300 rounded-lg p-8 text-center text-sm text-base-content/50">
+              No posts published yet. Check back soon.
+            </div>
+          ) : (
+            posts.map((post) => (
+              <Link
+                key={post.slug}
+                to="/blogs/$slug"
+                params={{ slug: post.slug }}
+                className="block rounded-xl border border-base-300 bg-base-100 p-5 transition-all hover:border-primary/40 hover:shadow-md"
+              >
+                <h2 className="text-lg font-bold text-base-content">
+                  {post.title}
+                </h2>
+                {post.description ? (
+                  <p className="mt-1.5 text-sm text-base-content/70">
+                    {post.description}
+                  </p>
+                ) : null}
+                {post.publishedAt ? (
+                  <p className="mt-3 text-xs text-base-content/50">
+                    {new Date(post.publishedAt).toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                ) : null}
+              </Link>
+            ))
+          )}
+        </div>
+      </div>
+    </MarketingChrome>
+  );
+}

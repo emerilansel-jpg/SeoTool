@@ -15,6 +15,7 @@ import {
   MessageSquare,
   FileText,
   Search,
+  Shield,
   Sparkles,
   Swords,
   TrendingUp,
@@ -145,6 +146,13 @@ const aiNavItem = linkOptions({
 export const connectNavGroup = {
   label: "Connect",
   items: [aiNavItem],
+};
+
+// Platform-admin group. Rendered conditionally by the Sidebar when the
+// current user passes the platform-admin check (env allowlist).
+export const adminNavGroup = {
+  label: "Admin",
+  items: [linkOptions({ to: "/admin" as const, label: "Admin", icon: Shield })],
 };
 
 function getProjectNavItems(projectId: string) {

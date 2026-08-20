@@ -8,7 +8,19 @@ import {
   isHostedClientAuthMode,
 } from "@/lib/auth-mode";
 
-export function useOnboardingRedirect() {
+/**
+ * Redirects incomplete-onboarding users to /onboarding and returns the
+ * check state so callers (like _app layout) can delay their own guards
+ * until onboarding is resolved. Onboarding must be completed BEFORE the
+ * paywall guard fires; otherwise a free user gets stuck on /subscribe
+ * without ever seeing the wizard.
+ */
+export function useOnboardingRedirect(): {
+  /** True while the onboarding status is being fetched. */
+  isChecking: boolean;
+  /** True when the user needs to visit /onboarding first. */
+  needsOnboarding: boolean;
+} {
   const navigate = useNavigate();
   const { data: session } = useSession();
   const isHostedMode = isHostedClientAuthMode();
@@ -19,27 +31,23 @@ export function useOnboardingRedirect() {
     enabled: isHostedMode && Boolean(session?.user?.id) && isEmailVerified,
   });
 
+  const isChecking = onboardingQuery.isLoading && !onboardingQuery.isError;
+  const needsOnboarding =
+    isHostedMode &&
+    Boolean(session?.user?.id) &&
+    isEmailVerified &&
+    !onboardingQuery.isLoading &&
+    !onboardingQuery.isError &&
+    !onboardingQuery.data?.completedAt &&
+    window.location.pathname !== "/onboarding";
+
   useEffect(() => {
-    if (
-      !isHostedMode ||
-      !session?.user?.id ||
-      !isEmailVerified ||
-      onboardingQuery.isLoading ||
-      onboardingQuery.isError ||
-      onboardingQuery.data?.completedAt ||
-      window.location.pathname === "/onboarding"
-    ) {
+    if (!needsOnboarding) {
       return;
     }
 
     void navigate({ to: "/onboarding", search: { step: 0 }, replace: true });
-  }, [
-    isHostedMode,
-    navigate,
-    onboardingQuery.data?.completedAt,
-    onboardingQuery.isError,
-    onboardingQuery.isLoading,
-    isEmailVerified,
-    session?.user?.id,
-  ]);
+  }, [needsOnboarding, navigate]);
+
+  return { isChecking, needsOnboarding };
 }

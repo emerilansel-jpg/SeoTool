@@ -1,7 +1,8 @@
 import { count, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { subscription, usageQuota, organization } from "@/db/schema";
-import { PLAN_PRICES_USD, PLAN_TIERS } from "@/shared/plans";
+import { PLAN_TIERS, type PlanTier } from "@/shared/plans";
+import { getEffectivePricesUsd } from "@/server/billing/plan-config";
 
 export interface PlanTierDistribution {
   planTier: string;
@@ -30,6 +31,8 @@ export interface AnalyticsOverview {
   planDistribution: PlanTierDistribution[];
   quotaSummary: QuotaUsageSummaryRow[];
   recentOrgs: RecentOrg[];
+  /** Effective per-tier monthly prices (admin-editable), for client display. */
+  prices: Record<string, number>;
 }
 
 export const AnalyticsRepository = {
@@ -50,7 +53,12 @@ export const AnalyticsRepository = {
     }));
   },
 
-  async getMrrEstimate(): Promise<{ mrr: number; paidCount: number }> {
+  async getMrrEstimate(): Promise<{
+    mrr: number;
+    paidCount: number;
+    prices: Record<string, number>;
+  }> {
+    const prices = await getEffectivePricesUsd();
     const rows = await db
       .select({
         planTier: subscription.planTier,
@@ -63,12 +71,12 @@ export const AnalyticsRepository = {
     let paidCount = 0;
 
     for (const row of rows) {
-      const price = PLAN_PRICES_USD[row.planTier] ?? 0;
+      const price = prices[row.planTier as PlanTier] ?? 0;
       mrr += price * row.orgCount;
       if (price > 0) paidCount += row.orgCount;
     }
 
-    return { mrr, paidCount };
+    return { mrr, paidCount, prices: prices as Record<string, number> };
   },
 
   async getQuotaUsageSummary(): Promise<QuotaUsageSummaryRow[]> {
@@ -141,6 +149,7 @@ export const AnalyticsRepository = {
       planDistribution,
       quotaSummary,
       recentOrgs,
+      prices: mrrData.prices,
     };
   },
 };

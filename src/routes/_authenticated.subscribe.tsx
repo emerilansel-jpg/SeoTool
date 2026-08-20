@@ -10,6 +10,7 @@ import { normalizeAuthRedirect } from "@/lib/auth-redirect";
 import { captureRedditConversionEvent } from "@/serverFunctions/redditConversions";
 import { createPaypalSubscription } from "@/serverFunctions/paypal-checkout";
 import { getQuotaStateSummary } from "@/serverFunctions/billing";
+import { getEffectivePlanConfigs } from "@/server/billing/plan-config";
 import { PlanPickerGrid } from "@/client/features/billing/PlanPickerGrid";
 import type { PaidTier } from "@/client/features/marketing/tierHighlights";
 import {
@@ -30,6 +31,17 @@ const SUPPORT_EMAIL = "support@seotool.im";
 type Search = { upgrade?: true; redirect?: string; plan?: PlanTier };
 
 export const Route = createFileRoute("/_authenticated/subscribe")({
+  loader: async () => {
+    // Effective (admin-editable) prices so checkout matches the picker.
+    const configs = await getEffectivePlanConfigs();
+    const prices: Record<PlanTier, number> = { ...PLAN_PRICES_USD };
+    const hiddenTiers: PlanTier[] = [];
+    for (const config of Object.values(configs)) {
+      prices[config.tier] = config.priceUsdCents / 100;
+      if (!config.active) hiddenTiers.push(config.tier);
+    }
+    return { prices, hiddenTiers };
+  },
   validateSearch: (search: Record<string, unknown>): Search => ({
     upgrade:
       search.upgrade === true || search.upgrade === "true" ? true : undefined,
@@ -52,6 +64,7 @@ function SubscribePage() {
     redirect,
     plan: defaultPlan,
   }: Search = Route.useSearch();
+  const { prices, hiddenTiers } = Route.useLoaderData();
   const { data: session } = useSession();
   const [selectedPlan, setSelectedPlan] = useState<PaidTier>(
     defaultPlan && defaultPlan !== "free" ? defaultPlan : "lite",
@@ -249,6 +262,8 @@ function SubscribePage() {
         selected={selectedPlan}
         onSelect={selectPlan}
         disabled={isAttaching}
+        prices={prices}
+        hiddenTiers={hiddenTiers}
       />
 
       <div className="mx-auto w-full max-w-md space-y-4">
@@ -271,9 +286,7 @@ function SubscribePage() {
           ) : (
             <>
               Subscribe to {PLAN_TIER_LABELS[selectedPlan]}
-              <span className="opacity-70">
-                ${PLAN_PRICES_USD[selectedPlan]}/mo
-              </span>
+              <span className="opacity-70">${prices[selectedPlan]}/mo</span>
             </>
           )}
         </button>

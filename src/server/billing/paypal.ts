@@ -201,6 +201,26 @@ export const paypal = {
           payment_failure_threshold: 3,
         },
       }),
+
+    /** Update a plan's monthly price (what PayPal actually charges). */
+    updatePricingScheme: (planId: string, monthlyPriceCents: number) =>
+      paypalRequest<void>(
+        "POST",
+        `/v1/billing/plans/${planId}/update-pricing-scheme`,
+        {
+          pricing_schemes: [
+            {
+              billing_cycle_sequence: 1,
+              pricing_scheme: {
+                fixed_price: {
+                  value: (monthlyPriceCents / 100).toFixed(2),
+                  currency_code: "USD",
+                },
+              },
+            },
+          ],
+        },
+      ),
   },
 
   /** Subscription lifecycle. */
@@ -253,6 +273,7 @@ export const paypal = {
       cert_url: string;
       actual_sig: string;
       webhook_event: unknown;
+      webhook_id: string;
     }) =>
       paypalRequest<{ verification_status: string }>(
         "POST",
@@ -262,7 +283,7 @@ export const paypal = {
           cert_url: args.cert_url,
           transmission_id: args.transmission_id,
           transmission_time: args.transmission_time,
-          webhook_id: "", // validated externally via PAYPAL_WEBHOOK_ID
+          webhook_id: args.webhook_id,
           webhook_event: args.webhook_event,
           expected_signature: args.actual_sig,
         },

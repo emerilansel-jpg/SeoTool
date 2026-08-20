@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { betterAuth } from "better-auth";
 import { APIError } from "better-auth/api";
-import { captcha, twoFactor } from "better-auth/plugins";
+import { admin, captcha, twoFactor } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { isDisposableEmailDomain } from "@/server/auth/disposable-email";
@@ -89,6 +89,13 @@ function createAuth() {
     database,
     plugins: [
       ...baseAuthConfig.plugins,
+      // User management toolbox for the platform admin area. Its HTTP
+      // endpoints stay locked because no DB user carries the admin role:
+      // platform authority remains the PLATFORM_ADMIN_USER_IDS env allowlist,
+      // and the admin UI goes through requirePlatformAdmin-guarded server
+      // functions that write the ban columns directly. The plugin supplies the
+      // getSession enforcement that rejects banned users.
+      admin(),
       ...(turnstileSecretKey
         ? [
             captcha({

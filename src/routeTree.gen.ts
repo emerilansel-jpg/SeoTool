@@ -14,11 +14,17 @@ import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as ProjectRouteRouteImport } from './routes/_project/route'
+import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
+import { Route as DpaRouteImport } from './routes/dpa'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as Char91DotwellKnownChar93OpenaiAppsChallengeRouteImport } from './routes/[.well-known]/openai-apps-challenge'
+import { Route as AppAdminRouteRouteImport } from './routes/_app/admin/route'
 import { Route as AppAiRouteImport } from './routes/_app/ai'
 import { Route as AppBillingRouteImport } from './routes/_app/billing'
 import { Route as AppProjectsRouteImport } from './routes/_app/projects'
@@ -31,6 +37,9 @@ import { Route as AuthenticatedOauthConsentRouteImport } from './routes/_authent
 import { Route as AuthenticatedSubscribeRouteImport } from './routes/_authenticated.subscribe'
 import { Route as ApiAiVisibilityRouteImport } from './routes/api/ai-visibility'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as BlogsIndexRouteImport } from './routes/blogs/index'
+import { Route as BlogsSlugRouteImport } from './routes/blogs/$slug'
+import { Route as PagesSlugRouteImport } from './routes/pages/$slug'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as AppHelpDataforseoApiKeyRouteImport } from './routes/_app/help/dataforseo-api-key'
 import { Route as AppHelpOpenrouterApiKeyRouteImport } from './routes/_app/help/openrouter-api-key'
@@ -38,6 +47,17 @@ import { Route as AuthenticatedOnboardingIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedOnboardingChatRouteImport } from './routes/_authenticated.onboarding.chat'
 import { Route as ProjectPProjectIdRouteRouteImport } from './routes/_project/p/$projectId/route'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AppAdminApiKeysIndexRouteImport } from './routes/_app/admin/api-keys/index'
+import { Route as AppAdminBillingIndexRouteImport } from './routes/_app/admin/billing/index'
+import { Route as AppAdminBlogIndexRouteImport } from './routes/_app/admin/blog/index'
+import { Route as AppAdminBlogPostIdRouteImport } from './routes/_app/admin/blog/$postId'
+import { Route as AppAdminBlogNewRouteImport } from './routes/_app/admin/blog/new'
+import { Route as AppAdminPagesIndexRouteImport } from './routes/_app/admin/pages/index'
+import { Route as AppAdminPagesPostIdRouteImport } from './routes/_app/admin/pages/$postId'
+import { Route as AppAdminPagesNewRouteImport } from './routes/_app/admin/pages/new'
+import { Route as AppAdminPricingIndexRouteImport } from './routes/_app/admin/pricing/index'
+import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
+import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
 import { Route as ProjectPProjectIdIndexRouteImport } from './routes/_project/p/$projectId/index'
 import { Route as ProjectPProjectIdAuditRouteImport } from './routes/_project/p/$projectId/audit'
 import { Route as ProjectPProjectIdBacklinksRouteImport } from './routes/_project/p/$projectId/backlinks'
@@ -92,6 +112,16 @@ const ProjectRouteRoute = ProjectRouteRouteImport.update({
   id: '/_project',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CookiePolicyRoute = CookiePolicyRouteImport.update({
+  id: '/cookie-policy',
+  path: '/cookie-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DpaRoute = DpaRouteImport.update({
+  id: '/dpa',
+  path: '/dpa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
@@ -102,9 +132,24 @@ const PricingRoute = PricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
+  id: '/terms-and-conditions',
+  path: '/terms-and-conditions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
@@ -118,6 +163,11 @@ const Char91DotwellKnownChar93OpenaiAppsChallengeRoute =
     path: '/.well-known/openai-apps-challenge',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AppAdminRouteRoute = AppAdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppAiRoute = AppAiRouteImport.update({
   id: '/ai',
   path: '/ai',
@@ -180,10 +230,25 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
   path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogsIndexRoute = BlogsIndexRouteImport.update({
+  id: '/blogs/',
+  path: '/blogs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogsSlugRoute = BlogsSlugRouteImport.update({
+  id: '/blogs/$slug',
+  path: '/blogs/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PagesSlugRoute = PagesSlugRouteImport.update({
+  id: '/pages/$slug',
+  path: '/pages/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
-  id: '/admin/',
-  path: '/admin/',
-  getParentRoute: () => AppRouteRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppAdminRouteRoute,
 } as any)
 const AppHelpDataforseoApiKeyRoute = AppHelpDataforseoApiKeyRouteImport.update({
   id: '/help/dataforseo-api-key',
@@ -216,6 +281,61 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppAdminApiKeysIndexRoute = AppAdminApiKeysIndexRouteImport.update({
+  id: '/api-keys/',
+  path: '/api-keys/',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminBillingIndexRoute = AppAdminBillingIndexRouteImport.update({
+  id: '/billing/',
+  path: '/billing/',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminBlogIndexRoute = AppAdminBlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminBlogPostIdRoute = AppAdminBlogPostIdRouteImport.update({
+  id: '/blog/$postId',
+  path: '/blog/$postId',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminBlogNewRoute = AppAdminBlogNewRouteImport.update({
+  id: '/blog/new',
+  path: '/blog/new',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminPagesIndexRoute = AppAdminPagesIndexRouteImport.update({
+  id: '/pages/',
+  path: '/pages/',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminPagesPostIdRoute = AppAdminPagesPostIdRouteImport.update({
+  id: '/pages/$postId',
+  path: '/pages/$postId',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminPagesNewRoute = AppAdminPagesNewRouteImport.update({
+  id: '/pages/new',
+  path: '/pages/new',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminPricingIndexRoute = AppAdminPricingIndexRouteImport.update({
+  id: '/pricing/',
+  path: '/pricing/',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminUsersIndexRoute = AppAdminUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminUsersUserIdRoute = AppAdminUsersUserIdRouteImport.update({
+  id: '/users/$userId',
+  path: '/users/$userId',
+  getParentRoute: () => AppAdminRouteRoute,
 } as any)
 const ProjectPProjectIdIndexRoute = ProjectPProjectIdIndexRouteImport.update({
   id: '/',
@@ -405,10 +525,16 @@ const ProjectPProjectIdStrategyBriefsBriefIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cookie-policy': typeof CookiePolicyRoute
+  '/dpa': typeof DpaRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/admin': typeof AppAdminRouteRouteWithChildren
   '/.well-known/openai-apps-challenge': typeof Char91DotwellKnownChar93OpenaiAppsChallengeRoute
   '/ai': typeof AppAiRoute
   '/billing': typeof AppBillingRoute
@@ -422,6 +548,9 @@ export interface FileRoutesByFullPath {
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/api/ai-visibility': typeof ApiAiVisibilityRoute
   '/api/health': typeof ApiHealthRoute
+  '/blogs/$slug': typeof BlogsSlugRoute
+  '/pages/$slug': typeof PagesSlugRoute
+  '/blogs/': typeof BlogsIndexRoute
   '/p/$projectId': typeof ProjectPProjectIdRouteRouteWithChildren
   '/help/dataforseo-api-key': typeof AppHelpDataforseoApiKeyRoute
   '/help/openrouter-api-key': typeof AppHelpOpenrouterApiKeyRoute
@@ -430,6 +559,11 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AppAdminIndexRoute
   '/onboarding/': typeof AuthenticatedOnboardingIndexRoute
   '/p/$projectId/reports': typeof ProjectPProjectIdReportsRouteRouteWithChildren
+  '/admin/blog/$postId': typeof AppAdminBlogPostIdRoute
+  '/admin/blog/new': typeof AppAdminBlogNewRoute
+  '/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
+  '/admin/pages/new': typeof AppAdminPagesNewRoute
+  '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/p/$projectId/audit': typeof ProjectPProjectIdAuditRouteWithChildren
   '/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
@@ -451,6 +585,12 @@ export interface FileRoutesByFullPath {
   '/p/$projectId/sitemap-validator': typeof ProjectPProjectIdSitemapValidatorRoute
   '/api/ga4/oauth/callback': typeof ApiGa4OauthCallbackRoute
   '/api/gsc/oauth/callback': typeof ApiGscOauthCallbackRoute
+  '/admin/api-keys/': typeof AppAdminApiKeysIndexRoute
+  '/admin/billing/': typeof AppAdminBillingIndexRoute
+  '/admin/blog/': typeof AppAdminBlogIndexRoute
+  '/admin/pages/': typeof AppAdminPagesIndexRoute
+  '/admin/pricing/': typeof AppAdminPricingIndexRoute
+  '/admin/users/': typeof AppAdminUsersIndexRoute
   '/p/$projectId/': typeof ProjectPProjectIdIndexRoute
   '/p/$projectId/rank-tracking/$configId': typeof ProjectPProjectIdRankTrackingConfigIdRoute
   '/p/$projectId/reports/$reportId': typeof ProjectPProjectIdReportsReportIdRoute
@@ -464,9 +604,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cookie-policy': typeof CookiePolicyRoute
+  '/dpa': typeof DpaRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/verify-email': typeof VerifyEmailRoute
   '/.well-known/openai-apps-challenge': typeof Char91DotwellKnownChar93OpenaiAppsChallengeRoute
   '/ai': typeof AppAiRoute
@@ -481,12 +626,20 @@ export interface FileRoutesByTo {
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/api/ai-visibility': typeof ApiAiVisibilityRoute
   '/api/health': typeof ApiHealthRoute
+  '/blogs/$slug': typeof BlogsSlugRoute
+  '/pages/$slug': typeof PagesSlugRoute
+  '/blogs': typeof BlogsIndexRoute
   '/help/dataforseo-api-key': typeof AppHelpDataforseoApiKeyRoute
   '/help/openrouter-api-key': typeof AppHelpOpenrouterApiKeyRoute
   '/onboarding/chat': typeof AuthenticatedOnboardingChatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin': typeof AppAdminIndexRoute
   '/onboarding': typeof AuthenticatedOnboardingIndexRoute
+  '/admin/blog/$postId': typeof AppAdminBlogPostIdRoute
+  '/admin/blog/new': typeof AppAdminBlogNewRoute
+  '/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
+  '/admin/pages/new': typeof AppAdminPagesNewRoute
+  '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
   '/p/$projectId/content-gap': typeof ProjectPProjectIdContentGapRoute
@@ -506,6 +659,12 @@ export interface FileRoutesByTo {
   '/p/$projectId/sitemap-validator': typeof ProjectPProjectIdSitemapValidatorRoute
   '/api/ga4/oauth/callback': typeof ApiGa4OauthCallbackRoute
   '/api/gsc/oauth/callback': typeof ApiGscOauthCallbackRoute
+  '/admin/api-keys': typeof AppAdminApiKeysIndexRoute
+  '/admin/billing': typeof AppAdminBillingIndexRoute
+  '/admin/blog': typeof AppAdminBlogIndexRoute
+  '/admin/pages': typeof AppAdminPagesIndexRoute
+  '/admin/pricing': typeof AppAdminPricingIndexRoute
+  '/admin/users': typeof AppAdminUsersIndexRoute
   '/p/$projectId': typeof ProjectPProjectIdIndexRoute
   '/p/$projectId/rank-tracking/$configId': typeof ProjectPProjectIdRankTrackingConfigIdRoute
   '/p/$projectId/reports/$reportId': typeof ProjectPProjectIdReportsReportIdRoute
@@ -524,10 +683,16 @@ export interface FileRoutesById {
   '/_project': typeof ProjectRouteRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/cookie-policy': typeof CookiePolicyRoute
+  '/dpa': typeof DpaRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/_app/admin': typeof AppAdminRouteRouteWithChildren
   '/.well-known/openai-apps-challenge': typeof Char91DotwellKnownChar93OpenaiAppsChallengeRoute
   '/_app/ai': typeof AppAiRoute
   '/_app/billing': typeof AppBillingRoute
@@ -541,6 +706,9 @@ export interface FileRoutesById {
   '/_authenticated/subscribe': typeof AuthenticatedSubscribeRoute
   '/api/ai-visibility': typeof ApiAiVisibilityRoute
   '/api/health': typeof ApiHealthRoute
+  '/blogs/$slug': typeof BlogsSlugRoute
+  '/pages/$slug': typeof PagesSlugRoute
+  '/blogs/': typeof BlogsIndexRoute
   '/_project/p/$projectId': typeof ProjectPProjectIdRouteRouteWithChildren
   '/_app/help/dataforseo-api-key': typeof AppHelpDataforseoApiKeyRoute
   '/_app/help/openrouter-api-key': typeof AppHelpOpenrouterApiKeyRoute
@@ -549,6 +717,11 @@ export interface FileRoutesById {
   '/_app/admin/': typeof AppAdminIndexRoute
   '/_authenticated/onboarding/': typeof AuthenticatedOnboardingIndexRoute
   '/_project/p/$projectId/reports': typeof ProjectPProjectIdReportsRouteRouteWithChildren
+  '/_app/admin/blog/$postId': typeof AppAdminBlogPostIdRoute
+  '/_app/admin/blog/new': typeof AppAdminBlogNewRoute
+  '/_app/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
+  '/_app/admin/pages/new': typeof AppAdminPagesNewRoute
+  '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/_project/p/$projectId/audit': typeof ProjectPProjectIdAuditRouteWithChildren
   '/_project/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/_project/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
@@ -570,6 +743,12 @@ export interface FileRoutesById {
   '/_project/p/$projectId/sitemap-validator': typeof ProjectPProjectIdSitemapValidatorRoute
   '/api/ga4/oauth/callback': typeof ApiGa4OauthCallbackRoute
   '/api/gsc/oauth/callback': typeof ApiGscOauthCallbackRoute
+  '/_app/admin/api-keys/': typeof AppAdminApiKeysIndexRoute
+  '/_app/admin/billing/': typeof AppAdminBillingIndexRoute
+  '/_app/admin/blog/': typeof AppAdminBlogIndexRoute
+  '/_app/admin/pages/': typeof AppAdminPagesIndexRoute
+  '/_app/admin/pricing/': typeof AppAdminPricingIndexRoute
+  '/_app/admin/users/': typeof AppAdminUsersIndexRoute
   '/_project/p/$projectId/': typeof ProjectPProjectIdIndexRoute
   '/_project/p/$projectId/rank-tracking/$configId': typeof ProjectPProjectIdRankTrackingConfigIdRoute
   '/_project/p/$projectId/reports/$reportId': typeof ProjectPProjectIdReportsReportIdRoute
@@ -585,10 +764,16 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/cookie-policy'
+    | '/dpa'
     | '/forgot-password'
     | '/pricing'
+    | '/privacy'
+    | '/refund-policy'
     | '/reset-password'
+    | '/terms-and-conditions'
     | '/verify-email'
+    | '/admin'
     | '/.well-known/openai-apps-challenge'
     | '/ai'
     | '/billing'
@@ -602,6 +787,9 @@ export interface FileRouteTypes {
     | '/subscribe'
     | '/api/ai-visibility'
     | '/api/health'
+    | '/blogs/$slug'
+    | '/pages/$slug'
+    | '/blogs/'
     | '/p/$projectId'
     | '/help/dataforseo-api-key'
     | '/help/openrouter-api-key'
@@ -610,6 +798,11 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/onboarding/'
     | '/p/$projectId/reports'
+    | '/admin/blog/$postId'
+    | '/admin/blog/new'
+    | '/admin/pages/$postId'
+    | '/admin/pages/new'
+    | '/admin/users/$userId'
     | '/p/$projectId/audit'
     | '/p/$projectId/backlinks'
     | '/p/$projectId/brand-lookup'
@@ -631,6 +824,12 @@ export interface FileRouteTypes {
     | '/p/$projectId/sitemap-validator'
     | '/api/ga4/oauth/callback'
     | '/api/gsc/oauth/callback'
+    | '/admin/api-keys/'
+    | '/admin/billing/'
+    | '/admin/blog/'
+    | '/admin/pages/'
+    | '/admin/pricing/'
+    | '/admin/users/'
     | '/p/$projectId/'
     | '/p/$projectId/rank-tracking/$configId'
     | '/p/$projectId/reports/$reportId'
@@ -644,9 +843,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/cookie-policy'
+    | '/dpa'
     | '/forgot-password'
     | '/pricing'
+    | '/privacy'
+    | '/refund-policy'
     | '/reset-password'
+    | '/terms-and-conditions'
     | '/verify-email'
     | '/.well-known/openai-apps-challenge'
     | '/ai'
@@ -661,12 +865,20 @@ export interface FileRouteTypes {
     | '/subscribe'
     | '/api/ai-visibility'
     | '/api/health'
+    | '/blogs/$slug'
+    | '/pages/$slug'
+    | '/blogs'
     | '/help/dataforseo-api-key'
     | '/help/openrouter-api-key'
     | '/onboarding/chat'
     | '/api/auth/$'
     | '/admin'
     | '/onboarding'
+    | '/admin/blog/$postId'
+    | '/admin/blog/new'
+    | '/admin/pages/$postId'
+    | '/admin/pages/new'
+    | '/admin/users/$userId'
     | '/p/$projectId/backlinks'
     | '/p/$projectId/brand-lookup'
     | '/p/$projectId/content-gap'
@@ -686,6 +898,12 @@ export interface FileRouteTypes {
     | '/p/$projectId/sitemap-validator'
     | '/api/ga4/oauth/callback'
     | '/api/gsc/oauth/callback'
+    | '/admin/api-keys'
+    | '/admin/billing'
+    | '/admin/blog'
+    | '/admin/pages'
+    | '/admin/pricing'
+    | '/admin/users'
     | '/p/$projectId'
     | '/p/$projectId/rank-tracking/$configId'
     | '/p/$projectId/reports/$reportId'
@@ -703,10 +921,16 @@ export interface FileRouteTypes {
     | '/_project'
     | '/_auth'
     | '/_authenticated'
+    | '/cookie-policy'
+    | '/dpa'
     | '/forgot-password'
     | '/pricing'
+    | '/privacy'
+    | '/refund-policy'
     | '/reset-password'
+    | '/terms-and-conditions'
     | '/verify-email'
+    | '/_app/admin'
     | '/.well-known/openai-apps-challenge'
     | '/_app/ai'
     | '/_app/billing'
@@ -720,6 +944,9 @@ export interface FileRouteTypes {
     | '/_authenticated/subscribe'
     | '/api/ai-visibility'
     | '/api/health'
+    | '/blogs/$slug'
+    | '/pages/$slug'
+    | '/blogs/'
     | '/_project/p/$projectId'
     | '/_app/help/dataforseo-api-key'
     | '/_app/help/openrouter-api-key'
@@ -728,6 +955,11 @@ export interface FileRouteTypes {
     | '/_app/admin/'
     | '/_authenticated/onboarding/'
     | '/_project/p/$projectId/reports'
+    | '/_app/admin/blog/$postId'
+    | '/_app/admin/blog/new'
+    | '/_app/admin/pages/$postId'
+    | '/_app/admin/pages/new'
+    | '/_app/admin/users/$userId'
     | '/_project/p/$projectId/audit'
     | '/_project/p/$projectId/backlinks'
     | '/_project/p/$projectId/brand-lookup'
@@ -749,6 +981,12 @@ export interface FileRouteTypes {
     | '/_project/p/$projectId/sitemap-validator'
     | '/api/ga4/oauth/callback'
     | '/api/gsc/oauth/callback'
+    | '/_app/admin/api-keys/'
+    | '/_app/admin/billing/'
+    | '/_app/admin/blog/'
+    | '/_app/admin/pages/'
+    | '/_app/admin/pricing/'
+    | '/_app/admin/users/'
     | '/_project/p/$projectId/'
     | '/_project/p/$projectId/rank-tracking/$configId'
     | '/_project/p/$projectId/reports/$reportId'
@@ -767,13 +1005,21 @@ export interface RootRouteChildren {
   ProjectRouteRoute: typeof ProjectRouteRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  CookiePolicyRoute: typeof CookiePolicyRoute
+  DpaRoute: typeof DpaRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
+  RefundPolicyRoute: typeof RefundPolicyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  TermsAndConditionsRoute: typeof TermsAndConditionsRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
   Char91DotwellKnownChar93OpenaiAppsChallengeRoute: typeof Char91DotwellKnownChar93OpenaiAppsChallengeRoute
   ApiAiVisibilityRoute: typeof ApiAiVisibilityRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  BlogsSlugRoute: typeof BlogsSlugRoute
+  PagesSlugRoute: typeof PagesSlugRoute
+  BlogsIndexRoute: typeof BlogsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiGa4OauthCallbackRoute: typeof ApiGa4OauthCallbackRoute
   ApiGscOauthCallbackRoute: typeof ApiGscOauthCallbackRoute
@@ -816,6 +1062,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cookie-policy': {
+      id: '/cookie-policy'
+      path: '/cookie-policy'
+      fullPath: '/cookie-policy'
+      preLoaderRoute: typeof CookiePolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dpa': {
+      id: '/dpa'
+      path: '/dpa'
+      fullPath: '/dpa'
+      preLoaderRoute: typeof DpaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forgot-password': {
       id: '/forgot-password'
       path: '/forgot-password'
@@ -830,11 +1090,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms-and-conditions': {
+      id: '/terms-and-conditions'
+      path: '/terms-and-conditions'
+      fullPath: '/terms-and-conditions'
+      preLoaderRoute: typeof TermsAndConditionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/verify-email': {
@@ -850,6 +1131,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/.well-known/openai-apps-challenge'
       preLoaderRoute: typeof Char91DotwellKnownChar93OpenaiAppsChallengeRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/admin': {
+      id: '/_app/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AppAdminRouteRouteImport
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/ai': {
       id: '/_app/ai'
@@ -935,12 +1223,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blogs/': {
+      id: '/blogs/'
+      path: '/blogs'
+      fullPath: '/blogs/'
+      preLoaderRoute: typeof BlogsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blogs/$slug': {
+      id: '/blogs/$slug'
+      path: '/blogs/$slug'
+      fullPath: '/blogs/$slug'
+      preLoaderRoute: typeof BlogsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pages/$slug': {
+      id: '/pages/$slug'
+      path: '/pages/$slug'
+      fullPath: '/pages/$slug'
+      preLoaderRoute: typeof PagesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/admin/': {
       id: '/_app/admin/'
-      path: '/admin'
+      path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AppAdminIndexRouteImport
-      parentRoute: typeof AppRouteRoute
+      parentRoute: typeof AppAdminRouteRoute
     }
     '/_app/help/dataforseo-api-key': {
       id: '/_app/help/dataforseo-api-key'
@@ -983,6 +1292,83 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/admin/api-keys/': {
+      id: '/_app/admin/api-keys/'
+      path: '/api-keys'
+      fullPath: '/admin/api-keys/'
+      preLoaderRoute: typeof AppAdminApiKeysIndexRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/billing/': {
+      id: '/_app/admin/billing/'
+      path: '/billing'
+      fullPath: '/admin/billing/'
+      preLoaderRoute: typeof AppAdminBillingIndexRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/blog/': {
+      id: '/_app/admin/blog/'
+      path: '/blog'
+      fullPath: '/admin/blog/'
+      preLoaderRoute: typeof AppAdminBlogIndexRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/blog/$postId': {
+      id: '/_app/admin/blog/$postId'
+      path: '/blog/$postId'
+      fullPath: '/admin/blog/$postId'
+      preLoaderRoute: typeof AppAdminBlogPostIdRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/blog/new': {
+      id: '/_app/admin/blog/new'
+      path: '/blog/new'
+      fullPath: '/admin/blog/new'
+      preLoaderRoute: typeof AppAdminBlogNewRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/pages/': {
+      id: '/_app/admin/pages/'
+      path: '/pages'
+      fullPath: '/admin/pages/'
+      preLoaderRoute: typeof AppAdminPagesIndexRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/pages/$postId': {
+      id: '/_app/admin/pages/$postId'
+      path: '/pages/$postId'
+      fullPath: '/admin/pages/$postId'
+      preLoaderRoute: typeof AppAdminPagesPostIdRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/pages/new': {
+      id: '/_app/admin/pages/new'
+      path: '/pages/new'
+      fullPath: '/admin/pages/new'
+      preLoaderRoute: typeof AppAdminPagesNewRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/pricing/': {
+      id: '/_app/admin/pricing/'
+      path: '/pricing'
+      fullPath: '/admin/pricing/'
+      preLoaderRoute: typeof AppAdminPricingIndexRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/users/': {
+      id: '/_app/admin/users/'
+      path: '/users'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AppAdminUsersIndexRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/users/$userId': {
+      id: '/_app/admin/users/$userId'
+      path: '/users/$userId'
+      fullPath: '/admin/users/$userId'
+      preLoaderRoute: typeof AppAdminUsersUserIdRouteImport
+      parentRoute: typeof AppAdminRouteRoute
     }
     '/_project/p/$projectId/': {
       id: '/_project/p/$projectId/'
@@ -1211,7 +1597,42 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppAdminRouteRouteChildren {
+  AppAdminIndexRoute: typeof AppAdminIndexRoute
+  AppAdminBlogPostIdRoute: typeof AppAdminBlogPostIdRoute
+  AppAdminBlogNewRoute: typeof AppAdminBlogNewRoute
+  AppAdminPagesPostIdRoute: typeof AppAdminPagesPostIdRoute
+  AppAdminPagesNewRoute: typeof AppAdminPagesNewRoute
+  AppAdminUsersUserIdRoute: typeof AppAdminUsersUserIdRoute
+  AppAdminApiKeysIndexRoute: typeof AppAdminApiKeysIndexRoute
+  AppAdminBillingIndexRoute: typeof AppAdminBillingIndexRoute
+  AppAdminBlogIndexRoute: typeof AppAdminBlogIndexRoute
+  AppAdminPagesIndexRoute: typeof AppAdminPagesIndexRoute
+  AppAdminPricingIndexRoute: typeof AppAdminPricingIndexRoute
+  AppAdminUsersIndexRoute: typeof AppAdminUsersIndexRoute
+}
+
+const AppAdminRouteRouteChildren: AppAdminRouteRouteChildren = {
+  AppAdminIndexRoute: AppAdminIndexRoute,
+  AppAdminBlogPostIdRoute: AppAdminBlogPostIdRoute,
+  AppAdminBlogNewRoute: AppAdminBlogNewRoute,
+  AppAdminPagesPostIdRoute: AppAdminPagesPostIdRoute,
+  AppAdminPagesNewRoute: AppAdminPagesNewRoute,
+  AppAdminUsersUserIdRoute: AppAdminUsersUserIdRoute,
+  AppAdminApiKeysIndexRoute: AppAdminApiKeysIndexRoute,
+  AppAdminBillingIndexRoute: AppAdminBillingIndexRoute,
+  AppAdminBlogIndexRoute: AppAdminBlogIndexRoute,
+  AppAdminPagesIndexRoute: AppAdminPagesIndexRoute,
+  AppAdminPricingIndexRoute: AppAdminPricingIndexRoute,
+  AppAdminUsersIndexRoute: AppAdminUsersIndexRoute,
+}
+
+const AppAdminRouteRouteWithChildren = AppAdminRouteRoute._addFileChildren(
+  AppAdminRouteRouteChildren,
+)
+
 interface AppRouteRouteChildren {
+  AppAdminRouteRoute: typeof AppAdminRouteRouteWithChildren
   AppAiRoute: typeof AppAiRoute
   AppBillingRoute: typeof AppBillingRoute
   AppProjectsRoute: typeof AppProjectsRoute
@@ -1219,10 +1640,10 @@ interface AppRouteRouteChildren {
   AppSupportRoute: typeof AppSupportRoute
   AppHelpDataforseoApiKeyRoute: typeof AppHelpDataforseoApiKeyRoute
   AppHelpOpenrouterApiKeyRoute: typeof AppHelpOpenrouterApiKeyRoute
-  AppAdminIndexRoute: typeof AppAdminIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppAdminRouteRoute: AppAdminRouteRouteWithChildren,
   AppAiRoute: AppAiRoute,
   AppBillingRoute: AppBillingRoute,
   AppProjectsRoute: AppProjectsRoute,
@@ -1230,7 +1651,6 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppSupportRoute: AppSupportRoute,
   AppHelpDataforseoApiKeyRoute: AppHelpDataforseoApiKeyRoute,
   AppHelpOpenrouterApiKeyRoute: AppHelpOpenrouterApiKeyRoute,
-  AppAdminIndexRoute: AppAdminIndexRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
@@ -1405,14 +1825,22 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectRouteRoute: ProjectRouteRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  CookiePolicyRoute: CookiePolicyRoute,
+  DpaRoute: DpaRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
+  RefundPolicyRoute: RefundPolicyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  TermsAndConditionsRoute: TermsAndConditionsRoute,
   VerifyEmailRoute: VerifyEmailRoute,
   Char91DotwellKnownChar93OpenaiAppsChallengeRoute:
     Char91DotwellKnownChar93OpenaiAppsChallengeRoute,
   ApiAiVisibilityRoute: ApiAiVisibilityRoute,
   ApiHealthRoute: ApiHealthRoute,
+  BlogsSlugRoute: BlogsSlugRoute,
+  PagesSlugRoute: PagesSlugRoute,
+  BlogsIndexRoute: BlogsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiGa4OauthCallbackRoute: ApiGa4OauthCallbackRoute,
   ApiGscOauthCallbackRoute: ApiGscOauthCallbackRoute,

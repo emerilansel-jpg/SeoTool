@@ -21,6 +21,11 @@ const ensuredUserContextSchema: z.ZodType<EnsuredUserContext> = z.object({
 // capture, and app-shell reads.
 const ALWAYS_ALLOWED_FILES = new Set([
   "src/serverFunctions/account.ts",
+  "src/serverFunctions/admin-billing.ts",
+  "src/serverFunctions/admin-content.ts",
+  "src/serverFunctions/admin-pricing.ts",
+  "src/serverFunctions/admin-settings.ts",
+  "src/serverFunctions/admin-users.ts",
   "src/serverFunctions/analytics.ts",
   "src/serverFunctions/billing.ts",
   "src/serverFunctions/config.ts",

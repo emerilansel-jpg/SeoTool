@@ -1,0 +1,1 @@
+import{j as t,aH as o,aI as e,d as n}from"./main-A4qcfVya.js";import{L as s}from"./library-page-RqW3IM5u.js";const p=()=>t.jsx(s,{title:o.title,description:o.description,crumb:"How to appear in ChatGPT results",children:t.jsx(e,{components:{...n}})});export{p as component};

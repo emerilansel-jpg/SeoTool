@@ -26,9 +26,18 @@ export const Route = createFileRoute("/_app")({
 
 function AppRouteLayout() {
   const authGate = useHostedAuthRouteGuard();
-  useOnboardingRedirect();
-  const paywall = usePaidPlanGuard();
+  const onboarding = useOnboardingRedirect();
 
+  // Paywall guard only fires AFTER onboarding is resolved. If onboarding is
+  // still loading or the user needs to visit /onboarding first, the paywall
+  // guard is inert (onboardingIncomplete=true). This prevents the race
+  // condition where a free user gets stuck on /subscribe without ever seeing
+  // the wizard.
+  const paywall = usePaidPlanGuard(
+    onboarding.isChecking || onboarding.needsOnboarding,
+  );
+
+  // 1. Auth not resolved yet (or not authenticated) -> spinner
   if (!authGate.canRenderAuthenticatedContent) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -37,6 +46,18 @@ function AppRouteLayout() {
     );
   }
 
+  // 2. Auth OK, but onboarding still loading -> spinner (don't render tools
+  //    yet; the onboarding redirect useEffect may fire next tick).
+  if (onboarding.isChecking) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <span className="loading loading-spinner loading-md" />
+      </div>
+    );
+  }
+
+  // 3. Auth OK, but paywall hasn't passed yet -> spinner (paywall useEffect
+  //    will redirect to /subscribe, or we're waiting for plan-tier load).
   if (!paywall.canUseTools) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -45,6 +66,7 @@ function AppRouteLayout() {
     );
   }
 
+  // 4. All guards passed -> render the app.
   return (
     <AuthenticatedAppLayout>
       <Outlet />

@@ -188,6 +188,11 @@ export function isPaidTier(tier: PlanTier): boolean {
   return tier !== "free";
 }
 
+/** Narrows a runtime string (e.g. a DB plan_tier column) to a PlanTier. */
+export function isPlanTier(value: string): value is PlanTier {
+  return (PLAN_TIERS as readonly string[]).includes(value);
+}
+
 /** Returns the limit for a feature on a tier, or Infinity for unlimited. */
 export function getPlanLimit(tier: PlanTier, feature: QuotaFeature): number {
   return PLAN_LIMITS[tier][feature];

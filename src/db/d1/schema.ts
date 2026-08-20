@@ -20,3 +20,4 @@ export * from "../serp-snapshots.schema";
 export * from "../serp-volatility.schema";
 export * from "../notifications.schema";
 export * from "./api-keys.schema";
+export * from "./admin.schema";

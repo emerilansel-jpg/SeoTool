@@ -204,6 +204,20 @@
       "when": 1787186000000,
       "tag": "0028_admin_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1787190000000,
+      "tag": "0029_admin_area",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1787190010000,
+      "tag": "0030_cms_seed",
+      "breakpoints": true
     }
   ]
 }

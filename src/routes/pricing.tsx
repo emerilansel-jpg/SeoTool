@@ -6,6 +6,8 @@ import {
   useMarketingSession,
 } from "@/client/features/marketing/MarketingChrome";
 import { PricingSection } from "@/client/features/marketing/PricingSection";
+import { getEffectivePlanConfigs } from "@/server/billing/plan-config";
+import { PLAN_PRICES_USD, type PlanTier } from "@/shared/plans";
 
 const FAQ_ITEMS = [
   {
@@ -37,6 +39,9 @@ const FAQ_ITEMS = [
 
 function PricingPage() {
   const { signedIn } = useMarketingSession();
+  // Loaded server-side: the effective (admin-editable) prices, so the public
+  // pricing page never disagrees with checkout.
+  const { prices, hiddenTiers } = Route.useLoaderData();
 
   return (
     <MarketingChrome signedIn={signedIn}>
@@ -66,7 +71,11 @@ function PricingPage() {
           </div>
 
           <div className="mt-14">
-            <PricingSection signedIn={signedIn} />
+            <PricingSection
+              signedIn={signedIn}
+              prices={prices}
+              hiddenTiers={hiddenTiers}
+            />
           </div>
 
           <section className="mx-auto mt-24 max-w-3xl">
@@ -128,5 +137,17 @@ function PricingPage() {
 }
 
 export const Route = createFileRoute("/pricing")({
+  loader: async () => {
+    const configs = await getEffectivePlanConfigs();
+    // Seed with the deploy constants so the record is fully typed without a
+    // cast; every tier is then overwritten from the effective config.
+    const prices: Record<PlanTier, number> = { ...PLAN_PRICES_USD };
+    const hiddenTiers: PlanTier[] = [];
+    for (const config of Object.values(configs)) {
+      prices[config.tier] = config.priceUsdCents / 100;
+      if (!config.active) hiddenTiers.push(config.tier);
+    }
+    return { prices, hiddenTiers };
+  },
   component: PricingPage,
 });

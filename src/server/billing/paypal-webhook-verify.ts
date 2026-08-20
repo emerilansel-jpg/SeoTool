@@ -1,4 +1,4 @@
-import { getRequiredEnvValue } from "@/server/lib/runtime-env";
+import { getOptionalEnvValue } from "@/server/lib/runtime-env";
 import { paypal } from "./paypal";
 
 // ---------------------------------------------------------------------------
@@ -48,6 +48,7 @@ export async function verifyWebhookSignature(args: {
       cert_url: args.headers.certUrl,
       actual_sig: args.headers.transmissionSig,
       webhook_event: webhookEvent,
+      webhook_id: (await getOptionalEnvValue("PAYPAL_WEBHOOK_ID")) ?? "",
     });
 
     return result.verification_status === "SUCCESS";

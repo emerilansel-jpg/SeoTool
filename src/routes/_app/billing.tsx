@@ -18,7 +18,8 @@ import { createPaypalTopup } from "@/serverFunctions/paypal-checkout";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { QuotaBar } from "@/client/features/billing/QuotaBar";
-import { PLAN_TIER_LABELS, PLAN_PRICES_USD } from "@/shared/plans";
+import { getEffectivePricesUsd } from "@/server/billing/plan-config";
+import { PLAN_TIER_LABELS } from "@/shared/plans";
 
 export const Route = createFileRoute("/_app/billing")({
   beforeLoad: () => {
@@ -26,10 +27,15 @@ export const Route = createFileRoute("/_app/billing")({
       throw notFound();
     }
   },
+  loader: async () => ({
+    // Effective (admin-editable) prices for the current-plan display.
+    prices: await getEffectivePricesUsd(),
+  }),
   component: BillingPage,
 });
 
 function BillingPage() {
+  const { prices } = Route.useLoaderData();
   const { data: session, isPending: isSessionPending } = useSession();
   const [isPortalLoading, setIsPortalLoading] = useState(false);
   const [isBuyingCredits, setIsBuyingCredits] = useState(false);
@@ -134,7 +140,7 @@ function BillingPage() {
               </span>
             </div>
             <div className="mt-3 text-2xl font-semibold tabular-nums">
-              ${PLAN_PRICES_USD[planTier].toFixed(2)}{" "}
+              ${prices[planTier].toFixed(2)}{" "}
               <span className="text-sm font-normal text-base-content/50">
                 / month
               </span>
