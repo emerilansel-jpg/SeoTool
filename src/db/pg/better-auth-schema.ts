@@ -25,6 +25,16 @@ export const user = pgTable("user", {
     .notNull(),
   analyticsOptedOut: boolean("analytics_opted_out"),
   twoFactorEnabled: boolean("two_factor_enabled"),
+  // Better Auth admin plugin columns. Platform authority stays in the
+  // PLATFORM_ADMIN_USER_IDS env allowlist; nobody is expected to carry
+  // role="admin" in the DB.
+  role: text("role").default("user").notNull(),
+  banned: boolean("banned").default(false).notNull(),
+  banReason: text("ban_reason"),
+  banExpires: timestampColumn("ban_expires"),
+  banCount: integer("ban_count").default(0).notNull(),
+  emailProductUpdates: boolean("email_product_updates"),
+  emailAlertNotifications: boolean("email_alert_notifications"),
 });
 
 export const session = pgTable(
@@ -43,6 +53,7 @@ export const session = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     activeOrganizationId: text("active_organization_id"),
+    impersonatedBy: text("impersonated_by"),
   },
   (table) => [index("session_userId_idx").on(table.userId)],
 );

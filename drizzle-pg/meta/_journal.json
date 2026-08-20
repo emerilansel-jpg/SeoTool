@@ -190,6 +190,20 @@
       "when": 1787170846253,
       "tag": "0026_unique_wolverine",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1787171717058,
+      "tag": "0027_admin_area",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1787172615622,
+      "tag": "0028_cms_seed",
+      "breakpoints": true
     }
   ]
 }

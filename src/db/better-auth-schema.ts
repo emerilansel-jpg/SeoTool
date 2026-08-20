@@ -24,6 +24,18 @@ export const user = sqliteTable("user", {
     .notNull(),
   analyticsOptedOut: integer("analytics_opted_out", { mode: "boolean" }),
   twoFactorEnabled: integer("two_factor_enabled", { mode: "boolean" }),
+  // Better Auth admin plugin columns. Platform authority stays in the
+  // PLATFORM_ADMIN_USER_IDS env allowlist; nobody is expected to carry
+  // role="admin" in the DB.
+  role: text("role").default("user").notNull(),
+  banned: integer("banned", { mode: "boolean" }).default(false).notNull(),
+  banReason: text("ban_reason"),
+  banExpires: integer("ban_expires", { mode: "timestamp_ms" }),
+  banCount: integer("ban_count").default(0).notNull(),
+  emailProductUpdates: integer("email_product_updates", { mode: "boolean" }),
+  emailAlertNotifications: integer("email_alert_notifications", {
+    mode: "boolean",
+  }),
 });
 
 export const session = sqliteTable(
@@ -44,6 +56,7 @@ export const session = sqliteTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     activeOrganizationId: text("active_organization_id"),
+    impersonatedBy: text("impersonated_by"),
   },
   (table) => [index("session_userId_idx").on(table.userId)],
 );
