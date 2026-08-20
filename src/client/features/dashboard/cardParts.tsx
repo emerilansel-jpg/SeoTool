@@ -4,11 +4,13 @@
 // design system.
 export function CardShell({
   title,
+  icon,
   stamp,
   action,
   children,
 }: {
   title: string;
+  icon?: React.ReactNode;
   stamp?: string;
   action?: React.ReactNode;
   children: React.ReactNode;
@@ -16,9 +18,12 @@ export function CardShell({
   return (
     <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-xs transition-all duration-200 hover:border-base-content/20 hover:shadow-md">
       <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-base-300/80 bg-base-200/20">
-        <h2 className="text-sm font-bold tracking-tight text-base-content leading-tight">
-          {title}
-        </h2>
+        <div className="flex items-center gap-2.5 min-w-0">
+          {icon ? <div className="shrink-0">{icon}</div> : null}
+          <h2 className="text-sm font-bold tracking-tight text-base-content leading-tight truncate">
+            {title}
+          </h2>
+        </div>
         {action}
       </div>
       <div className="p-5">
@@ -66,7 +71,7 @@ export function Stat({
         ? "text-rose-500"
         : "text-base-content";
   return (
-    <div className="rounded-xl border border-base-300/60 bg-base-200/30 p-3">
+    <div className="rounded-xl border border-base-300/60 bg-base-200/30 p-3.5 transition-colors hover:bg-base-200/50">
       <p className="text-[11px] font-bold uppercase tracking-wider text-base-content/50">
         {label}
       </p>

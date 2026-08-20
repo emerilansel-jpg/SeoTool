@@ -33,7 +33,7 @@ export default defineConfig({
       VITE_E2E_KEYWORD_FIXTURES: "1",
       PORT: "3101",
     },
-    reuseExistingServer: false,
+    reuseExistingServer: true,
     timeout: 180_000,
   },
 });

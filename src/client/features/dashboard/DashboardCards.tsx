@@ -1,9 +1,10 @@
 /* eslint-disable max-lines */
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Check } from "lucide-react";
+import { BarChart3, Check, ClipboardCheck, Link2, Target } from "lucide-react";
 import { SearchConsoleConnectionCard } from "@/client/features/gsc/SearchConsoleConnectionCard";
 import { Ga4ConnectionCard } from "@/client/features/ga4/Ga4ConnectionCard";
+import { GoogleGlyphMuted } from "@/client/features/gsc/GoogleGlyph";
 import { AUDIT_ISSUE_TYPES } from "@/shared/audit-issues";
 
 import {
@@ -65,7 +66,8 @@ export function GscCard({
 
   return (
     <CardShell
-      title="Search performance"
+      title="Search Performance"
+      icon={<GoogleGlyphMuted className="size-4" />}
       stamp="Google Search Console · last 28 days"
       action={
         <Link
@@ -150,7 +152,8 @@ export function Ga4Card({ projectId }: { projectId: string }) {
 
   return (
     <CardShell
-      title="Traffic"
+      title="Traffic & Visitors"
+      icon={<BarChart3 className="size-4 text-cyan-500" />}
       stamp="Google Analytics 4 · last 28 days"
       action={
         <Link
@@ -217,7 +220,10 @@ export function AuditHealthCard({
 }) {
   if (!audit) {
     return (
-      <CardShell title="Site audit">
+      <CardShell
+        title="Site Health & Audit"
+        icon={<ClipboardCheck className="size-4 text-emerald-500" />}
+      >
         <EmptyCardBody
           message="Crawl your site for broken links, missing tags and indexability problems."
           cta={
@@ -236,7 +242,8 @@ export function AuditHealthCard({
 
   return (
     <CardShell
-      title="Site audit"
+      title="Site Health & Audit"
+      icon={<ClipboardCheck className="size-4 text-emerald-500" />}
       stamp={`Site audit · ${
         audit.status === "completed"
           ? `crawled ${audit.pagesCrawled} pages · ${formatDay(audit.startedAt)}`
@@ -307,7 +314,10 @@ export function ContentCard({ projectId }: { projectId: string }) {
 
   if (summaryQuery.data === null) {
     return (
-      <CardShell title="Content quality">
+      <CardShell
+        title="Content Quality"
+        icon={<Target className="size-4 text-indigo-500" />}
+      >
         <EmptyCardBody
           message="Run a site audit to score every page's content quality."
           cta={
@@ -328,7 +338,10 @@ export function ContentCard({ projectId }: { projectId: string }) {
 
   if (!summary) {
     return (
-      <CardShell title="Content quality">
+      <CardShell
+        title="Content Quality"
+        icon={<Target className="size-4 text-indigo-500" />}
+      >
         <div className="grid grid-cols-2 gap-3" aria-busy>
           {Array.from({ length: 2 }, (_, i) => (
             <div key={i} className="skeleton h-20" />
@@ -340,7 +353,10 @@ export function ContentCard({ projectId }: { projectId: string }) {
 
   if (summaryQuery.isError) {
     return (
-      <CardShell title="Content quality">
+      <CardShell
+        title="Content Quality"
+        icon={<Target className="size-4 text-indigo-500" />}
+      >
         <p className="text-sm text-base-content/60">
           Couldn&rsquo;t load content scores. Try again shortly.
         </p>
@@ -350,7 +366,8 @@ export function ContentCard({ projectId }: { projectId: string }) {
 
   return (
     <CardShell
-      title="Content quality"
+      title="Content Quality"
+      icon={<Target className="size-4 text-indigo-500" />}
       stamp={`Content scores · ${formatCount(summary.total)} pages`}
       action={
         <Link
@@ -411,7 +428,11 @@ export function BacklinkPulseCard({
 }) {
   if (!backlinks && refreshing) {
     return (
-      <CardShell title="Backlink pulse" stamp="Taking your first snapshot…">
+      <CardShell
+        title="Backlink Pulse"
+        icon={<Link2 className="size-4 text-cyan-500" />}
+        stamp="Taking your first snapshot…"
+      >
         <div className="grid grid-cols-2 gap-3" aria-busy>
           {Array.from({ length: 4 }, (_, i) => (
             <div key={i} className="skeleton h-20" />
@@ -423,7 +444,10 @@ export function BacklinkPulseCard({
 
   if (!backlinks) {
     return (
-      <CardShell title="Backlink pulse">
+      <CardShell
+        title="Backlink Pulse"
+        icon={<Link2 className="size-4 text-cyan-500" />}
+      >
         <p className="text-sm text-base-content/60">
           We&rsquo;ll snapshot who links to your domain — nothing to set up.
         </p>
@@ -433,7 +457,8 @@ export function BacklinkPulseCard({
 
   return (
     <CardShell
-      title="Backlink pulse"
+      title="Backlink Pulse"
+      icon={<Link2 className="size-4 text-cyan-500" />}
       stamp={`Backlinks · snapshot ${formatDay(backlinks.capturedAt)}${
         refreshing ? " · refreshing…" : ""
       }`}

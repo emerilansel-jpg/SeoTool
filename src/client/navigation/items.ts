@@ -165,8 +165,7 @@ function getProjectNavItems(projectId: string) {
   );
 }
 
-// Grouped by scope: "My Site" is the project's own domain (tracked data),
-// "Research" is point-at-anything lookup tools.
+// Grouped by function: Overview, Keywords & Ranking, Site & Audit, Competitors & Links, Strategy & Reports
 export function getProjectNavGroups(projectId: string) {
   const all = getProjectNavItems(projectId);
   const byPath = (path: (typeof projectNavItems)[number]["to"]) =>
@@ -178,31 +177,41 @@ export function getProjectNavGroups(projectId: string) {
       items: [byPath("/p/$projectId")],
     },
     {
-      label: "Research",
+      label: "Keywords & Ranking",
       items: [
         byPath("/p/$projectId/keywords"),
-        byPath("/p/$projectId/domain"),
-        byPath("/p/$projectId/backlinks"),
-        byPath("/p/$projectId/sitemap-validator"),
-        byPath("/p/$projectId/on-page-checker"),
+        byPath("/p/$projectId/saved"),
+        byPath("/p/$projectId/rank-tracking"),
         byPath("/p/$projectId/keyword-clustering"),
-        byPath("/p/$projectId/link-intersect"),
-        byPath("/p/$projectId/brand-lookup"),
-        byPath("/p/$projectId/prompt-explorer"),
       ],
     },
     {
-      label: "My Site",
+      label: "Site & Audit",
       items: [
+        byPath("/p/$projectId/audit"),
         byPath("/p/$projectId/search-performance"),
         byPath("/p/$projectId/ga4-insights"),
-        byPath("/p/$projectId/rank-tracking"),
-        byPath("/p/$projectId/saved"),
-        byPath("/p/$projectId/audit"),
-        byPath("/p/$projectId/content-gap"),
-        byPath("/p/$projectId/strategy"),
+        byPath("/p/$projectId/on-page-checker"),
+        byPath("/p/$projectId/sitemap-validator"),
         byPath("/p/$projectId/crawl-budget"),
+      ],
+    },
+    {
+      label: "Competitors & Links",
+      items: [
+        byPath("/p/$projectId/domain"),
+        byPath("/p/$projectId/backlinks"),
+        byPath("/p/$projectId/content-gap"),
+        byPath("/p/$projectId/link-intersect"),
         byPath("/p/$projectId/serp-volatility"),
+      ],
+    },
+    {
+      label: "Strategy & Reports",
+      items: [
+        byPath("/p/$projectId/strategy"),
+        byPath("/p/$projectId/brand-lookup"),
+        byPath("/p/$projectId/prompt-explorer"),
         byPath("/p/$projectId/reports"),
         byPath("/p/$projectId/alerts"),
       ],

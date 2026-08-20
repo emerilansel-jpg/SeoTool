@@ -5,6 +5,7 @@ import {
   type RowSelectionState,
   type SortingState,
 } from "@tanstack/react-table";
+import { Link, useParams } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { useMemo } from "react";
 import { AreaTrendChart } from "@/client/features/keywords/components";
@@ -200,14 +201,35 @@ function SavedKeywordsEmptyState({
 }: {
   hasActiveFilters: boolean;
 }) {
+  const { projectId } = useParams({ strict: false });
   return (
-    <div className="py-12 text-center text-sm text-base-content/55">
-      <Search className="mx-auto mb-2 size-8 opacity-40" />
-      <p>
-        {hasActiveFilters
-          ? "No saved keywords match the current filters."
-          : "No saved keywords yet. Use the Keyword Research page to find and save keywords."}
-      </p>
+    <div className="py-12 text-center space-y-3 max-w-sm mx-auto">
+      <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mx-auto">
+        <Search className="size-6" />
+      </div>
+      <div className="space-y-1">
+        <p className="text-base font-bold text-base-content">
+          {hasActiveFilters
+            ? "No matching saved keywords"
+            : "No saved keywords yet"}
+        </p>
+        <p className="text-sm text-base-content/70 leading-relaxed">
+          {hasActiveFilters
+            ? "Try clearing or adjusting your search filters to see all keywords."
+            : "Save high-intent keywords during research to organize topics and tag campaigns."}
+        </p>
+      </div>
+      {!hasActiveFilters && projectId ? (
+        <div className="pt-2">
+          <Link
+            to="/p/$projectId/keywords"
+            params={{ projectId }}
+            className="btn btn-primary btn-sm font-semibold shadow-xs"
+          >
+            Explore Keywords
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 }

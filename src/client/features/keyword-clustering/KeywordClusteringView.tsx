@@ -29,8 +29,64 @@ export function KeywordClusteringView({ projectId }: { projectId: string }) {
     mutation.mutate(keywords);
   };
 
+  const applyPreset = (list: string[]) => {
+    setKeywordsText(list.join("\n"));
+  };
+
   return (
     <div className="space-y-6">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
+          Presets:
+        </span>
+        <button
+          type="button"
+          onClick={() =>
+            applyPreset([
+              "seo tools",
+              "keyword research",
+              "rank tracker",
+              "backlink checker",
+              "site audit",
+              "serp analysis",
+            ])
+          }
+          className="btn btn-ghost btn-xs rounded-full border border-base-300 bg-base-100 hover:bg-primary/10 hover:text-primary"
+        >
+          SEO & Analytics
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            applyPreset([
+              "saas marketing",
+              "b2b content strategy",
+              "product led growth",
+              "churn reduction",
+              "customer onboarding",
+            ])
+          }
+          className="btn btn-ghost btn-xs rounded-full border border-base-300 bg-base-100 hover:bg-primary/10 hover:text-primary"
+        >
+          SaaS & B2B
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            applyPreset([
+              "ecommerce seo",
+              "shopify seo tips",
+              "product schema markup",
+              "category page seo",
+              "online store traffic",
+            ])
+          }
+          className="btn btn-ghost btn-xs rounded-full border border-base-300 bg-base-100 hover:bg-primary/10 hover:text-primary"
+        >
+          E-Commerce Growth
+        </button>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-3">
         <textarea
           value={keywordsText}
@@ -38,9 +94,9 @@ export function KeywordClusteringView({ projectId }: { projectId: string }) {
           placeholder={
             "Enter keywords, one per line (2-20):\nseo tools\nkeyword research\nbacklink checker\nrank tracker"
           }
-          className="textarea textarea-bordered w-full h-40 font-mono text-sm"
+          className="textarea textarea-bordered w-full h-40 font-mono text-sm bg-base-100 focus:bg-base-100"
         />
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             type="submit"
             className={`btn btn-primary gap-2 ${mutation.isPending ? "loading" : ""}`}
@@ -56,7 +112,7 @@ export function KeywordClusteringView({ projectId }: { projectId: string }) {
             )}
             Cluster Keywords
           </button>
-          <span className="text-xs text-base-content/50">
+          <span className="text-xs text-base-content/60">
             Groups keywords by SERP similarity (Jaccard index)
           </span>
         </div>

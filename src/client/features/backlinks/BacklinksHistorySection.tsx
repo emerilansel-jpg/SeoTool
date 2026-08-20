@@ -21,11 +21,56 @@ export function BacklinksHistorySection({
 
   if (history.length === 0) {
     return (
-      <section className="rounded-2xl border border-dashed border-base-300 bg-base-100/70 p-6 text-center text-base-content/55 space-y-2">
-        <Link2 className="size-9 mx-auto opacity-35" />
-        <p className="text-base font-medium text-base-content/80">
-          Enter a domain or URL to get started
-        </p>
+      <section className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/60 space-y-5">
+        <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mx-auto">
+          <Link2 className="size-7" />
+        </div>
+        <div className="space-y-1.5 max-w-md mx-auto">
+          <p className="text-lg font-bold text-base-content">
+            Enter a domain or URL to get started
+          </p>
+          <p className="text-sm text-base-content/70 leading-relaxed">
+            Discover who links to any website, analyze referring domains,
+            monitor new and lost backlinks, and evaluate anchor text
+            distributions.
+          </p>
+        </div>
+
+        <div className="pt-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-3">
+            Popular targets to check
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2 max-w-lg mx-auto">
+            {[
+              "github.com",
+              "stripe.com",
+              "vercel.com",
+              "linear.app",
+              "notion.so",
+            ].map((target) => (
+              <Link
+                key={target}
+                to="/p/$projectId/backlinks"
+                from="/p/$projectId/backlinks"
+                params={{ projectId }}
+                search={(prev: Record<string, unknown>) => ({
+                  ...prev,
+                  target,
+                  scope: "domain" as const,
+                  tab: undefined,
+                  page: undefined,
+                  sort: undefined,
+                  order: undefined,
+                })}
+                replace
+                className="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-200/60 px-3.5 py-1.5 text-xs font-medium text-base-content/80 transition-all duration-150 hover:border-primary/40 hover:bg-primary/10 hover:text-primary active:scale-95"
+              >
+                <Link2 className="size-3 text-primary/70" />
+                {target}
+              </Link>
+            ))}
+          </div>
+        </div>
       </section>
     );
   }

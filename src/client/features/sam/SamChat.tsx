@@ -116,20 +116,23 @@ export function SamChat({
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
-      <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-        <Wrench className="size-6" />
+    <div className="flex h-full flex-col items-center justify-center gap-6 p-6 text-center max-w-xl mx-auto">
+      <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-xs">
+        <Wrench className="size-7" />
       </div>
-      <div className="space-y-1">
-        <p className="text-lg font-medium">What should we work on?</p>
-        <p className="max-w-sm text-sm text-base-content/60">
-          SAM is your in-app SEO agent with access to every SeoTool.im research
-          tool. Start a chat to get going.
+      <div className="space-y-1.5">
+        <p className="text-xl font-bold text-base-content">
+          What should we work on today?
+        </p>
+        <p className="text-sm text-base-content/70 leading-relaxed max-w-md">
+          SAM is your autonomous AI SEO strategist with full access to your
+          audits, keywords, backlinks, and Search Console data.
         </p>
       </div>
+
       <button
         type="button"
-        className="btn btn-primary btn-sm gap-1"
+        className="btn btn-primary font-semibold shadow-xs gap-2"
         disabled={createSession.isPending}
         onClick={() => createSession.mutate()}
       >
@@ -138,8 +141,33 @@ export function SamChat({
         ) : (
           <Plus className="size-4" />
         )}
-        New chat
+        Start New Conversation
       </button>
+
+      <div className="w-full pt-4 space-y-2.5">
+        <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
+          Example prompts to explore
+        </p>
+        <div className="grid gap-2 text-left">
+          {[
+            "Audit my site for broken links, missing meta tags, and indexing issues",
+            "Find low-competition keyword opportunities for my organic content strategy",
+            "Analyze my top competitor's backlink profile and identify link gaps",
+            "Generate high-intent content topic ideas to rank in Google's top 10",
+          ].map((promptText) => (
+            <button
+              key={promptText}
+              type="button"
+              disabled={createSession.isPending}
+              onClick={() => createSession.mutate()}
+              className="group flex items-center justify-between rounded-xl border border-base-300 bg-base-100 p-3 text-xs font-medium text-base-content/80 transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary active:scale-[0.99]"
+            >
+              <span>{promptText}</span>
+              <Plus className="size-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

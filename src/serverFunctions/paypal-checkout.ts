@@ -67,10 +67,7 @@ export const createPaypalSubscription = createServerFn({ method: "POST" })
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error("[PayPal Subscription Creation Error]:", msg);
-      throw new AppError(
-        "UPSTREAM_UNAVAILABLE",
-        `PayPal Error: ${msg}`,
-      );
+      throw new AppError("UPSTREAM_UNAVAILABLE", `PayPal Error: ${msg}`);
     }
 
     // Find the approval URL

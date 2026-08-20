@@ -32,13 +32,13 @@ interface SidebarProps {
 }
 
 const navItemBaseClass =
-  "relative flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-base-content/70 transition-all duration-150";
+  "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-base-content/75 transition-all duration-150";
 
-const navItemClass = `${navItemBaseClass} hover:bg-base-300/50 hover:text-base-content`;
+const navItemClass = `${navItemBaseClass} hover:bg-base-300/60 hover:text-base-content active:scale-[0.99]`;
 
 const navItemActiveProps = {
   className:
-    "bg-primary/10 hover:bg-primary/15 font-semibold text-primary shadow-sm",
+    "bg-primary/10 hover:bg-primary/15 font-semibold text-primary shadow-xs",
 };
 
 function SidebarNavLink({
@@ -120,14 +120,14 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
   };
 
   return (
-    <div className="flex h-full w-60 flex-col bg-base-200 border-r border-base-300/60">
+    <div className="flex h-full w-64 flex-col bg-base-200 border-r border-base-300/60">
       <div className="flex items-center justify-between px-3.5 pb-2 pt-3.5">
         <Link
           to="/"
           onClick={onNavigate}
-          className="group flex items-center gap-2"
+          className="group flex items-center gap-2.5"
         >
-          <div className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-indigo-600 to-cyan-400 text-xs font-black text-white shadow-sm shadow-primary/30 transition-transform group-hover:scale-105">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-indigo-600 to-cyan-400 text-xs font-black text-white shadow-xs shadow-primary/30 transition-transform group-hover:scale-105">
             S
           </div>
           <span className="text-base font-bold tracking-tight text-base-content">
@@ -180,7 +180,7 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
       {view === "chat" && projectId ? (
         <SamSidebarPanel projectId={projectId} onNavigate={onNavigate} />
       ) : (
-        <nav className="min-h-0 flex-1 overflow-y-auto px-2 py-2 space-y-3">
+        <nav className="min-h-0 flex-1 overflow-y-auto px-2.5 py-2 space-y-4 [scrollbar-width:thin] [scrollbar-color:var(--color-base-300)_transparent]">
           {navGroups.map((group) => (
             <div key={group.label}>
               <div className="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-base-content/45">

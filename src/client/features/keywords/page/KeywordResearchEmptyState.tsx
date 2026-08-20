@@ -123,15 +123,51 @@ function SearchHistoryState({
           </div>
         </section>
       ) : (
-        <section className="rounded-2xl border border-dashed border-base-300 bg-base-100/70 p-6 text-center text-base-content/50 space-y-3">
-          <Search className="size-10 mx-auto opacity-40" />
-          <p className="text-lg font-medium text-base-content/80">
-            Enter a keyword to get started
-          </p>
-          <p className="text-sm max-w-md mx-auto">
-            Search for any keyword to see volume, difficulty, CPC, and related
-            keyword ideas.
-          </p>
+        <section className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/60 space-y-5">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mx-auto">
+            <Search className="size-7" />
+          </div>
+          <div className="space-y-1.5 max-w-md mx-auto">
+            <p className="text-lg font-bold text-base-content">
+              Enter a keyword to get started
+            </p>
+            <p className="text-sm text-base-content/70 leading-relaxed">
+              Discover keyword ideas, monthly search volume, ranking difficulty,
+              CPC, and SERP opportunities.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-3">
+              Popular searches to try
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2 max-w-lg mx-auto">
+              {[
+                "keyword research",
+                "seo tools",
+                "backlinks checker",
+                "site audit",
+                "content marketing",
+                "rank tracking",
+              ].map((seed) => (
+                <Link
+                  key={seed}
+                  from="/p/$projectId/keywords"
+                  to="/p/$projectId/keywords"
+                  params={{ projectId }}
+                  search={{
+                    q: seed,
+                    loc: 2840,
+                  }}
+                  replace
+                  className="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-200/60 px-3.5 py-1.5 text-xs font-medium text-base-content/80 transition-all duration-150 hover:border-primary/40 hover:bg-primary/10 hover:text-primary active:scale-95"
+                >
+                  <Search className="size-3 text-primary/70" />
+                  {seed}
+                </Link>
+              ))}
+            </div>
+          </div>
         </section>
       )}
     </div>

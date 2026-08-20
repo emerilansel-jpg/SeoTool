@@ -60,7 +60,50 @@ export function SitemapValidationView({ projectId }: { projectId: string }) {
         </button>
       </form>
 
-      {mutation.data ? <ValidationReportView report={mutation.data} /> : null}
+      {mutation.data ? (
+        <ValidationReportView report={mutation.data} />
+      ) : (
+        <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/60 space-y-5">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mx-auto">
+            <FileCode className="size-7" />
+          </div>
+          <div className="space-y-1.5 max-w-md mx-auto">
+            <p className="text-lg font-bold text-base-content">
+              Enter a sitemap URL to validate
+            </p>
+            <p className="text-sm text-base-content/70 leading-relaxed">
+              Verify XML format structure, detect broken URL links, uncover
+              duplicate paths, and validate sitemap index trees.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-3">
+              Sample sitemaps to test
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2 max-w-lg mx-auto">
+              {[
+                "https://github.com/sitemap.xml",
+                "https://stripe.com/sitemap.xml",
+                "https://vercel.com/sitemap.xml",
+              ].map((sample) => (
+                <button
+                  key={sample}
+                  type="button"
+                  onClick={() => {
+                    setUrl(sample);
+                    mutation.mutate(sample);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-200/60 px-3.5 py-1.5 text-xs font-medium text-base-content/80 transition-all duration-150 hover:border-primary/40 hover:bg-primary/10 hover:text-primary active:scale-95"
+                >
+                  <FileCode className="size-3 text-primary/70" />
+                  {sample.replace("https://", "")}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

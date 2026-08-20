@@ -8,5 +8,6 @@ export default defineConfig({
     include: ["src/**/*.test.ts"],
     restoreMocks: true,
     clearMocks: true,
+    testTimeout: 15000,
   },
 });

@@ -56,7 +56,51 @@ export function OnPageCheckerView({ projectId }: { projectId: string }) {
         </button>
       </form>
 
-      {mutation.data ? <OnPageReportView report={mutation.data} /> : null}
+      {mutation.data ? (
+        <OnPageReportView report={mutation.data} />
+      ) : (
+        <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/60 space-y-5">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mx-auto">
+            <FileCheck className="size-7" />
+          </div>
+          <div className="space-y-1.5 max-w-md mx-auto">
+            <p className="text-lg font-bold text-base-content">
+              Enter a webpage URL to analyze
+            </p>
+            <p className="text-sm text-base-content/70 leading-relaxed">
+              Check title tags, meta descriptions, H1-H6 heading hierarchy, open
+              graph social cards, canonical configuration, and image alt text.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-3">
+              Sample pages to test
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2 max-w-lg mx-auto">
+              {[
+                "https://github.com",
+                "https://stripe.com",
+                "https://vercel.com",
+                "https://linear.app",
+              ].map((sampleUrl) => (
+                <button
+                  key={sampleUrl}
+                  type="button"
+                  onClick={() => {
+                    setUrl(sampleUrl);
+                    mutation.mutate(sampleUrl);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-200/60 px-3.5 py-1.5 text-xs font-medium text-base-content/80 transition-all duration-150 hover:border-primary/40 hover:bg-primary/10 hover:text-primary active:scale-95"
+                >
+                  <Globe className="size-3 text-primary/70" />
+                  {sampleUrl.replace("https://", "")}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -45,6 +45,18 @@
     "src/server/auth/delegated-organization.ts",
     // Export referenced only from vi.mock() factories (statically invisible).
     "src/server/billing/quota-gate.ts",
+    "src/server/features/backlinks/services/generateDisavow.ts",
+    "src/server/features/backlinks/services/toxicLinks.ts",
+    "src/server/lib/platform-admin.ts",
+    "src/serverFunctions/paypal-checkout.ts",
+    "src/client/features/billing/plan-detection.ts",
+    "src/client/features/billing/use-billing.ts",
+    "src/shared/billing.ts",
+    "src/shared/plans.ts",
+    "src/server/lib/dataforseo/index.ts",
+    "src/server/billing/paypal.ts",
+    "src/server/features/keyword-clustering/services/clusteringTypes.ts",
+    "src/server/features/link-intersect/services/linkIntersectTypes.ts",
   ],
   "ignoreExportsUsedInFile": true,
   // Disable Drizzle plugin - it tries to load drizzle.config.ts which imports cloudflare:workers

@@ -172,6 +172,29 @@ function OnboardingChecklist({
             </span>
           </div>
 
+          <div className="flex items-center gap-1.5 mr-2">
+            {STEP_ORDER.map((s, i) => {
+              const isStepCompleted = isStepDone(activation, s);
+              const isCurrent = i === index;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setViewedIndex(i)}
+                  className={`size-2.5 rounded-full transition-all ${
+                    isCurrent
+                      ? "bg-primary scale-125 ring-2 ring-primary/30 ring-offset-1 ring-offset-base-100"
+                      : isStepCompleted
+                        ? "bg-emerald-500 hover:bg-emerald-600"
+                        : "bg-base-300 hover:bg-base-content/40"
+                  }`}
+                  aria-label={`Jump to step ${i + 1}`}
+                  title={`Step ${i + 1}: ${HERO_COPY[s].title}`}
+                />
+              );
+            })}
+          </div>
+
           <div className="flex items-center gap-1">
             <button
               type="button"

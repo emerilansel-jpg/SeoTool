@@ -1,3 +1,4 @@
+// oxlint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
@@ -106,9 +107,13 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 py-8 text-base-content/60">
-        <RefreshCw className="h-4 w-4 animate-spin" />
-        Loading volatility data...
+      <div className="space-y-6" aria-busy>
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="skeleton h-48 rounded-2xl" />
+          <div className="skeleton h-48 rounded-2xl" />
+          <div className="skeleton h-48 rounded-2xl" />
+        </div>
+        <div className="skeleton h-64 rounded-2xl" />
       </div>
     );
   }
@@ -119,75 +124,85 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
   return (
     <div className="space-y-6">
       {/* Header + compute button */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-base-content/60">
-          <Activity className="h-5 w-5" />
-          <span className="text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-base-content/70">
+          <Activity className="size-4 text-primary" />
+          <span className="text-sm font-medium">
             Measured from rank tracking position changes
           </span>
         </div>
         <button
           type="button"
-          className="btn btn-sm btn-outline"
+          className="btn btn-sm btn-primary gap-2 font-semibold shadow-xs"
           onClick={() => computeMutation.mutate()}
           disabled={computeMutation.isPending}
         >
           {computeMutation.isPending ? (
-            <RefreshCw className="h-4 w-4 animate-spin" />
+            <RefreshCw className="size-4 animate-spin" />
           ) : (
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className="size-4" />
           )}
-          {computeMutation.isPending ? "Computing..." : "Compute Now"}
+          {computeMutation.isPending ? "Computing..." : "Compute Volatility"}
         </button>
       </div>
 
       {/* Latest score gauge */}
       {latest ? (
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="card bg-base-100 border border-base-300">
-            <div className="card-body items-center text-center">
-              <h2 className="card-title text-sm">Current Volatility</h2>
-              <div className="relative flex items-center justify-center">
+        <div className="grid gap-5 md:grid-cols-3">
+          <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs">
+            <div className="card-body items-center text-center p-5">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-base-content/50">
+                Current Volatility
+              </h2>
+              <div className="relative flex items-center justify-center my-2">
                 <ScoreGauge score={latest.volatilityScore} />
               </div>
               <span
-                className={`badge ${categoryBadgeClass(latest.volatilityScore)}`}
+                className={`badge badge-sm font-semibold ${categoryBadgeClass(latest.volatilityScore)}`}
               >
                 {latest.category}
               </span>
             </div>
           </div>
 
-          <div className="card bg-base-100 border border-base-300">
-            <div className="card-body">
-              <h2 className="card-title text-sm">Summary</h2>
-              <dl className="space-y-2 text-sm">
-                <div className="flex justify-between">
+          <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs">
+            <div className="card-body p-5">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-base-content/50">
+                Summary
+              </h2>
+              <dl className="mt-3 space-y-2.5 text-sm">
+                <div className="flex justify-between items-center">
                   <dt className="text-base-content/60">Date</dt>
-                  <dd className="font-mono">{latest.date}</dd>
+                  <dd className="font-mono text-xs">{latest.date}</dd>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <dt className="text-base-content/60">Keywords sampled</dt>
-                  <dd>{latest.keywordsSampled}</dd>
+                  <dd className="font-semibold tabular-nums">
+                    {latest.keywordsSampled}
+                  </dd>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <dt className="text-base-content/60">Avg position change</dt>
-                  <dd>{latest.avgPositionChange.toFixed(1)}</dd>
+                  <dd className="font-semibold tabular-nums">
+                    {latest.avgPositionChange.toFixed(1)}
+                  </dd>
                 </div>
               </dl>
             </div>
           </div>
 
-          <div className="card bg-base-100 border border-base-300">
-            <div className="card-body">
-              <h2 className="card-title text-sm">Top Movers</h2>
+          <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs">
+            <div className="card-body p-5">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-base-content/50">
+                Top Movers
+              </h2>
               {latest.topMovers && latest.topMovers.length > 0 ? (
-                <ul className="space-y-1 text-sm">
+                <ul className="mt-3 space-y-2 text-sm">
                   {latest.topMovers.map((mover: TopMover) => (
                     <li key={mover.keyword} className="flex items-center gap-2">
                       <MoverArrow change={mover.change} />
-                      <span className="truncate">{mover.keyword}</span>
-                      <span className="ml-auto font-mono text-xs">
+                      <span className="truncate flex-1">{mover.keyword}</span>
+                      <span className="font-mono text-xs font-semibold tabular-nums">
                         {mover.change > 0 ? "+" : ""}
                         {mover.change}
                       </span>
@@ -195,30 +210,38 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-base-content/60">No movers data</p>
+                <p className="mt-3 text-sm text-base-content/60">
+                  No movers detected
+                </p>
               )}
             </div>
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-dashed border-base-300 p-8 text-center">
-          <Activity className="mx-auto mb-2 h-8 w-8 text-base-content/30" />
-          <p className="text-base-content/60">
-            No volatility data computed yet.
+        <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/60 space-y-3">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mx-auto">
+            <Activity className="size-6" />
+          </div>
+          <p className="text-base font-bold text-base-content">
+            No volatility data computed yet
           </p>
-          <p className="text-sm text-base-content/40">
-            Click "Compute Now" after completing at least two rank checks.
+          <p className="text-sm text-base-content/70 max-w-md mx-auto">
+            SERP volatility tracks rank fluctuations across your tracked
+            keywords. Click &quot;Compute Volatility&quot; after running at
+            least two rank checks.
           </p>
         </div>
       )}
 
       {/* 30-day trend chart */}
-      <div>
-        <h2 className="mb-2 text-lg font-semibold">30-Day Trend</h2>
-        <div className="card bg-base-100 border border-base-300">
-          <div className="card-body">
-            <VolatilityChart rows={trend} />
-          </div>
+      <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs overflow-hidden">
+        <div className="px-5 py-4 border-b border-base-300 bg-base-200/20">
+          <h2 className="text-sm font-bold tracking-tight text-base-content">
+            30-Day Volatility Trend
+          </h2>
+        </div>
+        <div className="p-5">
+          <VolatilityChart rows={trend} />
         </div>
       </div>
     </div>

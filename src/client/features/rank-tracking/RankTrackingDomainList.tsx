@@ -122,16 +122,29 @@ export function RankTrackingDomainList({
               ))}
             </div>
           ) : allSummaries.length === 0 ? (
-            <div className="px-5 py-10 text-center space-y-2">
-              <div className="mx-auto flex size-10 items-center justify-center rounded-xl bg-base-200">
-                <Globe className="size-5 text-base-content/40" />
+            <div className="px-6 py-12 text-center space-y-4 max-w-md mx-auto">
+              <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <Globe className="size-7" />
               </div>
-              <p className="text-sm font-medium text-base-content/70">
-                No tracked domains yet
-              </p>
-              <p className="text-xs text-base-content/40">
-                Add a domain to start monitoring keyword rankings over time.
-              </p>
+              <div className="space-y-1.5">
+                <p className="text-base font-bold text-base-content">
+                  No tracked domains yet
+                </p>
+                <p className="text-sm text-base-content/70 leading-relaxed">
+                  Track keyword ranking positions daily, monitor algorithm
+                  shifts, and compare visibility against competitors.
+                </p>
+              </div>
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={onAddDomain}
+                  className="btn btn-primary btn-sm gap-1.5 font-semibold shadow-xs"
+                >
+                  <Plus className="size-4" />
+                  Add Your First Domain
+                </button>
+              </div>
             </div>
           ) : filteredSummaries.length === 0 ? (
             <div className="px-5 py-10 text-center space-y-3">
