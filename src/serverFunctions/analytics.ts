@@ -3,7 +3,7 @@ import {
   requireAuthenticatedContext,
   requirePlatformAdmin,
 } from "@/serverFunctions/middleware";
-import { getOptionalEnvValue } from "@/server/lib/runtime-env";
+import { isPlatformAdmin } from "@/server/lib/platform-admin";
 import {
   AnalyticsRepository,
   type AnalyticsOverview,
@@ -16,18 +16,14 @@ export const getAnalyticsOverview = createServerFn({ method: "POST" })
   });
 
 /** Lightweight check for route guards — returns true if the current user is a
- *  platform admin. Keeps admin IDs server-side. */
+ *  platform admin. Keeps admin IDs/emails server-side. */
 export const checkIsPlatformAdmin = createServerFn({ method: "GET" })
   .middleware([requireAuthenticatedContext])
   .handler(async ({ context }) => {
-    const adminIdsRaw = await getOptionalEnvValue("PLATFORM_ADMIN_USER_IDS");
-    const adminIds = adminIdsRaw
-      ? adminIdsRaw
-          .split(",")
-          .map((id) => id.trim())
-          .filter(Boolean)
-      : [];
-    return adminIds.includes(context.userId);
+    return isPlatformAdmin({
+      userId: context.userId,
+      userEmail: context.userEmail,
+    });
   });
 
 export type { AnalyticsOverview };

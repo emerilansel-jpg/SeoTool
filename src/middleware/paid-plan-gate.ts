@@ -6,6 +6,7 @@ import {
   isHostedServerAuthMode,
 } from "@/server/lib/runtime-env";
 import { AppError } from "@/server/lib/errors";
+import { isPlatformAdmin } from "@/server/lib/platform-admin";
 import type { EnsuredUserContext } from "@/middleware/ensure-user/types";
 
 const ensuredUserContextSchema: z.ZodType<EnsuredUserContext> = z.object({
@@ -57,8 +58,8 @@ async function isE2EBypassEnabled(): Promise<boolean> {
 // Hard paywall: in hosted mode, every tool server function requires an
 // active paid plan (lite/pro/agency). The subscription funnel, onboarding,
 // account management, and read-only shell functions stay reachable so the
-// app can render and walk the user to /subscribe. Self-hosted and E2E runs
-// are ungated.
+// app can render and walk the user to /subscribe. Self-hosted, E2E runs,
+// and platform admins are ungated.
 export const paidPlanGateMiddleware = createMiddleware({
   type: "function",
 }).server(async ({ serverFnMeta, context, next }) => {
@@ -72,6 +73,16 @@ export const paidPlanGateMiddleware = createMiddleware({
 
     if (!allowed) {
       const parsed = ensuredUserContextSchema.safeParse(context);
+      if (parsed.success) {
+        const isAdmin = await isPlatformAdmin({
+          userId: parsed.data.userId,
+          userEmail: parsed.data.userEmail,
+        });
+        if (isAdmin) {
+          return next();
+        }
+      }
+
       const organizationId = parsed.success ? parsed.data.organizationId : null;
       if (!organizationId || !(await customerHasPaidPlan(organizationId))) {
         throw new AppError(

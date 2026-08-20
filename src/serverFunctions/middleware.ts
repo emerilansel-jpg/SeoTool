@@ -1,7 +1,7 @@
 import { createMiddleware } from "@tanstack/react-start";
 import { z } from "zod";
 import { AppError } from "@/server/lib/errors";
-import { getOptionalEnvValue } from "@/server/lib/runtime-env";
+import { isPlatformAdmin } from "@/server/lib/platform-admin";
 import { errorHandlingMiddleware } from "@/middleware/errorHandling";
 import { paidPlanGateMiddleware } from "@/middleware/paid-plan-gate";
 import type { EnsuredUserContext } from "@/middleware/ensure-user/types";
@@ -90,8 +90,8 @@ export function requireProjectRole(minRole: Role) {
 }
 
 /**
- * Gate a server function to platform admins only. Reads
- * `PLATFORM_ADMIN_USER_IDS` (comma-separated user IDs from env). Stacks on
+ * Gate a server function to platform admins only. Checks
+ * PLATFORM_ADMIN_EMAILS, PLATFORM_ADMIN_USER_IDS, and built-in admins. Stacks on
  * `requireAuthenticatedContext`:
  * `.middleware([requireAuthenticatedContext, requirePlatformAdmin])`.
  */
@@ -100,18 +100,12 @@ export const requirePlatformAdmin = createMiddleware({
 }).server(async ({ next, context }) => {
   const authenticatedContext = getAuthenticatedContext(context);
 
-  const adminIdsRaw = await getOptionalEnvValue("PLATFORM_ADMIN_USER_IDS");
-  const adminIds = adminIdsRaw
-    ? adminIdsRaw
-        .split(",")
-        .map((id) => id.trim())
-        .filter(Boolean)
-    : [];
+  const isAdmin = await isPlatformAdmin({
+    userId: authenticatedContext.userId,
+    userEmail: authenticatedContext.userEmail,
+  });
 
-  if (
-    adminIds.length === 0 ||
-    !adminIds.includes(authenticatedContext.userId)
-  ) {
+  if (!isAdmin) {
     throw new AppError("FORBIDDEN", "Platform admin access required.");
   }
 

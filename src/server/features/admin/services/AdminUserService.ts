@@ -1,17 +1,6 @@
 import { AppError } from "@/server/lib/errors";
-import { getOptionalEnvValue } from "@/server/lib/runtime-env";
+import { isPlatformAdminId } from "@/server/lib/platform-admin";
 import { AdminUserRepository } from "../repositories/AdminUserRepository";
-
-async function isPlatformAdminId(userId: string): Promise<boolean> {
-  const adminIdsRaw = await getOptionalEnvValue("PLATFORM_ADMIN_USER_IDS");
-  const adminIds = adminIdsRaw
-    ? adminIdsRaw
-        .split(",")
-        .map((id) => id.trim())
-        .filter(Boolean)
-    : [];
-  return adminIds.includes(userId);
-}
 
 export const AdminUserService = {
   async searchUsers(input: {

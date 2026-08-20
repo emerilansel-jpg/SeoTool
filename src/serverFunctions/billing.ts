@@ -1,18 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { AppError } from "@/server/lib/errors";
-import {
-  getRequiredEnvValue,
-  isHostedServerAuthMode,
-} from "@/server/lib/runtime-env";
+import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import { requireAuthenticatedContext } from "@/serverFunctions/middleware";
 import {
   getQuotaState,
   getPlanTier,
 } from "@/server/features/billing/services/QuotaService";
 import { customerHasPaidPlan } from "@/server/billing/subscription";
-import { getCreditBalance } from "@/server/billing/credits";
+import { getCreditBalance, grantMonthlyCredits } from "@/server/billing/credits";
 import { QuotaRepository } from "@/server/features/billing/repositories/QuotaRepository";
+import { isPlatformAdmin } from "@/server/lib/platform-admin";
 import { paypal } from "@/server/billing/paypal";
 
 const billingUsageRangeSchema = z.object({
@@ -37,7 +35,7 @@ export type BillingUsageEvent = {
 export const getBillingUsageEvents = createServerFn({ method: "POST" })
   .middleware([requireAuthenticatedContext])
   .validator(billingUsageRangeSchema)
-  .handler(async ({ data, context }): Promise<BillingUsageEvent[]> => {
+  .handler(async ({ data: _data, context }): Promise<BillingUsageEvent[]> => {
     if (!(await isHostedServerAuthMode())) {
       return [] as BillingUsageEvent[];
     }
@@ -66,10 +64,32 @@ export const getBillingUsageEvents = createServerFn({ method: "POST" })
 export const getQuotaStateSummary = createServerFn({ method: "POST" })
   .middleware([requireAuthenticatedContext])
   .handler(async ({ context }) => {
+    const isAdmin = await isPlatformAdmin({
+      userId: context.userId,
+      userEmail: context.userEmail,
+    });
+
     const [tier, quotas] = await Promise.all([
       getPlanTier(context.organizationId),
       getQuotaState(context.organizationId),
     ]);
+
+    if (isAdmin) {
+      if (tier === "free") {
+        try {
+          await QuotaRepository.upsertSubscription({
+            organizationId: context.organizationId,
+            planTier: "agency",
+            status: "active",
+          });
+          await grantMonthlyCredits(context.organizationId, "agency");
+        } catch (e) {
+          console.warn("Failed to auto-upgrade admin subscription row:", e);
+        }
+        return { planTier: "agency" as const, quotas };
+      }
+    }
+
     return { planTier: tier, quotas };
   });
 
