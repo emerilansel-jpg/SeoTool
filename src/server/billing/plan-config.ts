@@ -44,11 +44,17 @@ async function loadConfigs(): Promise<EffectivePlanConfigs> {
   // Dynamic import: this module sits in hot billing chains (credits.ts) whose
   // unit tests mock cloudflare:workers without DB bindings, so @/db must stay
   // out of the static import graph. Any load failure falls back to constants.
+  // The import.meta.env.SSR guard is REQUIRED, not cosmetic: route modules
+  // (pricing/subscribe) import this file, and without the guard rollup keeps
+  // the dynamic chunk in the browser graph, dragging cloudflare:workers into
+  // the client build. In the browser the guard short-circuits to constants.
   let rows: PlanConfigRow[] = [];
   try {
-    const { PlanConfigRepository } =
-      await import("@/server/features/admin/repositories/PlanConfigRepository");
-    rows = await PlanConfigRepository.listAll();
+    if (import.meta.env.SSR) {
+      const { PlanConfigRepository } =
+        await import("@/server/features/admin/repositories/PlanConfigRepository");
+      rows = await PlanConfigRepository.listAll();
+    }
   } catch {
     rows = [];
   }

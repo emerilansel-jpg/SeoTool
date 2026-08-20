@@ -3,21 +3,14 @@ import {
   MarketingChrome,
   useMarketingSession,
 } from "@/client/features/marketing/MarketingChrome";
-import { CmsRepository } from "@/server/features/admin/repositories/CmsRepository";
+import { listPublishedPosts } from "@/serverFunctions/cms-public";
 
 export const Route = createFileRoute("/blogs/")({
-  // Public read path: the loader queries the repository directly, so no
-  // session/server-function middleware is involved.
+  // Public read path via server fn (keeps cloudflare:workers out of the
+  // client bundle).
   loader: async () => {
-    const posts = await CmsRepository.listPosts(false);
-    return {
-      posts: posts.map((post) => ({
-        slug: post.slug,
-        title: post.title,
-        description: post.description,
-        publishedAt: post.publishedAt,
-      })),
-    };
+    const posts = await listPublishedPosts({ data: undefined });
+    return { posts };
   },
   head: () => ({
     meta: [

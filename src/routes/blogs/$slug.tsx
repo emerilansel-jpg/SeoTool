@@ -4,12 +4,13 @@ import {
   useMarketingSession,
 } from "@/client/features/marketing/MarketingChrome";
 import { Markdown } from "@/client/components/Markdown";
-import { CmsRepository } from "@/server/features/admin/repositories/CmsRepository";
+import { getPublishedPost } from "@/serverFunctions/cms-public";
 
 export const Route = createFileRoute("/blogs/$slug")({
-  // Public read path: loader + repository, no auth middleware involved.
+  // Public read path via server fn (a direct repository import would drag
+  // cloudflare:workers into the client bundle).
   loader: async ({ params }) => {
-    const post = await CmsRepository.getPublishedPostBySlug(params.slug);
+    const post = await getPublishedPost({ data: { slug: params.slug } });
     if (!post) throw notFound();
     return {
       post: {
