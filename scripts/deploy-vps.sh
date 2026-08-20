@@ -84,6 +84,12 @@ if [ "$HEALTH" != "healthy" ]; then
   exit 1
 fi
 
+# ─── Reload Caddy ───────────────────────────────────────────────────────
+if [ -f "gateway-caddy/docker-compose.yml" ]; then
+  echo "🔄 Reloading seotool-caddy..."
+  docker compose -f gateway-caddy/docker-compose.yml up -d --force-recreate 2>/dev/null || docker compose -f gateway-caddy/docker-compose.yml restart seotool-caddy 2>/dev/null || true
+fi
+
 # ─── Summary ────────────────────────────────────────────────────────────
 
 echo ""
