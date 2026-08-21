@@ -4,7 +4,7 @@ import {
   useMarketingSession,
 } from "@/client/features/marketing/MarketingChrome";
 import { CmsPageView } from "@/client/features/cms/CmsPageView";
-import { loadCmsPage } from "./cms-page-loader";
+import { loadCmsPage } from "./-cms-page-loader";
 
 export const Route = createFileRoute("/pages/$slug")({
   loader: async ({ params }) => loadCmsPage(params.slug),
