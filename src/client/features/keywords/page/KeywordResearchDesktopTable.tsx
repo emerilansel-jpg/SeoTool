@@ -11,8 +11,8 @@ import {
   useSelectionAnchor,
 } from "@/client/components/table/AppDataTable";
 import {
-  AreaTrendChart,
   IntentBadge,
+  KeywordTrendSparkline,
   SortHeader,
   type SortDir,
   type SortField,
@@ -92,23 +92,25 @@ export function KeywordResearchDesktopTable({
             current={sortField}
             dir={sortDir}
             onToggle={toggleSort}
-            className="justify-end w-32"
+            className="justify-end"
           />
         ),
         cell: ({ row }) => (
-          <div className="flex flex-col items-end gap-1 w-full max-w-[120px] ml-auto">
-            <span className="font-medium text-base-content tabular-nums">
+          <div className="flex items-center justify-end gap-3 w-full">
+            <span className="font-semibold text-sm text-base-content tabular-nums shrink-0">
               {formatNumber(row.original.searchVolume)}
             </span>
-            <div className="h-6 w-full -mr-1">
-              <AreaTrendChart trend={row.original.trend} />
-            </div>
+            <KeywordTrendSparkline
+              trend={row.original.trend}
+              width={64}
+              height={20}
+            />
           </div>
         ),
         meta: {
-          headerClassName: "text-right w-32",
+          headerClassName: "text-right min-w-[140px]",
           cellClassName:
-            "whitespace-nowrap text-right tabular-nums text-base-content/70 w-32",
+            "whitespace-nowrap text-right tabular-nums text-base-content/70 min-w-[140px]",
         },
       }),
       keywordColumnHelper.accessor("cpc", {

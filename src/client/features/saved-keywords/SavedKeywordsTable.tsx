@@ -8,7 +8,7 @@ import {
 import { Link, useParams } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { useMemo } from "react";
-import { AreaTrendChart } from "@/client/features/keywords/components";
+import { KeywordTrendSparkline } from "@/client/features/keywords/components";
 import {
   AppDataTable,
   makeSelectionColumn,
@@ -61,15 +61,21 @@ export function SavedKeywordsTable({
           <SortableHeader column={column} label="Volume & Trend" />
         ),
         cell: ({ row }) => (
-          <div className="flex flex-col items-start gap-1 w-full max-w-[120px]">
-            <span className="tabular-nums">
+          <div className="flex items-center gap-3 w-full">
+            <span className="font-semibold text-sm text-base-content tabular-nums shrink-0">
               {formatSavedKeywordNumber(row.original.searchVolume)}
             </span>
-            <div className="h-6 w-full -ml-1">
-              <AreaTrendChart trend={row.original.monthlySearches ?? []} />
-            </div>
+            <KeywordTrendSparkline
+              trend={row.original.monthlySearches ?? []}
+              width={64}
+              height={20}
+            />
           </div>
         ),
+        meta: {
+          headerClassName: "min-w-[140px]",
+          cellClassName: "whitespace-nowrap tabular-nums min-w-[140px]",
+        },
       }),
       columnHelper.accessor("cpc", {
         header: ({ column }) => <SortableHeader column={column} label="CPC" />,

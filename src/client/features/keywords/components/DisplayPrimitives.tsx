@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { sortBy } from "remeda";
 import {
@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import type { MonthlySearch } from "@/types/keywords";
-import { formatCompactNumber } from "../utils";
+import { formatCompactNumber, formatNumber } from "../utils";
 import { FloatingTooltip, useFloatingTooltip } from "./FloatingTooltip";
 
 export type SortField =
@@ -56,6 +56,108 @@ export function HeaderHelpLabel({
           )
         : null}
     </span>
+  );
+}
+
+export function KeywordTrendSparkline({
+  trend,
+  width = 64,
+  height = 20,
+}: {
+  trend?: MonthlySearch[];
+  width?: number;
+  height?: number;
+}) {
+  const gradientId = useId();
+  const sorted = useMemo(() => {
+    if (!trend || trend.length === 0) return [];
+    return sortBy(trend, (item) => item.year * 100 + item.month).slice(-12);
+  }, [trend]);
+
+  if (sorted.length === 0) {
+    return (
+      <span className="inline-block w-14 text-center text-xs text-base-content/30">
+        —
+      </span>
+    );
+  }
+
+  const volumes = sorted.map((d) => d.searchVolume ?? 0);
+  const min = Math.min(...volumes);
+  const max = Math.max(...volumes);
+  const range = max - min;
+  const lastVal = volumes[volumes.length - 1];
+
+  const padX = 2;
+  const padY = 2;
+  const usableW = width - padX * 2;
+  const usableH = height - padY * 2;
+
+  const points = volumes.map((v, i) => {
+    const x = padX + (i / Math.max(volumes.length - 1, 1)) * usableW;
+    const y =
+      range === 0
+        ? height / 2
+        : height - padY - ((v - min) / range) * usableH;
+    return { x, y, v };
+  });
+
+  const pathD = points.reduce((acc, pt, i, arr) => {
+    if (i === 0) return `M ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`;
+    const prev = arr[i - 1];
+    const cpX = (prev.x + pt.x) / 2;
+    return `${acc} C ${cpX.toFixed(1)} ${prev.y.toFixed(1)}, ${cpX.toFixed(1)} ${pt.y.toFixed(1)}, ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`;
+  }, "");
+
+  const first = points[0];
+  const last = points[points.length - 1];
+  const areaD = `${pathD} L ${last.x.toFixed(1)} ${height} L ${first.x.toFixed(1)} ${height} Z`;
+
+  const tooltipText = `12-mo: ${formatCompactNumber(min)} – ${formatCompactNumber(max)} (Latest: ${formatCompactNumber(lastVal)})`;
+
+  return (
+    <div
+      className="inline-flex items-center shrink-0 cursor-default"
+      title={tooltipText}
+    >
+      <svg
+        width={width}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+        className="overflow-hidden"
+        aria-label={tooltipText}
+      >
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+            <stop
+              offset="0%"
+              stopColor="var(--color-primary)"
+              stopOpacity="0.3"
+            />
+            <stop
+              offset="100%"
+              stopColor="var(--color-primary)"
+              stopOpacity="0.02"
+            />
+          </linearGradient>
+        </defs>
+        <path d={areaD} fill={`url(#${gradientId})`} />
+        <path
+          d={pathD}
+          fill="none"
+          stroke="var(--color-primary)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle
+          cx={last.x}
+          cy={last.y}
+          r="1.5"
+          fill="var(--color-primary)"
+        />
+      </svg>
+    </div>
   );
 }
 

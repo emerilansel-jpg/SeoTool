@@ -7,6 +7,7 @@ export type { SortDir, SortField } from "./DisplayPrimitives";
 export {
   AreaTrendChart,
   HeaderHelpLabel,
+  KeywordTrendSparkline,
   SortHeader,
 } from "./DisplayPrimitives";
 
