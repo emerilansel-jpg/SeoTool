@@ -8,7 +8,9 @@ import type { CsvValue } from "@/client/lib/csv";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { captureClientEvent } from "@/client/lib/posthog";
 
-type ModalState = { isOpen: false } | { isOpen: true; rowCount: number };
+type ModalState =
+  | { isOpen: false }
+  | { isOpen: true; rowCount: number; headers: string[]; rows: CsvValue[][] };
 
 const listeners = new Set<() => void>();
 let state: ModalState = { isOpen: false };
@@ -43,8 +45,8 @@ export function openGoogleSheetsTab() {
 
 /**
  * Copy a table to the clipboard and open the "paste into a new Google Sheet"
- * modal. The modal handles opening sheets.new on user click — we don't auto-
- * redirect because users wouldn't realize the data was on their clipboard.
+ * modal. Headers and rows are stored in modal state so the modal can re-copy
+ * when needed (Chrome invalidates ClipboardItem on focus loss).
  */
 export async function exportTableToSheets(args: {
   headers: string[];
@@ -62,7 +64,7 @@ export async function exportTableToSheets(args: {
       source_feature: feature,
       result_count: rows.length,
     });
-    setState({ isOpen: true, rowCount: rows.length });
+    setState({ isOpen: true, rowCount: rows.length, headers, rows });
   } catch (error) {
     toast.error(getStandardErrorMessage(error, "Could not copy to clipboard"));
   }

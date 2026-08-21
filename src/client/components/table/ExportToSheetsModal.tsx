@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { useLocation } from "@tanstack/react-router";
-import { Check, ExternalLink, X } from "lucide-react";
+import { Check, Clipboard, ExternalLink, X } from "lucide-react";
+import { toast } from "sonner";
 import { Modal } from "@/client/components/Modal";
+import { copyTableToClipboard } from "@/client/lib/clipboard";
 import {
   closeExportToSheetsModal,
   openGoogleSheetsTab,
@@ -10,9 +12,6 @@ import {
 
 export function ExportToSheetsModal() {
   const state = useExportToSheetsModalState();
-  // Close any stale modal when the user navigates away mid-flow. Deps must
-  // be `[pathname]` only — adding `isOpen` would close the modal the instant
-  // it opens (the effect would fire on the open->true transition).
   const pathname = useLocation({ select: (l) => l.pathname });
   useEffect(() => {
     closeExportToSheetsModal();
@@ -20,9 +19,26 @@ export function ExportToSheetsModal() {
 
   if (!state.isOpen) return null;
 
-  const { rowCount } = state;
+  const { rowCount, headers, rows } = state;
 
-  const handleOpenSheet = () => {
+  const handleCopyAgain = async () => {
+    try {
+      await copyTableToClipboard(headers, rows);
+      toast.success("Copied again — now paste in your Google Sheet");
+    } catch {
+      toast.error("Could not copy to clipboard");
+    }
+  };
+
+  const handleOpenSheet = async () => {
+    // Re-copy immediately before opening the tab so the clipboard item is
+    // fresh. Chrome invalidates ClipboardItem when focus leaves the document,
+    // so copying here (same gesture, before window.open) keeps it alive.
+    try {
+      await copyTableToClipboard(headers, rows);
+    } catch {
+      // If re-copy fails, continue — the user can use "Copy again" in the sheet
+    }
     openGoogleSheetsTab();
     closeExportToSheetsModal();
   };
@@ -39,7 +55,7 @@ export function ExportToSheetsModal() {
             <Check className="size-4" />
           </span>
           <h3 id="export-to-sheets-title" className="text-base font-semibold">
-            Copied {rowCount} row{rowCount === 1 ? "" : "s"} to your clipboard
+            {rowCount} row{rowCount === 1 ? "" : "s"} copied to clipboard
           </h3>
         </div>
         <button
@@ -52,15 +68,42 @@ export function ExportToSheetsModal() {
         </button>
       </div>
 
-      <p className="text-sm text-base-content/75">
-        Open a new Google Sheet and paste to fill it.
-      </p>
+      <ol className="mt-1 list-decimal space-y-1 pl-4 text-sm text-base-content/75">
+        <li>
+          Click{" "}
+          <span className="font-medium text-base-content">
+            Open new Google Sheet
+          </span>{" "}
+          below.
+        </li>
+        <li>
+          In the new sheet, press <kbd className="kbd kbd-xs">Ctrl</kbd>
+          {" + "}
+          <kbd className="kbd kbd-xs">V</kbd>
+          {" (or "}
+          <kbd className="kbd kbd-xs">⌘V</kbd>
+          {") to paste the data."}
+        </li>
+        <li className="text-base-content/55">
+          If the sheet is blank after pasting, click{" "}
+          <span className="font-medium">Copy again</span> below, then paste.
+        </li>
+      </ol>
 
-      <div className="flex justify-end">
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm gap-1.5"
+          onClick={() => void handleCopyAgain()}
+        >
+          <Clipboard className="size-3.5" />
+          Copy again
+        </button>
+
         <button
           type="button"
           className="btn btn-primary btn-sm gap-1.5"
-          onClick={handleOpenSheet}
+          onClick={() => void handleOpenSheet()}
         >
           Open new Google Sheet
           <ExternalLink className="size-3.5" />

@@ -40,19 +40,27 @@ export async function getKeywordClusters(
 
   const results = await Promise.allSettled(
     limited.map(async (keyword) => {
-      try {
-        const serp = await dataforseo.serp.live({
-          keyword,
-          locationCode,
-          languageCode,
-        });
-        const domains = extractSerpDomains(serp);
-        return { keyword, domains };
-      } catch {
-        return { keyword, domains: [] };
-      }
+      // Omit try/catch here so quota errors (INSUFFICIENT_CREDITS,
+      // QUOTA_EXCEEDED, PLAN_LIMIT_REACHED) bubble up and fail the whole
+      // batch, rather than silently returning empty domains for all keywords
+      // and producing a zero-cluster success result.
+      const serp = await dataforseo.serp.live({
+        keyword,
+        locationCode,
+        languageCode,
+      });
+      const domains = extractSerpDomains(serp);
+      return { keyword, domains };
     }),
   );
+
+  // If any keyword failed due to quota/auth, fail the whole clustering job.
+  // (DataForSEO intermittent failures will also fail the job, which is safer
+  // than clustering on partial data).
+  const firstError = results.find((r) => r.status === "rejected");
+  if (firstError) {
+    throw firstError.reason;
+  }
 
   for (const result of results) {
     if (result.status === "fulfilled" && result.value.domains.length > 0) {
