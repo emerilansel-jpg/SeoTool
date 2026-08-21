@@ -86,12 +86,12 @@ function HistoryActions({
   onDelete: (auditId: string) => void;
 }) {
   return (
-    <div className="flex items-center justify-end gap-2 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
+    <div className="flex items-center justify-end gap-2">
       <Link
         to="/p/$projectId/audit"
         params={{ projectId }}
         search={{ auditId, tab: "pages" }}
-        className="btn btn-primary btn-xs"
+        className="btn btn-sm"
       >
         View
       </Link>
@@ -99,7 +99,7 @@ function HistoryActions({
         <div
           tabIndex={0}
           role="button"
-          className="btn btn-ghost btn-xs btn-square"
+          className="btn btn-ghost btn-sm btn-square"
           aria-label="Audit actions"
         >
           <MoreHorizontal className="size-3.5" />
