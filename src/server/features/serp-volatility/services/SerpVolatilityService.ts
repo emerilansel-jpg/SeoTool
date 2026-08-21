@@ -8,6 +8,7 @@ import {
   categorizeVolatility,
   identifyTopMovers,
 } from "./volatilityCalculation";
+import { AppError } from "@/server/lib/errors";
 
 /**
  * Compute a daily SERP volatility snapshot for a project by comparing the
@@ -19,7 +20,12 @@ import {
 async function computeVolatility(projectId: string) {
   // Find all active configs for this project.
   const configs = await RankTrackingRepository.getConfigsForProject(projectId);
-  if (configs.length === 0) return null;
+  if (configs.length === 0) {
+    throw new AppError(
+      "VALIDATION_ERROR",
+      "No active rank tracking configurations found for this project.",
+    );
+  }
 
   const configIds = configs.map((c) => c.id);
 
@@ -68,7 +74,12 @@ async function computeVolatility(projectId: string) {
     });
   }
 
-  if (runsByConfig.size === 0) return null;
+  if (runsByConfig.size === 0) {
+    throw new AppError(
+      "VALIDATION_ERROR",
+      "Not enough rank tracking history. Volatility calculation requires at least two completed rank checks.",
+    );
+  }
 
   // Collect position changes across all configs.
   const positionChanges: number[] = [];
@@ -111,7 +122,12 @@ async function computeVolatility(projectId: string) {
     }
   }
 
-  if (positionChanges.length === 0) return null;
+  if (positionChanges.length === 0) {
+    throw new AppError(
+      "VALIDATION_ERROR",
+      "No keyword position data found in recent rank checks.",
+    );
+  }
 
   const volatilityScore = calculateVolatilityScore(positionChanges);
   const avgPositionChange =
