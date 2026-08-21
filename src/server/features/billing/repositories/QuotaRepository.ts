@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { usageQuota, subscription } from "@/db/schema";
+import { usageQuota, subscription, member, user } from "@/db/schema";
 import type { PlanTier, QuotaFeature } from "@/shared/plans";
 
 export type UsageQuotaRow = typeof usageQuota.$inferSelect;
@@ -29,6 +29,22 @@ export async function getSubscription(
 export async function getPlanTier(organizationId: string): Promise<PlanTier> {
   const row = await getSubscription(organizationId);
   return row?.planTier ?? "free";
+}
+
+/** Returns the email of the org's owner (member with role "owner"), or null
+ *  when the org has no owner row. Used by the platform-admin quota bypass. */
+export async function getOwnerEmail(
+  organizationId: string,
+): Promise<string | null> {
+  const rows = await db
+    .select({ email: user.email })
+    .from(member)
+    .innerJoin(user, eq(member.userId, user.id))
+    .where(
+      and(eq(member.organizationId, organizationId), eq(member.role, "owner")),
+    )
+    .limit(1);
+  return rows[0]?.email ?? null;
 }
 
 /** Upsert the org's subscription. Called by the billing webhook when PayPal
@@ -191,6 +207,7 @@ export async function resetUsageQuotaForOrg(
 export const QuotaRepository = {
   getSubscription,
   getPlanTier,
+  getOwnerEmail,
   upsertSubscription,
   getUsageQuota,
   listUsageQuota,

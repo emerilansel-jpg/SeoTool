@@ -24,10 +24,22 @@ export const ADMIN_SETTING_GROUPS: AdminSettingGroup[] = [
     settings: [
       {
         envKey: "DATAFORSEO_API_KEY",
-        label: "API key (login:password)",
+        label: "Base64 of email:password (from DataForSEO dashboard)",
         secret: true,
         editable: true,
-        hint: "Powers all SERP, keyword, and backlink data.",
+        hint: "Powers all SERP, keyword, and backlink data. Copy the Base64 credential from your DataForSEO API dashboard.",
+      },
+    ],
+  },
+  {
+    provider: "OpenAI",
+    settings: [
+      {
+        envKey: "OPENAI_API_KEY",
+        label: "API key",
+        secret: true,
+        editable: true,
+        hint: "Set to use GPT-4o directly from OpenAI instead of OpenRouter. When set, overrides the OpenRouter configuration.",
       },
     ],
   },

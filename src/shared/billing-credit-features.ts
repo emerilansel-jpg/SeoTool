@@ -75,7 +75,10 @@ export function mapDataforseoPathToCreditFeature(
       return "keyword_research";
     }
     default:
-      return "site_audit";
+      // Unknown module: attribute to keyword_research (daily window) rather
+      // than site_audit (monthly, tiny limits) so unmapped endpoints don't
+      // exhaust the audit bucket and break rank-tracking suggestions.
+      return "keyword_research";
   }
 }
 

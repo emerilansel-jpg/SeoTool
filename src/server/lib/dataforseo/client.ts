@@ -98,8 +98,19 @@ export function createDataforseoClient(customer: BillingCustomerContext) {
     },
     domain: {
       rankOverview: meter(customer, (s) => s.fetchDomainRankOverview),
-      rankedKeywords: meter(customer, (s) => s.fetchRankedKeywords),
-      relevantPages: meter(customer, (s) => s.fetchRelevantPages),
+      // domain_* credit features (domain_overview → keyword_search quota) so
+      // rank-tracking keyword suggestions don't fall through to site_audit's
+      // tiny monthly bucket via the empty-path default.
+      rankedKeywords: meter(
+        customer,
+        (s) => s.fetchRankedKeywords,
+        "domain_overview",
+      ),
+      relevantPages: meter(
+        customer,
+        (s) => s.fetchRelevantPages,
+        "domain_overview",
+      ),
     },
     serp: {
       live: meter(customer, (s) => s.fetchLiveSerp),

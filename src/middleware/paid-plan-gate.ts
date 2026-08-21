@@ -37,11 +37,15 @@ const ALWAYS_ALLOWED_FILES = new Set([
 ]);
 
 // Read-only functions inside otherwise-gated files that the app shell needs
-// before a subscription exists (rendering /projects and the project layout).
+// before a subscription exists (rendering /projects and the project layout),
+// plus integration lifecycle actions (disconnecting a data source is account
+// management, not a metered tool).
 const ALWAYS_ALLOWED_FUNCTIONS = new Set([
   "getProjects",
   "getProjectAccess",
   "getArchivedProjects",
+  "disconnectGa4",
+  "disconnectGsc",
 ]);
 
 async function isE2EBypassEnabled(): Promise<boolean> {

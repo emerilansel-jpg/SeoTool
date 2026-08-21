@@ -6,6 +6,23 @@ import {
   type QuotaFeature,
 } from "@/shared/plans";
 import { AppError } from "@/server/lib/errors";
+import { isPlatformAdmin } from "@/server/lib/platform-admin";
+
+// Cache orgId → is-admin-org so repeated quota checks don't re-query the
+// owner email. Entries are small and orgs are few; no TTL needed.
+const adminOrgCache = new Map<string, boolean>();
+
+async function isPlatformAdminOrg(organizationId: string): Promise<boolean> {
+  const cached = adminOrgCache.get(organizationId);
+  if (cached !== undefined) return cached;
+
+  const ownerEmail = await QuotaRepository.getOwnerEmail(organizationId);
+  const isAdmin = ownerEmail
+    ? await isPlatformAdmin({ userEmail: ownerEmail })
+    : false;
+  adminOrgCache.set(organizationId, isAdmin);
+  return isAdmin;
+}
 
 // ---------------------------------------------------------------------------
 // Window computation
@@ -59,8 +76,12 @@ export type QuotaCheckResult = {
 };
 
 /** Returns the org's current plan tier. Defaults to "free" when no
- *  subscription row exists yet. */
+ *  subscription row exists yet. Platform-admin-owned orgs get the agency
+ *  tier so admins can test every feature without a paid subscription. */
 export async function getPlanTier(organizationId: string): Promise<PlanTier> {
+  if (await isPlatformAdminOrg(organizationId)) {
+    return "agency";
+  }
   return QuotaRepository.getPlanTier(organizationId);
 }
 

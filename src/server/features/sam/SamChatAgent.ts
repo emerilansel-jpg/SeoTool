@@ -107,6 +107,16 @@ export class SamChatAgent extends Think {
   }
 
   getModel() {
+    // Direct OpenAI (GPT-4o) takes priority when OPENAI_API_KEY is set.
+    const openaiKey = getEnvValueSync(this.env, "OPENAI_API_KEY");
+    if (openaiKey) {
+      return buildChatAgentModel(
+        openaiKey,
+        getEnvValueSync(this.env, "OPENAI_MODEL") ?? "gpt-4o",
+        "https://api.openai.com/v1",
+      );
+    }
+
     const apiKey = getEnvValueSync(this.env, "OPENROUTER_API_KEY");
     if (!apiKey) {
       throw new Error("OPENROUTER_API_KEY is required for the SAM agent");
