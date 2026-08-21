@@ -90,13 +90,13 @@ export function TableBulkExportMenu({
   busy?: boolean;
 }) {
   return (
-    <div className="dropdown dropdown-top dropdown-end">
-      <button
-        type="button"
-        tabIndex={0}
-        disabled={busy}
-        aria-haspopup="menu"
-        className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-base-content/85 hover:bg-base-content/10 disabled:opacity-50"
+    <details className="dropdown dropdown-top dropdown-end">
+      <summary
+        className="inline-flex list-none items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-base-content/85 hover:bg-base-content/10 disabled:opacity-50 [&::-webkit-details-marker]:hidden"
+        style={{ cursor: busy ? "not-allowed" : "pointer" }}
+        onClick={(e) => {
+          if (busy) e.preventDefault();
+        }}
       >
         {busy ? (
           <Loader2 className="size-3.5 animate-spin" />
@@ -105,9 +105,8 @@ export function TableBulkExportMenu({
         )}
         Export
         <ChevronDown className="size-3 opacity-60" />
-      </button>
+      </summary>
       <ul
-        tabIndex={0}
         role="menu"
         className="dropdown-content menu z-10 mb-2 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
       >
@@ -115,7 +114,10 @@ export function TableBulkExportMenu({
           <li key={index}>
             <button
               type="button"
-              onClick={action.onClick}
+              onClick={(e) => {
+                action.onClick();
+                e.currentTarget.closest("details")?.removeAttribute("open");
+              }}
               disabled={busy || action.disabled}
             >
               {action.icon}
@@ -124,7 +126,7 @@ export function TableBulkExportMenu({
           </li>
         ))}
       </ul>
-    </div>
+    </details>
   );
 }
 
@@ -143,18 +145,23 @@ export function TableExportMenu({
   menuClassName?: string;
 }) {
   return (
-    <div className="dropdown dropdown-end">
-      <div tabIndex={0} role="button" className={buttonClassName}>
+    <details className="dropdown dropdown-end">
+      <summary
+        className={`${buttonClassName} list-none [&::-webkit-details-marker]:hidden cursor-pointer`}
+      >
         <Download className="size-4" />
-        Export
+        <span className="hidden lg:inline">Export</span>
         <ChevronDown className="size-3 opacity-60" />
-      </div>
-      <ul tabIndex={0} className={menuClassName}>
+      </summary>
+      <ul className={menuClassName}>
         {actions.map((action, index) => (
           <li key={index}>
             <button
               type="button"
-              onClick={action.onClick}
+              onClick={(e) => {
+                action.onClick();
+                e.currentTarget.closest("details")?.removeAttribute("open");
+              }}
               disabled={action.disabled}
             >
               {action.icon}
@@ -163,6 +170,6 @@ export function TableExportMenu({
           </li>
         ))}
       </ul>
-    </div>
+    </details>
   );
 }
