@@ -129,7 +129,7 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
   const trend = data?.trend ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Top Action Bar */}
       <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs">
         <div className="card-body p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">

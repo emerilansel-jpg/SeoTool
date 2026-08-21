@@ -186,7 +186,7 @@ export function ContentGapView({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Controls Form Card */}
       <div className="card bg-base-100 border border-base-300">
         <div className="card-body gap-4">
