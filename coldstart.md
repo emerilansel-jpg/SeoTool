@@ -14,9 +14,13 @@ Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 
 **Rebrand OpenSEO → SeoTool.im (2026-08-17)**: Semua user-facing + internal code identifiers cleaned (themes, localStorage, MCP commands, env examples, docs, marketing). Hanya infra IDs yang tersisa (DB names, Hyperdrive, HMAC salts). Commit `1343430`.
 
-**In-App Landing Page + Hard Paywall (2026-08-19)**: SaaS app kini punya homepage publik di `/` (landing page DaisyUI) dan halaman pricing publik di `/pricing`. Hard paywall: server function gate (`paidPlanGateMiddleware`) + client guard (`usePaidPlanGuard`) — user free-tier tidak bisa memakai tools sampai berlangganan. E2E bypass tetap jalan (BY PASS_AUTH). Funnel: sign-up → onboarding → /projects → /subscribe → bayar → tools terbuka.
+**In-App Landing Page + Hard Paywall (2026-08-19)**: SaaS app kini punya homepage publik di `/` (landing page DaisyUI) dan halaman pricing publik di `/pricing`. Hard paywall: server function gate (`paidPlanGateMiddleware`) + client guard (`usePaidPlanGuard`) — user free-tier tidak bisa memakai tools sampai berlangganan. E2E bypass tetap jalan (BYPASS_AUTH). Funnel: sign-up → onboarding → /projects → /subscribe → bayar → tools terbuka.
 
 **Production Deploy + Caddy Re-architecture (2026-08-19/20)**: Seluruh P2 batch + landing/paywall deployed ke VPS (commit `751d389`, migrations D1 0048 + PG 0025). Ingress di-re-arsitektur: dedicated container `seotool-caddy` (127.0.0.1:8080) memisahkan routing seotool.im dari `pesat-control-plane-caddy-1` (host network, forward-only). Verified end-to-end: health, homepage marketing, /pricing. Detail + gotchas di section "Produksi LIVE" dan "Deploy 2026-08-19/20".
+
+**Dashboard UI/UX QA & Container Layout Standardization (2026-08-20/21)**: Audit E2E menyeluruh pada 25 rute dashboard (`qa-dashboard-audit.spec.ts`). Redesign search bar Content Gap dan Link Intersect menjadi form horizontal 1 baris yang ramping dengan instant presets. Standarisasi seluruh wrapper rute dengan kontainer `max-w-7xl mx-auto space-y-4` dan padding `px-4 py-4 pb-24 overflow-auto md:px-6 md:py-6 md:pb-8`.
+
+**VPS Caddy Assets & Fresh Startup Build Fix (2026-08-21)**: Perbaikan Caddyfile root (`@marketingAssetFile`) agar request `/assets/*` milik SPA app tidak ditelan oleh direktori marketing; perbaikan `docker-entrypoint.sh` untuk selalu mengompilasi build baru saat container start; verified live di `https://seotool.im` (commit `f969bb3`).
 
 ---
 
@@ -963,6 +967,55 @@ Landing page publik di `/` (DaisyUI, bukan `.itc-*` webfont), pricing publik di 
 
 ---
 
+## Dashboard UI/UX QA, Container Standardization & VPS Fixes (2026-08-20/21) (LENGKAP)
+
+Pembersihan UI/UX menyeluruh dan standardisasi layout pada seluruh fitur dashboard agar konsisten dengan Domain Overview / Keyword Research, serta perbaikan deployment container VPS.
+
+### Bagian A: Visual QA & Form Redesign
+
+| File | Keterangan |
+| --- | --- |
+| `e2e/qa-dashboard-audit.spec.ts` | Test suite Playwright 25-route QA capturing screenshots (`test-results/qa-screenshots/`). Part 1 (1-13) & Part 2 (14-25). |
+| `src/client/features/content-intelligence/ContentGapView.tsx` | Redesign form: Search bar horizontal 1 baris ramping (Domain input, Competitors input, Search button), Quick presets chip, empty state card terpusat. |
+| `src/client/features/link-intersect/LinkIntersectView.tsx` | Redesign form: Search bar horizontal 1 baris ramping (Domain input, Competitors input, Search button), Quick sets presets, empty state card terpusat. |
+| `src/client/features/serp-volatility/SerpVolatilityView.tsx` | Penyelarasan internal spacing (`space-y-4`), styling gauge turbulence index, dan action card. |
+
+### Bagian B: Standarisasi Layout Kontainer Rute (`max-w-7xl mx-auto`)
+
+Sebelumnya, sejumlah rute seperti `link-intersect`, `content-gap`, dan `serp-volatility` me-render langsung ke `Outlet` tanpa wrapper padding dan max-width sehingga meregang tanpa batas (*edge-to-edge*) pada monitor ultra-wide.
+
+Semua rute distandarisasi menggunakan wrapper pola:
+```tsx
+<div className="px-4 py-4 pb-24 overflow-auto md:px-6 md:py-6 md:pb-8">
+  <div className="mx-auto max-w-7xl space-y-4">
+    <div>
+      <h1 className="text-2xl font-semibold">{Title}</h1>
+      <p className="text-sm text-base-content/70">{Description}</p>
+    </div>
+    <{FeatureView} projectId={projectId} />
+  </div>
+</div>
+```
+
+| File Diperbaiki | Keterangan |
+| --- | --- |
+| `src/routes/_project/p/$projectId/link-intersect.tsx` | Ditambahkan wrapper standar `px-4 py-4 md:px-6 md:py-6 pb-24 md:pb-8` + `max-w-7xl mx-auto space-y-4` |
+| `src/routes/_project/p/$projectId/content-gap.tsx` | Ditambahkan wrapper standar `px-4 py-4 md:px-6 md:py-6 pb-24 md:pb-8` + `max-w-7xl mx-auto space-y-4` |
+| `src/routes/_project/p/$projectId/serp-volatility.tsx` | Ditambahkan wrapper standar `px-4 py-4 md:px-6 md:py-6 pb-24 md:pb-8` + `max-w-7xl mx-auto space-y-4` |
+
+### Bagian C: Perbaikan VPS Production Deploy & Routing Caddy
+
+1. **Root Cause CSS Hilang/Broken di VPS**: Root `Caddyfile` mencocokkan `@marketingAssets path /assets/*` dan menyajikannya dari `/srv/marketing`. Ini mengakibatkan chunk Vite client dan file stylesheet Tailwind/DaisyUI milik aplikasi SaaS (`open-seo:3001`) ter-intercept dan menghasilkan HTTP 404 / broken styling.
+2. **Solusi Routing Caddy (`Caddyfile`)**:
+   - Mengubah `@marketingAssets` menjadi `@marketingAssetFile` dengan `file { root /srv/marketing }` (hanya serve static marketing jika file benar-benar ada di direktori marketing, sisanya di-proxy ke app).
+   - Menambahkan header `header_up Host localhost` pada blok reverse proxy.
+3. **Build Caching Issue (`docker-entrypoint.sh`)**:
+   - Menghapus mekanisme hashing env yang sebelumnya me-skip `pnpm run build` jika file `.env.hosted` tidak berubah, memastikan setiap kali container di-recreate/start, kode terbaru selalu ter-compile segar.
+4. **Deploy Script (`scripts/deploy-vps.sh`)**:
+   - Menambahkan flag `--force-recreate` pada pemanggilan Docker Compose.
+
+---
+
 ## Quality gate yang wajib dijalankan
 
 ```bash
@@ -1015,6 +1068,8 @@ npx drizzle-kit generate --config drizzle-pg.config.ts    # PG
 | **P2**                | **P2 Features Batch (9 fitur)** ✅                            | All features                          | DONE (2026-08-18). P2-1 Bing support, P2-4 Link intersect, P2-6 Anchor distribution, P2-7 Sitemap validator, P2-9 Crawl budget, P2-10 On-page checker, P2-12 Keyword clustering, P2-13 Toxic links, P2-15 SERP volatility. ~60 files. 8 MCP tools. P2-14 PPC excluded. |
 | **Landing + Paywall** | **In-App Landing Page + Hard Paywall** ✅                     | —                                     | DONE (2026-08-19). Public landing at `/` (DaisyUI), pricing at `/pricing` (import from plans.ts), hard paywall server+client. E2E bypass preserved. Funnel: signup → onboarding → /projects → /subscribe. Fixed broken `customerHasManagedAccess` imports.             |
 | **Deploy**            | **Production Deploy + Caddy Re-architecture** ✅              | —                                     | DONE (2026-08-19/20, commits `751d389`..`a0b67c4`). P2 batch + landing deployed; migrations D1 0048 + PG 0025; 12 TS errors + 3 test failures fixed. Dedicated `seotool-caddy` (127.0.0.1:8080) behind pesat-caddy forward. Verified end-to-end.                       |
+| **UI/UX QA**          | **Dashboard UI/UX Audit & Layout Standardization** ✅        | All features                          | DONE (2026-08-20/21). Full 25-route Playwright visual audit, single-line search bar on Content Gap & Link Intersect, standardized `max-w-7xl mx-auto space-y-4` layout container across all routes.                                   |
+| **VPS Assets Fix**    | **VPS Caddy Asset Routing & Fresh Startup Build** ✅          | —                                     | DONE (2026-08-21, commit `f969bb3`). Fixed `@marketingAssetFile` in Caddyfile to prevent CSS/JS 404s, fixed `docker-entrypoint.sh` for guaranteed fresh build on boot. Verified live at `https://seotool.im`.                         |
 
 ---
 
