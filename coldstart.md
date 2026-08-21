@@ -967,24 +967,53 @@ Landing page publik di `/` (DaisyUI, bukan `.itc-*` webfont), pricing publik di 
 
 ---
 
+## Admin Quota Bypass, DataForSEO Fixes & Direct OpenAI GPT-4o (2026-08-21) (LENGKAP)
+
+Perbaikan komprehensif untuk pengujian fitur dashboard oleh platform admin, perbaikan mapping kuota DataForSEO, dan integrasi direct OpenAI API.
+
+### Ringkasan Perubahan
+
+| File                                                              | Keterangan                                                                                                                                                                                                                                                                                               |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/server/features/billing/services/QuotaService.ts`            | **Platform Admin Quota Bypass**: `getPlanTier()` secara otomatis mengembalikan tier `"agency"` untuk organisasi milik platform admin (`alfu13.sf@gmail.com`, `emerilansel@gmail.com`). Menggunakan cached owner-email lookup agar tidak membebani database pada setiap query.                            |
+| `src/server/features/billing/repositories/QuotaRepository.ts`     | +`getOwnerEmail(organizationId)` helper untuk membaca email pemilik organisasi (member dengan role `"owner"`).                                                                                                                                                                                           |
+| `src/server/lib/dataforseo/client.ts`                             | **DataForSEO Mapping Fix**: `rankedKeywords` dan `relevantPages` di-meter secara eksplisit dengan credit feature `"domain_overview"`. Mencegah keyword suggestions jatuh ke default `"site_audit"` yang kuotanya kecil (1/bulan pada free) sehingga tidak lagi memicu error _"Couldn't fetch keywords"_. |
+| `src/shared/billing-credit-features.ts`                           | Default fallback untuk path DataForSEO yang tidak terpetakan diubah dari `"site_audit"` (bulanan) menjadi `"keyword_research"` (harian).                                                                                                                                                                 |
+| `src/server/lib/openrouter.ts`                                    | **Direct OpenAI GPT-4o Support**: Mendukung env var `OPENAI_API_KEY`. Jika diatur, AI diarahkan langsung ke `https://api.openai.com/v1` dengan model default `gpt-4o` (tanpa melalui OpenRouter). Opsi `reasoning` dilepas untuk gateway non-OpenRouter agar tidak memicu error API.                     |
+| `src/server/features/sam/SamChatAgent.ts`                         | SAM agent membaca `OPENAI_API_KEY` dan memprioritaskan direct OpenAI GPT-4o jika tersedia.                                                                                                                                                                                                               |
+| `src/shared/admin-settings.ts`                                    | +Pengaturan `OPENAI_API_KEY` di admin API keys page. Label `DATAFORSEO_API_KEY` diperbaiki menjadi _"Base64 of email:password (from DataForSEO dashboard)"_ untuk menghindari kebingungan format credential.                                                                                             |
+| `src/middleware/paid-plan-gate.ts`                                | +`disconnectGa4` dan `disconnectGsc` ditambahkan ke `ALWAYS_ALLOWED_FUNCTIONS` agar lifecycle disconnect tidak diblokir paywall.                                                                                                                                                                         |
+| `src/env.d.ts`                                                    | +Type definitions untuk `OPENAI_API_KEY` dan `OPENAI_MODEL`.                                                                                                                                                                                                                                             |
+| `src/shared/billing-credit-features.test.ts`                      | Unit regression test untuk pemetaan credit feature DataForSEO.                                                                                                                                                                                                                                           |
+| `src/server/features/billing/services/QuotaService.admin.test.ts` | Unit regression test untuk platform-admin agency tier override.                                                                                                                                                                                                                                          |
+
+### Status VPS
+
+- Commit `4e86cba` dideploy dan berjalan sehat di VPS (`148.230.103.98`).
+- Database PostgreSQL: Subscription kedua admin (`alfu13.sf@gmail.com`, `emerilansel@gmail.com`) telah diupdate ke plan tier `agency`.
+- Environment VPS (`.env.hosted`): `PLATFORM_ADMIN_USER_IDS=H9Qk2yYXpiVanOgB6KbDcFuypW4pGlZ7,VR4JUE2y0NyzaWemz1BGUQRCF62k9kDe`.
+
+---
+
 ## Dashboard UI/UX QA, Container Standardization & VPS Fixes (2026-08-20/21) (LENGKAP)
 
 Pembersihan UI/UX menyeluruh dan standardisasi layout pada seluruh fitur dashboard agar konsisten dengan Domain Overview / Keyword Research, serta perbaikan deployment container VPS.
 
 ### Bagian A: Visual QA & Form Redesign
 
-| File | Keterangan |
-| --- | --- |
-| `e2e/qa-dashboard-audit.spec.ts` | Test suite Playwright 25-route QA capturing screenshots (`test-results/qa-screenshots/`). Part 1 (1-13) & Part 2 (14-25). |
+| File                                                          | Keterangan                                                                                                                                            |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `e2e/qa-dashboard-audit.spec.ts`                              | Test suite Playwright 25-route QA capturing screenshots (`test-results/qa-screenshots/`). Part 1 (1-13) & Part 2 (14-25).                             |
 | `src/client/features/content-intelligence/ContentGapView.tsx` | Redesign form: Search bar horizontal 1 baris ramping (Domain input, Competitors input, Search button), Quick presets chip, empty state card terpusat. |
-| `src/client/features/link-intersect/LinkIntersectView.tsx` | Redesign form: Search bar horizontal 1 baris ramping (Domain input, Competitors input, Search button), Quick sets presets, empty state card terpusat. |
-| `src/client/features/serp-volatility/SerpVolatilityView.tsx` | Penyelarasan internal spacing (`space-y-4`), styling gauge turbulence index, dan action card. |
+| `src/client/features/link-intersect/LinkIntersectView.tsx`    | Redesign form: Search bar horizontal 1 baris ramping (Domain input, Competitors input, Search button), Quick sets presets, empty state card terpusat. |
+| `src/client/features/serp-volatility/SerpVolatilityView.tsx`  | Penyelarasan internal spacing (`space-y-4`), styling gauge turbulence index, dan action card.                                                         |
 
 ### Bagian B: Standarisasi Layout Kontainer Rute (`max-w-7xl mx-auto`)
 
-Sebelumnya, sejumlah rute seperti `link-intersect`, `content-gap`, dan `serp-volatility` me-render langsung ke `Outlet` tanpa wrapper padding dan max-width sehingga meregang tanpa batas (*edge-to-edge*) pada monitor ultra-wide.
+Sebelumnya, sejumlah rute seperti `link-intersect`, `content-gap`, dan `serp-volatility` me-render langsung ke `Outlet` tanpa wrapper padding dan max-width sehingga meregang tanpa batas (_edge-to-edge_) pada monitor ultra-wide.
 
 Semua rute distandarisasi menggunakan wrapper pola:
+
 ```tsx
 <div className="px-4 py-4 pb-24 overflow-auto md:px-6 md:py-6 md:pb-8">
   <div className="mx-auto max-w-7xl space-y-4">
@@ -997,10 +1026,10 @@ Semua rute distandarisasi menggunakan wrapper pola:
 </div>
 ```
 
-| File Diperbaiki | Keterangan |
-| --- | --- |
-| `src/routes/_project/p/$projectId/link-intersect.tsx` | Ditambahkan wrapper standar `px-4 py-4 md:px-6 md:py-6 pb-24 md:pb-8` + `max-w-7xl mx-auto space-y-4` |
-| `src/routes/_project/p/$projectId/content-gap.tsx` | Ditambahkan wrapper standar `px-4 py-4 md:px-6 md:py-6 pb-24 md:pb-8` + `max-w-7xl mx-auto space-y-4` |
+| File Diperbaiki                                        | Keterangan                                                                                            |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `src/routes/_project/p/$projectId/link-intersect.tsx`  | Ditambahkan wrapper standar `px-4 py-4 md:px-6 md:py-6 pb-24 md:pb-8` + `max-w-7xl mx-auto space-y-4` |
+| `src/routes/_project/p/$projectId/content-gap.tsx`     | Ditambahkan wrapper standar `px-4 py-4 md:px-6 md:py-6 pb-24 md:pb-8` + `max-w-7xl mx-auto space-y-4` |
 | `src/routes/_project/p/$projectId/serp-volatility.tsx` | Ditambahkan wrapper standar `px-4 py-4 md:px-6 md:py-6 pb-24 md:pb-8` + `max-w-7xl mx-auto space-y-4` |
 
 ### Bagian C: Perbaikan VPS Production Deploy & Routing Caddy
@@ -1068,8 +1097,8 @@ npx drizzle-kit generate --config drizzle-pg.config.ts    # PG
 | **P2**                | **P2 Features Batch (9 fitur)** ✅                            | All features                          | DONE (2026-08-18). P2-1 Bing support, P2-4 Link intersect, P2-6 Anchor distribution, P2-7 Sitemap validator, P2-9 Crawl budget, P2-10 On-page checker, P2-12 Keyword clustering, P2-13 Toxic links, P2-15 SERP volatility. ~60 files. 8 MCP tools. P2-14 PPC excluded. |
 | **Landing + Paywall** | **In-App Landing Page + Hard Paywall** ✅                     | —                                     | DONE (2026-08-19). Public landing at `/` (DaisyUI), pricing at `/pricing` (import from plans.ts), hard paywall server+client. E2E bypass preserved. Funnel: signup → onboarding → /projects → /subscribe. Fixed broken `customerHasManagedAccess` imports.             |
 | **Deploy**            | **Production Deploy + Caddy Re-architecture** ✅              | —                                     | DONE (2026-08-19/20, commits `751d389`..`a0b67c4`). P2 batch + landing deployed; migrations D1 0048 + PG 0025; 12 TS errors + 3 test failures fixed. Dedicated `seotool-caddy` (127.0.0.1:8080) behind pesat-caddy forward. Verified end-to-end.                       |
-| **UI/UX QA**          | **Dashboard UI/UX Audit & Layout Standardization** ✅        | All features                          | DONE (2026-08-20/21). Full 25-route Playwright visual audit, single-line search bar on Content Gap & Link Intersect, standardized `max-w-7xl mx-auto space-y-4` layout container across all routes.                                   |
-| **VPS Assets Fix**    | **VPS Caddy Asset Routing & Fresh Startup Build** ✅          | —                                     | DONE (2026-08-21, commit `f969bb3`). Fixed `@marketingAssetFile` in Caddyfile to prevent CSS/JS 404s, fixed `docker-entrypoint.sh` for guaranteed fresh build on boot. Verified live at `https://seotool.im`.                         |
+| **UI/UX QA**          | **Dashboard UI/UX Audit & Layout Standardization** ✅         | All features                          | DONE (2026-08-20/21). Full 25-route Playwright visual audit, single-line search bar on Content Gap & Link Intersect, standardized `max-w-7xl mx-auto space-y-4` layout container across all routes.                                                                    |
+| **VPS Assets Fix**    | **VPS Caddy Asset Routing & Fresh Startup Build** ✅          | —                                     | DONE (2026-08-21, commit `f969bb3`). Fixed `@marketingAssetFile` in Caddyfile to prevent CSS/JS 404s, fixed `docker-entrypoint.sh` for guaranteed fresh build on boot. Verified live at `https://seotool.im`.                                                          |
 
 ---
 
