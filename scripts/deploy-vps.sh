@@ -53,7 +53,7 @@ echo "✅ Pre-flight checks passed."
 BUILD_FLAG=""
 if [ "${1:-}" = "--build" ]; then
   echo "🔨 Building Docker image..."
-  BUILD_FLAG="--build"
+  BUILD_FLAG="--build --force-recreate"
 fi
 
 # ─── Deploy ─────────────────────────────────────────────────────────────
