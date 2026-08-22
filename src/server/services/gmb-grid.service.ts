@@ -96,7 +96,9 @@ export class GmbGridService {
       const chunk = nodes.slice(offset, offset + CHUNK_SIZE);
       const tasks = chunk.map((node) => ({
         keyword,
-        location_coordinate: `${node.lat},${node.lng}`,
+        // DataForSEO Maps location_coordinate must include zoom/radius parameter (e.g. ,14z)
+        // Format: latitude,longitude,zoom
+        location_coordinate: `${node.lat},${node.lng},14z`,
         language_code: "en",
         depth: 20,
         tag: node.id,
@@ -199,7 +201,7 @@ export class GmbGridService {
 
     const tasks = keywords.map((kw) => ({
       keyword: kw,
-      location_coordinate: `${lat},${lng}`,
+      location_coordinate: `${lat},${lng},14z`,
       language_code: "en",
       depth: 20,
     }));
