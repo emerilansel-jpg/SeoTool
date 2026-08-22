@@ -21,8 +21,9 @@ git reset --hard origin/main
 cp .env.hosted.bak .env.hosted 2>/dev/null || true
 rm -f .env.hosted.bak
 
-chmod +x scripts/deploy-vps.sh
-./scripts/deploy-vps.sh --build
+# Run via bash: the checkout may contain root-owned files (from past root
+# logins) that the seotool user cannot chmod.
+bash scripts/deploy-vps.sh --build
 
 # Apply pending Postgres migrations inside the freshly built container.
 # The entrypoint deliberately skips runtime migrations (drizzle-kit can
