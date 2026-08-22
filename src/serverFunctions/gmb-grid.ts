@@ -156,6 +156,7 @@ export const createGmbGridRun = createServerFn({ method: "POST" })
         data.keyword,
         data.businessName,
         dfNodes,
+        data.radiusMeters,
       );
 
       for (const result of results) {

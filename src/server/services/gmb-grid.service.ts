@@ -88,6 +88,7 @@ export class GmbGridService {
     keyword: string,
     businessName: string,
     nodes: Array<{ lat: number; lng: number; id: string }>,
+    radiusMeters: number = 1000,
   ): Promise<GridScanResult[]> {
     const CHUNK_SIZE = 25;
     const results: GridScanResult[] = [];
@@ -96,9 +97,9 @@ export class GmbGridService {
       const chunk = nodes.slice(offset, offset + CHUNK_SIZE);
       const tasks = chunk.map((node) => ({
         keyword,
-        // DataForSEO Maps location_coordinate must include zoom/radius parameter (e.g. ,14z)
-        // Format: latitude,longitude,zoom
-        location_coordinate: `${node.lat},${node.lng},14z`,
+        // DataForSEO Maps location_coordinate MUST include radius parameter
+        // Format: latitude,longitude,radius
+        location_coordinate: `${node.lat},${node.lng},${radiusMeters}`,
         language_code: "en",
         depth: 20,
         tag: node.id,
