@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -47,6 +47,13 @@ const getRankColor = (rank: number | null) => {
 type FormInputs = HTMLFormControlsCollection & Record<string, HTMLInputElement>;
 
 export function GmbGridView({ projectId }: { projectId: string }) {
+  // react-leaflet cannot be server-rendered: SSR output mismatches the
+  // client init and hydration fails, which silently kills every event
+  // handler on the page (form buttons stop working). Render the map only
+  // after mount.
+  const [mapMounted, setMapMounted] = useState(false);
+  useEffect(() => setMapMounted(true), []);
+
   const getConfigs = useServerFn(getGmbGridConfigs);
   const getSnapshots = useServerFn(getGmbGridSnapshots);
   const createRun = useServerFn(createGmbGridRun);
@@ -286,6 +293,7 @@ export function GmbGridView({ projectId }: { projectId: string }) {
         )}
 
         <div className="relative flex-1 min-h-[400px] rounded-lg overflow-hidden border border-base-300 z-0">
+          {mapMounted ? (
           <MapContainer
             center={[mapCenterLat, mapCenterLng]}
             zoom={13}
@@ -323,6 +331,11 @@ export function GmbGridView({ projectId }: { projectId: string }) {
               </CircleMarker>
             ))}
           </MapContainer>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-base-content/50 text-sm">
+              Loading map…
+            </div>
+          )}
 
           <div className="absolute bottom-3 right-3 z-[1000] bg-base-100/95 rounded-lg shadow-md border border-base-300 p-2 text-xs">
             <p className="font-semibold mb-1">Local rank</p>
