@@ -20,7 +20,12 @@ interface GmbScanPipelineProps {
  * Explains the scan pipeline to the user and shows live progress:
  * submit -> DataForSEO live scan per grid point -> ranked heatmap.
  */
-export function GmbScanPipeline({ isScanning, runStatus, snapshots, error }: GmbScanPipelineProps) {
+export function GmbScanPipeline({
+  isScanning,
+  runStatus,
+  snapshots,
+  error,
+}: GmbScanPipelineProps) {
   if (error) {
     return (
       <div className="mb-4 p-4 rounded-lg bg-error/10 border border-error/30 text-sm flex items-start gap-3">
@@ -37,7 +42,10 @@ export function GmbScanPipeline({ isScanning, runStatus, snapshots, error }: Gmb
   const done = snapshots?.filter((s) => s.status !== "pending").length ?? 0;
   const ranked = snapshots?.filter((s) => s.rank !== null) ?? [];
   const avgRank = ranked.length
-    ? Math.round((ranked.reduce((sum, s) => sum + (s.rank ?? 0), 0) / ranked.length) * 10) / 10
+    ? Math.round(
+        (ranked.reduce((sum, s) => sum + (s.rank ?? 0), 0) / ranked.length) *
+          10,
+      ) / 10
     : null;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
@@ -92,8 +100,8 @@ export function GmbScanPipeline({ isScanning, runStatus, snapshots, error }: Gmb
         max={100}
       />
       <p className="text-xs text-base-content/60 mt-1">
-        Each grid point runs a separate Google Maps search for your keyword.
-        A {total}-point grid usually finishes in under a minute.
+        Each grid point runs a separate Google Maps search for your keyword. A{" "}
+        {total}-point grid usually finishes in under a minute.
       </p>
     </div>
   );
