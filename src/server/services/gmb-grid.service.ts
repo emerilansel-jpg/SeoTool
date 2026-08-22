@@ -28,7 +28,12 @@ const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 
 /** Find the rank of `targetBusinessName` inside a Maps SERP item list. */
 function findBusinessRank(
-  items: Array<{ type?: string; title?: string; rank_group?: number; rank_absolute?: number }>,
+  items: Array<{
+    type?: string;
+    title?: string;
+    rank_group?: number;
+    rank_absolute?: number;
+  }>,
   targetBusinessName: string,
 ): number | null {
   const target = normalize(targetBusinessName);
@@ -43,7 +48,10 @@ function findBusinessRank(
   // Fallback for titles with extra suffixes ("Milkwood Restaurant - San Diego").
   for (const item of items) {
     if (item.type !== "maps_search" || !item.title) continue;
-    if (normalize(item.title).startsWith(target) || normalize(item.title).includes(target)) {
+    if (
+      normalize(item.title).startsWith(target) ||
+      normalize(item.title).includes(target)
+    ) {
       return item.rank_group || item.rank_absolute || null;
     }
   }
@@ -136,27 +144,38 @@ export class GmbGridService {
 
   async getRankedKeywordsForDomain(domain: string): Promise<string[]> {
     try {
-      const url = new URL(domain.startsWith('http') ? domain : `https://${domain}`);
-      const host = url.hostname.replace('www.', '');
+      const url = new URL(
+        domain.startsWith("http") ? domain : `https://${domain}`,
+      );
+      const host = url.hostname.replace("www.", "");
 
-      const response = await fetch("https://api.dataforseo.com/v3/dataforseo_labs/google/ranked_keywords/live", {
-        method: "POST",
-        headers: {
-          "Authorization": this.getAuthHeader(),
-          "Content-Type": "application/json"
+      const response = await fetch(
+        "https://api.dataforseo.com/v3/dataforseo_labs/google/ranked_keywords/live",
+        {
+          method: "POST",
+          headers: {
+            Authorization: this.getAuthHeader(),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify([
+            {
+              target: host,
+              location_code: 2840,
+              language_code: "en",
+              limit: 10,
+            },
+          ]),
         },
-        body: JSON.stringify([{
-          target: host,
-          location_code: 2840,
-          language_code: "en",
-          limit: 10
-        }])
-      });
+      );
 
       if (!response.ok) return [];
 
       const data = (await response.json()) as {
-        tasks?: Array<{ result?: Array<{ items?: Array<{ keyword_data?: { keyword?: string } }> }> }>;
+        tasks?: Array<{
+          result?: Array<{
+            items?: Array<{ keyword_data?: { keyword?: string } }>;
+          }>;
+        }>;
       };
       const items = data.tasks?.[0]?.result?.[0]?.items || [];
       return items
@@ -168,31 +187,44 @@ export class GmbGridService {
     }
   }
 
-  async verifyMapsRankings(keywords: string[], targetPlaceId: string, lat: number, lng: number) {
+  async verifyMapsRankings(
+    keywords: string[],
+    targetPlaceId: string,
+    lat: number,
+    lng: number,
+  ) {
     if (!keywords.length) return [];
 
-    const tasks = keywords.map(kw => ({
+    const tasks = keywords.map((kw) => ({
       keyword: kw,
       location_coordinate: `${lat},${lng}`,
       language_code: "en",
-      depth: 20
+      depth: 20,
     }));
 
-    const response = await fetch("https://api.dataforseo.com/v3/serp/google/maps/live/advanced", {
-      method: "POST",
-      headers: {
-        "Authorization": this.getAuthHeader(),
-        "Content-Type": "application/json"
+    const response = await fetch(
+      "https://api.dataforseo.com/v3/serp/google/maps/live/advanced",
+      {
+        method: "POST",
+        headers: {
+          Authorization: this.getAuthHeader(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(tasks),
       },
-      body: JSON.stringify(tasks)
-    });
+    );
 
     if (!response.ok) return [];
 
     const data = (await response.json()) as {
       tasks?: Array<{
         result?: Array<{
-          items?: Array<{ type?: string; place_id?: string; rank_group?: number; rank_absolute?: number }>;
+          items?: Array<{
+            type?: string;
+            place_id?: string;
+            rank_group?: number;
+            rank_absolute?: number;
+          }>;
         }>;
       }>;
     };
@@ -217,5 +249,4 @@ export class GmbGridService {
 
     return verified;
   }
-
 }

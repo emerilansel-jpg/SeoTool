@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "@/db";
 import { gmbGridConfigs, gmbGridRuns, gmbGridSnapshots } from "@/db/schema";
-import { CreateGmbGridSchema, AutoScanGmbKeywordsSchema } from "@/server/features/gmb-grid/gmb-grid.schema";
+import {
+  CreateGmbGridSchema,
+  AutoScanGmbKeywordsSchema,
+} from "@/server/features/gmb-grid/gmb-grid.schema";
 import { generateGridNodes } from "@/server/utils/geo-grid";
 import { GmbGridService } from "@/server/services/gmb-grid.service";
 import { eq, desc, inArray, and } from "drizzle-orm";
@@ -21,9 +24,18 @@ export const getGmbGridConfigs = createServerFn({ method: "GET" })
     let lastRunIds: Record<string, string> = {};
     if (configs.length > 0) {
       const runs = await db
-        .select({ id: gmbGridRuns.id, configId: gmbGridRuns.configId, startedAt: gmbGridRuns.startedAt })
+        .select({
+          id: gmbGridRuns.id,
+          configId: gmbGridRuns.configId,
+          startedAt: gmbGridRuns.startedAt,
+        })
         .from(gmbGridRuns)
-        .where(inArray(gmbGridRuns.configId, configs.map((c) => c.id)))
+        .where(
+          inArray(
+            gmbGridRuns.configId,
+            configs.map((c) => c.id),
+          ),
+        )
         .orderBy(desc(gmbGridRuns.startedAt));
 
       for (const run of runs) {
@@ -174,7 +186,6 @@ export const createGmbGridRun = createServerFn({ method: "POST" })
     return { runId, configId, status, failedCount };
   });
 
-
 export const scanGmbKeywords = createServerFn({ method: "POST" })
   .middleware([requireAuthenticatedContext])
   .validator(AutoScanGmbKeywordsSchema)
@@ -188,20 +199,27 @@ export const scanGmbKeywords = createServerFn({ method: "POST" })
     const seeds = new Set<string>();
 
     // Generic fallback based on name tokens (assuming business name contains category)
-    const nameTokens = data.businessName.split(" ").filter(t => t.length > 3);
+    const nameTokens = data.businessName.split(" ").filter((t) => t.length > 3);
     for (const token of nameTokens) {
       seeds.add(`${token.toLowerCase()} near me`);
     }
 
     if (data.website) {
-      const organicKeywords = await gmbService.getRankedKeywordsForDomain(data.website);
+      const organicKeywords = await gmbService.getRankedKeywordsForDomain(
+        data.website,
+      );
       organicKeywords.forEach((kw: string) => seeds.add(kw));
     }
 
     const keywordList = Array.from(seeds).slice(0, 15); // Limit to 15 to save live cost
 
     // 2. Verify ranks in maps
-    const verifiedRankings = await gmbService.verifyMapsRankings(keywordList, data.placeId, data.lat, data.lng);
+    const verifiedRankings = await gmbService.verifyMapsRankings(
+      keywordList,
+      data.placeId,
+      data.lat,
+      data.lng,
+    );
 
     return verifiedRankings; // Array of { keyword, rank }
   });
