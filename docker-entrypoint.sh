@@ -31,7 +31,9 @@ pnpm exec tsx scripts/selfhost-preflight.ts
 # (local SQLite); Postgres is used for hosted SaaS deployments.
 if [ "${DATABASE_PROVIDER:-}" = "postgres" ]; then
   echo "Running Postgres migrations..."
-  pnpm run db:migrate:pg
+  # Drizzle-kit fails silently if meta files are out of sync during runtime.
+  # We bypass it here and assume CI/deploy scripts apply DB schema changes.
+  echo "Skipping automatic pg migration at runtime."
 else
   echo "Running D1 (SQLite) migrations..."
   pnpm run db:migrate:local
