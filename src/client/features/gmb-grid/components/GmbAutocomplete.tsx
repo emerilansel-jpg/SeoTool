@@ -72,7 +72,6 @@ export function GmbAutocomplete({ onSelectProfile }: GmbAutocompleteProps) {
       <label className="text-sm font-medium mb-1 block">Business Name</label>
       <div className="relative">
         <input
-          name="businessName"
           value={value}
           onChange={(e) => {
             setValue(e.target.value);

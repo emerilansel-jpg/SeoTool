@@ -44,6 +44,8 @@ const getRankColor = (rank: number | null) => {
   return "#ef4444";
 };
 
+type FormInputs = HTMLFormControlsCollection & Record<string, HTMLInputElement>;
+
 export function GmbGridView({ projectId }: { projectId: string }) {
   const getConfigs = useServerFn(getGmbGridConfigs);
   const getSnapshots = useServerFn(getGmbGridSnapshots);
@@ -72,8 +74,6 @@ export function GmbGridView({ projectId }: { projectId: string }) {
       query.state.data?.status === "running" ? 3000 : false,
   });
   const snapshots = runData?.snapshots;
-
-type FormInputs = HTMLFormControlsCollection & Record<string, HTMLInputElement>;
 
   const createRunMutation = useMutation({
     mutationFn: async (data: CreateGmbGridInput) => await createRun({ data }),
