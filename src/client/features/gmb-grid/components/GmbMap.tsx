@@ -10,7 +10,7 @@ import {
 import "leaflet/dist/leaflet.css";
 
 import L from "leaflet";
-// oxlint-disable-next-line typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript-eslint/no-explicit-any, typescript-eslint/no-unsafe-type-assertion, typescript-eslint/no-unsafe-member-access
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:

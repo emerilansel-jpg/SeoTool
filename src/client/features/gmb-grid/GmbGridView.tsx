@@ -15,6 +15,11 @@ import { Loader2, Sparkles } from "lucide-react";
 
 type FormInputs = HTMLFormControlsCollection & Record<string, HTMLInputElement>;
 
+// DOM form collections are loosely typed; index them by field name.
+const getFormInputs = (form: HTMLFormElement): FormInputs =>
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion
+  form.elements as FormInputs;
+
 export function GmbGridView({ projectId }: { projectId: string }) {
   const getConfigs = useServerFn(getGmbGridConfigs);
   const getSnapshots = useServerFn(getGmbGridSnapshots);
@@ -70,7 +75,7 @@ export function GmbGridView({ projectId }: { projectId: string }) {
     website?: string,
   ) => {
     if (formRef.current) {
-      const inputs = formRef.current.elements as FormInputs;
+      const inputs = getFormInputs(formRef.current);
       if (inputs.businessName) inputs.businessName.value = name;
       // Manual typing (no placeId) must not clobber the user's coordinates.
       if (placeId) {
@@ -87,7 +92,7 @@ export function GmbGridView({ projectId }: { projectId: string }) {
 
   const onAutoScanKeywords = () => {
     if (!formRef.current) return;
-    const inputs = formRef.current.elements as FormInputs;
+    const inputs = getFormInputs(formRef.current);
     if (!selectedPlaceId || !inputs.businessName?.value) return;
 
     scanKeywordsMutation.mutate({
@@ -101,15 +106,19 @@ export function GmbGridView({ projectId }: { projectId: string }) {
 
   const useScannedKeyword = (kw: string) => {
     if (formRef.current) {
-      const inputs = formRef.current.elements as FormInputs;
+      const inputs = getFormInputs(formRef.current);
       if (inputs.keyword) inputs.keyword.value = kw;
     }
     setScannedKeywords(null);
   };
 
-  const handleStartScan = (e: React.FormEvent) => {
+  const handleStartScan = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
+    const formData = new FormData(e.currentTarget);
+    const field = (name: string) => {
+      const value = formData.get(name);
+      return typeof value === "string" ? value : "";
+    };
     const runId = crypto.randomUUID();
     setScanError(null);
     // Poll immediately so the pipeline panel tracks progress while the
@@ -119,12 +128,12 @@ export function GmbGridView({ projectId }: { projectId: string }) {
       {
         projectId,
         runId,
-        businessName: formData.get("businessName") as string,
-        keyword: formData.get("keyword") as string,
-        centerLat: parseFloat(formData.get("centerLat") as string),
-        centerLng: parseFloat(formData.get("centerLng") as string),
-        gridSize: parseInt(formData.get("gridSize") as string, 10),
-        radiusMeters: parseInt(formData.get("radiusMeters") as string, 10),
+        businessName: field("businessName"),
+        keyword: field("keyword"),
+        centerLat: parseFloat(field("centerLat")),
+        centerLng: parseFloat(field("centerLng")),
+        gridSize: parseInt(field("gridSize"), 10),
+        radiusMeters: parseInt(field("radiusMeters"), 10),
       },
       {
         onSuccess: () => {

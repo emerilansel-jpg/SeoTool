@@ -46,6 +46,7 @@ export function GmbAutocomplete({ onSelectProfile }: GmbAutocompleteProps) {
         const details = (await getDetails({
           placeId: suggestion.place_id,
           fields: ["website", "name"],
+          // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion
         })) as google.maps.places.PlaceResult;
 
         if (typeof details !== "string" && details.website) {

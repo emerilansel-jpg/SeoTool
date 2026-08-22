@@ -1,18 +1,20 @@
 import { AppError } from "@/server/lib/errors";
 
+interface DataForSeoItem {
+  type?: string;
+  title?: string;
+  place_id?: string;
+  rank_group?: number;
+  rank_absolute?: number;
+  keyword_data?: { keyword?: string };
+}
+
 interface DataForSeoLiveTask {
   id: string;
   status_code: number;
   status_message: string;
   tag?: string;
-  result?: Array<{
-    items?: Array<{
-      type?: string;
-      title?: string;
-      rank_group?: number;
-      rank_absolute?: number;
-    }>;
-  }>;
+  result?: Array<{ items?: DataForSeoItem[] }>;
 }
 
 export interface GridScanResult {
@@ -26,14 +28,19 @@ export interface GridScanResult {
 
 const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 
+/** Minimal runtime guard for a DataForSEO live/advanced response envelope. */
+function getTasksArray(payload: unknown): DataForSeoLiveTask[] {
+  if (typeof payload !== "object" || payload === null) return [];
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion
+  const tasks = (payload as { tasks?: unknown }).tasks;
+  if (!Array.isArray(tasks)) return [];
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion
+  return tasks as DataForSeoLiveTask[];
+}
+
 /** Find the rank of `targetBusinessName` inside a Maps SERP item list. */
 function findBusinessRank(
-  items: Array<{
-    type?: string;
-    title?: string;
-    rank_group?: number;
-    rank_absolute?: number;
-  }>,
+  items: DataForSeoItem[],
   targetBusinessName: string,
 ): number | null {
   const target = normalize(targetBusinessName);
@@ -118,9 +125,10 @@ export class GmbGridService {
         continue;
       }
 
-      const data = (await response.json()) as { tasks?: DataForSeoLiveTask[] };
+      // response.json() is `any`; narrowing happens per-field below.
+      const payload: unknown = await response.json();
       const byTag = new Map<string, DataForSeoLiveTask>();
-      for (const task of data.tasks ?? []) {
+      for (const task of getTasksArray(payload)) {
         if (task.tag) byTag.set(task.tag, task);
       }
 
@@ -170,14 +178,8 @@ export class GmbGridService {
 
       if (!response.ok) return [];
 
-      const data = (await response.json()) as {
-        tasks?: Array<{
-          result?: Array<{
-            items?: Array<{ keyword_data?: { keyword?: string } }>;
-          }>;
-        }>;
-      };
-      const items = data.tasks?.[0]?.result?.[0]?.items || [];
+      const items =
+        getTasksArray(await response.json())[0]?.result?.[0]?.items || [];
       return items
         .map((i) => i.keyword_data?.keyword)
         .filter((k): k is string => typeof k === "string");
@@ -216,21 +218,9 @@ export class GmbGridService {
 
     if (!response.ok) return [];
 
-    const data = (await response.json()) as {
-      tasks?: Array<{
-        result?: Array<{
-          items?: Array<{
-            type?: string;
-            place_id?: string;
-            rank_group?: number;
-            rank_absolute?: number;
-          }>;
-        }>;
-      }>;
-    };
     const verified: Array<{ keyword: string; rank: number }> = [];
 
-    const resultTasks = data.tasks || [];
+    const resultTasks = getTasksArray(await response.json());
     for (let i = 0; i < resultTasks.length; i++) {
       const task = resultTasks[i];
       const items = task.result?.[0]?.items || [];
