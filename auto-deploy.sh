@@ -41,12 +41,12 @@ fi
 
 echo "🩺 Post-deploy diagnostics..."
 echo "--- container errors (10m) ---"
-docker logs open-seo --since 10m 2>&1 | grep -iE "error|cannot|failed" | tail -15 || echo "(none)"
+docker compose -f docker-compose.hosted.yaml --env-file .env.hosted logs --since 10m open-seo 2>&1 | grep -iaE "error|cannot|failed" | tail -15 || echo "(none)"
 echo "--- app asset dir ---"
 docker compose -f docker-compose.hosted.yaml --env-file .env.hosted exec -T open-seo sh -c \
   'ls /app/dist/client/assets 2>/dev/null | head -5; ls /app/.output/public/assets 2>/dev/null | head -5' || true
 echo "--- SSR HTML asset refs (direct :3001) ---"
-curl -s --max-time 10 http://127.0.0.1:3001/ | grep -oE '/assets/[^"]+\.(js|css)' | head -6 || echo "(no refs)"
+curl -s --max-time 10 http://127.0.0.1:3001/ | grep -aoE '/assets/[^"]+\.(js|css)' | head -6 || echo "(no refs)"
 echo "--- end diagnostics ---"
 
 echo "✅ Auto-Deploy finished successfully!"
