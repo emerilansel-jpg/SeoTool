@@ -39,4 +39,14 @@ if [ -f "gateway-caddy/docker-compose.yml" ]; then
   (cd gateway-caddy && docker compose up -d --force-recreate) 2>/dev/null || docker compose -f gateway-caddy/docker-compose.yml up -d --force-recreate 2>/dev/null || true
 fi
 
+echo "🩺 Post-deploy diagnostics..."
+echo "--- container errors (10m) ---"
+docker logs open-seo --since 10m 2>&1 | grep -iE "error|cannot|failed" | tail -15 || echo "(none)"
+echo "--- app asset dir ---"
+docker compose -f docker-compose.hosted.yaml --env-file .env.hosted exec -T open-seo sh -c \
+  'ls /app/dist/client/assets 2>/dev/null | head -5; ls /app/.output/public/assets 2>/dev/null | head -5' || true
+echo "--- SSR HTML asset refs (direct :3001) ---"
+curl -s --max-time 10 http://127.0.0.1:3001/ | grep -oE '/assets/[^"]+\.(js|css)' | head -6 || echo "(no refs)"
+echo "--- end diagnostics ---"
+
 echo "✅ Auto-Deploy finished successfully!"
