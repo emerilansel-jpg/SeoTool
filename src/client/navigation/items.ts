@@ -51,7 +51,7 @@ const projectNavItems = [
     icon: TrendingUp,
   },
   {
-    to: "/_dashboard/projects/$projectId/gmb-grid" as const,
+    to: "/p/$projectId/gmb-grid" as const,
     label: "Local Map Rank",
     icon: MapPin,
   },
@@ -188,7 +188,7 @@ export function getProjectNavGroups(projectId: string) {
         byPath("/p/$projectId/keywords"),
         byPath("/p/$projectId/saved"),
         byPath("/p/$projectId/rank-tracking"),
-        byPath("/_dashboard/projects/$projectId/gmb-grid"),
+        byPath("/p/$projectId/gmb-grid"),
         byPath("/p/$projectId/keyword-clustering"),
       ],
     },

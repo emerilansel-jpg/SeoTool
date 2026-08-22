@@ -58,7 +58,6 @@ import { Route as AppAdminPagesNewRouteImport } from './routes/_app/admin/pages/
 import { Route as AppAdminPricingIndexRouteImport } from './routes/_app/admin/pricing/index'
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
-import { Route as DashboardProjectsProjectIdGmbGridRouteImport } from './routes/_dashboard/projects/$projectId/gmb-grid'
 import { Route as ProjectPProjectIdIndexRouteImport } from './routes/_project/p/$projectId/index'
 import { Route as ProjectPProjectIdAuditRouteImport } from './routes/_project/p/$projectId/audit'
 import { Route as ProjectPProjectIdBacklinksRouteImport } from './routes/_project/p/$projectId/backlinks'
@@ -67,6 +66,7 @@ import { Route as ProjectPProjectIdContentGapRouteImport } from './routes/_proje
 import { Route as ProjectPProjectIdCrawlBudgetRouteImport } from './routes/_project/p/$projectId/crawl-budget'
 import { Route as ProjectPProjectIdDomainRouteImport } from './routes/_project/p/$projectId/domain'
 import { Route as ProjectPProjectIdGa4InsightsRouteImport } from './routes/_project/p/$projectId/ga4-insights'
+import { Route as ProjectPProjectIdGmbGridRouteImport } from './routes/_project/p/$projectId/gmb-grid'
 import { Route as ProjectPProjectIdKeywordClusteringRouteImport } from './routes/_project/p/$projectId/keyword-clustering'
 import { Route as ProjectPProjectIdKeywordsRouteImport } from './routes/_project/p/$projectId/keywords'
 import { Route as ProjectPProjectIdLinkIntersectRouteImport } from './routes/_project/p/$projectId/link-intersect'
@@ -338,12 +338,6 @@ const AppAdminUsersUserIdRoute = AppAdminUsersUserIdRouteImport.update({
   path: '/users/$userId',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
-const DashboardProjectsProjectIdGmbGridRoute =
-  DashboardProjectsProjectIdGmbGridRouteImport.update({
-    id: '/_dashboard/projects/$projectId/gmb-grid',
-    path: '/projects/$projectId/gmb-grid',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ProjectPProjectIdIndexRoute = ProjectPProjectIdIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -387,6 +381,12 @@ const ProjectPProjectIdGa4InsightsRoute =
   ProjectPProjectIdGa4InsightsRouteImport.update({
     id: '/ga4-insights',
     path: '/ga4-insights',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
+const ProjectPProjectIdGmbGridRoute =
+  ProjectPProjectIdGmbGridRouteImport.update({
+    id: '/gmb-grid',
+    path: '/gmb-grid',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
 const ProjectPProjectIdKeywordClusteringRoute =
@@ -571,7 +571,6 @@ export interface FileRoutesByFullPath {
   '/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/admin/pages/new': typeof AppAdminPagesNewRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
-  '/projects/$projectId/gmb-grid': typeof DashboardProjectsProjectIdGmbGridRoute
   '/p/$projectId/audit': typeof ProjectPProjectIdAuditRouteWithChildren
   '/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
@@ -579,6 +578,7 @@ export interface FileRoutesByFullPath {
   '/p/$projectId/crawl-budget': typeof ProjectPProjectIdCrawlBudgetRoute
   '/p/$projectId/domain': typeof ProjectPProjectIdDomainRoute
   '/p/$projectId/ga4-insights': typeof ProjectPProjectIdGa4InsightsRoute
+  '/p/$projectId/gmb-grid': typeof ProjectPProjectIdGmbGridRoute
   '/p/$projectId/keyword-clustering': typeof ProjectPProjectIdKeywordClusteringRoute
   '/p/$projectId/keywords': typeof ProjectPProjectIdKeywordsRoute
   '/p/$projectId/link-intersect': typeof ProjectPProjectIdLinkIntersectRoute
@@ -648,13 +648,13 @@ export interface FileRoutesByTo {
   '/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/admin/pages/new': typeof AppAdminPagesNewRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
-  '/projects/$projectId/gmb-grid': typeof DashboardProjectsProjectIdGmbGridRoute
   '/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
   '/p/$projectId/content-gap': typeof ProjectPProjectIdContentGapRoute
   '/p/$projectId/crawl-budget': typeof ProjectPProjectIdCrawlBudgetRoute
   '/p/$projectId/domain': typeof ProjectPProjectIdDomainRoute
   '/p/$projectId/ga4-insights': typeof ProjectPProjectIdGa4InsightsRoute
+  '/p/$projectId/gmb-grid': typeof ProjectPProjectIdGmbGridRoute
   '/p/$projectId/keyword-clustering': typeof ProjectPProjectIdKeywordClusteringRoute
   '/p/$projectId/keywords': typeof ProjectPProjectIdKeywordsRoute
   '/p/$projectId/link-intersect': typeof ProjectPProjectIdLinkIntersectRoute
@@ -731,7 +731,6 @@ export interface FileRoutesById {
   '/_app/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/_app/admin/pages/new': typeof AppAdminPagesNewRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
-  '/_dashboard/projects/$projectId/gmb-grid': typeof DashboardProjectsProjectIdGmbGridRoute
   '/_project/p/$projectId/audit': typeof ProjectPProjectIdAuditRouteWithChildren
   '/_project/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/_project/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
@@ -739,6 +738,7 @@ export interface FileRoutesById {
   '/_project/p/$projectId/crawl-budget': typeof ProjectPProjectIdCrawlBudgetRoute
   '/_project/p/$projectId/domain': typeof ProjectPProjectIdDomainRoute
   '/_project/p/$projectId/ga4-insights': typeof ProjectPProjectIdGa4InsightsRoute
+  '/_project/p/$projectId/gmb-grid': typeof ProjectPProjectIdGmbGridRoute
   '/_project/p/$projectId/keyword-clustering': typeof ProjectPProjectIdKeywordClusteringRoute
   '/_project/p/$projectId/keywords': typeof ProjectPProjectIdKeywordsRoute
   '/_project/p/$projectId/link-intersect': typeof ProjectPProjectIdLinkIntersectRoute
@@ -813,7 +813,6 @@ export interface FileRouteTypes {
     | '/admin/pages/$postId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
-    | '/projects/$projectId/gmb-grid'
     | '/p/$projectId/audit'
     | '/p/$projectId/backlinks'
     | '/p/$projectId/brand-lookup'
@@ -821,6 +820,7 @@ export interface FileRouteTypes {
     | '/p/$projectId/crawl-budget'
     | '/p/$projectId/domain'
     | '/p/$projectId/ga4-insights'
+    | '/p/$projectId/gmb-grid'
     | '/p/$projectId/keyword-clustering'
     | '/p/$projectId/keywords'
     | '/p/$projectId/link-intersect'
@@ -890,13 +890,13 @@ export interface FileRouteTypes {
     | '/admin/pages/$postId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
-    | '/projects/$projectId/gmb-grid'
     | '/p/$projectId/backlinks'
     | '/p/$projectId/brand-lookup'
     | '/p/$projectId/content-gap'
     | '/p/$projectId/crawl-budget'
     | '/p/$projectId/domain'
     | '/p/$projectId/ga4-insights'
+    | '/p/$projectId/gmb-grid'
     | '/p/$projectId/keyword-clustering'
     | '/p/$projectId/keywords'
     | '/p/$projectId/link-intersect'
@@ -972,7 +972,6 @@ export interface FileRouteTypes {
     | '/_app/admin/pages/$postId'
     | '/_app/admin/pages/new'
     | '/_app/admin/users/$userId'
-    | '/_dashboard/projects/$projectId/gmb-grid'
     | '/_project/p/$projectId/audit'
     | '/_project/p/$projectId/backlinks'
     | '/_project/p/$projectId/brand-lookup'
@@ -980,6 +979,7 @@ export interface FileRouteTypes {
     | '/_project/p/$projectId/crawl-budget'
     | '/_project/p/$projectId/domain'
     | '/_project/p/$projectId/ga4-insights'
+    | '/_project/p/$projectId/gmb-grid'
     | '/_project/p/$projectId/keyword-clustering'
     | '/_project/p/$projectId/keywords'
     | '/_project/p/$projectId/link-intersect'
@@ -1034,7 +1034,6 @@ export interface RootRouteChildren {
   PagesSlugRoute: typeof PagesSlugRoute
   BlogsIndexRoute: typeof BlogsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  DashboardProjectsProjectIdGmbGridRoute: typeof DashboardProjectsProjectIdGmbGridRoute
   ApiGa4OauthCallbackRoute: typeof ApiGa4OauthCallbackRoute
   ApiGscOauthCallbackRoute: typeof ApiGscOauthCallbackRoute
 }
@@ -1384,13 +1383,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminUsersUserIdRouteImport
       parentRoute: typeof AppAdminRouteRoute
     }
-    '/_dashboard/projects/$projectId/gmb-grid': {
-      id: '/_dashboard/projects/$projectId/gmb-grid'
-      path: '/projects/$projectId/gmb-grid'
-      fullPath: '/projects/$projectId/gmb-grid'
-      preLoaderRoute: typeof DashboardProjectsProjectIdGmbGridRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_project/p/$projectId/': {
       id: '/_project/p/$projectId/'
       path: '/'
@@ -1445,6 +1437,13 @@ declare module '@tanstack/react-router' {
       path: '/ga4-insights'
       fullPath: '/p/$projectId/ga4-insights'
       preLoaderRoute: typeof ProjectPProjectIdGa4InsightsRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/gmb-grid': {
+      id: '/_project/p/$projectId/gmb-grid'
+      path: '/gmb-grid'
+      fullPath: '/p/$projectId/gmb-grid'
+      preLoaderRoute: typeof ProjectPProjectIdGmbGridRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
     '/_project/p/$projectId/keyword-clustering': {
@@ -1739,6 +1738,7 @@ interface ProjectPProjectIdRouteRouteChildren {
   ProjectPProjectIdCrawlBudgetRoute: typeof ProjectPProjectIdCrawlBudgetRoute
   ProjectPProjectIdDomainRoute: typeof ProjectPProjectIdDomainRoute
   ProjectPProjectIdGa4InsightsRoute: typeof ProjectPProjectIdGa4InsightsRoute
+  ProjectPProjectIdGmbGridRoute: typeof ProjectPProjectIdGmbGridRoute
   ProjectPProjectIdKeywordClusteringRoute: typeof ProjectPProjectIdKeywordClusteringRoute
   ProjectPProjectIdKeywordsRoute: typeof ProjectPProjectIdKeywordsRoute
   ProjectPProjectIdLinkIntersectRoute: typeof ProjectPProjectIdLinkIntersectRoute
@@ -1768,6 +1768,7 @@ const ProjectPProjectIdRouteRouteChildren: ProjectPProjectIdRouteRouteChildren =
     ProjectPProjectIdCrawlBudgetRoute: ProjectPProjectIdCrawlBudgetRoute,
     ProjectPProjectIdDomainRoute: ProjectPProjectIdDomainRoute,
     ProjectPProjectIdGa4InsightsRoute: ProjectPProjectIdGa4InsightsRoute,
+    ProjectPProjectIdGmbGridRoute: ProjectPProjectIdGmbGridRoute,
     ProjectPProjectIdKeywordClusteringRoute:
       ProjectPProjectIdKeywordClusteringRoute,
     ProjectPProjectIdKeywordsRoute: ProjectPProjectIdKeywordsRoute,
@@ -1863,8 +1864,6 @@ const rootRouteChildren: RootRouteChildren = {
   PagesSlugRoute: PagesSlugRoute,
   BlogsIndexRoute: BlogsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  DashboardProjectsProjectIdGmbGridRoute:
-    DashboardProjectsProjectIdGmbGridRoute,
   ApiGa4OauthCallbackRoute: ApiGa4OauthCallbackRoute,
   ApiGscOauthCallbackRoute: ApiGscOauthCallbackRoute,
 }
