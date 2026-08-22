@@ -24,6 +24,14 @@ rm -f .env.hosted.bak
 chmod +x scripts/deploy-vps.sh
 ./scripts/deploy-vps.sh --build
 
+# Apply pending Postgres migrations inside the freshly built container.
+# The entrypoint deliberately skips runtime migrations (drizzle-kit can
+# exit non-zero on journal mismatches), so they run here instead, after
+# the container is up, as a logged but non-fatal step.
+echo "🗄️  Applying Postgres migrations..."
+docker compose -f docker-compose.hosted.yaml --env-file .env.hosted exec -T open-seo pnpm run db:migrate:pg \
+  || echo "⚠️  Postgres migration step failed or was skipped (see logs above)."
+
 # Reload / restart seotool-caddy if the gateway-caddy compose exists
 if [ -f "gateway-caddy/docker-compose.yml" ]; then
   echo "🔄 Reloading seotool-caddy..."
