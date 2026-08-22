@@ -124,6 +124,7 @@ function tableQueryOptions(
 }
 
 export function Ga4InsightsPage({ projectId }: { projectId: string }) {
+  const [isChangingProperty, setIsChangingProperty] = React.useState(false);
   const queryClient = useQueryClient();
   const [range, setRange] = useState<Ga4InsightsDateRange>("last_28_days");
   const [device, setDevice] = useState<Ga4InsightsDevice | typeof ALL>(ALL);
@@ -195,14 +196,13 @@ export function Ga4InsightsPage({ projectId }: { projectId: string }) {
             </p>
           </div>
           {report?.connected ? (
-            <Link
-              to="/p/$projectId/settings"
-              params={{ projectId }}
-              hash="google-analytics"
+            <button
+              type="button"
+              onClick={() => setIsChangingProperty(true)}
               className="link link-hover shrink-0 self-start text-sm font-medium text-base-content/60 transition-colors hover:text-base-content sm:mt-1"
             >
               Change property
-            </Link>
+            </button>
           ) : null}
         </div>
 
@@ -213,6 +213,17 @@ export function Ga4InsightsPage({ projectId }: { projectId: string }) {
             <span className="text-sm">
               {getStandardErrorMessage(reportQuery.error)}
             </span>
+          </div>
+        ) : isChangingProperty ? (
+          <div className="max-w-2xl space-y-4">
+            <button 
+              type="button" 
+              className="btn btn-ghost btn-sm px-2 -ml-2"
+              onClick={() => setIsChangingProperty(false)}
+            >
+              ← Back to Insights
+            </button>
+            <Ga4ConnectionCard projectId={projectId} />
           </div>
         ) : !report?.connected ? (
           <div className="max-w-2xl">
