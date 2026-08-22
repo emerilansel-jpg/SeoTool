@@ -14,8 +14,8 @@ function SerpVolatilityRoute() {
         <div>
           <h1 className="text-2xl font-semibold">SERP Volatility</h1>
           <p className="text-sm text-base-content/70">
-            Track day-over-day ranking instability and potential Google algorithm
-            updates across your tracked keywords.
+            Track day-over-day ranking instability and potential Google
+            algorithm updates across your tracked keywords.
           </p>
         </div>
         {/* oxlint-disable-next-line typescript-eslint/no-unsafe-assignment */}

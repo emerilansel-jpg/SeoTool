@@ -9,7 +9,7 @@ const samSearchSchema = z.object({
 
 type Search = z.infer<typeof samSearchSchema>;
 
-export const Route = createFileRoute("/_project/p/$projectId/sam")({
+export const Route = createFileRoute("/_project/p/$projectId/jet")({
   validateSearch: samSearchSchema,
   component: SamRoute,
 });

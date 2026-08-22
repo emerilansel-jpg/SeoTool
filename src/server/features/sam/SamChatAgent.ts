@@ -170,7 +170,7 @@ export class SamChatAgent extends Think {
     return withPgClient(async () => {
       const ctx = await this.loadSamContext();
       if (!ctx) {
-        return "You are SAM, the SEO agent inside SeoTool.im. This chat session no longer exists; tell the user to start a new chat.";
+        return "You are Jet, the SEO agent inside SeoTool.im. This chat session no longer exists; tell the user to start a new chat.";
       }
       const memory = await SamProjectMemoryRepository.getBlock(
         ctx.project.id,

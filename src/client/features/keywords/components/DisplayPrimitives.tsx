@@ -96,9 +96,7 @@ export function KeywordTrendSparkline({
   const points = volumes.map((v, i) => {
     const x = padX + (i / Math.max(volumes.length - 1, 1)) * usableW;
     const y =
-      range === 0
-        ? height / 2
-        : height - padY - ((v - min) / range) * usableH;
+      range === 0 ? height / 2 : height - padY - ((v - min) / range) * usableH;
     return { x, y, v };
   });
 
@@ -150,12 +148,7 @@ export function KeywordTrendSparkline({
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle
-          cx={last.x}
-          cy={last.y}
-          r="1.5"
-          fill="var(--color-primary)"
-        />
+        <circle cx={last.x} cy={last.y} r="1.5" fill="var(--color-primary)" />
       </svg>
     </div>
   );

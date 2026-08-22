@@ -11,7 +11,7 @@ import {
 
 const DISCORD_URL = "https://discord.gg/c9uGs3cFXr";
 const SUPPORT_EMAIL = "support@seotool.im";
-const SAM_GITHUB_URL = "https://github.com/every-app/sam";
+const SAM_GITHUB_URL = "https://github.com/every-app/jet";
 const SKILL_NAMES = [
   "seo-project-setup",
   "seo-coach",
@@ -267,9 +267,9 @@ function AiPage() {
         </section>
 
         <section className="mt-12">
-          <h2 className="text-base font-semibold">Sam: AI SEO teammate</h2>
+          <h2 className="text-base font-semibold">Jet: AI SEO teammate</h2>
           <p className="mt-1.5 text-sm text-base-content/70 leading-relaxed">
-            Sam is an experimental content workflow for Claude Code and other
+            Jet is an experimental content workflow for Claude Code and other
             coding agents. It combines keyword research, source discovery,
             drafting, and QA.
           </p>
@@ -279,7 +279,7 @@ function AiPage() {
             rel="noreferrer"
             className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-base-content transition-colors hover:text-base-content/60"
           >
-            View Sam on GitHub
+            View Jet on GitHub
             <ArrowUpRight className="size-3.5" />
           </a>
         </section>

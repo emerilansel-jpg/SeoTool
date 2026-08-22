@@ -84,25 +84,25 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
   ];
   const navigate = useNavigate();
   const location = useLocation();
-  const onSamRoute = location.pathname.includes("/sam");
+  const onJetRoute = location.pathname.includes("/jet");
 
   // PostHog-style sidebar tabs: Browse shows the regular nav, Chat shows the
-  // SAM chat history. The tab is view state (switching to Browse leaves the
+  // Jet chat history. The tab is view state (switching to Browse leaves the
   // conversation open in the content panel), but the route wins: landing on
-  // /sam selects Chat, navigating anywhere else flips back to Browse.
+  // /jet selects Chat, navigating anywhere else flips back to Browse.
   const [view, setView] = useState<"browse" | "chat">(
-    onSamRoute ? "chat" : "browse",
+    onJetRoute ? "chat" : "browse",
   );
   useEffect(() => {
-    setView(onSamRoute ? "chat" : "browse");
-  }, [onSamRoute]);
+    setView(onJetRoute ? "chat" : "browse");
+  }, [onJetRoute]);
 
   const openChat = () => {
     setView("chat");
     if (!projectId) return;
-    if (!onSamRoute) {
+    if (!onJetRoute) {
       void navigate({
-        to: "/p/$projectId/sam",
+        to: "/p/$projectId/jet",
         params: { projectId },
         search: {},
       });
@@ -114,7 +114,7 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
   // conversation filling the content panel next to a Browse nav.
   const openBrowse = () => {
     setView("browse");
-    if (!projectId || !onSamRoute) return;
+    if (!projectId || !onJetRoute) return;
     void navigate({ to: "/p/$projectId", params: { projectId } });
     onNavigate?.();
   };

@@ -14,8 +14,8 @@ function ContentGapRoute() {
         <div>
           <h1 className="text-2xl font-semibold">Content Gap</h1>
           <p className="text-sm text-base-content/70">
-            Find high-intent keywords your competitors rank for that your site is
-            missing.
+            Find high-intent keywords your competitors rank for that your site
+            is missing.
           </p>
         </div>
         {/* oxlint-disable-next-line typescript-eslint/no-unsafe-assignment */}

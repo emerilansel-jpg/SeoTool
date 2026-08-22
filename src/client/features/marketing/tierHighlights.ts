@@ -50,7 +50,7 @@ export const TIER_HIGHLIGHTS: Record<PaidTier, TierHighlight> = {
       "Unlimited projects",
       "500 backlink checks per day",
       "50 site audits per month",
-      "SAM AI agent and MCP access",
+      "Jet AI agent and MCP access",
       `${MONTHLY_CREDIT_GRANTS.agency.toLocaleString()} monthly data credits`,
     ],
     badge: "Scale",

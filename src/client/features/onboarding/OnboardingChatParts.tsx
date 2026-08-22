@@ -65,7 +65,7 @@ export function WelcomeMessage({
       </div>
       <div className="min-w-0 flex-1 space-y-3 pt-0.5 text-sm">
         <div className="space-y-3 text-base-content/80">
-          <p>Hey, I’m Sam — welcome to SeoTool.im.</p>
+          <p>Hey, I’m Jet — welcome to SeoTool.im.</p>
           <p>
             To get full access to SeoTool.im, you need to upgrade to the paid
             plan. But, I’m here if you have any questions.
@@ -95,7 +95,7 @@ export function WelcomeMessage({
         </div>
 
         <div className="rounded-box border border-base-300 bg-base-200/50 p-3 text-xs lg:hidden">
-          <p className="font-medium">Want Sam to keep going?</p>
+          <p className="font-medium">Want Jet to keep going?</p>
           <p className="mt-0.5 text-base-content/70">
             Upgrade to run keyword research, rank tracking, and site audits on{" "}
             {domain}.
@@ -233,7 +233,7 @@ export function ChatGate({
           That’s all {FREE_ONBOARDING_QUESTION_LIMIT} free questions
         </p>
         <p className="mx-auto mt-1 max-w-md text-xs text-base-content/70">
-          Upgrade to keep working with Sam and unlock the full SeoTool.im app.
+          Upgrade to keep working with Jet and unlock the full SeoTool.im app.
         </p>
         <button
           type="button"
@@ -254,7 +254,7 @@ export function ChatGate({
 export function ChatComposer({
   busy,
   onSend,
-  placeholder = "Ask Sam about your strategy or SeoTool.im…",
+  placeholder = "Ask Jet about your strategy or SeoTool.im…",
 }: {
   busy: boolean;
   onSend: (text: string) => void;

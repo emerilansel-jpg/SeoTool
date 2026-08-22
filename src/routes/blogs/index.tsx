@@ -67,29 +67,33 @@ function BlogIndexPage() {
               }) => (
                 <Link
                   key={post.slug}
-                to="/blogs/$slug"
-                params={{ slug: post.slug }}
-                className="block rounded-xl border border-base-300 bg-base-100 p-5 transition-all hover:border-primary/40 hover:shadow-md"
-              >
-                <h2 className="text-lg font-bold text-base-content">
-                  {post.title}
-                </h2>
-                {post.description ? (
-                  <p className="mt-1.5 text-sm text-base-content/70">
-                    {post.description}
-                  </p>
-                ) : null}
-                {post.publishedAt ? (
-                  <p className="mt-3 text-xs text-base-content/50">
-                    {new Date(post.publishedAt).toLocaleDateString(undefined, {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </p>
-                ) : null}
-              </Link>
-            ))
+                  to="/blogs/$slug"
+                  params={{ slug: post.slug }}
+                  className="block rounded-xl border border-base-300 bg-base-100 p-5 transition-all hover:border-primary/40 hover:shadow-md"
+                >
+                  <h2 className="text-lg font-bold text-base-content">
+                    {post.title}
+                  </h2>
+                  {post.description ? (
+                    <p className="mt-1.5 text-sm text-base-content/70">
+                      {post.description}
+                    </p>
+                  ) : null}
+                  {post.publishedAt ? (
+                    <p className="mt-3 text-xs text-base-content/50">
+                      {new Date(post.publishedAt).toLocaleDateString(
+                        undefined,
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        },
+                      )}
+                    </p>
+                  ) : null}
+                </Link>
+              ),
+            )
           )}
         </div>
       </div>

@@ -2995,14 +2995,12 @@
             position: relative;
           }
           .timeline > li {
-            grid-template-rows: var(
-                --timeline-row-start,
-                minmax(0, 1fr)
-              ) auto var(--timeline-row-end, minmax(0, 1fr));
-            grid-template-columns: var(
-                --timeline-col-start,
-                minmax(0, 1fr)
-              ) auto var(--timeline-col-end, minmax(0, 1fr));
+            grid-template-rows:
+              var(--timeline-row-start, minmax(0, 1fr))
+              auto var(--timeline-row-end, minmax(0, 1fr));
+            grid-template-columns:
+              var(--timeline-col-start, minmax(0, 1fr))
+              auto var(--timeline-col-end, minmax(0, 1fr));
             flex-shrink: 0;
             align-items: center;
             display: grid;
@@ -11643,42 +11641,42 @@
       }
       .tag-chip-slate {
         color: rgb(51, 65, 85);
-        --tw-ring-color: oklab(55.4391% -0.00887066 -0.039739/.3);
+        --tw-ring-color: oklab(55.4391% -0.00887066 -0.039739/0.3);
         background-color: rgba(100, 116, 139, 0.14);
       }
       .tag-chip-rose {
         color: rgb(159, 18, 57);
-        --tw-ring-color: oklab(64.5032% 0.206597 0.060959/.3);
+        --tw-ring-color: oklab(64.5032% 0.206597 0.060959/0.3);
         background-color: rgba(244, 63, 94, 0.14);
       }
       .tag-chip-amber {
         color: rgb(146, 64, 14);
-        --tw-ring-color: oklab(76.8591% 0.0560995 0.154808/.32);
+        --tw-ring-color: oklab(76.8591% 0.0560995 0.154808/0.32);
         background-color: rgba(245, 158, 11, 0.16);
       }
       .tag-chip-lime {
         color: rgb(63, 98, 18);
-        --tw-ring-color: oklab(76.8141% -0.133694 0.154614/.32);
+        --tw-ring-color: oklab(76.8141% -0.133694 0.154614/0.32);
         background-color: rgba(132, 204, 22, 0.16);
       }
       .tag-chip-emerald {
         color: rgb(6, 95, 70);
-        --tw-ring-color: oklab(69.5873% -0.142158 0.0448781/.3);
+        --tw-ring-color: oklab(69.5873% -0.142158 0.0448781/0.3);
         background-color: rgba(16, 185, 129, 0.14);
       }
       .tag-chip-sky {
         color: rgb(7, 89, 133);
-        --tw-ring-color: oklab(68.4687% -0.0798356 -0.124464/.3);
+        --tw-ring-color: oklab(68.4687% -0.0798356 -0.124464/0.3);
         background-color: rgba(14, 165, 233, 0.14);
       }
       .tag-chip-violet {
         color: rgb(91, 33, 182);
-        --tw-ring-color: oklab(60.5631% 0.0845415 -0.201932/.32);
+        --tw-ring-color: oklab(60.5631% 0.0845415 -0.201932/0.32);
         background-color: rgba(139, 92, 246, 0.16);
       }
       .tag-chip-fuchsia {
         color: rgb(134, 25, 143);
-        --tw-ring-color: oklab(66.6764% 0.204559 -0.158959/.3);
+        --tw-ring-color: oklab(66.6764% 0.204559 -0.158959/0.3);
         background-color: rgba(217, 70, 239, 0.14);
       }
       html[data-theme="seotool-dark"] .tag-chip-slate {
@@ -11767,37 +11765,37 @@
       }
       .score-tier-na {
         color: rgb(71, 85, 105);
-        --tw-ring-color: oklab(71.0672% -0.00802556 -0.0341849/.28);
+        --tw-ring-color: oklab(71.0672% -0.00802556 -0.0341849/0.28);
         background-color: rgba(148, 163, 184, 0.12);
       }
       .score-tier-1 {
         color: rgb(6, 95, 70);
-        --tw-ring-color: oklab(69.5873% -0.142158 0.0448781/.3);
+        --tw-ring-color: oklab(69.5873% -0.142158 0.0448781/0.3);
         background-color: rgba(16, 185, 129, 0.15);
       }
       .score-tier-2 {
         color: rgb(63, 98, 18);
-        --tw-ring-color: oklab(76.8141% -0.133694 0.154614/.3);
+        --tw-ring-color: oklab(76.8141% -0.133694 0.154614/0.3);
         background-color: rgba(132, 204, 22, 0.15);
       }
       .score-tier-3 {
         color: rgb(133, 77, 14);
-        --tw-ring-color: oklab(79.5243% 0.0111457 0.161283/.32);
+        --tw-ring-color: oklab(79.5243% 0.0111457 0.161283/0.32);
         background-color: rgba(234, 179, 8, 0.16);
       }
       .score-tier-4 {
         color: rgb(154, 52, 18);
-        --tw-ring-color: oklab(70.4871% 0.125896 0.137895/.32);
+        --tw-ring-color: oklab(70.4871% 0.125896 0.137895/0.32);
         background-color: rgba(249, 115, 22, 0.16);
       }
       .score-tier-5 {
         color: rgb(153, 27, 27);
-        --tw-ring-color: oklab(63.6834% 0.187864 0.0889286/.3);
+        --tw-ring-color: oklab(63.6834% 0.187864 0.0889286/0.3);
         background-color: rgba(239, 68, 68, 0.15);
       }
       .score-tier-6 {
         color: rgb(127, 29, 29);
-        --tw-ring-color: oklab(50.542% 0.168942 0.0880134/.32);
+        --tw-ring-color: oklab(50.542% 0.168942 0.0880134/0.32);
         background-color: rgba(185, 28, 28, 0.18);
       }
       html[data-theme="seotool-dark"] .score-tier-na {

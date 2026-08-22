@@ -22,7 +22,7 @@ const CREDIT_FEATURE_LABELS: Record<string, string> = {
   ai_search: "AI Search",
   local_seo: "Local SEO",
   onboarding: "Onboarding",
-  agent: "SAM Agent",
+  agent: "Jet AI Agent",
   content_intelligence: "Content Intelligence",
 };
 

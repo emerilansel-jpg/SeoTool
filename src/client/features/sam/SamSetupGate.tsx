@@ -20,7 +20,7 @@ export function SamSetupGate({
           <div className="max-w-3xl space-y-1.5">
             <h2 className="text-xl font-semibold">Enable AI Features</h2>
             <div className="text-sm text-base-content/68">
-              SAM, SeoTool.im's in-app AI agent, needs an OpenRouter API key.
+              Jet, SeoTool.im's in-app AI agent, needs an OpenRouter API key.
               Create a key on OpenRouter, set it as the{" "}
               <code>OPENROUTER_API_KEY</code> environment variable, restart
               SeoTool.im, then confirm here.

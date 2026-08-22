@@ -67,6 +67,7 @@ import { Route as ProjectPProjectIdCrawlBudgetRouteImport } from './routes/_proj
 import { Route as ProjectPProjectIdDomainRouteImport } from './routes/_project/p/$projectId/domain'
 import { Route as ProjectPProjectIdGa4InsightsRouteImport } from './routes/_project/p/$projectId/ga4-insights'
 import { Route as ProjectPProjectIdGmbGridRouteImport } from './routes/_project/p/$projectId/gmb-grid'
+import { Route as ProjectPProjectIdJetRouteImport } from './routes/_project/p/$projectId/jet'
 import { Route as ProjectPProjectIdKeywordClusteringRouteImport } from './routes/_project/p/$projectId/keyword-clustering'
 import { Route as ProjectPProjectIdKeywordsRouteImport } from './routes/_project/p/$projectId/keywords'
 import { Route as ProjectPProjectIdLinkIntersectRouteImport } from './routes/_project/p/$projectId/link-intersect'
@@ -74,7 +75,6 @@ import { Route as ProjectPProjectIdOnPageCheckerRouteImport } from './routes/_pr
 import { Route as ProjectPProjectIdPromptExplorerRouteImport } from './routes/_project/p/$projectId/prompt-explorer'
 import { Route as ProjectPProjectIdRankTrackingRouteImport } from './routes/_project/p/$projectId/rank-tracking'
 import { Route as ProjectPProjectIdReportsRouteRouteImport } from './routes/_project/p/$projectId/reports/route'
-import { Route as ProjectPProjectIdSamRouteImport } from './routes/_project/p/$projectId/sam'
 import { Route as ProjectPProjectIdSavedRouteImport } from './routes/_project/p/$projectId/saved'
 import { Route as ProjectPProjectIdSearchPerformanceRouteImport } from './routes/_project/p/$projectId/search-performance'
 import { Route as ProjectPProjectIdSerpVolatilityRouteImport } from './routes/_project/p/$projectId/serp-volatility'
@@ -389,6 +389,11 @@ const ProjectPProjectIdGmbGridRoute =
     path: '/gmb-grid',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
+const ProjectPProjectIdJetRoute = ProjectPProjectIdJetRouteImport.update({
+  id: '/jet',
+  path: '/jet',
+  getParentRoute: () => ProjectPProjectIdRouteRoute,
+} as any)
 const ProjectPProjectIdKeywordClusteringRoute =
   ProjectPProjectIdKeywordClusteringRouteImport.update({
     id: '/keyword-clustering',
@@ -431,11 +436,6 @@ const ProjectPProjectIdReportsRouteRoute =
     path: '/reports',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
-const ProjectPProjectIdSamRoute = ProjectPProjectIdSamRouteImport.update({
-  id: '/sam',
-  path: '/sam',
-  getParentRoute: () => ProjectPProjectIdRouteRoute,
-} as any)
 const ProjectPProjectIdSavedRoute = ProjectPProjectIdSavedRouteImport.update({
   id: '/saved',
   path: '/saved',
@@ -579,13 +579,13 @@ export interface FileRoutesByFullPath {
   '/p/$projectId/domain': typeof ProjectPProjectIdDomainRoute
   '/p/$projectId/ga4-insights': typeof ProjectPProjectIdGa4InsightsRoute
   '/p/$projectId/gmb-grid': typeof ProjectPProjectIdGmbGridRoute
+  '/p/$projectId/jet': typeof ProjectPProjectIdJetRoute
   '/p/$projectId/keyword-clustering': typeof ProjectPProjectIdKeywordClusteringRoute
   '/p/$projectId/keywords': typeof ProjectPProjectIdKeywordsRoute
   '/p/$projectId/link-intersect': typeof ProjectPProjectIdLinkIntersectRoute
   '/p/$projectId/on-page-checker': typeof ProjectPProjectIdOnPageCheckerRoute
   '/p/$projectId/prompt-explorer': typeof ProjectPProjectIdPromptExplorerRoute
   '/p/$projectId/rank-tracking': typeof ProjectPProjectIdRankTrackingRouteWithChildren
-  '/p/$projectId/sam': typeof ProjectPProjectIdSamRoute
   '/p/$projectId/saved': typeof ProjectPProjectIdSavedRoute
   '/p/$projectId/search-performance': typeof ProjectPProjectIdSearchPerformanceRoute
   '/p/$projectId/serp-volatility': typeof ProjectPProjectIdSerpVolatilityRoute
@@ -655,12 +655,12 @@ export interface FileRoutesByTo {
   '/p/$projectId/domain': typeof ProjectPProjectIdDomainRoute
   '/p/$projectId/ga4-insights': typeof ProjectPProjectIdGa4InsightsRoute
   '/p/$projectId/gmb-grid': typeof ProjectPProjectIdGmbGridRoute
+  '/p/$projectId/jet': typeof ProjectPProjectIdJetRoute
   '/p/$projectId/keyword-clustering': typeof ProjectPProjectIdKeywordClusteringRoute
   '/p/$projectId/keywords': typeof ProjectPProjectIdKeywordsRoute
   '/p/$projectId/link-intersect': typeof ProjectPProjectIdLinkIntersectRoute
   '/p/$projectId/on-page-checker': typeof ProjectPProjectIdOnPageCheckerRoute
   '/p/$projectId/prompt-explorer': typeof ProjectPProjectIdPromptExplorerRoute
-  '/p/$projectId/sam': typeof ProjectPProjectIdSamRoute
   '/p/$projectId/saved': typeof ProjectPProjectIdSavedRoute
   '/p/$projectId/search-performance': typeof ProjectPProjectIdSearchPerformanceRoute
   '/p/$projectId/serp-volatility': typeof ProjectPProjectIdSerpVolatilityRoute
@@ -739,13 +739,13 @@ export interface FileRoutesById {
   '/_project/p/$projectId/domain': typeof ProjectPProjectIdDomainRoute
   '/_project/p/$projectId/ga4-insights': typeof ProjectPProjectIdGa4InsightsRoute
   '/_project/p/$projectId/gmb-grid': typeof ProjectPProjectIdGmbGridRoute
+  '/_project/p/$projectId/jet': typeof ProjectPProjectIdJetRoute
   '/_project/p/$projectId/keyword-clustering': typeof ProjectPProjectIdKeywordClusteringRoute
   '/_project/p/$projectId/keywords': typeof ProjectPProjectIdKeywordsRoute
   '/_project/p/$projectId/link-intersect': typeof ProjectPProjectIdLinkIntersectRoute
   '/_project/p/$projectId/on-page-checker': typeof ProjectPProjectIdOnPageCheckerRoute
   '/_project/p/$projectId/prompt-explorer': typeof ProjectPProjectIdPromptExplorerRoute
   '/_project/p/$projectId/rank-tracking': typeof ProjectPProjectIdRankTrackingRouteWithChildren
-  '/_project/p/$projectId/sam': typeof ProjectPProjectIdSamRoute
   '/_project/p/$projectId/saved': typeof ProjectPProjectIdSavedRoute
   '/_project/p/$projectId/search-performance': typeof ProjectPProjectIdSearchPerformanceRoute
   '/_project/p/$projectId/serp-volatility': typeof ProjectPProjectIdSerpVolatilityRoute
@@ -821,13 +821,13 @@ export interface FileRouteTypes {
     | '/p/$projectId/domain'
     | '/p/$projectId/ga4-insights'
     | '/p/$projectId/gmb-grid'
+    | '/p/$projectId/jet'
     | '/p/$projectId/keyword-clustering'
     | '/p/$projectId/keywords'
     | '/p/$projectId/link-intersect'
     | '/p/$projectId/on-page-checker'
     | '/p/$projectId/prompt-explorer'
     | '/p/$projectId/rank-tracking'
-    | '/p/$projectId/sam'
     | '/p/$projectId/saved'
     | '/p/$projectId/search-performance'
     | '/p/$projectId/serp-volatility'
@@ -897,12 +897,12 @@ export interface FileRouteTypes {
     | '/p/$projectId/domain'
     | '/p/$projectId/ga4-insights'
     | '/p/$projectId/gmb-grid'
+    | '/p/$projectId/jet'
     | '/p/$projectId/keyword-clustering'
     | '/p/$projectId/keywords'
     | '/p/$projectId/link-intersect'
     | '/p/$projectId/on-page-checker'
     | '/p/$projectId/prompt-explorer'
-    | '/p/$projectId/sam'
     | '/p/$projectId/saved'
     | '/p/$projectId/search-performance'
     | '/p/$projectId/serp-volatility'
@@ -980,13 +980,13 @@ export interface FileRouteTypes {
     | '/_project/p/$projectId/domain'
     | '/_project/p/$projectId/ga4-insights'
     | '/_project/p/$projectId/gmb-grid'
+    | '/_project/p/$projectId/jet'
     | '/_project/p/$projectId/keyword-clustering'
     | '/_project/p/$projectId/keywords'
     | '/_project/p/$projectId/link-intersect'
     | '/_project/p/$projectId/on-page-checker'
     | '/_project/p/$projectId/prompt-explorer'
     | '/_project/p/$projectId/rank-tracking'
-    | '/_project/p/$projectId/sam'
     | '/_project/p/$projectId/saved'
     | '/_project/p/$projectId/search-performance'
     | '/_project/p/$projectId/serp-volatility'
@@ -1446,6 +1446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectPProjectIdGmbGridRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
+    '/_project/p/$projectId/jet': {
+      id: '/_project/p/$projectId/jet'
+      path: '/jet'
+      fullPath: '/p/$projectId/jet'
+      preLoaderRoute: typeof ProjectPProjectIdJetRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
     '/_project/p/$projectId/keyword-clustering': {
       id: '/_project/p/$projectId/keyword-clustering'
       path: '/keyword-clustering'
@@ -1493,13 +1500,6 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/p/$projectId/reports'
       preLoaderRoute: typeof ProjectPProjectIdReportsRouteRouteImport
-      parentRoute: typeof ProjectPProjectIdRouteRoute
-    }
-    '/_project/p/$projectId/sam': {
-      id: '/_project/p/$projectId/sam'
-      path: '/sam'
-      fullPath: '/p/$projectId/sam'
-      preLoaderRoute: typeof ProjectPProjectIdSamRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
     '/_project/p/$projectId/saved': {
@@ -1739,13 +1739,13 @@ interface ProjectPProjectIdRouteRouteChildren {
   ProjectPProjectIdDomainRoute: typeof ProjectPProjectIdDomainRoute
   ProjectPProjectIdGa4InsightsRoute: typeof ProjectPProjectIdGa4InsightsRoute
   ProjectPProjectIdGmbGridRoute: typeof ProjectPProjectIdGmbGridRoute
+  ProjectPProjectIdJetRoute: typeof ProjectPProjectIdJetRoute
   ProjectPProjectIdKeywordClusteringRoute: typeof ProjectPProjectIdKeywordClusteringRoute
   ProjectPProjectIdKeywordsRoute: typeof ProjectPProjectIdKeywordsRoute
   ProjectPProjectIdLinkIntersectRoute: typeof ProjectPProjectIdLinkIntersectRoute
   ProjectPProjectIdOnPageCheckerRoute: typeof ProjectPProjectIdOnPageCheckerRoute
   ProjectPProjectIdPromptExplorerRoute: typeof ProjectPProjectIdPromptExplorerRoute
   ProjectPProjectIdRankTrackingRoute: typeof ProjectPProjectIdRankTrackingRouteWithChildren
-  ProjectPProjectIdSamRoute: typeof ProjectPProjectIdSamRoute
   ProjectPProjectIdSavedRoute: typeof ProjectPProjectIdSavedRoute
   ProjectPProjectIdSearchPerformanceRoute: typeof ProjectPProjectIdSearchPerformanceRoute
   ProjectPProjectIdSerpVolatilityRoute: typeof ProjectPProjectIdSerpVolatilityRoute
@@ -1769,6 +1769,7 @@ const ProjectPProjectIdRouteRouteChildren: ProjectPProjectIdRouteRouteChildren =
     ProjectPProjectIdDomainRoute: ProjectPProjectIdDomainRoute,
     ProjectPProjectIdGa4InsightsRoute: ProjectPProjectIdGa4InsightsRoute,
     ProjectPProjectIdGmbGridRoute: ProjectPProjectIdGmbGridRoute,
+    ProjectPProjectIdJetRoute: ProjectPProjectIdJetRoute,
     ProjectPProjectIdKeywordClusteringRoute:
       ProjectPProjectIdKeywordClusteringRoute,
     ProjectPProjectIdKeywordsRoute: ProjectPProjectIdKeywordsRoute,
@@ -1777,7 +1778,6 @@ const ProjectPProjectIdRouteRouteChildren: ProjectPProjectIdRouteRouteChildren =
     ProjectPProjectIdPromptExplorerRoute: ProjectPProjectIdPromptExplorerRoute,
     ProjectPProjectIdRankTrackingRoute:
       ProjectPProjectIdRankTrackingRouteWithChildren,
-    ProjectPProjectIdSamRoute: ProjectPProjectIdSamRoute,
     ProjectPProjectIdSavedRoute: ProjectPProjectIdSavedRoute,
     ProjectPProjectIdSearchPerformanceRoute:
       ProjectPProjectIdSearchPerformanceRoute,

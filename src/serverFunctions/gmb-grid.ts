@@ -17,7 +17,7 @@ export const getGmbGridConfigs = createServerFn({ method: "GET" })
       .from(gmbGridConfigs)
       .where(eq(gmbGridConfigs.projectId, projectId))
       .orderBy(desc(gmbGridConfigs.createdAt));
-      
+
     return configs;
   });
 
@@ -28,7 +28,7 @@ export const getGmbGridSnapshots = createServerFn({ method: "GET" })
       .select()
       .from(gmbGridSnapshots)
       .where(eq(gmbGridSnapshots.runId, runId));
-      
+
     return snapshots;
   });
 
@@ -37,8 +37,12 @@ export const createGmbGridRun = createServerFn({ method: "POST" })
   .validator(CreateGmbGridSchema)
   .handler(async ({ data, context }) => {
     const nodesCount = data.gridSize * data.gridSize;
-    
-    await assertQuotaAvailable(context.organizationId, "rank_tracking", nodesCount);
+
+    await assertQuotaAvailable(
+      context.organizationId,
+      "rank_tracking",
+      nodesCount,
+    );
 
     const configId = crypto.randomUUID();
     await db.insert(gmbGridConfigs).values({
@@ -59,9 +63,14 @@ export const createGmbGridRun = createServerFn({ method: "POST" })
       status: "running",
     });
 
-    const nodes = generateGridNodes(data.centerLat, data.centerLng, data.gridSize, data.radiusMeters);
-    
-    const snapshotsToInsert = nodes.map(node => ({
+    const nodes = generateGridNodes(
+      data.centerLat,
+      data.centerLng,
+      data.gridSize,
+      data.radiusMeters,
+    );
+
+    const snapshotsToInsert = nodes.map((node) => ({
       id: crypto.randomUUID(),
       runId,
       lat: node.lat,
@@ -70,18 +79,24 @@ export const createGmbGridRun = createServerFn({ method: "POST" })
       gridCol: node.gridCol,
       status: "pending" as const,
     }));
-    
+
     await db.insert(gmbGridSnapshots).values(snapshotsToInsert);
 
     try {
       const gmbService = new GmbGridService(process.env);
-      const dfNodes = snapshotsToInsert.map(s => ({ lat: s.lat, lng: s.lng, id: s.id }));
-      
+      const dfNodes = snapshotsToInsert.map((s) => ({
+        lat: s.lat,
+        lng: s.lng,
+        id: s.id,
+      }));
+
       const dfTasks = await gmbService.postGridTasks(data.keyword, dfNodes);
-      
     } catch (e) {
       console.error("DataForSEO GMB Grid trigger failed", e);
-      await db.update(gmbGridRuns).set({ status: "failed" }).where(eq(gmbGridRuns.id, runId));
+      await db
+        .update(gmbGridRuns)
+        .set({ status: "failed" })
+        .where(eq(gmbGridRuns.id, runId));
     }
 
     return { runId, configId };

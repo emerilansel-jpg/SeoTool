@@ -174,7 +174,7 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
         },
       },
       {
-        label: "SAM AI agent",
+        label: "Jet AI agent",
         values: {
           free: false,
           lite: true,

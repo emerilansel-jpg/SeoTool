@@ -1,7 +1,7 @@
-const fs = require('fs');
+const fs = require("fs");
 
-const sqliteAppSchema = fs.readFileSync('src/db/app.schema.ts', 'utf8');
-const pgAppSchema = fs.readFileSync('src/db/pg/app.schema.ts', 'utf8');
+const sqliteAppSchema = fs.readFileSync("src/db/app.schema.ts", "utf8");
+const pgAppSchema = fs.readFileSync("src/db/pg/app.schema.ts", "utf8");
 
 const sqliteGmbTables = `
 export const gmbGridConfigs = sqliteTable(
@@ -121,6 +121,9 @@ export const gmbGridSnapshots = pgTable(
 );
 `;
 
-fs.writeFileSync('src/db/app.schema.ts', sqliteAppSchema + '\n' + sqliteGmbTables);
-fs.writeFileSync('src/db/pg/app.schema.ts', pgAppSchema + '\n' + pgGmbTables);
+fs.writeFileSync(
+  "src/db/app.schema.ts",
+  sqliteAppSchema + "\n" + sqliteGmbTables,
+);
+fs.writeFileSync("src/db/pg/app.schema.ts", pgAppSchema + "\n" + pgGmbTables);
 console.log("Schema updated.");

@@ -1,21 +1,25 @@
-# Fix Plan: SERP Volatility Empty State UX & Error Fix
+# Rencana Penggantian Nama AI (Sam -> Jet)
 
-## Masalah Saat Ini
-1. Masih terdapat satu kondisi `return null` secara diam-diam di `SerpVolatilityService.ts` pada baris ke-54 (`if (recentRuns.length < 2) return null;`) yang saya terlewat pada perbaikan sebelumnya. Akibatnya, jika user benar-benar baru menjalankan 1 kali (atau 0 kali), fungsi ini gagal tanpa memberi toast error yang dijanjikan.
-2. Pengguna masih belum tahu mengapa UI menampilkan "No SERP Volatility computed yet". Hanya menekan "Compute Volatility" untuk mendapatkan pesan error bukanlah UX yang baik.
+Sesuai dengan pilihan "UI, URL, & Teks Saja", saya akan membatasi perubahan hanya pada hal-hal yang terlihat oleh pengguna, tanpa mengubah nama file internal atau skema database untuk meminimalisasi risiko _breakage_.
 
-## Solusi
-1. Ganti `return null` yang tersisa di `computeVolatility` dengan `throw new AppError(...)`.
-2. Buat fungsi baru `SerpVolatilityService.checkEligibility(projectId)` yang secara efisien memeriksa apakah project ini siap dikomputasi (mempunyai konfigurasi rank tracking dengan minimal 2 kali run).
-3. Panggil fungsi ini dalam `getSerpVolatility` dan kembalikan properti `isComputable`.
-4. Di `SerpVolatilityView.tsx`, ubah tampilan `!latest` state. Jika `!isComputable`, ubah teks "No SERP Volatility computed yet" menjadi penjelasan yang ramah ("Not enough data... requires at least two completed rank checks"), dan *disable* tombol "Compute Volatility". Jika `isComputable` barulah tombol "Compute Volatility" aktif dengan deskripsi "Ready to compute".
+## Langkah-langkah:
 
-## Perubahan File
-1. `src/server/features/serp-volatility/services/SerpVolatilityService.ts`: Hapus `return null` dan lempar `AppError`. Tambahkan fungsi `checkEligibility`.
-2. `src/serverFunctions/serp-volatility.ts`: Tambahkan `isComputable` di return value.
-3. `src/client/features/serp-volatility/SerpVolatilityView.tsx`: Gunakan flag `isComputable` untuk merubah UI (teks dan disabled state button).
+1. **Ubah Rute (URL)**:
+   - Ganti nama file `src/routes/_project/p/$projectId/sam.tsx` menjadi `src/routes/_project/p/$projectId/jet.tsx`.
+   - Jalankan `tsr generate` agar TanStack Router mengupdate `routeTree.gen.ts`.
+2. **Ubah Navigasi & Label Teks**:
+   - `src/client/navigation/items.ts`: Ubah link navigasi sidebar dari `/sam` ke `/jet` dan ubah label menu menjadi "Jet".
+   - `src/shared/billing-credit-features.ts`: Ubah label tag penggunaan dari "SAM Agent" menjadi "Jet".
+3. **Ubah Copywriting di Halaman Web & Paywall**:
+   - Edit teks pemasaran di `tierHighlights.ts` dan `pricing.tsx` (dari "SAM AI agent" menjadi "Jet AI agent").
+   - Edit halaman panduan `/ai` di `src/routes/_app/ai.tsx`.
+   - Edit teks sambutan (empty state & setup gate) di dalam komponen `SamConversation.tsx`, `SamChat.tsx`, dan `SamSetupGate.tsx`.
+   - Edit juga pesan di chat onboarding (`OnboardingChatParts.tsx`).
 
-## Verifikasi
-1. `npx tsc --noEmit`
-2. Prettier
-3. Commit, Push, dan trigger deploy VPS.
+4. **Ubah Kepribadian AI (System Prompt)**:
+   - Modifikasi `samSystemPrompt.ts` dan instruksi awal di `SamChatAgent.ts` & `OnboardingChatAgent.ts` agar AI mengenali dirinya sebagai "Jet, the AI SEO strategist" bukan lagi "Sam".
+5. **Pengujian & Deployment**:
+   - Jalankan verifikasi _Type Checking_ (`npx tsc`).
+   - Format kode menggunakan Prettier.
+   - Commit & Push ke repository.
+   - Lakukan manual deployment ke VPS agar URL `https://seotool.im/p/.../jet` langsung aktif.

@@ -106,7 +106,7 @@ export function SamConversation({
           {messages.length === 0 ? (
             <div className="space-y-2 text-sm text-base-content/80">
               <p>
-                Hey, I’m SAM — your in-app SEO agent. I can research keywords,
+                Hey, I’m Jet — your in-app SEO agent. I can research keywords,
                 size up competitors, read your SERPs, backlinks, rank tracking
                 and Search Console, and turn it into next steps for this
                 project.
@@ -179,7 +179,7 @@ export function SamConversation({
           <ChatComposer
             busy={isBusy}
             onSend={sendText}
-            placeholder="Ask SAM to research, analyze, or track anything…"
+            placeholder="Ask Jet to research, analyze, or track anything…"
           />
         </div>
       </div>

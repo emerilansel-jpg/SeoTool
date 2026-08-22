@@ -171,5 +171,5 @@ export const {
   paypalWebhookEvents,
   gmbGridConfigs,
   gmbGridRuns,
-  gmbGridSnapshots
+  gmbGridSnapshots,
 } = schema;

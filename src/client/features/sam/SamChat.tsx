@@ -125,7 +125,7 @@ export function SamChat({
           What should we work on today?
         </p>
         <p className="text-sm text-base-content/70 leading-relaxed max-w-md">
-          SAM is your autonomous AI SEO strategist with full access to your
+          Jet is your autonomous AI SEO strategist with full access to your
           audits, keywords, backlinks, and Search Console data.
         </p>
       </div>
