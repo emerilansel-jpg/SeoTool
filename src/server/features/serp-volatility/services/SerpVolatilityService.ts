@@ -51,7 +51,12 @@ async function computeVolatility(projectId: string) {
     .orderBy(desc(rankCheckRuns.startedAt))
     .limit(configIds.length * 2);
 
-  if (recentRuns.length < 2) return null;
+  if (recentRuns.length < 2) {
+    throw new AppError(
+      "VALIDATION_ERROR",
+      "Not enough rank tracking history. Volatility calculation requires at least two completed rank checks.",
+    );
+  }
 
   // Group runs by config, picking the latest and second-latest per config.
   const runsByConfig = new Map<

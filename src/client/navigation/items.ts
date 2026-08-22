@@ -19,6 +19,7 @@ import {
   Sparkles,
   Swords,
   TrendingUp,
+  MapPin,
   Target,
   Waypoints,
 } from "lucide-react";
@@ -48,6 +49,11 @@ const projectNavItems = [
     to: "/p/$projectId/rank-tracking" as const,
     label: "Rank Tracking",
     icon: TrendingUp,
+  },
+  {
+    to: "/_dashboard/projects/$projectId/gmb-grid" as const,
+    label: "Local Map Rank",
+    icon: MapPin,
   },
   {
     to: "/p/$projectId/search-performance" as const,
@@ -182,6 +188,7 @@ export function getProjectNavGroups(projectId: string) {
         byPath("/p/$projectId/keywords"),
         byPath("/p/$projectId/saved"),
         byPath("/p/$projectId/rank-tracking"),
+        byPath("/_dashboard/projects/$projectId/gmb-grid"),
         byPath("/p/$projectId/keyword-clustering"),
       ],
     },

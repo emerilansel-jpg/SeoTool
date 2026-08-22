@@ -1,0 +1,38 @@
+CREATE TABLE "gmb_grid_configs" (
+	"id" text PRIMARY KEY NOT NULL,
+	"project_id" text NOT NULL,
+	"business_name" text NOT NULL,
+	"place_id" text,
+	"keyword" text NOT NULL,
+	"center_lat" real NOT NULL,
+	"center_lng" real NOT NULL,
+	"grid_size" integer NOT NULL,
+	"radius_meters" integer NOT NULL,
+	"schedule_interval" text DEFAULT 'weekly' NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"created_at" text DEFAULT (isoNow()) NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "gmb_grid_runs" (
+	"id" text PRIMARY KEY NOT NULL,
+	"config_id" text NOT NULL,
+	"status" text DEFAULT 'pending' NOT NULL,
+	"started_at" text DEFAULT (isoNow()) NOT NULL,
+	"completed_at" text
+);
+--> statement-breakpoint
+CREATE TABLE "gmb_grid_snapshots" (
+	"id" text PRIMARY KEY NOT NULL,
+	"run_id" text NOT NULL,
+	"lat" real NOT NULL,
+	"lng" real NOT NULL,
+	"grid_row" integer NOT NULL,
+	"grid_col" integer NOT NULL,
+	"rank" integer,
+	"task_id" text,
+	"status" text DEFAULT 'pending' NOT NULL
+);
+--> statement-breakpoint
+ALTER TABLE "gmb_grid_configs" ADD CONSTRAINT "gmb_grid_configs_project_id_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."projects"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "gmb_grid_runs" ADD CONSTRAINT "gmb_grid_runs_config_id_gmb_grid_configs_id_fk" FOREIGN KEY ("config_id") REFERENCES "public"."gmb_grid_configs"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "gmb_grid_snapshots" ADD CONSTRAINT "gmb_grid_snapshots_run_id_gmb_grid_runs_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."gmb_grid_runs"("id") ON DELETE cascade ON UPDATE no action;

@@ -169,4 +169,7 @@ export const {
   cmsPosts,
   cmsPages,
   paypalWebhookEvents,
+  gmbGridConfigs,
+  gmbGridRuns,
+  gmbGridSnapshots
 } = schema;

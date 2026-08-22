@@ -58,6 +58,7 @@ import { Route as AppAdminPagesNewRouteImport } from './routes/_app/admin/pages/
 import { Route as AppAdminPricingIndexRouteImport } from './routes/_app/admin/pricing/index'
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
+import { Route as DashboardProjectsProjectIdGmbGridRouteImport } from './routes/_dashboard/projects/$projectId/gmb-grid'
 import { Route as ProjectPProjectIdIndexRouteImport } from './routes/_project/p/$projectId/index'
 import { Route as ProjectPProjectIdAuditRouteImport } from './routes/_project/p/$projectId/audit'
 import { Route as ProjectPProjectIdBacklinksRouteImport } from './routes/_project/p/$projectId/backlinks'
@@ -337,6 +338,12 @@ const AppAdminUsersUserIdRoute = AppAdminUsersUserIdRouteImport.update({
   path: '/users/$userId',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
+const DashboardProjectsProjectIdGmbGridRoute =
+  DashboardProjectsProjectIdGmbGridRouteImport.update({
+    id: '/_dashboard/projects/$projectId/gmb-grid',
+    path: '/projects/$projectId/gmb-grid',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ProjectPProjectIdIndexRoute = ProjectPProjectIdIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -564,6 +571,7 @@ export interface FileRoutesByFullPath {
   '/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/admin/pages/new': typeof AppAdminPagesNewRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/projects/$projectId/gmb-grid': typeof DashboardProjectsProjectIdGmbGridRoute
   '/p/$projectId/audit': typeof ProjectPProjectIdAuditRouteWithChildren
   '/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
@@ -640,6 +648,7 @@ export interface FileRoutesByTo {
   '/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/admin/pages/new': typeof AppAdminPagesNewRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/projects/$projectId/gmb-grid': typeof DashboardProjectsProjectIdGmbGridRoute
   '/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
   '/p/$projectId/content-gap': typeof ProjectPProjectIdContentGapRoute
@@ -722,6 +731,7 @@ export interface FileRoutesById {
   '/_app/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/_app/admin/pages/new': typeof AppAdminPagesNewRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/_dashboard/projects/$projectId/gmb-grid': typeof DashboardProjectsProjectIdGmbGridRoute
   '/_project/p/$projectId/audit': typeof ProjectPProjectIdAuditRouteWithChildren
   '/_project/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/_project/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
@@ -803,6 +813,7 @@ export interface FileRouteTypes {
     | '/admin/pages/$postId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
+    | '/projects/$projectId/gmb-grid'
     | '/p/$projectId/audit'
     | '/p/$projectId/backlinks'
     | '/p/$projectId/brand-lookup'
@@ -879,6 +890,7 @@ export interface FileRouteTypes {
     | '/admin/pages/$postId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
+    | '/projects/$projectId/gmb-grid'
     | '/p/$projectId/backlinks'
     | '/p/$projectId/brand-lookup'
     | '/p/$projectId/content-gap'
@@ -960,6 +972,7 @@ export interface FileRouteTypes {
     | '/_app/admin/pages/$postId'
     | '/_app/admin/pages/new'
     | '/_app/admin/users/$userId'
+    | '/_dashboard/projects/$projectId/gmb-grid'
     | '/_project/p/$projectId/audit'
     | '/_project/p/$projectId/backlinks'
     | '/_project/p/$projectId/brand-lookup'
@@ -1021,6 +1034,7 @@ export interface RootRouteChildren {
   PagesSlugRoute: typeof PagesSlugRoute
   BlogsIndexRoute: typeof BlogsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  DashboardProjectsProjectIdGmbGridRoute: typeof DashboardProjectsProjectIdGmbGridRoute
   ApiGa4OauthCallbackRoute: typeof ApiGa4OauthCallbackRoute
   ApiGscOauthCallbackRoute: typeof ApiGscOauthCallbackRoute
 }
@@ -1369,6 +1383,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/users/$userId'
       preLoaderRoute: typeof AppAdminUsersUserIdRouteImport
       parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_dashboard/projects/$projectId/gmb-grid': {
+      id: '/_dashboard/projects/$projectId/gmb-grid'
+      path: '/projects/$projectId/gmb-grid'
+      fullPath: '/projects/$projectId/gmb-grid'
+      preLoaderRoute: typeof DashboardProjectsProjectIdGmbGridRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_project/p/$projectId/': {
       id: '/_project/p/$projectId/'
@@ -1842,19 +1863,11 @@ const rootRouteChildren: RootRouteChildren = {
   PagesSlugRoute: PagesSlugRoute,
   BlogsIndexRoute: BlogsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  DashboardProjectsProjectIdGmbGridRoute:
+    DashboardProjectsProjectIdGmbGridRoute,
   ApiGa4OauthCallbackRoute: ApiGa4OauthCallbackRoute,
   ApiGscOauthCallbackRoute: ApiGscOauthCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
