@@ -1,9 +1,19 @@
 import { useEffect } from "react";
-import usePlacesAutocomplete, { getGeocode, getLatLng, getDetails } from "use-places-autocomplete";
+import usePlacesAutocomplete, {
+  getGeocode,
+  getLatLng,
+  getDetails,
+} from "use-places-autocomplete";
 import { Search, MapPin } from "lucide-react";
 
 interface GmbAutocompleteProps {
-  onSelectProfile: (placeId: string, name: string, lat: number, lng: number, website?: string) => void;
+  onSelectProfile: (
+    placeId: string,
+    name: string,
+    lat: number,
+    lng: number,
+    website?: string,
+  ) => void;
 }
 
 export function GmbAutocomplete({ onSelectProfile }: GmbAutocompleteProps) {
@@ -21,7 +31,9 @@ export function GmbAutocomplete({ onSelectProfile }: GmbAutocompleteProps) {
     debounce: 300,
   });
 
-  const handleSelect = async (suggestion: google.maps.places.AutocompletePrediction) => {
+  const handleSelect = async (
+    suggestion: google.maps.places.AutocompletePrediction,
+  ) => {
     setValue(suggestion.description, false);
     clearSuggestions();
 
@@ -33,11 +45,11 @@ export function GmbAutocomplete({ onSelectProfile }: GmbAutocompleteProps) {
       // Attempt to get website via places details
       let website = undefined;
       try {
-        const details = await getDetails({
+        const details = (await getDetails({
           placeId: suggestion.place_id,
-          fields: ["website", "name"]
-        }) as google.maps.places.PlaceResult;
-        
+          fields: ["website", "name"],
+        })) as google.maps.places.PlaceResult;
+
         if (typeof details !== "string" && details.website) {
           website = details.website;
         }
@@ -50,7 +62,7 @@ export function GmbAutocomplete({ onSelectProfile }: GmbAutocompleteProps) {
         suggestion.structured_formatting.main_text,
         lat,
         lng,
-        website
+        website,
       );
     } catch (error) {
       console.error("Error: ", error);
@@ -58,18 +70,25 @@ export function GmbAutocomplete({ onSelectProfile }: GmbAutocompleteProps) {
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full z-50">
       <label className="text-sm font-medium mb-1 block">Business Name</label>
       <div className="relative">
         <input
+          name="businessName"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
-          disabled={!ready}
+          onChange={(e) => {
+            setValue(e.target.value);
+            // If the user types manually, immediately report the text up as the place name
+            // (but with no placeId and 0/0 coords) so the form isn't completely blocked
+            // if Google Maps API fails to load.
+            onSelectProfile("", e.target.value, 0, 0, undefined);
+          }}
+          disabled={false}
           placeholder="Type your Google Business Name..."
           className="input input-bordered w-full pl-10"
           autoComplete="off"
         />
-        <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+        <Search className="absolute left-3 top-3 w-5 h-5 text-base-content/40" />
       </div>
 
       {status === "OK" && (
@@ -77,8 +96,8 @@ export function GmbAutocomplete({ onSelectProfile }: GmbAutocompleteProps) {
           {data.map((suggestion) => {
             const { place_id, structured_formatting } = suggestion;
             return (
-              <li 
-                key={place_id} 
+              <li
+                key={place_id}
                 onClick={() => handleSelect(suggestion)}
                 className="px-4 py-3 hover:bg-base-200 cursor-pointer border-b border-base-200 last:border-b-0 flex items-start gap-3"
               >
