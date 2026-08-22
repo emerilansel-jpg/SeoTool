@@ -95,4 +95,79 @@ export class GmbGridService {
 
     return null;
   }
+
+  async getRankedKeywordsForDomain(domain: string): Promise<string[]> {
+    try {
+      const url = new URL(domain.startsWith('http') ? domain : `https://${domain}`);
+      const host = url.hostname.replace('www.', '');
+
+      const response = await fetch("https://api.dataforseo.com/v3/dataforseo_labs/google/ranked_keywords/live", {
+        method: "POST",
+        headers: {
+          "Authorization": this.getAuthHeader(),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify([{
+          target: host,
+          location_code: 2840,
+          language_code: "en",
+          limit: 10
+        }])
+      });
+
+      if (!response.ok) return [];
+      
+      const data = await response.json() as any;
+      const items = data.tasks?.[0]?.result?.[0]?.items || [];
+      return items.map((i: any) => i.keyword_data?.keyword).filter(Boolean);
+    } catch (err) {
+      console.error("Failed to extract keywords for domain", err);
+      return [];
+    }
+  }
+
+  async verifyMapsRankings(keywords: string[], targetPlaceId: string, lat: number, lng: number) {
+    if (!keywords.length) return [];
+
+    const tasks = keywords.map(kw => ({
+      keyword: kw,
+      location_coordinate: `${lat},${lng}`,
+      language_code: "en",
+      depth: 20
+    }));
+
+    const response = await fetch("https://api.dataforseo.com/v3/serp/google/maps/live/advanced", {
+      method: "POST",
+      headers: {
+        "Authorization": this.getAuthHeader(),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(tasks)
+    });
+
+    if (!response.ok) return [];
+
+    const data = await response.json() as any;
+    const verified = [];
+
+    const resultTasks = data.tasks || [];
+    for (let i = 0; i < resultTasks.length; i++) {
+      const task = resultTasks[i];
+      const items = task.result?.[0]?.items || [];
+      const originalKeyword = keywords[i];
+      
+      for (const item of items) {
+        if (item.type === "maps_search" && item.place_id === targetPlaceId) {
+          verified.push({
+            keyword: originalKeyword,
+            rank: item.rank_group || item.rank_absolute || 1,
+          });
+          break;
+        }
+      }
+    }
+
+    return verified;
+  }
+
 }

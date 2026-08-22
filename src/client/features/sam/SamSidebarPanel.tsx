@@ -84,8 +84,8 @@ export function SamSidebarPanel({
   const sessions = sessionsQuery.data ?? [];
 
   const goToSession = (sessionId: string | undefined) => {
-    void navigate({
-      to: "/p/$projectId/sam",
+    void (navigate as any)({
+      to: "/p/$projectId/sam" as any,
       params: { projectId },
       search: sessionId ? { s: sessionId } : {},
     });

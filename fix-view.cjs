@@ -1,4 +1,6 @@
-import { useState, useRef } from "react";
+const fs = require('fs');
+
+const content = `import { useState, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { 
@@ -194,71 +196,4 @@ export function GmbGridView({ projectId }: { projectId: string }) {
             <ul className="text-sm flex flex-col gap-2">
               {configs.slice(0, 5).map(c => (
                 <li key={c.id} className="p-2 border rounded cursor-pointer hover:bg-gray-50">
-                  {c.keyword} - {c.gridSize}x{c.gridSize}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-
-      <div className="md:col-span-2 relative rounded-lg overflow-hidden border border-gray-200">
-        <MapContainer 
-          center={[mapCenterLat, mapCenterLng]} 
-          zoom={13} 
-          style={{ height: '100%', width: '100%' }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap contributors"
-          />
-          <MapBoundsUpdater centerLat={mapCenterLat} centerLng={mapCenterLng} radiusMeters={mapRadius} />
-
-          {snapshots?.map((snap) => (
-            <CircleMarker
-              key={snap.id}
-              center={[snap.lat, snap.lng]}
-              radius={16}
-              pathOptions={{ 
-                color: 'white', 
-                weight: 2, 
-                fillColor: getRankColor(snap.rank), 
-                fillOpacity: 0.9 
-              }}
-            >
-              <Tooltip direction="center" permanent className="bg-transparent border-none shadow-none text-white font-bold text-center">
-                {snap.rank === null ? "-" : snap.rank}
-              </Tooltip>
-            </CircleMarker>
-          ))}
-        </MapContainer>
-      </div>
-
-      {scannedKeywords && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4">Detected Rankings</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              {scannedKeywords.length === 0 
-                ? "Could not find any top 20 rankings for extracted seeds."
-                : "We found this profile ranking for these keywords. Click one to track its heatmap grid."}
-            </p>
-            <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
-              {scannedKeywords.map((sk) => (
-                <button 
-                  key={sk.keyword}
-                  onClick={() => useScannedKeyword(sk.keyword)}
-                  className="flex justify-between items-center p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 transition-colors"
-                >
-                  <span className="font-medium text-sm">{sk.keyword}</span>
-                  <span className="badge badge-sm badge-success font-bold text-white px-2">Rank #{sk.rank}</span>
-                </button>
-              ))}
-            </div>
-            <button onClick={() => setScannedKeywords(null)} className="btn btn-ghost w-full mt-4">Close</button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+                  {c.key
