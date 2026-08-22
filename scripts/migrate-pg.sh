@@ -23,7 +23,7 @@ if [ "$code" -ne 0 ]; then
   echo "migrate-pg: drizzle-kit failed; replaying gmb-grid DDL via psql…"
   docker compose -f docker-compose.hosted.yaml --env-file .env.hosted exec -T postgres \
     psql -U openseo -d openseo -v ON_ERROR_STOP=0 \
-    -c "CREATE OR REPLACE FUNCTION \"isoNow\"() RETURNS text AS \$\$ SELECT to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"') \$\$ LANGUAGE sql;" \
+    -c "CREATE OR REPLACE FUNCTION isonow() RETURNS text AS \$\$ SELECT to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"') \$\$ LANGUAGE sql;" \
     -c "CREATE TABLE IF NOT EXISTS gmb_grid_configs (id text PRIMARY KEY NOT NULL, project_id text NOT NULL, business_name text NOT NULL, place_id text, keyword text NOT NULL, center_lat real NOT NULL, center_lng real NOT NULL, grid_size integer NOT NULL, radius_meters integer NOT NULL, schedule_interval text DEFAULT 'weekly' NOT NULL, is_active boolean DEFAULT true NOT NULL, created_at text DEFAULT (isoNow()) NOT NULL);" \
     -c "CREATE TABLE IF NOT EXISTS gmb_grid_runs (id text PRIMARY KEY NOT NULL, config_id text NOT NULL, status text DEFAULT 'pending' NOT NULL, started_at text DEFAULT (isoNow()) NOT NULL, completed_at text);" \
     -c "CREATE TABLE IF NOT EXISTS gmb_grid_snapshots (id text PRIMARY KEY NOT NULL, run_id text NOT NULL, lat real NOT NULL, lng real NOT NULL, grid_row integer NOT NULL, grid_col integer NOT NULL, rank integer, task_id text, status text DEFAULT 'pending' NOT NULL);" \
