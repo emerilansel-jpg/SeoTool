@@ -30,7 +30,8 @@ bash scripts/deploy-vps.sh --build
 # exit non-zero on journal mismatches), so they run here instead, after
 # the container is up, as a logged but non-fatal step.
 echo "🗄️  Applying Postgres migrations..."
-docker compose -f docker-compose.hosted.yaml --env-file .env.hosted exec -T open-seo pnpm run db:migrate:pg \
+docker compose -f docker-compose.hosted.yaml --env-file .env.hosted exec -T open-seo sh -c \
+  'node -e "console.log(process.env.POSTGRES_DATABASE_URL ? \"db-url: set\" : \"db-url: MISSING\")" && pnpm run db:migrate:pg; echo "MIGRATE_EXIT_CODE=$?"' \
   || echo "⚠️  Postgres migration step failed or was skipped (see logs above)."
 
 # Reload / restart seotool-caddy if the gateway-caddy compose exists

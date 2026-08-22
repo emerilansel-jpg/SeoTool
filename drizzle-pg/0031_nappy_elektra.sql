@@ -1,3 +1,4 @@
+CREATE OR REPLACE FUNCTION "isoNow"() RETURNS text AS $$ SELECT to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') $$ LANGUAGE sql;--> statement-breakpoint
 CREATE TABLE "gmb_grid_configs" (
 	"id" text PRIMARY KEY NOT NULL,
 	"project_id" text NOT NULL,
