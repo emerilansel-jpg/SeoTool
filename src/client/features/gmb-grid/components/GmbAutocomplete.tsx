@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
@@ -18,7 +17,6 @@ interface GmbAutocompleteProps {
 
 export function GmbAutocomplete({ onSelectProfile }: GmbAutocompleteProps) {
   const {
-    ready,
     value,
     suggestions: { status, data },
     setValue,

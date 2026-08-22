@@ -1,67 +1,61 @@
 import { useState, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getGmbGridConfigs,
   getGmbGridSnapshots,
   createGmbGridRun,
-  scanGmbKeywords,
+  scanGmbKeywords
 } from "@/serverFunctions/gmb-grid";
-import {
-  MapContainer,
-  TileLayer,
-  CircleMarker,
-  Tooltip,
-  useMap,
-} from "react-leaflet";
+import type { CreateGmbGridInput } from "@/server/features/gmb-grid/gmb-grid.schema";
+import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from "react-leaflet";
+// oxlint-disable-next-line import/no-unassigned-import
 import "leaflet/dist/leaflet.css";
 import { GmbAutocomplete } from "./components/GmbAutocomplete";
+import { GmbScanPipeline } from "./components/GmbScanPipeline";
 import { Loader2, Sparkles } from "lucide-react";
 
 import L from "leaflet";
+// oxlint-disable-next-line typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-function MapBoundsUpdater({
-  centerLat,
-  centerLng,
-  radiusMeters,
-}: {
-  centerLat: number;
-  centerLng: number;
-  radiusMeters: number;
-}) {
+function MapBoundsUpdater({ centerLat, centerLng, radiusMeters }: { centerLat: number, centerLng: number, radiusMeters: number }) {
   const map = useMap();
   const latDelta = radiusMeters / 111320;
-  const lngDelta =
-    radiusMeters / ((40075000 * Math.cos((centerLat * Math.PI) / 180)) / 360);
+  const lngDelta = radiusMeters / (40075000 * Math.cos(centerLat * Math.PI / 180) / 360);
 
   map.fitBounds([
     [centerLat - latDelta, centerLng - lngDelta],
-    [centerLat + latDelta, centerLng + lngDelta],
+    [centerLat + latDelta, centerLng + lngDelta]
   ]);
 
   return null;
 }
+
+const getRankColor = (rank: number | null) => {
+  if (rank === null) return "#9ca3af";
+  if (rank <= 3) return "#22c55e";
+  if (rank <= 10) return "#eab308";
+  return "#ef4444";
+};
 
 export function GmbGridView({ projectId }: { projectId: string }) {
   const getConfigs = useServerFn(getGmbGridConfigs);
   const getSnapshots = useServerFn(getGmbGridSnapshots);
   const createRun = useServerFn(createGmbGridRun);
   const scanKeywordsFn = useServerFn(scanGmbKeywords);
+  const queryClient = useQueryClient();
 
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [selectedWebsite, setSelectedWebsite] = useState<string | undefined>();
-  const [scannedKeywords, setScannedKeywords] = useState<Array<{
-    keyword: string;
-    rank: number;
-  }> | null>(null);
+  const [scannedKeywords, setScannedKeywords] = useState<Array<{keyword: string, rank: number}> | null>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -70,57 +64,61 @@ export function GmbGridView({ projectId }: { projectId: string }) {
     queryFn: () => getConfigs({ data: projectId }),
   });
 
-  const { data: snapshots } = useQuery({
+  const { data: runData } = useQuery({
     queryKey: ["gmb-snapshots", activeRunId],
     queryFn: () => getSnapshots({ data: activeRunId! }),
     enabled: !!activeRunId,
-    refetchInterval: 5000,
+    refetchInterval: (query) =>
+      query.state.data?.status === "running" ? 3000 : false,
   });
+  const snapshots = runData?.snapshots;
+
+type FormInputs = HTMLFormControlsCollection & Record<string, HTMLInputElement>;
 
   const createRunMutation = useMutation({
-    mutationFn: async (data: any) => await createRun({ data }),
-    onSuccess: (res) => setActiveRunId(res.runId),
+    mutationFn: async (data: CreateGmbGridInput) => await createRun({ data }),
   });
 
   const scanKeywordsMutation = useMutation({
-    mutationFn: async (data: any) => await scanKeywordsFn({ data }),
-    onSuccess: (data) => setScannedKeywords(data),
+    mutationFn: async (data: { placeId: string; businessName: string; website?: string; lat: number; lng: number }) =>
+      await scanKeywordsFn({ data }),
+    onSuccess: (data) => setScannedKeywords(data)
   });
 
-  const handleProfileSelect = (
-    placeId: string,
-    name: string,
-    lat: number,
-    lng: number,
-    website?: string,
-  ) => {
-    setSelectedPlaceId(placeId);
-    setSelectedWebsite(website);
-
+  const handleProfileSelect = (placeId: string, name: string, lat: number, lng: number, website?: string) => {
     if (formRef.current) {
-      const inputs = formRef.current.elements as any;
+      const inputs = formRef.current.elements as FormInputs;
       if (inputs.businessName) inputs.businessName.value = name;
-      if (inputs.centerLat) inputs.centerLat.value = lat;
-      if (inputs.centerLng) inputs.centerLng.value = lng;
+      // Manual typing (no placeId) must not clobber the user's coordinates.
+      if (placeId) {
+        if (inputs.centerLat) inputs.centerLat.value = String(lat);
+        if (inputs.centerLng) inputs.centerLng.value = String(lng);
+      }
+    }
+
+    if (placeId) {
+      setSelectedPlaceId(placeId);
+      setSelectedWebsite(website);
     }
   };
 
   const onAutoScanKeywords = () => {
-    if (!formRef.current || !selectedPlaceId) return;
-    const inputs = formRef.current.elements as any;
+    if (!formRef.current) return;
+    const inputs = formRef.current.elements as FormInputs;
+    if (!selectedPlaceId || !inputs.businessName?.value) return;
 
     scanKeywordsMutation.mutate({
       placeId: selectedPlaceId,
       businessName: inputs.businessName.value,
       website: selectedWebsite,
       lat: parseFloat(inputs.centerLat.value),
-      lng: parseFloat(inputs.centerLng.value),
+      lng: parseFloat(inputs.centerLng.value)
     });
   };
 
   const useScannedKeyword = (kw: string) => {
     if (formRef.current) {
-      const inputs = formRef.current.elements as any;
+      const inputs = formRef.current.elements as FormInputs;
       if (inputs.keyword) inputs.keyword.value = kw;
     }
     setScannedKeywords(null);
@@ -129,15 +127,36 @@ export function GmbGridView({ projectId }: { projectId: string }) {
   const handleStartScan = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    createRunMutation.mutate({
-      projectId,
-      businessName: formData.get("businessName") as string,
-      keyword: formData.get("keyword") as string,
-      centerLat: parseFloat(formData.get("centerLat") as string),
-      centerLng: parseFloat(formData.get("centerLng") as string),
-      gridSize: parseInt(formData.get("gridSize") as string, 10),
-      radiusMeters: parseInt(formData.get("radiusMeters") as string, 10),
-    });
+    const runId = crypto.randomUUID();
+    setScanError(null);
+    // Poll immediately so the pipeline panel tracks progress while the
+    // server runs the synchronous live scan.
+    setActiveRunId(runId);
+    createRunMutation.mutate(
+      {
+        projectId,
+        runId,
+        businessName: formData.get("businessName") as string,
+        keyword: formData.get("keyword") as string,
+        centerLat: parseFloat(formData.get("centerLat") as string),
+        centerLng: parseFloat(formData.get("centerLng") as string),
+        gridSize: parseInt(formData.get("gridSize") as string, 10),
+        radiusMeters: parseInt(formData.get("radiusMeters") as string, 10),
+      },
+      {
+        onSuccess: () => {
+          // Nudge the poll query so final results appear without waiting
+          // for the next interval tick.
+          void queryClient.invalidateQueries({ queryKey: ["gmb-snapshots", runId] });
+        },
+        onError: (err: Error) => {
+          setScanError(
+            err?.message ||
+              "Could not reach the scan service. Please try again."
+          );
+        },
+      },
+    );
   };
 
   const activeConfig = configs?.[0];
@@ -145,50 +164,29 @@ export function GmbGridView({ projectId }: { projectId: string }) {
   const mapCenterLng = activeConfig?.centerLng || -117.1611;
   const mapRadius = activeConfig?.radiusMeters || 1000;
 
-  const getRankColor = (rank: number | null) => {
-    if (rank === null) return "#9ca3af";
-    if (rank <= 3) return "#22c55e";
-    if (rank <= 10) return "#eab308";
-    return "#ef4444";
-  };
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[800px]">
-      <div className="md:col-span-1 bg-base-100 p-6 rounded-2xl border border-base-300 relative z-10 shadow-xs">
-        <h2 className="text-lg font-semibold mb-4 text-base-content">
-          Scan Settings
-        </h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="md:col-span-1 bg-base-100 p-6 rounded-lg border border-base-300 md:max-h-[800px] md:overflow-y-auto">
+        <h2 className="text-lg font-semibold mb-4">Scan Settings</h2>
 
-        <form
-          ref={formRef}
-          onSubmit={handleStartScan}
-          className="flex flex-col gap-4"
-        >
+        <form ref={formRef} onSubmit={handleStartScan} className="flex flex-col gap-4 relative z-10">
           <GmbAutocomplete onSelectProfile={handleProfileSelect} />
 
-          <div className="relative z-0">
-            <label className="text-sm font-medium flex justify-between text-base-content">
+          <div>
+            <label className="text-sm font-medium flex justify-between">
               Search Query / Keyword
-              {selectedWebsite && (
+              {selectedPlaceId && (
                 <button
                   type="button"
                   onClick={onAutoScanKeywords}
                   className="text-xs text-primary flex items-center gap-1 hover:underline"
                 >
-                  {scanKeywordsMutation.isPending ? (
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                  ) : (
-                    <Sparkles className="w-3 h-3" />
-                  )}
+                  {scanKeywordsMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin"/> : <Sparkles className="w-3 h-3"/>}
                   Auto-detect rankings
                 </button>
               )}
             </label>
-            <input
-              name="keyword"
-              className="input input-bordered w-full mt-1"
-              required
-            />
+            <input name="keyword" className="input input-bordered w-full mt-1" required />
           </div>
 
           <input type="hidden" name="businessName" />
@@ -266,7 +264,8 @@ export function GmbGridView({ projectId }: { projectId: string }) {
               {configs.slice(0, 5).map((c) => (
                 <li
                   key={c.id}
-                  className="p-2 border rounded cursor-pointer hover:bg-gray-50"
+                  onClick={() => c.lastRunId && setActiveRunId(c.lastRunId)}
+                  className={`p-2 border rounded cursor-pointer hover:bg-base-200 ${c.lastRunId ? "" : "opacity-50 cursor-default"}`}
                 >
                   {c.keyword} - {c.gridSize}x{c.gridSize}
                 </li>
@@ -276,51 +275,72 @@ export function GmbGridView({ projectId }: { projectId: string }) {
         )}
       </div>
 
-      <div className="md:col-span-2 relative rounded-lg overflow-hidden border border-gray-200">
-        <MapContainer
-          center={[mapCenterLat, mapCenterLng]}
-          zoom={13}
-          style={{ height: "100%", width: "100%" }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap contributors"
+      <div className="md:col-span-2 flex flex-col gap-4 min-h-[500px] md:h-[800px]">
+        {activeRunId && (
+          <GmbScanPipeline
+            isScanning={createRunMutation.isPending}
+            runStatus={runData?.status}
+            snapshots={snapshots}
+            error={scanError}
           />
-          <MapBoundsUpdater
-            centerLat={mapCenterLat}
-            centerLng={mapCenterLng}
-            radiusMeters={mapRadius}
-          />
+        )}
 
-          {snapshots?.map((snap) => (
-            <CircleMarker
-              key={snap.id}
-              center={[snap.lat, snap.lng]}
-              radius={16}
-              pathOptions={{
-                color: "white",
-                weight: 2,
-                fillColor: getRankColor(snap.rank),
-                fillOpacity: 0.9,
-              }}
-            >
-              <Tooltip
-                direction="center"
-                permanent
-                className="bg-transparent border-none shadow-none text-white font-bold text-center"
+        <div className="relative flex-1 min-h-[400px] rounded-lg overflow-hidden border border-base-300 z-0">
+          <MapContainer
+            center={[mapCenterLat, mapCenterLng]}
+            zoom={13}
+            style={{ height: "100%", width: "100%" }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution="&copy; OpenStreetMap contributors"
+            />
+            <MapBoundsUpdater
+              centerLat={mapCenterLat}
+              centerLng={mapCenterLng}
+              radiusMeters={mapRadius}
+            />
+
+            {snapshots?.map((snap) => (
+              <CircleMarker
+                key={snap.id}
+                center={[snap.lat, snap.lng]}
+                radius={16}
+                pathOptions={{
+                  color: "white",
+                  weight: 2,
+                  fillColor: getRankColor(snap.rank),
+                  fillOpacity: 0.9,
+                }}
               >
-                {snap.rank === null ? "-" : snap.rank}
-              </Tooltip>
-            </CircleMarker>
-          ))}
-        </MapContainer>
+                <Tooltip
+                  direction="center"
+                  permanent
+                  className="bg-transparent border-none shadow-none text-white font-bold text-center"
+                >
+                  {snap.status === "failed" ? "!" : snap.rank === null ? "-" : snap.rank}
+                </Tooltip>
+              </CircleMarker>
+            ))}
+          </MapContainer>
+
+          <div className="absolute bottom-3 right-3 z-[1000] bg-base-100/95 rounded-lg shadow-md border border-base-300 p-2 text-xs">
+            <p className="font-semibold mb-1">Local rank</p>
+            <div className="flex flex-col gap-1">
+              <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ background: "#22c55e" }} /> Top 3</span>
+              <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ background: "#eab308" }} /> 4 - 10</span>
+              <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ background: "#ef4444" }} /> 11+</span>
+              <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ background: "#9ca3af" }} /> Not found</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {scannedKeywords && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
+          <div className="bg-base-100 text-base-content rounded-xl shadow-2xl p-6 max-w-md w-full">
             <h3 className="text-lg font-bold mb-4">Detected Rankings</h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-base-content/70 mb-4">
               {scannedKeywords.length === 0
                 ? "Could not find any top 20 rankings for extracted seeds."
                 : "We found this profile ranking for these keywords. Click one to track its heatmap grid."}
@@ -330,7 +350,7 @@ export function GmbGridView({ projectId }: { projectId: string }) {
                 <button
                   key={sk.keyword}
                   onClick={() => useScannedKeyword(sk.keyword)}
-                  className="flex justify-between items-center p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 transition-colors"
+                  className="flex justify-between items-center p-3 rounded-lg border border-base-300 hover:border-primary hover:bg-primary/5 transition-colors"
                 >
                   <span className="font-medium text-sm">{sk.keyword}</span>
                   <span className="badge badge-sm badge-success font-bold text-white px-2">
