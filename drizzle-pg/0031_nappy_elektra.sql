@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION "isoNow"() RETURNS text AS $$ SELECT to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') $$ LANGUAGE sql;--> statement-breakpoint
-CREATE TABLE "gmb_grid_configs" (
+CREATE TABLE IF NOT EXISTS "gmb_grid_configs" (
 	"id" text PRIMARY KEY NOT NULL,
 	"project_id" text NOT NULL,
 	"business_name" text NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE "gmb_grid_configs" (
 	"created_at" text DEFAULT (isoNow()) NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "gmb_grid_runs" (
+CREATE TABLE IF NOT EXISTS "gmb_grid_runs" (
 	"id" text PRIMARY KEY NOT NULL,
 	"config_id" text NOT NULL,
 	"status" text DEFAULT 'pending' NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE "gmb_grid_runs" (
 	"completed_at" text
 );
 --> statement-breakpoint
-CREATE TABLE "gmb_grid_snapshots" (
+CREATE TABLE IF NOT EXISTS "gmb_grid_snapshots" (
 	"id" text PRIMARY KEY NOT NULL,
 	"run_id" text NOT NULL,
 	"lat" real NOT NULL,
@@ -34,6 +34,9 @@ CREATE TABLE "gmb_grid_snapshots" (
 	"status" text DEFAULT 'pending' NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "gmb_grid_configs" DROP CONSTRAINT IF EXISTS "gmb_grid_configs_project_id_projects_id_fk";--> statement-breakpoint
 ALTER TABLE "gmb_grid_configs" ADD CONSTRAINT "gmb_grid_configs_project_id_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."projects"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "gmb_grid_runs" ADD CONSTRAINT "gmb_grid_runs_config_id_gmb_grid_configs_id_fk" FOREIGN KEY ("config_id") REFERENCES "public"."gmb_grid_configs"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "gmb_grid_snapshots" ADD CONSTRAINT "gmb_grid_snapshots_run_id_gmb_grid_runs_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."gmb_grid_runs"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "gmb_grid_runs" DROP CONSTRAINT IF EXISTS "gmb_grid_runs_config_id_gmb_grid_configs_id_fk";--> statement-breakpoint
+ALTER TABLE "gmb_grid_runs" ADD CONSTRAINT "gmb_grid_runs_config_id_gmb_grid_configs_id_fk" FOREIGN KEY ("config_id") REFERENCES "gmb_grid_configs"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "gmb_grid_snapshots" DROP CONSTRAINT IF EXISTS "gmb_grid_snapshots_run_id_gmb_grid_runs_id_fk";--> statement-breakpoint
+ALTER TABLE "gmb_grid_snapshots" ADD CONSTRAINT "gmb_grid_snapshots_run_id_gmb_grid_runs_id_fk" FOREIGN KEY ("run_id") REFERENCES "gmb_grid_runs"("id") ON DELETE cascade ON UPDATE no action;
