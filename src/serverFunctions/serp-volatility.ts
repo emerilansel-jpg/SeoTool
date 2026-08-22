@@ -13,11 +13,12 @@ export const getSerpVolatility = createServerFn({ method: "GET" })
   .middleware([requireProjectContext])
   .validator(volatilityTrendSchema)
   .handler(async ({ data: { projectId, days } }) => {
-    const [latest, trend] = await Promise.all([
+    const [latest, trend, isComputable] = await Promise.all([
       SerpVolatilityService.getLatestVolatility(projectId),
       SerpVolatilityService.getVolatilityTrend(projectId, days),
+      SerpVolatilityService.checkEligibility(projectId),
     ]);
-    return { latest, trend };
+    return { latest, trend, isComputable };
   });
 
 const computeVolatilitySchema = z.object({

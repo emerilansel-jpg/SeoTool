@@ -202,8 +202,52 @@ async function getLatestVolatility(projectId: string) {
   };
 }
 
+/**
+ * Check if the project has enough rank tracking history to compute volatility.
+ */
+async function checkEligibility(projectId: string): Promise<boolean> {
+  const configs = await RankTrackingRepository.getConfigsForProject(projectId);
+  if (configs.length === 0) return false;
+
+  const configIds = configs.map((c) => c.id);
+
+  const recentRuns = await db
+    .select({
+      id: rankCheckRuns.id,
+      configId: rankCheckRuns.configId,
+    })
+    .from(rankCheckRuns)
+    .where(
+      and(
+        sql`${rankCheckRuns.configId} IN (${sql.join(
+          configIds.map((id) => sql`${id}`),
+          sql`, `,
+        )})`,
+        eq(rankCheckRuns.status, "completed"),
+        eq(rankCheckRuns.isSubsetRun, false),
+      ),
+    )
+    .orderBy(desc(rankCheckRuns.startedAt))
+    .limit(configIds.length * 2);
+
+  if (recentRuns.length < 2) return false;
+
+  const seen = new Map<string, number>();
+  for (const run of recentRuns) {
+    seen.set(run.configId, (seen.get(run.configId) ?? 0) + 1);
+  }
+
+  // Eligible if at least one config has 2+ completed runs
+  for (const count of seen.values()) {
+    if (count >= 2) return true;
+  }
+
+  return false;
+}
+
 export const SerpVolatilityService = {
   computeVolatility,
   getVolatilityTrend,
   getLatestVolatility,
+  checkEligibility,
 };

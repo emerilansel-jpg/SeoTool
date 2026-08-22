@@ -127,6 +127,7 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
 
   const latest = data?.latest;
   const trend = data?.trend ?? [];
+  const isComputable = data?.isComputable ?? false;
 
   return (
     <div className="space-y-4">
@@ -152,7 +153,12 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
             type="button"
             className="btn btn-primary rounded-xl gap-2 font-semibold shadow-xs shrink-0 self-start sm:self-auto"
             onClick={() => computeMutation.mutate()}
-            disabled={computeMutation.isPending}
+            disabled={computeMutation.isPending || (!latest && !isComputable)}
+            title={
+              !latest && !isComputable
+                ? "Not enough rank tracking history to compute volatility yet"
+                : undefined
+            }
           >
             {computeMutation.isPending ? (
               <>
@@ -284,12 +290,14 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
           </div>
           <div className="space-y-1.5 max-w-md mx-auto">
             <p className="text-lg font-bold text-base-content">
-              No SERP Volatility computed yet
+              {isComputable
+                ? "Ready to compute SERP Volatility"
+                : "Waiting for more rank tracking data"}
             </p>
             <p className="text-sm text-base-content/70 leading-relaxed">
-              SERP volatility tracks fluctuations across your tracked keywords
-              over time. Click below to compute volatility score based on your
-              latest rank tracking checks.
+              {isComputable
+                ? "SERP volatility tracks fluctuations across your tracked keywords over time. Click below to compute your first volatility score based on your latest rank tracking checks."
+                : "SERP volatility requires comparing keyword positions across at least two different days. Run periodic rank checks to start collecting data."}
             </p>
           </div>
 
@@ -298,7 +306,7 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
               type="button"
               className="btn btn-primary rounded-xl gap-2 font-semibold shadow-xs"
               onClick={() => computeMutation.mutate()}
-              disabled={computeMutation.isPending}
+              disabled={computeMutation.isPending || !isComputable}
             >
               {computeMutation.isPending ? (
                 <>

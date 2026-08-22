@@ -9,7 +9,15 @@ export const Route = createFileRoute("/blogs/")({
   // Public read path via server fn (keeps cloudflare:workers out of the
   // client bundle).
   loader: async () => {
-    const posts = await listPublishedPosts({ data: undefined });
+    // Explicit type cast to work around TanStack Start's generic inference
+    // dropping the return type when no validator is used.
+    const response = await listPublishedPosts({ data: undefined });
+    const posts = response as Array<{
+      slug: string;
+      title: string;
+      description: string | null;
+      publishedAt: string | null;
+    }>;
     return { posts };
   },
   head: () => ({
@@ -50,9 +58,15 @@ function BlogIndexPage() {
               No posts published yet. Check back soon.
             </div>
           ) : (
-            posts.map((post) => (
-              <Link
-                key={post.slug}
+            posts.map(
+              (post: {
+                slug: string;
+                title: string;
+                description: string | null;
+                publishedAt: string | null;
+              }) => (
+                <Link
+                  key={post.slug}
                 to="/blogs/$slug"
                 params={{ slug: post.slug }}
                 className="block rounded-xl border border-base-300 bg-base-100 p-5 transition-all hover:border-primary/40 hover:shadow-md"
