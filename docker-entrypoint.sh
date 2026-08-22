@@ -17,7 +17,7 @@ if [ -f "$MARKETING_INDEX" ]; then
 else
   echo "📦 Building marketing site (no pre-built HTML found)..."
   cd /app/web
-  DOCKER_BUILD=1 pnpm run build
+  DOCKER_BUILD=1 pnpm exec vite build
   cd /app
   echo "✅ Marketing site built."
 fi
@@ -41,6 +41,6 @@ fi
 
 # Build client + server to ensure latest code, CSS, and assets are compiled
 echo "Building client + server..."
-pnpm run build
+pnpm exec vite build
 
 exec pnpm exec vite preview --host 0.0.0.0 --port "${PORT:-3001}"
