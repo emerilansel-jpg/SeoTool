@@ -65,5 +65,8 @@
     // Tailwindcss used via @tailwindcss/vite plugin
     "tailwindcss",
     "daisyui",
+    // Ambient global namespace google.maps.* types (GmbAutocomplete);
+    // knip can't see @types packages consumed via global declarations
+    "@types/google.maps",
   ],
 }
