@@ -7,7 +7,12 @@ import { parseTopMovers } from "./SerpVolatilityService";
 describe("parseTopMovers", () => {
   it("parses valid top movers JSON", () => {
     const json = JSON.stringify([
-      { keyword: "seo tool", change: 3, currentPosition: 5, previousPosition: 8 },
+      {
+        keyword: "seo tool",
+        change: 3,
+        currentPosition: 5,
+        previousPosition: 8,
+      },
       { keyword: "rank tracker", change: -2 },
     ]);
     const movers = parseTopMovers(json);
