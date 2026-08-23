@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import {
   keepPreviousData,
   queryOptions,
@@ -124,7 +123,7 @@ function tableQueryOptions(
 }
 
 export function Ga4InsightsPage({ projectId }: { projectId: string }) {
-  const [isChangingProperty, setIsChangingProperty] = React.useState(false);
+  const [isChangingProperty, setIsChangingProperty] = useState(false);
   const queryClient = useQueryClient();
   const [range, setRange] = useState<Ga4InsightsDateRange>("last_28_days");
   const [device, setDevice] = useState<Ga4InsightsDevice | typeof ALL>(ALL);
@@ -216,8 +215,8 @@ export function Ga4InsightsPage({ projectId }: { projectId: string }) {
           </div>
         ) : isChangingProperty ? (
           <div className="max-w-2xl space-y-4">
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="btn btn-ghost btn-sm px-2 -ml-2"
               onClick={() => setIsChangingProperty(false)}
             >

@@ -2,7 +2,10 @@ import { createMiddleware } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { resolveUserContextFromHeaders } from "@/middleware/ensure-user/resolve";
 import { E2E_ORG_ID } from "@/middleware/ensure-user/hosted";
-import type { EnsuredProject } from "@/middleware/ensure-user/types";
+import type {
+  EnsuredProject,
+  EnsuredUserContext,
+} from "@/middleware/ensure-user/types";
 import { AppError } from "@/server/lib/errors";
 import { ProjectRepository } from "@/server/features/projects/repositories/ProjectRepository";
 
@@ -32,9 +35,30 @@ function getE2eMockProject(projectId: string): EnsuredProject {
   };
 }
 
+// Files whose server functions may run without a session: published CMS
+// content (legal pages, blog) is rendered anonymously through SSR loaders.
+// Scoped by filename so a colliding function name elsewhere stays gated.
+const ANONYMOUS_ALLOWED_FILES = new Set(["src/serverFunctions/cms-public.ts"]);
+
 export const ensureUserMiddleware = createMiddleware({
   type: "function",
-}).server(async ({ next, data }) => {
+}).server(async ({ next, data, serverFnMeta }) => {
+  if (serverFnMeta && ANONYMOUS_ALLOWED_FILES.has(serverFnMeta.filename)) {
+    // Published content stays readable with a valid session, a stale
+    // session cookie, or no session at all; an authenticated caller still
+    // gets its real context downstream. The cms-public handlers never read
+    // user fields, so the anonymous shape is safe to assert.
+    let resolved: EnsuredUserContext | undefined;
+    try {
+      resolved = await resolveUserContextFromHeaders(getRequest().headers);
+    } catch {
+      // Anonymous or expired-session reader: fall through with no user.
+    }
+    return next({
+      context: { ...resolved, project: undefined } as EnsuredUserContext,
+    });
+  }
+
   const context = await resolveUserContextFromHeaders(getRequest().headers);
 
   const projectId = extractProjectId(data);
@@ -60,10 +84,6 @@ export const ensureUserMiddleware = createMiddleware({
     }
   }
 
-  return next({
-    context: {
-      ...context,
-      project,
-    },
-  });
+  const enriched: EnsuredUserContext = { ...context, project };
+  return next({ context: enriched });
 });

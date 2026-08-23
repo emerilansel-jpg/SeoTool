@@ -29,6 +29,7 @@ const ALWAYS_ALLOWED_FILES = new Set([
   "src/serverFunctions/admin-users.ts",
   "src/serverFunctions/analytics.ts",
   "src/serverFunctions/billing.ts",
+  "src/serverFunctions/cms-public.ts",
   "src/serverFunctions/config.ts",
   "src/serverFunctions/notifications.ts",
   "src/serverFunctions/onboarding.ts",
