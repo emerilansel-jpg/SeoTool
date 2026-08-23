@@ -5,7 +5,6 @@ import type {
 } from "./sitemapTypes";
 
 const MAX_URLS_SITEMAP = 50000;
-const URL_SAMPLE_SIZE = 20;
 
 export function validateSitemapUrls(
   url: string,

@@ -61,7 +61,7 @@ export function identifyToxicLinks(
       count: data.count,
       avgSpamScore: Math.round((data.totalSpam / data.count) * 10) / 10,
     }))
-    .sort((a, b) => b.count - a.count)
+    .toSorted((a, b) => b.count - a.count)
     .slice(0, 10);
 
   return {

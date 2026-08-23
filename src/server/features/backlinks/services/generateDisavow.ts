@@ -32,7 +32,7 @@ export function generateDisavowFile(
     }
   }
 
-  const sortedDomains = [...uniqueDomains].sort();
+  const sortedDomains = [...uniqueDomains].toSorted();
   for (const domain of sortedDomains) {
     lines.push(`domain:${domain}`);
   }

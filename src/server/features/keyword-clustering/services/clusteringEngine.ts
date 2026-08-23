@@ -51,7 +51,7 @@ export function buildSimilarityMatrix(keywordDomains: Map<string, string[]>): {
   const keywords = [...keywordDomains.keys()];
   const n = keywords.length;
   const matrix: number[][] = Array.from({ length: n }, () =>
-    new Array(n).fill(0),
+    Array.from({ length: n }, () => 0),
   );
 
   for (let i = 0; i < n; i++) {

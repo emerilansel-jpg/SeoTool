@@ -1,12 +1,4 @@
-import {
-  PAYPAL_PLAN_IDS,
-  planTierFromPaypalPlanId,
-  type PlanTier,
-} from "@/shared/plans";
-
-function isRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === "object" && v !== null;
-}
+import { planTierFromPaypalPlanId, type PlanTier } from "@/shared/plans";
 
 export type BillingCustomerStatusSnapshot = {
   organizationId: string;

@@ -8,9 +8,11 @@ import { getRequiredEnvValue } from "@/server/lib/runtime-env";
 // (PayPal tokens last 8 hours; we refresh slightly early).
 // ---------------------------------------------------------------------------
 
-const TOKEN_CACHE_TTL_MS = 7.5 * 60 * 60 * 1000;
-
 let tokenPromise: Promise<{ token: string; expiresAt: number }> | undefined;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
 
 async function getAccessToken(): Promise<string> {
   const now = Date.now();
@@ -46,10 +48,14 @@ async function fetchToken(): Promise<{ token: string; expiresAt: number }> {
     );
   }
 
-  const data = (await response.json()) as {
-    access_token: string;
-    expires_in: number;
-  };
+  const data: unknown = await response.json();
+  if (
+    !isRecord(data) ||
+    typeof data.access_token !== "string" ||
+    typeof data.expires_in !== "number"
+  ) {
+    throw new Error("PayPal token response had an unexpected shape");
+  }
 
   return {
     token: data.access_token,
@@ -91,16 +97,21 @@ export async function paypalRequest<T = unknown>(
 
   // 204 No Content (e.g. cancel subscription)
   if (response.status === 204) {
+    // oxlint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- generic endpoint envelope: the 204 contract carries no body, so T is structurally undefined here
     return undefined as T;
   }
 
   const data = await response.json();
 
   if (!response.ok) {
-    const errData = data as Record<string, unknown>;
-    const details = Array.isArray(errData.details)
-      ? (errData.details as Array<{ issue?: string; description?: string }>)
-      : [];
+    const details =
+      isRecord(data) && Array.isArray(data.details)
+        ? data.details.filter(isRecord).map((d) => ({
+            issue: typeof d.issue === "string" ? d.issue : undefined,
+            description:
+              typeof d.description === "string" ? d.description : undefined,
+          }))
+        : [];
     const msg =
       details.map((d) => d.description ?? d.issue).join("; ") ??
       response.statusText;
@@ -109,6 +120,7 @@ export async function paypalRequest<T = unknown>(
     );
   }
 
+  // oxlint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- generic endpoint envelope; each call site owns the shape it requested
   return data as T;
 }
 

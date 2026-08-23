@@ -25,10 +25,8 @@ export function getDatabaseProvider(): DatabaseProvider {
 // container. A direct POSTGRES_DATABASE_URL must therefore take precedence
 // there.
 export function getPostgresConnectionString() {
-  const directUrl = Reflect.get(env, "POSTGRES_DATABASE_URL") as
-    | string
-    | undefined;
-  if (directUrl && directUrl.trim()) {
+  const directUrl: unknown = Reflect.get(env, "POSTGRES_DATABASE_URL");
+  if (typeof directUrl === "string" && directUrl.trim()) {
     return directUrl.trim();
   }
 

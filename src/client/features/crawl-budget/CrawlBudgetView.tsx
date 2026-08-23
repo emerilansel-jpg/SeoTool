@@ -56,9 +56,9 @@ export function CrawlBudgetView({ projectId }: { projectId: string }) {
   );
 }
 
-function CrawlBudgetReportView({ report }: { report: CrawlBudgetReport }) {
-  const fmt = (n: number) => new Intl.NumberFormat().format(n);
+const fmt = (n: number) => new Intl.NumberFormat().format(n);
 
+function CrawlBudgetReportView({ report }: { report: CrawlBudgetReport }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-px rounded-lg border border-base-300 bg-base-300/70 overflow-hidden">
@@ -154,7 +154,7 @@ function CrawlBudgetReportView({ report }: { report: CrawlBudgetReport }) {
                 </thead>
                 <tbody>
                   {Object.entries(report.statusDistribution)
-                    .sort(([, a], [, b]) => b - a)
+                    .toSorted(([, a], [, b]) => b - a)
                     .map(([code, count]) => (
                       <tr key={code} className="hover">
                         <td>

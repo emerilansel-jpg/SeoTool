@@ -1,10 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
-import {
-  getBillingUsageEvents,
-  type BillingUsageEvent,
-} from "@/serverFunctions/billing";
+import { getBillingUsageEvents } from "@/serverFunctions/billing";
 import { useSession } from "@/lib/auth-client";
 
 export function BillingUsageChart() {
@@ -41,12 +38,21 @@ export function BillingUsageChart() {
     staleTime: 60_000,
   });
 
-  const chartData = ((eventsQuery.data ?? []) as BillingUsageEvent[]).map(
-    (event) => ({
+  const events = Array.isArray(eventsQuery.data) ? eventsQuery.data : [];
+  const chartData = events.map((event) => {
+    const properties =
+      typeof event.properties === "object" && event.properties !== null
+        ? (event.properties as Record<string, unknown>)
+        : {};
+    const monthlyRemaining =
+      typeof properties.monthly_remaining === "number"
+        ? properties.monthly_remaining
+        : 0;
+    return {
       date: new Date().toISOString(),
-      credits: ((event.properties.monthly_remaining as number) ?? 0) / 1000,
-    }),
-  );
+      credits: monthlyRemaining / 1000,
+    };
+  });
 
   const totalSpend = chartData.reduce(
     (sum: number, d: { credits: number }) => sum + d.credits,

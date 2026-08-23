@@ -60,7 +60,7 @@ export function identifyTopMovers(
     });
 
   return withChange
-    .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
+    .toSorted((a, b) => Math.abs(b.change) - Math.abs(a.change))
     .slice(0, 5);
 }
 

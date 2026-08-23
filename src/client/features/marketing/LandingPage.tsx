@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,

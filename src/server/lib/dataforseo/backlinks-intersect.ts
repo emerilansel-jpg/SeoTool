@@ -77,6 +77,40 @@ type IntersectInput = {
  *
  * Maps to DataForSEO `POST /v3/backlinks/domain_intersection/live`.
  */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/** Flatten one DFS intersect item: remap the numeric domain_intersection
+ * keys to the original target domains and copy the summary fields. */
+function flattenIntersectItem(
+  record: Record<string, unknown>,
+  targets: Record<string, string>,
+): Record<string, unknown> {
+  const domainIntersection = isRecord(record.domain_intersection)
+    ? record.domain_intersection
+    : undefined;
+  const summary = isRecord(record.summary) ? record.summary : undefined;
+
+  const intersection: Record<string, unknown> = {};
+  if (domainIntersection) {
+    for (const [key, value] of Object.entries(domainIntersection)) {
+      // Map the numeric key back to the original target domain for readability.
+      const targetDomain = targets[key] ?? key;
+      intersection[targetDomain] = value;
+    }
+  }
+
+  return {
+    domain: record.domain ?? null,
+    intersection,
+    summary_rank: summary?.rank ?? null,
+    summary_backlinks: summary?.backlinks ?? null,
+    summary_referring_domains: summary?.referring_domains ?? null,
+    summary_referring_pages: summary?.referring_pages ?? null,
+  };
+}
+
 export async function fetchBacklinksDomainIntersection(
   input: IntersectInput,
 ): Promise<
@@ -110,36 +144,10 @@ export async function fetchBacklinksDomainIntersection(
 
   const rawItems: unknown[] = [];
   const firstResult = task.result?.[0];
-  if (firstResult && typeof firstResult === "object" && firstResult !== null) {
-    const items = (firstResult as Record<string, unknown>).items;
-    if (Array.isArray(items)) {
-      for (const item of items) {
-        if (!item || typeof item !== "object") continue;
-        const record = item as Record<string, unknown>;
-        const domainIntersection = record.domain_intersection as
-          | Record<string, unknown>
-          | undefined;
-        const summary = record.summary as Record<string, unknown> | undefined;
-
-        // Flatten the keyed intersection object into a readable structure.
-        const intersection: Record<string, unknown> = {};
-        if (domainIntersection) {
-          for (const [key, value] of Object.entries(domainIntersection)) {
-            // Map the numeric key back to the original target domain for readability.
-            const targetDomain = targets[key] ?? key;
-            intersection[targetDomain] = value;
-          }
-        }
-
-        rawItems.push({
-          domain: record.domain ?? null,
-          intersection,
-          summary_rank: summary?.rank ?? null,
-          summary_backlinks: summary?.backlinks ?? null,
-          summary_referring_domains: summary?.referring_domains ?? null,
-          summary_referring_pages: summary?.referring_pages ?? null,
-        });
-      }
+  if (isRecord(firstResult) && Array.isArray(firstResult.items)) {
+    for (const item of firstResult.items) {
+      if (!isRecord(item)) continue;
+      rawItems.push(flattenIntersectItem(item, targets));
     }
   }
 
@@ -152,6 +160,7 @@ export async function fetchBacklinksDomainIntersection(
     // Fall through with raw items — the passthrough schema is permissive.
   }
 
+  // oxlint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- fallback keeps the raw DFS items; the passthrough schema accepts their shape
   const items = parsed.success ? parsed.data : (rawItems as IntersectItem[]);
 
   return {

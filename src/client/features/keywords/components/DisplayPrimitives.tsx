@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import type { MonthlySearch } from "@/types/keywords";
-import { formatCompactNumber, formatNumber } from "../utils";
+import { formatCompactNumber } from "../utils";
 import { FloatingTooltip, useFloatingTooltip } from "./FloatingTooltip";
 
 export type SortField =

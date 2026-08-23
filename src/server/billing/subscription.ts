@@ -10,7 +10,6 @@ import { AppError } from "@/server/lib/errors";
 import { QuotaRepository } from "@/server/features/billing/repositories/QuotaRepository";
 import {
   getCreditBalance,
-  areCreditsDepleted,
   deductCredits,
   grantMonthlyCredits,
 } from "@/server/billing/credits";
@@ -159,14 +158,6 @@ export async function trackUsageCreditSpend(args: {
     args.customerId,
     totalCostCredits,
   );
-
-  const properties = {
-    currency: "USD",
-    creditFeature: args.creditFeature,
-    totalCostUsd,
-    totalCostCredits,
-    ...args.properties,
-  };
 
   await captureServerEvent({
     distinctId: args.customer.userId,

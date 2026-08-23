@@ -1,3 +1,4 @@
+// oxlint-disable @typescript-eslint/no-unsafe-type-assertion
 import { test, expect } from "@playwright/test";
 import { getE2EProjectId } from "./e2e-helpers";
 import * as path from "path";

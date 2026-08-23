@@ -1,6 +1,5 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import type { OnChangeFn, SortingState } from "@tanstack/react-table";
-import { useMemo } from "react";
 import {
   AppDataTable,
   useAppTable,

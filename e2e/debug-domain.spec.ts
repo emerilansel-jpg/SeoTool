@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test";
+// oxlint-disable @typescript-eslint/no-unsafe-type-assertion
+import { test } from "@playwright/test";
 import { getE2EProjectId } from "./e2e-helpers";
 
 test("debug domain overview", async ({ page }) => {
@@ -9,7 +10,7 @@ test("debug domain overview", async ({ page }) => {
   page.on("pageerror", (err) => errors.push(err.message));
 
   await page.addInitScript(() => {
-    (window as any).__E2E_BYPASS_AUTH = true;
+    (window as unknown as Record<string, boolean>).__E2E_BYPASS_AUTH = true;
   });
 
   const projectId = await getE2EProjectId(page);

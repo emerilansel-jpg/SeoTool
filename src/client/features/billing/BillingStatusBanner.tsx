@@ -1,8 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { useSession } from "@/lib/auth-client";
-import { getQuotaStateSummary } from "@/serverFunctions/billing";
 
 const PROBLEM_COPY: Record<string, string> = {
   past_due:
@@ -17,19 +14,6 @@ const PROBLEM_COPY: Record<string, string> = {
  * externally; this banner checks the local subscription status.
  */
 export function BillingStatusBanner() {
-  const { data: session } = useSession();
-  const hasSession = Boolean(session?.user?.id);
-
-  const query = useQuery({
-    queryKey: ["billing", "status-banner"],
-    queryFn: async () => {
-      const state = await getQuotaStateSummary({ data: undefined });
-      return state;
-    },
-    enabled: hasSession,
-    staleTime: 60_000,
-  });
-
   // PayPal handles dunning externally; local status check is a fallback.
   // For now, we don't show the banner unless there's an explicit problem.
   const problem = null; // PayPal manages payment failures via email + portal

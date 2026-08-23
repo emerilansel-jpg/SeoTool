@@ -1,25 +1,28 @@
-# Rencana Penggantian Nama AI (Sam -> Jet)
+# Fix Plan: GMB Grid Form Unclickable
 
-Sesuai dengan pilihan "UI, URL, & Teks Saja", saya akan membatasi perubahan hanya pada hal-hal yang terlihat oleh pengguna, tanpa mengubah nama file internal atau skema database untuk meminimalisasi risiko _breakage_.
+## Masalah Saat Ini
+Form pada halaman Local Map Rank (`/p/.../gmb-grid`) tidak bisa diklik atau ditgetik pada bagian "Business Name".
+Akar masalahnya adalah kolom "Business Name" menggunakan komponen `usePlacesAutocomplete` yang mengharuskan Google Maps JavaScript API di-load pada halaman tersebut. Karena aplikasi SeoTool.im belum memuat library Google Maps (tidak ada script `<script src="https://maps.googleapis.com/..."></script>`), status library selalu `ready = false`, sehingga kode menetapkan `disabled={true}` secara permanen pada input tersebut. 
 
-## Langkah-langkah:
+Hal ini "mengunci" keseluruhan form, karena field lainnya bergantung pada hasil otomatis dari profil yang dicari.
 
-1. **Ubah Rute (URL)**:
-   - Ganti nama file `src/routes/_project/p/$projectId/sam.tsx` menjadi `src/routes/_project/p/$projectId/jet.tsx`.
-   - Jalankan `tsr generate` agar TanStack Router mengupdate `routeTree.gen.ts`.
-2. **Ubah Navigasi & Label Teks**:
-   - `src/client/navigation/items.ts`: Ubah link navigasi sidebar dari `/sam` ke `/jet` dan ubah label menu menjadi "Jet".
-   - `src/shared/billing-credit-features.ts`: Ubah label tag penggunaan dari "SAM Agent" menjadi "Jet".
-3. **Ubah Copywriting di Halaman Web & Paywall**:
-   - Edit teks pemasaran di `tierHighlights.ts` dan `pricing.tsx` (dari "SAM AI agent" menjadi "Jet AI agent").
-   - Edit halaman panduan `/ai` di `src/routes/_app/ai.tsx`.
-   - Edit teks sambutan (empty state & setup gate) di dalam komponen `SamConversation.tsx`, `SamChat.tsx`, dan `SamSetupGate.tsx`.
-   - Edit juga pesan di chat onboarding (`OnboardingChatParts.tsx`).
+## Solusi
+Karena aplikasi ini dibangun agar tidak memerlukan langganan ke banyak layanan eksternal jika bisa (saat ini menggunakan Leaflet open-source untuk petanya), kita perlu melakukan penyesuaian:
 
-4. **Ubah Kepribadian AI (System Prompt)**:
-   - Modifikasi `samSystemPrompt.ts` dan instruksi awal di `SamChatAgent.ts` & `OnboardingChatAgent.ts` agar AI mengenali dirinya sebagai "Jet, the AI SEO strategist" bukan lagi "Sam".
-5. **Pengujian & Deployment**:
-   - Jalankan verifikasi _Type Checking_ (`npx tsc`).
-   - Format kode menggunakan Prettier.
-   - Commit & Push ke repository.
-   - Lakukan manual deployment ke VPS agar URL `https://seotool.im/p/.../jet` langsung aktif.
+1. **Fallback ke Input Manual**: Hapus `disabled={!ready}` di `GmbAutocomplete.tsx`. Biarkan pengguna tetap bisa mengetikkan nama bisnis secara manual jika API Google Places tidak tersedia. Pengguna dapat mengisi secara manual nama bisnis serta koordinat (Latitude/Longitude) di kolom form lainnya yang sudah tersedia.
+2. **Perbaikan State Z-Index / Leaflet Map**: Peta (Leaflet) di sebelah kanan dapat "bocor" (z-index tumpang tindih) ke atas form jika ukuran layar (grid) bersempitan. Saya akan memastikan form memiliki `z-index` atau `position: relative` yang aman sehingga selalu dapat diklik.
+3. **Mengaktifkan `auto_detect` tanpa Place ID**: Mengatur auto-detect (jika DataForSEO bisa mendeteksi dari string nama) atau memperingatkan jika koordinat manual kurang.
+
+*Pertimbangan untuk masa depan: Jika ingin fitur autocomplete ini berjalan otomatis, Anda harus mendaftarkan Google Maps API Key dan memuatnya secara dinamis.*
+
+## Perubahan Kode
+- `src/client/features/gmb-grid/components/GmbAutocomplete.tsx`:
+  - Ubah `disabled={!ready}` menjadi `disabled={false}`.
+  - Tambahkan state fallback. Ketika user mengetik namun Google Maps tidak merespons (status bukan OK), onChange akan meneruskan nilai `name` ke parent komponen untuk diisi manual pada form `businessName`.
+- `src/client/features/gmb-grid/GmbGridView.tsx`:
+  - Perbaiki z-index peta & form container (`z-10 relative`).
+  - Hapus blokir dari *auto-detect* jika placeId tidak ada, asalkan koordinat dan nama ada.
+
+## Verifikasi
+- Tsc + Linter check
+- Commit, Push dan Deploy ke VPS.

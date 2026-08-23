@@ -18,13 +18,6 @@ import {
 } from "@/serverFunctions/serp-volatility";
 import { VolatilityChart } from "./VolatilityChart";
 
-type TopMover = {
-  keyword: string;
-  currentPosition: number | null;
-  previousPosition: number | null;
-  change: number;
-};
-
 function scoreColor(score: number): string {
   if (score < 20) return "text-success";
   if (score < 50) return "text-warning";
@@ -253,7 +246,7 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
 
               {latest.topMovers && latest.topMovers.length > 0 ? (
                 <ul className="mt-2 space-y-2 text-sm max-h-[160px] overflow-y-auto pr-1">
-                  {latest.topMovers.map((mover: TopMover) => (
+                  {latest.topMovers.map((mover) => (
                     <li
                       key={mover.keyword}
                       className="flex items-center justify-between gap-2 p-2 rounded-lg bg-base-200/40 hover:bg-base-200 transition-colors"

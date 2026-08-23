@@ -214,11 +214,3 @@ export async function addTopupCredits(
 // ---------------------------------------------------------------------------
 // Check depleted
 // ---------------------------------------------------------------------------
-
-/** Returns true if the org has no credits remaining. */
-export async function areCreditsDepleted(
-  organizationId: string,
-): Promise<boolean> {
-  const balance = await getCreditBalance(organizationId);
-  return balance.totalRemaining <= 0;
-}

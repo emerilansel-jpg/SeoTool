@@ -9,12 +9,18 @@ interface MemberEntry {
   user?: { name?: string | null; email?: string | null } | null;
 }
 
+type OrgRole = "member" | "admin" | "owner";
+
+function isOrgRole(value: string): value is OrgRole {
+  return value === "member" || value === "admin" || value === "owner";
+}
+
 export function TeamSection() {
   const { data: session } = useSession();
   const [members, setMembers] = useState<MemberEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState("member");
+  const [inviteRole, setInviteRole] = useState<OrgRole>("member");
   const [isInviting, setIsInviting] = useState(false);
 
   const orgId = session?.session?.activeOrganizationId;
@@ -50,7 +56,7 @@ export function TeamSection() {
     try {
       await authClient.organization.inviteMember({
         email: inviteEmail.trim(),
-        role: inviteRole as "member" | "admin" | "owner",
+        role: inviteRole,
         organizationId: orgId,
       });
       toast.success("Invitation sent.");
@@ -76,6 +82,7 @@ export function TeamSection() {
   }
 
   async function handleRoleChange(memberId: string, role: string) {
+    if (!isOrgRole(role)) return;
     try {
       await authClient.organization.updateMemberRole({
         memberId,
@@ -122,7 +129,9 @@ export function TeamSection() {
         <select
           className="select select-bordered w-28"
           value={inviteRole}
-          onChange={(e) => setInviteRole(e.target.value)}
+          onChange={(e) => {
+            if (isOrgRole(e.target.value)) setInviteRole(e.target.value);
+          }}
         >
           <option value="member">Member</option>
           <option value="admin">Admin</option>

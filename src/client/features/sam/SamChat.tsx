@@ -33,8 +33,8 @@ export function SamChat({
 
   const goToSession = useCallback(
     (sessionId: string) =>
-      void (navigate as any)({
-        to: "/p/$projectId/sam" as any,
+      void navigate({
+        to: "/p/$projectId/jet",
         params: { projectId },
         search: { s: sessionId },
         replace: true,

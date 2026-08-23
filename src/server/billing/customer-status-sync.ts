@@ -36,6 +36,7 @@ export async function syncPaypalCustomerStatus(
   let subscriptionResource: Record<string, unknown>;
 
   if (webhookPayload?.resource) {
+    // oxlint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- PayPal webhook resource is a free-form object; downstream readers guard their own fields
     subscriptionResource = webhookPayload.resource as Record<string, unknown>;
   } else {
     // Fetch subscription from PayPal (for manual sync or if resource is missing)
@@ -83,6 +84,7 @@ async function getSubscriptionForOrg(
 
   try {
     const paypalSub = await paypal.subscriptions.get(sub.paypalSubscriptionId);
+    // oxlint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- paypal.subscriptions.get returns the generic endpoint envelope; downstream readers guard their own fields
     return paypalSub as unknown as Record<string, unknown>;
   } catch (error) {
     console.error(

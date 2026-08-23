@@ -2,15 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { SortingState } from "@tanstack/react-table";
-import {
-  AlertCircle,
-  Globe,
-  Layers,
-  Search,
-  Sparkles,
-  Split,
-  TrendingUp,
-} from "lucide-react";
+import { AlertCircle, Layers, Search, Sparkles, Split } from "lucide-react";
 import { toast } from "sonner";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import {

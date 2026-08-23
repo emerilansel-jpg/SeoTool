@@ -4,16 +4,6 @@ import type { BacklinksRow } from "./backlinksPageTypes";
 import { formatDecimal, formatNumber } from "./backlinksPageUtils";
 import { downloadDisavowFile } from "./disavowExport";
 
-type ToxicData = {
-  links: BacklinksRow[];
-  summary: {
-    totalToxic: number;
-    totalAnalyzed: number;
-    toxicPercentage: number;
-    topToxicDomains: { domain: string; count: number; avgSpamScore: number }[];
-  };
-};
-
 export function ToxicLinksTable({
   rows,
   target,
@@ -48,7 +38,7 @@ export function ToxicLinksTable({
       `# Generated: ${new Date().toISOString().slice(0, 10)}`,
       `# Toxic links: ${rows.length}`,
       "",
-      ...[...domains].sort().map((d) => `domain:${d}`),
+      ...[...domains].toSorted().map((d) => `domain:${d}`),
     ];
     downloadDisavowFile(lines.join("\n") + "\n", target);
   };

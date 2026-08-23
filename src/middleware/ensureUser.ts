@@ -55,6 +55,7 @@ export const ensureUserMiddleware = createMiddleware({
       // Anonymous or expired-session reader: fall through with no user.
     }
     return next({
+      // oxlint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- anonymous readers intentionally carry a partial context; cms-public handlers never read user fields
       context: { ...resolved, project: undefined } as EnsuredUserContext,
     });
   }

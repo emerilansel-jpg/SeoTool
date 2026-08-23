@@ -45,6 +45,7 @@ export function SessionSection() {
     try {
       const result = await authClient.listSessions();
       if (result.data) {
+        // oxlint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- better-auth client session shape is looser than the local view model; rendered fields are optional-chained
         setSessions(result.data as unknown as SessionEntry[]);
       }
     } catch {

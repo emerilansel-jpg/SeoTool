@@ -9,7 +9,6 @@ import {
   SUBSCRIBE_ROUTE,
   creditsToUsd,
 } from "@/shared/billing";
-import type { PlanTier } from "@/shared/plans";
 
 export function FreePlanBanner() {
   const { data: session } = useSession();
@@ -29,7 +28,7 @@ export function FreePlanBanner() {
     return null;
   }
 
-  const planTier = (query.data.planTier as PlanTier) ?? "free";
+  const planTier = query.data.planTier ?? "free";
   const isFreePlan = planTier === "free";
 
   // Estimate remaining credits from tier defaults (actual balance is server-side)

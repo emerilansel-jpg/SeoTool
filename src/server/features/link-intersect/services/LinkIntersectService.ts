@@ -44,7 +44,7 @@ function buildSummary(domains: IntersectDomain[]): IntersectSummary {
 
   let medianBacklinks: number | null = null;
   if (backlinks.length > 0) {
-    const sorted = [...backlinks].sort((a, b) => a - b);
+    const sorted = backlinks.toSorted((a, b) => a - b);
     const mid = Math.floor(sorted.length / 2);
     medianBacklinks =
       sorted.length % 2 === 0

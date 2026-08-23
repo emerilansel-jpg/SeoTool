@@ -1,6 +1,6 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { rankCheckRuns, rankSnapshots, rankTrackingConfigs } from "@/db/schema";
+import { rankCheckRuns } from "@/db/schema";
 import { RankTrackingRepository } from "@/server/features/rank-tracking/repositories/RankTrackingRepository";
 import { SerpVolatilityRepository } from "../repositories/SerpVolatilityRepository";
 import {
@@ -9,6 +9,50 @@ import {
   identifyTopMovers,
 } from "./volatilityCalculation";
 import { AppError } from "@/server/lib/errors";
+
+export type TopMover = {
+  keyword: string;
+  change: number;
+  currentPosition?: number;
+  previousPosition?: number;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/** Parse the persisted topMoversJson column; malformed data degrades to
+ * fewer movers instead of poisoning API responses with `any`. */
+export function parseTopMovers(json: string | null): TopMover[] {
+  if (!json) return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(json);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+  const movers: TopMover[] = [];
+  for (const entry of parsed) {
+    if (!isRecord(entry)) continue;
+    if (typeof entry.keyword !== "string" || typeof entry.change !== "number") {
+      continue;
+    }
+    movers.push({
+      keyword: entry.keyword,
+      change: entry.change,
+      currentPosition:
+        typeof entry.currentPosition === "number"
+          ? entry.currentPosition
+          : undefined,
+      previousPosition:
+        typeof entry.previousPosition === "number"
+          ? entry.previousPosition
+          : undefined,
+    });
+  }
+  return movers;
+}
 
 /**
  * Compute a daily SERP volatility snapshot for a project by comparing the
@@ -94,7 +138,7 @@ async function computeVolatility(projectId: string) {
     previousPosition: number | null;
   }[] = [];
 
-  for (const [configId, { latest, previous }] of runsByConfig) {
+  for (const [, { latest, previous }] of runsByConfig) {
     const latestSnapshots =
       await RankTrackingRepository.getSnapshotsForRun(latest);
     const previousSnapshots =
@@ -141,7 +185,7 @@ async function computeVolatility(projectId: string) {
   const topMovers = identifyTopMovers(keywordChanges);
 
   // Use the most recent date across all configs.
-  const dates = [...runsByConfig.values()].map((r) => r.date).sort();
+  const dates = [...runsByConfig.values()].map((r) => r.date).toSorted();
   const date = dates[dates.length - 1];
 
   const snapshotData = {
@@ -183,7 +227,7 @@ async function getVolatilityTrend(projectId: string, days = 30) {
   return snapshots.map((s) => ({
     ...s,
     category: categorizeVolatility(s.volatilityScore),
-    topMovers: s.topMoversJson ? JSON.parse(s.topMoversJson) : [],
+    topMovers: parseTopMovers(s.topMoversJson),
   }));
 }
 
@@ -198,7 +242,7 @@ async function getLatestVolatility(projectId: string) {
   return {
     ...row,
     category: categorizeVolatility(row.volatilityScore),
-    topMovers: row.topMoversJson ? JSON.parse(row.topMoversJson) : [],
+    topMovers: parseTopMovers(row.topMoversJson),
   };
 }
 

@@ -123,7 +123,7 @@ function countBotTypes(entries: AccessLogEntry[]): BotType[] {
       requests,
       percentage: total > 0 ? Math.round((requests / total) * 1000) / 10 : 0,
     }))
-    .sort((a, b) => b.requests - a.requests);
+    .toSorted((a, b) => b.requests - a.requests);
 }
 
 function identifyBot(userAgent: string): string {
@@ -169,7 +169,7 @@ function countTopUrls(
       requests: [...codeMap.values()].reduce((a, b) => a + b, 0),
       statusCodes: Object.fromEntries(codeMap),
     }))
-    .sort((a, b) => b.requests - a.requests)
+    .toSorted((a, b) => b.requests - a.requests)
     .slice(0, limit);
 }
 

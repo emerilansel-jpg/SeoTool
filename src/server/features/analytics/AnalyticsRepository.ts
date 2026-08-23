@@ -1,7 +1,7 @@
 import { count, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { subscription, usageQuota, organization } from "@/db/schema";
-import { PLAN_TIERS, type PlanTier } from "@/shared/plans";
+import { PLAN_TIERS } from "@/shared/plans";
 import { getEffectivePricesUsd } from "@/server/billing/plan-config";
 
 export interface PlanTierDistribution {
@@ -71,7 +71,7 @@ export const AnalyticsRepository = {
     let paidCount = 0;
 
     for (const row of rows) {
-      const price = prices[row.planTier as PlanTier] ?? 0;
+      const price = prices[row.planTier] ?? 0;
       mrr += price * row.orgCount;
       if (price > 0) paidCount += row.orgCount;
     }

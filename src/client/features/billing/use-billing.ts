@@ -1,7 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { getQuotaStateSummary } from "@/serverFunctions/billing";
 import { useSession } from "@/lib/auth-client";
-import type { PlanTier } from "@/shared/plans";
+import { PLAN_TIERS, type PlanTier } from "@/shared/plans";
+
+function isPlanTier(value: unknown): value is PlanTier {
+  return (
+    typeof value === "string" &&
+    (PLAN_TIERS as readonly string[]).includes(value)
+  );
+}
 
 /** Returns the current plan tier from the local subscription table. */
 export function usePlanTier(): {
@@ -23,7 +30,7 @@ export function usePlanTier(): {
   });
 
   return {
-    planTier: (query.data as PlanTier) ?? "free",
+    planTier: isPlanTier(query.data) ? query.data : "free",
     isLoading: query.isLoading,
     isError: query.isError,
   };

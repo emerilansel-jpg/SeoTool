@@ -1,18 +1,6 @@
 /* eslint-disable max-lines */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  PAYPAL_CREDITS_FEATURE_ID,
-  CREDITS_PER_USD,
-  PAYPAL_TOPUP_CREDITS_FEATURE_ID,
-  SEO_DATA_COST_MARKUP,
-} from "@/shared/billing";
-
-interface TrackCallArg {
-  customerId: string;
-  featureId: string;
-  value: number;
-  properties?: { balanceFeatureId: string };
-}
+import { CREDITS_PER_USD, SEO_DATA_COST_MARKUP } from "@/shared/billing";
 
 const { checkMock, trackMock, getOrCreateMock, isHostedServerAuthModeMock } =
   vi.hoisted(() => ({

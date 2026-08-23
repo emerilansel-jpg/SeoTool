@@ -108,16 +108,17 @@ export function SitemapValidationView({ projectId }: { projectId: string }) {
   );
 }
 
-function ValidationReportView({ report }: { report: ValidationReport }) {
-  const severityIcon = (severity: "error" | "warning" | "info") =>
-    severity === "error" ? (
-      <AlertTriangle className="size-4 text-error" />
-    ) : severity === "warning" ? (
-      <AlertTriangle className="size-4 text-warning" />
-    ) : (
-      <Info className="size-4 text-info" />
-    );
+function severityIcon(severity: "error" | "warning" | "info") {
+  return severity === "error" ? (
+    <AlertTriangle className="size-4 text-error" />
+  ) : severity === "warning" ? (
+    <AlertTriangle className="size-4 text-warning" />
+  ) : (
+    <Info className="size-4 text-info" />
+  );
+}
 
+function ValidationReportView({ report }: { report: ValidationReport }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-px rounded-lg border border-base-300 bg-base-300/70 overflow-hidden">

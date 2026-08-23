@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { buildCacheKey, getCached, setCached } from "@/server/lib/r2-cache";
 import { createDataforseoClient } from "@/server/lib/dataforseo";
 import type { BillingCustomerContext } from "@/server/billing/subscription";
@@ -22,7 +21,7 @@ export async function getKeywordClusters(
     .slice(0, MAX_KEYWORDS)
     .map((k) => k.trim().toLowerCase())
     .filter(Boolean);
-  const sorted = [...limited].sort();
+  const sorted = limited.toSorted();
 
   const cacheKey = await buildCacheKey("keyword-clustering", {
     organizationId: billingCustomer.organizationId,
