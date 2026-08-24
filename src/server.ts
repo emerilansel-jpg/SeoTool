@@ -9,6 +9,7 @@ import { SamSessionRepository } from "@/server/features/sam/SamSessionRepository
 import { runScheduledRankChecks } from "@/server/features/rank-tracking/services/scheduledRankChecks";
 import { runScheduledReports } from "@/server/features/reports/services/scheduledReports";
 import { runScheduledAlerts } from "@/server/features/alerts/services/scheduledAlerts";
+import { runScheduledGmbGridScans } from "@/server/features/gmb-grid/services/scheduledGmbGridScans";
 import { getOrCreateOrganizationCustomer } from "@/server/billing/subscription";
 import { assertFeatureAccess } from "@/server/billing/quota-gate";
 import {
@@ -159,6 +160,7 @@ export { SiteAuditWorkflow } from "./server/workflows/SiteAuditWorkflow";
 export { RankCheckWorkflow } from "./server/workflows/RankCheckWorkflow";
 export { ReportGenerationWorkflow } from "./server/workflows/ReportGenerationWorkflow";
 export { AlertWorkflow } from "./server/workflows/AlertWorkflow";
+export { GmbGridWorkflow } from "./server/workflows/GmbGridWorkflow";
 // Durable Object class for the onboarding strategy chat (Agents SDK).
 export { OnboardingChatAgent } from "./server/features/onboarding/OnboardingChatAgent";
 // Durable Object class for the SAM in-app agent (Agents SDK).
@@ -175,5 +177,6 @@ export default {
     await withPgClient(() => runScheduledRankChecks(env));
     await withPgClient(() => runScheduledReports(env));
     await withPgClient(() => runScheduledAlerts(env));
+    await withPgClient(() => runScheduledGmbGridScans(env));
   },
 };

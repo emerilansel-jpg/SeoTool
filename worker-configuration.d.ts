@@ -10,6 +10,7 @@ interface __BaseEnv_Env {
 	SAM_CHAT: DurableObjectNamespace<import("./src/server").SamChatAgent>;
 	SITE_AUDIT_WORKFLOW: Workflow<Parameters<import("./src/server").SiteAuditWorkflow['run']>[0]['payload']>;
 	RANK_CHECK_WORKFLOW: Workflow<Parameters<import("./src/server").RankCheckWorkflow['run']>[0]['payload']>;
+	GMB_GRID_WORKFLOW: Workflow<Parameters<import("./src/server").GmbGridWorkflow['run']>[0]['payload']>;
 	REPORT_WORKFLOW: Workflow /* ReportGenerationWorkflow */;
 	ALERT_WORKFLOW: Workflow<Parameters<import("./src/server").AlertWorkflow['run']>[0]['payload']>;
 }

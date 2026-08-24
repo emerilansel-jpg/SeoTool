@@ -386,6 +386,7 @@ export async function fetchRankCheckTaskResult(input: {
 export async function fetchLocalSerp(input: {
   keyword: string;
   locationCoordinate?: string;
+  locationCode?: number;
   languageCode: string;
   searchType: "maps" | "local_finder";
   device: "desktop" | "mobile";
@@ -393,6 +394,9 @@ export async function fetchLocalSerp(input: {
   searchPlaces?: boolean;
 }): Promise<DataforseoApiResponse<Record<string, unknown>[]>> {
   const os = input.device === "desktop" ? "windows" : "android";
+  const locationParams = input.locationCoordinate
+    ? { location_coordinate: input.locationCoordinate }
+    : { location_code: input.locationCode };
 
   // Maps and Local Finder return different SDK item models; both carry an index
   // signature, so the typed items assign cleanly to the generic row shape.
@@ -400,7 +404,7 @@ export async function fetchLocalSerp(input: {
     const response = await serpApi().googleMapsLiveAdvanced([
       new SerpGoogleMapsLiveAdvancedRequestInfo({
         keyword: input.keyword,
-        location_coordinate: input.locationCoordinate,
+        ...locationParams,
         language_code: input.languageCode,
         device: input.device,
         os,
@@ -418,7 +422,7 @@ export async function fetchLocalSerp(input: {
   const response = await serpApi().googleLocalFinderLiveAdvanced([
     new SerpGoogleLocalFinderLiveAdvancedRequestInfo({
       keyword: input.keyword,
-      location_coordinate: input.locationCoordinate,
+      ...locationParams,
       language_code: input.languageCode,
       device: input.device,
       os,

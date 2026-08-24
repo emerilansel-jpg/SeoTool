@@ -271,6 +271,7 @@ function formatFeatureName(feature: string): string {
     keyword_search: "Keyword Searches (Labs)",
     saved_keywords: "Saved Keywords",
     rank_tracking: "Tracked Keywords",
+    local_map_points: "Local Map Grid Points",
     backlink_check: "Backlink Checks",
     site_audit: "Site Audits",
     audit_pages: "Max Pages per Audit",

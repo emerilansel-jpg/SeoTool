@@ -38,6 +38,9 @@ export const fetchBingRankCheckTaskResult: DataforseoSections["fetchBingRankChec
   async (input) =>
     (await loadDataforseoSections()).fetchBingRankCheckTaskResult(input);
 
+export const fetchMapsTaskResult: DataforseoSections["fetchMapsTaskResult"] =
+  async (input) => (await loadDataforseoSections()).fetchMapsTaskResult(input);
+
 export type {
   LabsKeywordDataItem,
   DomainRankedKeywordItem,
@@ -52,6 +55,12 @@ export type {
   RankCheckTaskInput,
   PostedRankCheckTask,
 } from "@/server/lib/dataforseo/serp";
+
+export type {
+  MapsTaskInput,
+  PostedMapsTask,
+  MapsTaskOutcome,
+} from "@/server/lib/dataforseo/maps-serp";
 
 export type {
   AnchorsItem,

@@ -147,9 +147,6 @@ importers:
       tldts:
         specifier: ^7.0.25
         version: 7.0.25
-      use-places-autocomplete:
-        specifier: ^4.0.1
-        version: 4.0.1(react@19.2.4)
       zod:
         specifier: ^4.1.12
         version: 4.3.6
@@ -5826,10 +5823,6 @@ packages:
     peerDependencies:
       browserslist: '>= 4.21.0'
 
-  use-places-autocomplete@4.0.1:
-    resolution: {integrity: sha512-AybOR/qzXcdaMCGSFveycfL3kztwseAOdagbYoJD8c3amll+gEiPmUkSNhYNUEBqbR+JmJG6/oBTRgihNbE+1A==}
-    peerDependencies:
-      react: '>= 16.8.0'
 
   use-sync-external-store@1.6.0:
     resolution: {integrity: sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==}
@@ -11733,10 +11726,6 @@ snapshots:
       browserslist: 4.28.4
       escalade: 3.2.0
       picocolors: 1.1.1
-
-  use-places-autocomplete@4.0.1(react@19.2.4):
-    dependencies:
-      react: 19.2.4
 
   use-sync-external-store@1.6.0(react@19.2.4):
     dependencies:

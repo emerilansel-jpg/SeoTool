@@ -423,57 +423,119 @@ export const backlinkSnapshots = sqliteTable(
   ],
 );
 
-export const gmbGridConfigs = sqliteTable("gmb_grid_configs", {
-  id: text("id").primaryKey(),
-  projectId: text("project_id")
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
-  businessName: text("business_name").notNull(),
-  placeId: text("place_id"),
-  keyword: text("keyword").notNull(),
-  centerLat: real("center_lat").notNull(),
-  centerLng: real("center_lng").notNull(),
-  gridSize: integer("grid_size").notNull(),
-  radiusMeters: integer("radius_meters").notNull(),
-  scheduleInterval: text("schedule_interval", {
-    enum: ["weekly", "monthly", "manual"],
-  })
-    .notNull()
-    .default("weekly"),
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  createdAt: text("created_at")
-    .notNull()
-    .default(sql`(current_timestamp)`),
-});
+export const gmbGridConfigs = sqliteTable(
+  "gmb_grid_configs",
+  {
+    id: text("id").primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    businessName: text("business_name").notNull(),
+    placeId: text("place_id").notNull(),
+    cid: text("cid"),
+    address: text("address"),
+    keyword: text("keyword").notNull(),
+    centerLat: real("center_lat").notNull(),
+    centerLng: real("center_lng").notNull(),
+    gridSize: integer("grid_size").notNull(),
+    radiusMeters: integer("radius_meters").notNull(),
+    languageCode: text("language_code").notNull().default("en"),
+    device: text("device", { enum: ["desktop", "mobile"] })
+      .notNull()
+      .default("mobile"),
+    mapZoom: integer("map_zoom").notNull().default(15),
+    scheduleInterval: text("schedule_interval", {
+      enum: ["weekly", "monthly", "manual"],
+    })
+      .notNull()
+      .default("manual"),
+    nextCheckAt: text("next_check_at"),
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`(current_timestamp)`),
+    updatedAt: text("updated_at")
+      .notNull()
+      .default(sql`(current_timestamp)`),
+  },
+  (table) => [
+    index("gmb_grid_configs_project_created_idx").on(
+      table.projectId,
+      table.createdAt,
+    ),
+    index("gmb_grid_configs_active_next_idx").on(
+      table.isActive,
+      table.nextCheckAt,
+    ),
+  ],
+);
 
-export const gmbGridRuns = sqliteTable("gmb_grid_runs", {
-  id: text("id").primaryKey(),
-  configId: text("config_id")
-    .notNull()
-    .references(() => gmbGridConfigs.id, { onDelete: "cascade" }),
-  status: text("status", {
-    enum: ["pending", "running", "completed", "failed"],
-  })
-    .notNull()
-    .default("pending"),
-  startedAt: text("started_at")
-    .notNull()
-    .default(sql`(current_timestamp)`),
-  completedAt: text("completed_at"),
-});
+export const gmbGridRuns = sqliteTable(
+  "gmb_grid_runs",
+  {
+    id: text("id").primaryKey(),
+    configId: text("config_id")
+      .notNull()
+      .references(() => gmbGridConfigs.id, { onDelete: "cascade" }),
+    status: text("status", {
+      enum: ["pending", "running", "completed", "partial", "failed"],
+    })
+      .notNull()
+      .default("pending"),
+    trigger: text("trigger", { enum: ["manual", "scheduled"] })
+      .notNull()
+      .default("manual"),
+    totalPoints: integer("total_points").notNull().default(0),
+    completedPoints: integer("completed_points").notNull().default(0),
+    failedPoints: integer("failed_points").notNull().default(0),
+    foundPoints: integer("found_points").notNull().default(0),
+    solv: real("solv"),
+    averageRank: real("average_rank"),
+    costUsd: real("cost_usd").notNull().default(0),
+    errorCode: text("error_code"),
+    errorMessage: text("error_message"),
+    startedAt: text("started_at")
+      .notNull()
+      .default(sql`(current_timestamp)`),
+    completedAt: text("completed_at"),
+  },
+  (table) => [
+    index("gmb_grid_runs_config_started_idx").on(
+      table.configId,
+      table.startedAt,
+    ),
+    uniqueIndex("gmb_grid_runs_one_active_per_config_idx")
+      .on(table.configId)
+      .where(sql`${table.status} IN ('pending', 'running')`),
+  ],
+);
 
-export const gmbGridSnapshots = sqliteTable("gmb_grid_snapshots", {
-  id: text("id").primaryKey(),
-  runId: text("run_id")
-    .notNull()
-    .references(() => gmbGridRuns.id, { onDelete: "cascade" }),
-  lat: real("lat").notNull(),
-  lng: real("lng").notNull(),
-  gridRow: integer("grid_row").notNull(),
-  gridCol: integer("grid_col").notNull(),
-  rank: integer("rank"),
-  taskId: text("task_id"),
-  status: text("status", { enum: ["pending", "completed", "failed"] })
-    .notNull()
-    .default("pending"),
-});
+export const gmbGridSnapshots = sqliteTable(
+  "gmb_grid_snapshots",
+  {
+    id: text("id").primaryKey(),
+    runId: text("run_id")
+      .notNull()
+      .references(() => gmbGridRuns.id, { onDelete: "cascade" }),
+    lat: real("lat").notNull(),
+    lng: real("lng").notNull(),
+    gridRow: integer("grid_row").notNull(),
+    gridCol: integer("grid_col").notNull(),
+    rank: integer("rank"),
+    taskId: text("task_id"),
+    status: text("status", { enum: ["pending", "completed", "failed"] })
+      .notNull()
+      .default("pending"),
+    errorCode: text("error_code"),
+    errorMessage: text("error_message"),
+    checkedAt: text("checked_at"),
+  },
+  (table) => [
+    uniqueIndex("gmb_grid_snapshots_run_grid_idx").on(
+      table.runId,
+      table.gridRow,
+      table.gridCol,
+    ),
+    index("gmb_grid_snapshots_task_idx").on(table.taskId),
+  ],
+);

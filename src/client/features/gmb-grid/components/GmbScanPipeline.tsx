@@ -1,108 +1,126 @@
-import { Loader2, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2, XCircle } from "lucide-react";
 
-export interface GmbSnapshotLike {
+interface RunLike {
+  status: "pending" | "running" | "completed" | "partial" | "failed";
+  totalPoints: number;
+  completedPoints: number;
+  failedPoints: number;
+  foundPoints: number;
+  solv: number | null;
+  averageRank: number | null;
+  costUsd: number;
+  errorMessage: string | null;
+}
+
+interface SnapshotLike {
   id: string;
   status: string;
   rank: number | null;
 }
 
-interface GmbScanPipelineProps {
-  /** Mutation is in flight (server still scanning synchronously). */
-  isScanning: boolean;
-  /** Latest poll result from the run being viewed. */
-  runStatus?: "pending" | "running" | "completed" | "failed";
-  snapshots?: GmbSnapshotLike[];
-  /** Human error message when the scan request itself failed. */
-  error?: string | null;
-}
-
-/**
- * Explains the scan pipeline to the user and shows live progress:
- * submit -> DataForSEO live scan per grid point -> ranked heatmap.
- */
 export function GmbScanPipeline({
-  isScanning,
-  runStatus,
+  run,
   snapshots,
-  error,
-}: GmbScanPipelineProps) {
-  if (error) {
+}: {
+  run: RunLike;
+  snapshots: SnapshotLike[];
+}) {
+  const settled = snapshots.filter(
+    (snapshot) => snapshot.status !== "pending",
+  ).length;
+  const total = run.totalPoints || snapshots.length;
+  const percentage = total > 0 ? Math.round((settled / total) * 100) : 0;
+
+  if (run.status === "pending" || run.status === "running") {
     return (
-      <div className="mb-4 p-4 rounded-lg bg-error/10 border border-error/30 text-sm flex items-start gap-3">
-        <XCircle className="w-5 h-5 text-error shrink-0 mt-0.5" />
-        <div>
-          <p className="font-semibold">Scan failed to start</p>
-          <p className="text-base-content/70">{error}</p>
+      <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm">
+        <div className="flex items-center gap-2 font-semibold">
+          <Loader2 className="size-4 animate-spin text-primary" />
+          {run.status === "pending"
+            ? "Preparing queued map checks…"
+            : "Collecting Google Maps results…"}
+          <span className="ml-auto font-normal text-base-content/60">
+            {settled}/{total} points
+          </span>
+        </div>
+        <progress
+          className="progress progress-primary mt-3 w-full"
+          value={percentage}
+          max={100}
+        />
+        <p className="mt-2 text-xs text-base-content/60">
+          Results are processed in the background. You may leave this page and
+          reopen the scan from Recent scans.
+        </p>
+      </div>
+    );
+  }
+
+  if (run.status === "failed") {
+    return (
+      <div className="rounded-xl border border-error/30 bg-error/10 p-4 text-sm">
+        <div className="flex items-start gap-3">
+          <XCircle className="mt-0.5 size-5 shrink-0 text-error" />
+          <div>
+            <p className="font-semibold">Scan failed</p>
+            <p className="text-base-content/70">
+              {run.errorMessage ||
+                "No grid points could be collected. Check provider access, quota, and credits, then retry."}
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
-  const total = snapshots?.length ?? 0;
-  const done = snapshots?.filter((s) => s.status !== "pending").length ?? 0;
-  const ranked = snapshots?.filter((s) => s.rank !== null) ?? [];
-  const avgRank = ranked.length
-    ? Math.round(
-        (ranked.reduce((sum, s) => sum + (s.rank ?? 0), 0) / ranked.length) *
-          10,
-      ) / 10
-    : null;
-  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-
-  if (runStatus === "failed" && !isScanning) {
-    return (
-      <div className="mb-4 p-4 rounded-lg bg-warning/10 border border-warning/30 text-sm flex items-start gap-3">
-        <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-        <div>
-          <p className="font-semibold">Scan failed</p>
-          <p className="text-base-content/70">
-            The grid scan could not be completed. Check your DataForSEO
-            connection or credits, then try again.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (runStatus === "completed" && !isScanning) {
-    return (
-      <div className="mb-4 p-4 rounded-lg bg-success/10 border border-success/30 text-sm flex items-start gap-3">
-        <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />
+  const partial = run.status === "partial";
+  return (
+    <div
+      className={`rounded-xl border p-4 text-sm ${
+        partial
+          ? "border-warning/30 bg-warning/10"
+          : "border-success/30 bg-success/10"
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        {partial ? (
+          <AlertTriangle className="mt-0.5 size-5 shrink-0 text-warning" />
+        ) : (
+          <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" />
+        )}
         <div className="flex-1">
           <p className="font-semibold">
-            Scan complete — found in {ranked.length} of {total} grid points
+            {partial ? "Scan completed with some errors" : "Scan complete"}
           </p>
           <p className="text-base-content/70">
-            {avgRank !== null
-              ? `Average local rank: #${avgRank}. Green means top 3, yellow means 4-10, red means 11+, grey means not found in the top 20.`
-              : "The business was not found in the top 20 Maps results at any grid point. Try a broader keyword or check the exact Google Business Profile name."}
+            Found in {run.foundPoints} of {total} points
+            {run.failedPoints > 0 ? ` · ${run.failedPoints} failed` : ""}.
           </p>
+          <div className="mt-3 grid grid-cols-3 gap-3">
+            <Metric
+              label="SoLV (top 3)"
+              value={run.solv == null ? "—" : `${run.solv}%`}
+            />
+            <Metric
+              label="Average rank"
+              value={run.averageRank == null ? "—" : `#${run.averageRank}`}
+            />
+            <Metric
+              label="Provider cost"
+              value={`$${run.costUsd.toFixed(4)}`}
+            />
+          </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
-  // running or scanning
+function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="mb-4 p-4 rounded-lg bg-base-200/60 border border-base-300 text-sm">
-      <div className="flex items-center gap-2 font-semibold">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        {isScanning
-          ? "Scanning grid points with live Google Maps data…"
-          : "Waiting for scan results…"}
-        <span className="ml-auto text-base-content/70 font-normal">
-          {done}/{total} points
-        </span>
-      </div>
-      <progress
-        className="progress progress-primary w-full mt-2"
-        value={pct}
-        max={100}
-      />
-      <p className="text-xs text-base-content/60 mt-1">
-        Each grid point runs a separate Google Maps search for your keyword. A{" "}
-        {total}-point grid usually finishes in under a minute.
-      </p>
+    <div className="rounded-lg bg-base-100/70 p-2">
+      <p className="text-xs text-base-content/60">{label}</p>
+      <p className="font-semibold">{value}</p>
     </div>
   );
 }

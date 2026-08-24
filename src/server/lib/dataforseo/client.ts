@@ -53,12 +53,15 @@ function meter<I, T>(
     sections: DataforseoSections,
   ) => (input: I) => Promise<DataforseoApiResponse<T>>,
   defaultFeature?: CreditFeature,
-): (input: I & { creditFeature?: CreditFeature }) => Promise<T> {
+): (
+  input: I & { creditFeature?: CreditFeature; quotaUnits?: number },
+) => Promise<T> {
   return (input) =>
     meterDataforseoCall(
       customer,
       async () => pick(await loadDataforseoSections())(input),
       input.creditFeature ?? defaultFeature,
+      input.quotaUnits,
     );
 }
 
@@ -123,6 +126,7 @@ export function createDataforseoClient(customer: BillingCustomerContext) {
         (s) => s.postRankCheckTasks,
         "rank_tracking",
       ),
+      mapsTaskPost: meter(customer, (s) => s.postMapsTasks, "local_map_rank"),
       local: meter(customer, (s) => s.fetchLocalSerp, "local_seo"),
       bingRankCheck: meter(
         customer,
@@ -173,6 +177,7 @@ async function meterDataforseoCall<T>(
   customer: BillingCustomerContext,
   execute: () => Promise<DataforseoApiResponse<T>>,
   creditFeature?: CreditFeature,
+  quotaUnits = 1,
 ): Promise<T> {
   const isHostedMode = await isHostedServerAuthMode();
 
@@ -191,7 +196,7 @@ async function meterDataforseoCall<T>(
     creditFeature ?? mapDataforseoPathToCreditFeature([]);
   const quotaFeature = creditFeatureToQuotaFeature(creditFeatureForQuota);
   if (quotaFeature && quotaFeature !== "rank_tracking") {
-    await assertFeatureQuota(customer.organizationId, quotaFeature);
+    await assertFeatureQuota(customer.organizationId, quotaFeature, quotaUnits);
   }
 
   const { monthlyRemaining } = await assertUsageCreditsAvailable(

@@ -68,6 +68,7 @@ export const QUOTA_FEATURES = [
   "keyword_search", // keyword research searches (daily)
   "saved_keywords", // saved keywords count (gauge)
   "rank_tracking", // tracked keywords count (gauge)
+  "local_map_points", // geo-grid points checked (daily)
   "backlink_check", // backlink profile lookups (daily)
   "site_audit", // audit launches (monthly)
   "audit_pages", // max pages per audit (gauge, per-audit cap)
@@ -90,6 +91,7 @@ export const QUOTA_FEATURE_PERIODS: Record<QuotaFeature, QuotaPeriod> = {
   keyword_search: "daily",
   saved_keywords: "gauge",
   rank_tracking: "gauge",
+  local_map_points: "daily",
   backlink_check: "daily",
   site_audit: "monthly",
   audit_pages: "gauge",
@@ -108,6 +110,7 @@ export const PLAN_LIMITS: Record<PlanTier, Record<QuotaFeature, number>> = {
     keyword_search: 10,
     saved_keywords: 50,
     rank_tracking: 0,
+    local_map_points: 0,
     backlink_check: 0,
     site_audit: 1,
     audit_pages: 50,
@@ -121,6 +124,7 @@ export const PLAN_LIMITS: Record<PlanTier, Record<QuotaFeature, number>> = {
     keyword_search: 100,
     saved_keywords: 500,
     rank_tracking: 50,
+    local_map_points: 100,
     backlink_check: 10,
     site_audit: 3,
     audit_pages: 500,
@@ -134,6 +138,7 @@ export const PLAN_LIMITS: Record<PlanTier, Record<QuotaFeature, number>> = {
     keyword_search: 500,
     saved_keywords: 5000,
     rank_tracking: 500,
+    local_map_points: 500,
     backlink_check: 100,
     site_audit: 10,
     audit_pages: 5000,
@@ -147,6 +152,7 @@ export const PLAN_LIMITS: Record<PlanTier, Record<QuotaFeature, number>> = {
     keyword_search: Number.POSITIVE_INFINITY,
     saved_keywords: Number.POSITIVE_INFINITY,
     rank_tracking: 5000,
+    local_map_points: 2500,
     backlink_check: 500,
     site_audit: 50,
     audit_pages: 10000,
@@ -210,6 +216,8 @@ export function creditFeatureToQuotaFeature(
     case "domain_overview":
     case "local_seo":
       return "keyword_search";
+    case "local_map_rank":
+      return "local_map_points";
     case "backlinks":
       return "backlink_check";
     case "site_audit":

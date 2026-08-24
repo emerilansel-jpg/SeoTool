@@ -7,6 +7,7 @@ export type CreditFeature =
   | "ai_citations"
   | "ai_prompt_responses"
   | "local_seo"
+  | "local_map_rank"
   | "onboarding"
   | "agent"
   | "content_intelligence";
@@ -21,6 +22,7 @@ const CREDIT_FEATURE_LABELS: Record<string, string> = {
   ai_prompt_responses: "AI Prompt Responses",
   ai_search: "AI Search",
   local_seo: "Local SEO",
+  local_map_rank: "Local Map Rank Tracker",
   onboarding: "Onboarding",
   agent: "Jet AI Agent",
   content_intelligence: "Content Intelligence",
@@ -43,8 +45,11 @@ export function mapDataforseoPathToCreditFeature(
     case "backlinks":
       return "backlinks";
     case "serp":
+      if (normalizedPath[2] === "google" && normalizedPath[3] === "maps") {
+        return "local_map_rank";
+      }
       return normalizedPath[2] === "google" &&
-        ["maps", "local_finder"].includes(normalizedPath[3])
+        normalizedPath[3] === "local_finder"
         ? "local_seo"
         : "keyword_research";
     case "ai_optimization":

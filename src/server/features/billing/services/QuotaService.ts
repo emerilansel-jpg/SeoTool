@@ -257,6 +257,7 @@ export async function getQuotaState(organizationId: string): Promise<
     "keyword_search",
     "saved_keywords",
     "rank_tracking",
+    "local_map_points",
     "backlink_check",
     "site_audit",
     "audit_pages",

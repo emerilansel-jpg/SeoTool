@@ -41,7 +41,8 @@ function MapBoundsUpdater({
   return null;
 }
 
-export const getRankColor = (rank: number | null) => {
+export const getRankColor = (rank: number | null, status?: string) => {
+  if (status === "failed") return "#374151";
   if (rank === null) return "#9ca3af";
   if (rank <= 3) return "#22c55e";
   if (rank <= 10) return "#eab308";
@@ -101,7 +102,7 @@ export function GmbMap({
               pathOptions={{
                 color: "white",
                 weight: 2,
-                fillColor: getRankColor(snap.rank),
+                fillColor: getRankColor(snap.rank, snap.status),
                 fillOpacity: 0.9,
               }}
             >
@@ -155,6 +156,13 @@ export function GmbMap({
               style={{ background: "#9ca3af" }}
             />{" "}
             Not found
+          </span>
+          <span className="flex items-center gap-2">
+            <span
+              className="w-3 h-3 rounded-full"
+              style={{ background: "#374151" }}
+            />{" "}
+            Provider error
           </span>
         </div>
       </div>

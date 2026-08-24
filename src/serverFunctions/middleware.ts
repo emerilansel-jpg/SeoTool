@@ -76,6 +76,13 @@ export function requireProjectRole(minRole: Role) {
   return createMiddleware({ type: "function" }).server(
     async ({ next, context }) => {
       const authenticatedContext = getAuthenticatedContext(context);
+      // The local Playwright harness creates an isolated project context but
+      // deliberately has no persisted organization-membership row. Auth is
+      // already bypassed in this explicit test-only mode, so role lookup must
+      // follow the same boundary for mutating feature E2E coverage.
+      if (import.meta.env.BYPASS_AUTH === "true") {
+        return next({ context: authenticatedContext });
+      }
       const role =
         (await getMemberRole(
           authenticatedContext.userId,

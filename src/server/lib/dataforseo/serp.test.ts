@@ -10,6 +10,10 @@ import {
   extractSerpItems,
   type SerpLiveItem,
 } from "@/server/lib/dataforseo/serp";
+import {
+  fetchMapsTaskResult,
+  postMapsTasks,
+} from "@/server/lib/dataforseo/maps-serp";
 
 function parseDataforseoRequestBody(init: RequestInit | undefined): unknown {
   const body = init?.body;
@@ -175,6 +179,127 @@ describe("rank check task queue", () => {
         serpFeatures: ["organic"],
       },
     });
+  });
+});
+
+describe("Google Maps task queue", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("posts multiple standard tasks with zoom coordinates and maps ids from data.tag", async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({
+        status_code: 20000,
+        tasks: [
+          {
+            id: "maps-a",
+            status_code: 20100,
+            cost: 0.0006,
+            data: { tag: "snapshot-a" },
+          },
+          {
+            id: "maps-b",
+            status_code: 20100,
+            cost: 0.0006,
+            data: { tag: "snapshot-b" },
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await postMapsTasks({
+      tasks: [
+        { snapshotId: "snapshot-a", keyword: "dentist", lat: -6.2, lng: 106.8 },
+        {
+          snapshotId: "snapshot-b",
+          keyword: "dentist",
+          lat: -6.21,
+          lng: 106.81,
+        },
+      ],
+      languageCode: "id",
+      device: "mobile",
+      zoom: 15,
+      depth: 20,
+    });
+
+    expect(
+      fetchMock.mock.calls.map(([url]) =>
+        typeof url === "string" || url instanceof URL
+          ? url.toString()
+          : url.url,
+      ),
+    ).toEqual(["https://api.dataforseo.com/v3/serp/google/maps/task_post"]);
+    expect(
+      parseDataforseoRequestBody(fetchMock.mock.calls[0]?.[1]),
+    ).toMatchObject([
+      { location_coordinate: "-6.2,106.8,15z", tag: "snapshot-a" },
+      { location_coordinate: "-6.21,106.81,15z", tag: "snapshot-b" },
+    ]);
+    expect(result.data).toEqual({
+      tasks: [
+        {
+          snapshotId: "snapshot-a",
+          keyword: "dentist",
+          lat: -6.2,
+          lng: 106.8,
+          taskId: "maps-a",
+        },
+        {
+          snapshotId: "snapshot-b",
+          keyword: "dentist",
+          lat: -6.21,
+          lng: 106.81,
+          taskId: "maps-b",
+        },
+      ],
+      costUsd: 0.0012,
+    });
+  });
+
+  it("uses exact place id when collecting the rank", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn<typeof fetch>().mockResolvedValue(
+        Response.json({
+          status_code: 20000,
+          tasks: [
+            {
+              id: "maps-a",
+              status_code: 20000,
+              result: [
+                {
+                  items: [
+                    {
+                      type: "maps_search",
+                      title: "Acme",
+                      place_id: "other",
+                      rank_group: 1,
+                    },
+                    {
+                      type: "maps_search",
+                      title: "Acme",
+                      place_id: "target",
+                      rank_group: 5,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ),
+    );
+
+    await expect(
+      fetchMapsTaskResult({
+        taskId: "maps-a",
+        placeId: "target",
+        businessName: "Acme",
+      }),
+    ).resolves.toEqual({ status: "completed", rank: 5 });
   });
 });
 

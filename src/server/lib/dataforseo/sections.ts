@@ -48,6 +48,11 @@ export {
 } from "@/server/lib/dataforseo/serp";
 
 export {
+  fetchMapsTaskResult,
+  postMapsTasks,
+} from "@/server/lib/dataforseo/maps-serp";
+
+export {
   fetchBingRankCheckSerp,
   fetchBingRankCheckTaskResult,
   postBingRankCheckTasks,

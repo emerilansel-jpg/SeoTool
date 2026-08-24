@@ -225,6 +225,13 @@
       "when": 1787356367519,
       "tag": "0031_nappy_elektra",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1787560001000,
+      "tag": "0032_gmb_grid_reliability",
+      "breakpoints": true
     }
   ]
 }

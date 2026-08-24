@@ -2,19 +2,25 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CREDITS_PER_USD, SEO_DATA_COST_MARKUP } from "@/shared/billing";
 
-const { checkMock, trackMock, getOrCreateMock, isHostedServerAuthModeMock } =
-  vi.hoisted(() => ({
-    checkMock: vi.fn(),
-    trackMock:
-      vi.fn<
-        (
-          organizationId: string,
-          amount: number,
-        ) => { monthlyDeducted: number; topupDeducted: number }
-      >(),
-    getOrCreateMock: vi.fn(),
-    isHostedServerAuthModeMock: vi.fn(),
-  }));
+const {
+  checkMock,
+  trackMock,
+  getOrCreateMock,
+  isHostedServerAuthModeMock,
+  quotaMock,
+} = vi.hoisted(() => ({
+  checkMock: vi.fn(),
+  trackMock:
+    vi.fn<
+      (
+        organizationId: string,
+        amount: number,
+      ) => { monthlyDeducted: number; topupDeducted: number }
+    >(),
+  getOrCreateMock: vi.fn(),
+  isHostedServerAuthModeMock: vi.fn(),
+  quotaMock: vi.fn().mockResolvedValue(undefined),
+}));
 
 vi.mock("cloudflare:workers", () => ({
   waitUntil: vi.fn(),
@@ -36,7 +42,7 @@ vi.mock("@/server/lib/runtime-env", () => ({
 }));
 
 vi.mock("@/server/billing/quota-gate", () => ({
-  assertFeatureQuota: vi.fn().mockResolvedValue(undefined),
+  assertFeatureQuota: quotaMock,
   assertGaugeFeature: vi.fn().mockResolvedValue(undefined),
   assertFeatureAccess: vi.fn().mockResolvedValue(undefined),
 }));
@@ -79,6 +85,10 @@ vi.mock("@/server/lib/dataforseo/serp", () => ({
   postRankCheckTasks: vi.fn(),
   fetchLocalSerp: vi.fn(),
 }));
+vi.mock("@/server/lib/dataforseo/maps-serp", () => ({
+  postMapsTasks: vi.fn(),
+  fetchMapsTaskResult: vi.fn(),
+}));
 vi.mock("@/server/lib/dataforseo/business", () => ({
   fetchBusinessListingsSearch: vi.fn(),
   fetchQuestionsAnswers: vi.fn(),
@@ -107,6 +117,7 @@ import {
 } from "@/server/lib/dataforseo/client";
 import { DataforseoChargedTaskError } from "@/server/lib/dataforseo/envelope";
 import { fetchBacklinksSummary } from "@/server/lib/dataforseo/backlinks";
+import { postMapsTasks } from "@/server/lib/dataforseo/maps-serp";
 
 const billingCustomer = {
   organizationId: "org_123",
@@ -173,6 +184,32 @@ describe("meterDataforseoCall with split balances", () => {
 
     expect(checkMock).toHaveBeenCalledTimes(1);
     expect(checkMock).toHaveBeenCalledWith("org_123");
+  });
+
+  it("charges the dedicated daily quota by Maps grid point", async () => {
+    setupHostedMode();
+    mockBalances(5000, 3000);
+    vi.mocked(postMapsTasks).mockResolvedValue({
+      data: { tasks: [], costUsd: 0.0294 },
+      billing: {
+        costUsd: 0.0294,
+        path: ["v3", "serp", "google", "maps", "task_post"],
+      },
+    });
+
+    const client = createDataforseoClient(billingCustomer);
+    await client.serp.mapsTaskPost({
+      tasks: [
+        { snapshotId: "snapshot-a", keyword: "dentist", lat: -6.2, lng: 106.8 },
+      ],
+      languageCode: "id",
+      device: "mobile",
+      zoom: 15,
+      depth: 20,
+      quotaUnits: 49,
+    });
+
+    expect(quotaMock).toHaveBeenCalledWith("org_123", "local_map_points", 49);
   });
 
   const RAW_COST = 0.05;
@@ -489,7 +526,7 @@ describe("mapDataforseoPathToCreditFeature", () => {
         "live",
         "advanced",
       ]),
-    ).toBe("local_seo");
+    ).toBe("local_map_rank");
     expect(
       mapDataforseoPathToCreditFeature([
         "v3",

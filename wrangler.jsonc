@@ -31,6 +31,11 @@
       "class_name": "RankCheckWorkflow",
     },
     {
+      "name": "gmb-grid-workflow",
+      "binding": "GMB_GRID_WORKFLOW",
+      "class_name": "GmbGridWorkflow",
+    },
+    {
       "name": "report-generation-workflow",
       "binding": "REPORT_WORKFLOW",
       "class_name": "ReportGenerationWorkflow",
