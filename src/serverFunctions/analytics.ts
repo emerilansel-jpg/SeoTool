@@ -8,11 +8,18 @@ import {
   AnalyticsRepository,
   type AnalyticsOverview,
 } from "@/server/features/analytics/AnalyticsRepository";
+import { captureServerError } from "@/server/lib/posthog";
 
 export const getAnalyticsOverview = createServerFn({ method: "POST" })
   .middleware([requireAuthenticatedContext, requirePlatformAdmin])
   .handler(async () => {
-    return AnalyticsRepository.getOverview();
+    try {
+      return await AnalyticsRepository.getOverview();
+    } catch (error) {
+      console.error("Admin analytics overview failed", error);
+      await captureServerError(error, { source: "admin_analytics_overview" });
+      throw error;
+    }
   });
 
 /** Lightweight check for route guards — returns true if the current user is a

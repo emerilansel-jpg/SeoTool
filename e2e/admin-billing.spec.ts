@@ -81,6 +81,14 @@ test.describe("Admin and billing smoke coverage", () => {
       await expect(
         page.getByRole("link", { name: "API Keys", exact: true }),
       ).toBeVisible();
+      if (section.path === "/admin") {
+        await expect(
+          page.getByText("Total Orgs", { exact: true }),
+        ).toBeVisible();
+        await expect(
+          page.getByText("Unable to load analytics data.", { exact: true }),
+        ).toHaveCount(0);
+      }
       if (section.path === "/admin/api-keys") {
         await expect(
           page.getByRole("button", { name: "Test PayPal configuration" }),

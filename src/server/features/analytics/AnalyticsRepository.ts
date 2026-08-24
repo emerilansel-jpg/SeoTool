@@ -65,7 +65,8 @@ export const AnalyticsRepository = {
         orgCount: count(),
       })
       .from(subscription)
-      .where(sql`${subscription.status} = 'active'`);
+      .where(sql`${subscription.status} = 'active'`)
+      .groupBy(subscription.planTier);
 
     let mrr = 0;
     let paidCount = 0;

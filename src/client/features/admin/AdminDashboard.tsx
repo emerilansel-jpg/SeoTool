@@ -32,7 +32,7 @@ const TIER_BADGE_CLASS: Record<string, string> = {
 export function AdminDashboard() {
   const getOverview = useServerFn(getAnalyticsOverview);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["analytics-overview"],
     queryFn: () => getOverview(),
   });
@@ -54,8 +54,16 @@ export function AdminDashboard() {
 
   if (!data) {
     return (
-      <div className="p-8 text-center text-base-content/60">
-        Unable to load analytics data.
+      <div className="p-8 text-center" role="alert">
+        <p className="text-base-content/60">Unable to load analytics data.</p>
+        <button
+          type="button"
+          className="btn btn-outline btn-sm mt-4"
+          disabled={isFetching}
+          onClick={() => void refetch()}
+        >
+          {isFetching ? "Retrying..." : "Retry"}
+        </button>
       </div>
     );
   }
