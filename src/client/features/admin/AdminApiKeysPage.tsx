@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { KeyRound, Pencil, Trash2 } from "lucide-react";
+import { CircleCheck, KeyRound, Pencil, RefreshCw, Trash2 } from "lucide-react";
 import {
   getAdminSettings,
   removeAdminSetting,
   saveAdminSetting,
+  testPaypalConfiguration,
 } from "@/serverFunctions/admin-settings";
 import type { AdminSettingStatus } from "@/server/features/admin/services/AdminSettingsService";
 import { Modal } from "@/client/components/Modal";
@@ -22,9 +23,11 @@ export function AdminApiKeysPage() {
   const getSettings = useServerFn(getAdminSettings);
   const save = useServerFn(saveAdminSetting);
   const remove = useServerFn(removeAdminSetting);
+  const testPaypal = useServerFn(testPaypalConfiguration);
   const queryClient = useQueryClient();
   const [editState, setEditState] = useState<EditState | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [paypalTestResult, setPaypalTestResult] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-settings"],
@@ -55,6 +58,21 @@ export function AdminApiKeysPage() {
     },
     onError: (error) => {
       toast.error(getStandardErrorMessage(error, "Could not remove override."));
+    },
+  });
+
+  const paypalTestMutation = useMutation({
+    mutationFn: () => testPaypal(),
+    onSuccess: (result) => {
+      const message = `${result.mode.toUpperCase()} connection verified; ${result.plans.length} active plan${result.plans.length === 1 ? "" : "s"} match.`;
+      setPaypalTestResult(message);
+      toast.success(message);
+    },
+    onError: (error) => {
+      setPaypalTestResult(null);
+      toast.error(
+        getStandardErrorMessage(error, "PayPal configuration test failed."),
+      );
     },
   });
 
@@ -111,6 +129,27 @@ export function AdminApiKeysPage() {
                 />
               ))}
             </div>
+            {group.provider === "PayPal" ? (
+              <div className="flex flex-wrap items-center gap-3 border-t border-base-300 pt-3">
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  disabled={paypalTestMutation.isPending}
+                  onClick={() => paypalTestMutation.mutate()}
+                >
+                  <RefreshCw
+                    className={`size-3.5 ${paypalTestMutation.isPending ? "animate-spin" : ""}`}
+                  />
+                  Test PayPal configuration
+                </button>
+                {paypalTestResult ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs text-success">
+                    <CircleCheck className="size-3.5" />
+                    {paypalTestResult}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
       ))}

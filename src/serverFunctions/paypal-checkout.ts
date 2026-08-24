@@ -4,7 +4,7 @@ import { AppError } from "@/server/lib/errors";
 import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import { requireAuthenticatedContext } from "@/serverFunctions/middleware";
 import { paypal } from "@/server/billing/paypal";
-import { getEffectivePaypalPlanId } from "@/server/billing/plan-config";
+import { PayPalCheckoutService } from "@/server/billing/paypal-checkout-service";
 
 const createSubscriptionSchema = z.object({
   tier: z.enum(["lite", "pro", "agency"]),
@@ -26,63 +26,15 @@ export const createPaypalSubscription = createServerFn({ method: "POST" })
       );
     }
 
-    const { tier } = data;
-    const planId = await getEffectivePaypalPlanId(tier);
-    if (!planId) {
-      throw new AppError(
-        "VALIDATION_ERROR",
-        `No PayPal plan configured for tier: ${tier}`,
-      );
-    }
-
     const publicUrl = await import("@/server/lib/runtime-env").then((m) =>
       m.getRequiredEnvValue("BETTER_AUTH_URL"),
     );
-
-    // Create the PayPal subscription
-    let subscription: {
-      id: string;
-      links: Array<{ rel: string; href: string; method: string }>;
-    };
-
-    try {
-      subscription = await paypalRequest<{
-        id: string;
-        links: Array<{ rel: string; href: string; method: string }>;
-      }>("POST", "/v1/billing/subscriptions", {
-        plan_id: planId,
-        custom_id: context.organizationId,
-        subscriber: {
-          email_address: context.userEmail,
-        },
-        application_context: {
-          brand_name: "SeoTool.im",
-          locale: "en-US",
-          shipping_preference: "NO_SHIPPING",
-          user_action: "SUBSCRIBE_NOW",
-          return_url: `${publicUrl}/subscribe?checkout=success`,
-          cancel_url: `${publicUrl}/subscribe?checkout=cancelled`,
-        },
-      });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error("[PayPal Subscription Creation Error]:", msg);
-      throw new AppError("UPSTREAM_UNAVAILABLE", `PayPal Error: ${msg}`);
-    }
-
-    // Find the approval URL
-    const approveLink = subscription.links?.find((l) => l.rel === "approve");
-    if (!approveLink) {
-      throw new AppError(
-        "INTERNAL_ERROR",
-        "PayPal subscription created but no approval URL returned",
-      );
-    }
-
-    return {
-      subscriptionId: subscription.id,
-      approveUrl: approveLink.href,
-    };
+    return PayPalCheckoutService.startSubscription({
+      tier: data.tier,
+      organizationId: context.organizationId,
+      userEmail: context.userEmail,
+      publicUrl,
+    });
   });
 
 /**
@@ -130,53 +82,35 @@ export const createPaypalTopup = createServerFn({ method: "POST" })
       m.getRequiredEnvValue("BETTER_AUTH_URL"),
     );
 
-    // Create a PayPal order for one-time payment
-    const order = await paypalRequest<{
-      id: string;
-      links: Array<{ rel: string; href: string; method: string }>;
-    }>("POST", "/v2/checkout/orders", {
-      intent: "CAPTURE",
-      purchase_units: [
-        {
-          reference_id: `topup-${context.organizationId}-${Date.now()}`,
-          description: `SeoTool.im Credit Top-up ($${data.amountUsd})`,
-          custom_id: context.organizationId,
-          amount: {
-            currency_code: "USD",
-            value: data.amountUsd.toFixed(2),
-          },
-        },
-      ],
-      application_context: {
-        brand_name: "SeoTool.im",
-        locale: "en-US",
-        shipping_preference: "NO_SHIPPING",
-        user_action: "PAY_NOW",
-        return_url: `${publicUrl}/billing?topup=success`,
-        cancel_url: `${publicUrl}/billing`,
-      },
+    return PayPalCheckoutService.createTopup({
+      amountUsd: data.amountUsd,
+      organizationId: context.organizationId,
+      publicUrl,
     });
-
-    const approveLink = order.links?.find((l) => l.rel === "approve");
-    if (!approveLink) {
-      throw new AppError(
-        "INTERNAL_ERROR",
-        "PayPal order created but no approval URL returned",
-      );
-    }
-
-    return {
-      orderId: order.id,
-      approveUrl: approveLink.href,
-    };
   });
 
-// Reuse the paypal request helper from the billing module
-async function paypalRequest<T>(
-  method: string,
-  path: string,
-  body?: unknown,
-): Promise<T> {
-  const { paypalRequest: req } = await import("@/server/billing/paypal");
-  return req<T>(method, path, body);
-}
+/** Capture an approved top-up order after PayPal redirects the buyer back. */
+export const capturePaypalTopup = createServerFn({ method: "POST" })
+  .middleware([requireAuthenticatedContext])
+  .validator(
+    z.object({
+      orderId: z
+        .string()
+        .trim()
+        .min(1)
+        .max(100)
+        .regex(/^[A-Za-z0-9-]+$/),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    if (!(await isHostedServerAuthMode())) {
+      throw new AppError(
+        "AUTH_CONFIG_MISSING",
+        "Credit top-up is only available in hosted mode",
+      );
+    }
+    return PayPalCheckoutService.captureTopup({
+      orderId: data.orderId,
+      organizationId: context.organizationId,
+    });
+  });

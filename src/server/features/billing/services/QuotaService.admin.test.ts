@@ -1,19 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getOwnerEmailMock, getPlanTierMock } = vi.hoisted(() => ({
-  getOwnerEmailMock: vi.fn(),
-  getPlanTierMock: vi.fn(),
-}));
+const { getOwnerIdentityMock, getPlanTierMock, getOptionalEnvValueMock } =
+  vi.hoisted(() => ({
+    getOwnerIdentityMock: vi.fn(),
+    getPlanTierMock: vi.fn(),
+    getOptionalEnvValueMock: vi.fn(),
+  }));
 
 vi.mock("@/server/features/billing/repositories/QuotaRepository", () => ({
   QuotaRepository: {
-    getOwnerEmail: getOwnerEmailMock,
+    getOwnerIdentity: getOwnerIdentityMock,
     getPlanTier: getPlanTierMock,
   },
 }));
 
 vi.mock("@/server/lib/runtime-env", () => ({
-  getOptionalEnvValue: vi.fn().mockResolvedValue(undefined),
+  getOptionalEnvValue: getOptionalEnvValueMock,
 }));
 
 import { getPlanTier } from "./QuotaService";
@@ -21,21 +23,41 @@ import { getPlanTier } from "./QuotaService";
 describe("QuotaService platform-admin tier override", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getOptionalEnvValueMock.mockResolvedValue(undefined);
   });
 
-  it.each(["alfu13.sf@gmail.com", "emerilansel@gmail.com"])(
-    "treats the built-in admin owner %s as agency",
-    async (email) => {
-      getOwnerEmailMock.mockResolvedValue(email);
-      getPlanTierMock.mockResolvedValue("free");
+  it("treats an owner in the configured user-id allowlist as agency", async () => {
+    getOptionalEnvValueMock.mockImplementation(async (key: string) =>
+      key === "PLATFORM_ADMIN_USER_IDS" ? "admin-user-1" : undefined,
+    );
+    getOwnerIdentityMock.mockResolvedValue({
+      userId: "admin-user-1",
+      userEmail: "admin@example.com",
+    });
+    getPlanTierMock.mockResolvedValue("free");
 
-      await expect(getPlanTier(`org-${email}`)).resolves.toBe("agency");
-      expect(getPlanTierMock).not.toHaveBeenCalled();
-    },
-  );
+    await expect(getPlanTier("org-admin-id")).resolves.toBe("agency");
+    expect(getPlanTierMock).not.toHaveBeenCalled();
+  });
+
+  it("supports the explicitly configured email fallback", async () => {
+    getOptionalEnvValueMock.mockImplementation(async (key: string) =>
+      key === "PLATFORM_ADMIN_EMAILS" ? "admin@example.com" : undefined,
+    );
+    getOwnerIdentityMock.mockResolvedValue({
+      userId: "admin-user-2",
+      userEmail: "admin@example.com",
+    });
+
+    await expect(getPlanTier("org-admin-email")).resolves.toBe("agency");
+    expect(getPlanTierMock).not.toHaveBeenCalled();
+  });
 
   it("preserves the stored plan for non-admin org owners", async () => {
-    getOwnerEmailMock.mockResolvedValue("customer@example.com");
+    getOwnerIdentityMock.mockResolvedValue({
+      userId: "customer-1",
+      userEmail: "customer@example.com",
+    });
     getPlanTierMock.mockResolvedValue("pro");
 
     await expect(getPlanTier("org-customer")).resolves.toBe("pro");

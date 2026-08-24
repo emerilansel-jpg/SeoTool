@@ -50,7 +50,10 @@ vi.mock("@/server/lib/posthog", () => ({
   captureServerEvent: vi.fn(),
 }));
 vi.mock("@/server/billing/paypal", () => ({
-  paypal: { billingPlans: { updatePricingScheme: vi.fn() } },
+  paypal: {
+    billingPlans: { get: vi.fn(), updatePricingScheme: vi.fn() },
+  },
+  clearPaypalAccessTokenCache: vi.fn(),
 }));
 vi.mock("@/server/billing/customer-status-sync", () => ({
   syncPaypalCustomerStatus: vi.fn(),
@@ -83,10 +86,15 @@ import {
   resolvePlanTierByPaypalPlanId,
 } from "@/server/billing/plan-config";
 import { extractTopupGrant } from "@/server/billing/paypal-webhook";
+import { clearPaypalAccessTokenCache, paypal } from "@/server/billing/paypal";
+import { getRequiredEnvValue } from "@/server/lib/runtime-env";
 
 const cmsRepo = vi.mocked(CmsRepository);
 const planRepo = vi.mocked(PlanConfigRepository);
 const settingsRepo = vi.mocked(AdminSettingsRepository);
+const clearPaypalToken = vi.mocked(clearPaypalAccessTokenCache);
+const getPaypalPlan = vi.mocked(paypal.billingPlans.get);
+const getRequiredEnv = vi.mocked(getRequiredEnvValue);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -265,6 +273,70 @@ describe("AdminSettingsService: editable key guard", () => {
         "u1",
       ),
     ).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
+  });
+
+  it("validates PayPal mode and clears the OAuth cache after a valid change", async () => {
+    await expect(
+      AdminSettingsService.saveSetting(
+        { envKey: "PAYPAL_MODE", value: "production" },
+        "u1",
+      ),
+    ).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
+    expect(settingsRepo.upsert).not.toHaveBeenCalled();
+
+    settingsRepo.upsert.mockResolvedValue({
+      key: "PAYPAL_MODE",
+      value: "live",
+      isSecret: false,
+      updatedByUserId: "u1",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    });
+    await AdminSettingsService.saveSetting(
+      { envKey: "PAYPAL_MODE", value: " live " },
+      "u1",
+    );
+    expect(settingsRepo.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ key: "PAYPAL_MODE", value: "live" }),
+    );
+    expect(clearPaypalToken).toHaveBeenCalledOnce();
+  });
+
+  it("tests live credentials, webhook configuration, plan status, and prices", async () => {
+    planRepo.listAll.mockResolvedValue([]);
+    getRequiredEnv.mockImplementation(async (key: string) =>
+      key === "PAYPAL_MODE" ? "live" : "WH-123",
+    );
+    getPaypalPlan.mockImplementation(async (planId: string) => {
+      const priceById: Record<string, string> = {
+        "lite-plan": "49.00",
+        "pro-plan": "149.00",
+        "agency-plan": "499.00",
+      };
+      return {
+        id: planId,
+        product_id: "PROD-1",
+        status: "ACTIVE",
+        name: planId,
+        description: planId,
+        billing_cycles: [
+          {
+            tenure_type: "REGULAR",
+            pricing_scheme: {
+              fixed_price: {
+                value: priceById[planId],
+                currency_code: "USD",
+              },
+            },
+          },
+        ],
+      };
+    });
+
+    const result = await AdminSettingsService.testPaypalConfiguration();
+    expect(result.mode).toBe("live");
+    expect(result.plans).toHaveLength(3);
+    expect(result.plans[0]).toMatchObject({ tier: "lite", priceUsd: 49 });
+    expect(getPaypalPlan).toHaveBeenCalledTimes(3);
   });
 });
 

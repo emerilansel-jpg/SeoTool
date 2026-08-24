@@ -41,11 +41,16 @@ export const AdminPricingService = {
 
     const priceUsdCents = Math.round(input.priceUsd * 100);
     const priceChanged = priceUsdCents !== previous.priceUsdCents;
+    const planChanged = paypalPlanId !== previous.paypalPlanId;
 
     let syncStatus = previous.syncStatus;
-    if (priceChanged && paypalPlanId && input.tier !== "free") {
+    if (
+      (priceChanged || planChanged) &&
+      paypalPlanId &&
+      input.tier !== "free"
+    ) {
       syncStatus = await syncPaypalPrice(paypalPlanId, priceUsdCents);
-    } else if (!priceChanged) {
+    } else if (!priceChanged && !planChanged) {
       syncStatus = previous.syncStatus;
     }
 

@@ -2,11 +2,14 @@ import { AppError } from "@/server/lib/errors";
 import {
   clearAdminSettingsCache,
   getOptionalEnvValue,
+  getRequiredEnvValue,
 } from "@/server/lib/runtime-env";
 import {
   ADMIN_SETTING_GROUPS,
   type AdminSettingDefinition,
 } from "@/shared/admin-settings";
+import { clearPaypalAccessTokenCache, paypal } from "@/server/billing/paypal";
+import { getEffectivePlanConfigs } from "@/server/billing/plan-config";
 import { AdminSettingsRepository } from "../repositories/AdminSettingsRepository";
 
 export interface AdminSettingStatus {
@@ -85,13 +88,15 @@ export const AdminSettingsService = {
     adminUserId: string,
   ): Promise<void> {
     const definition = findEditableDefinition(input.envKey);
+    const value = validateSettingValue(input.envKey, input.value);
     await AdminSettingsRepository.upsert({
       key: input.envKey,
-      value: input.value,
+      value,
       isSecret: definition.secret,
       updatedByUserId: adminUserId,
     });
     clearAdminSettingsCache();
+    if (isPaypalSetting(input.envKey)) clearPaypalAccessTokenCache();
   },
 
   async removeOverride(envKey: string): Promise<void> {
@@ -105,8 +110,102 @@ export const AdminSettingsService = {
     }
     await AdminSettingsRepository.remove(envKey);
     clearAdminSettingsCache();
+    if (isPaypalSetting(envKey)) clearPaypalAccessTokenCache();
+  },
+
+  /** Read-only live check for the admin UI. It verifies credentials by
+   * fetching every active paid plan and confirms PayPal's price matches the
+   * price shown by SeoTool.im. No order or charge is created. */
+  async testPaypalConfiguration(): Promise<{
+    mode: "live" | "sandbox";
+    plans: Array<{ tier: string; planId: string; priceUsd: number }>;
+  }> {
+    const mode = await getRequiredEnvValue("PAYPAL_MODE");
+    if (mode !== "live" && mode !== "sandbox") {
+      throw new AppError(
+        "VALIDATION_ERROR",
+        'PAYPAL_MODE must be exactly "live" or "sandbox".',
+      );
+    }
+    await getRequiredEnvValue("PAYPAL_WEBHOOK_ID");
+
+    const configs = await getEffectivePlanConfigs();
+    const activePaidConfigs = Object.values(configs).filter(
+      (config) => config.tier !== "free" && config.active,
+    );
+    if (activePaidConfigs.length === 0) {
+      throw new AppError(
+        "VALIDATION_ERROR",
+        "No active paid plan is configured.",
+      );
+    }
+
+    const plans = await Promise.all(
+      activePaidConfigs.map(async (config) => {
+        if (!config.paypalPlanId) {
+          throw new AppError(
+            "VALIDATION_ERROR",
+            `${config.tier} is active but has no PayPal plan ID.`,
+          );
+        }
+        const plan = await paypal.billingPlans.get(config.paypalPlanId);
+        if (plan.status !== "ACTIVE") {
+          throw new AppError(
+            "VALIDATION_ERROR",
+            `PayPal plan ${config.paypalPlanId} for ${config.tier} is not active.`,
+          );
+        }
+
+        const regularCycle = plan.billing_cycles?.find(
+          (cycle) => cycle.tenure_type === "REGULAR",
+        );
+        const fixedPrice = regularCycle?.pricing_scheme?.fixed_price;
+        const paypalPriceUsd = Number(fixedPrice?.value);
+        if (
+          fixedPrice?.currency_code !== "USD" ||
+          !Number.isFinite(paypalPriceUsd) ||
+          Math.round(paypalPriceUsd * 100) !== config.priceUsdCents
+        ) {
+          throw new AppError(
+            "VALIDATION_ERROR",
+            `PayPal price for ${config.tier} does not match SeoTool.im.`,
+          );
+        }
+
+        return {
+          tier: config.tier,
+          planId: config.paypalPlanId,
+          priceUsd: paypalPriceUsd,
+        };
+      }),
+    );
+
+    return { mode, plans };
   },
 };
+
+function isPaypalSetting(envKey: string): boolean {
+  return envKey.startsWith("PAYPAL_");
+}
+
+function validateSettingValue(envKey: string, rawValue: string): string {
+  if (!isPaypalSetting(envKey)) return rawValue;
+
+  const value = rawValue.trim();
+  if (!value) {
+    throw new AppError(
+      "VALIDATION_ERROR",
+      `${envKey} cannot be empty. Remove the override to use the deploy value.`,
+    );
+  }
+  if (envKey === "PAYPAL_MODE" && value !== "live" && value !== "sandbox") {
+    throw new AppError(
+      "VALIDATION_ERROR",
+      'PAYPAL_MODE must be exactly "live" or "sandbox".',
+    );
+  }
+  return value;
+}
 
 function findEditableDefinition(envKey: string): AdminSettingDefinition {
   for (const group of ADMIN_SETTING_GROUPS) {

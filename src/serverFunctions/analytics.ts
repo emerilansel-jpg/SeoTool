@@ -20,6 +20,12 @@ export const getAnalyticsOverview = createServerFn({ method: "POST" })
 export const checkIsPlatformAdmin = createServerFn({ method: "GET" })
   .middleware([requireAuthenticatedContext])
   .handler(async ({ context }) => {
+    if (
+      import.meta.env.BYPASS_AUTH === "true" ||
+      import.meta.env.VITE_E2E_BYPASS_AUTH === "true"
+    ) {
+      return true;
+    }
     return isPlatformAdmin({
       userId: context.userId,
       userEmail: context.userEmail,

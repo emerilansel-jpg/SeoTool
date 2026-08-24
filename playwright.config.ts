@@ -31,6 +31,7 @@ export default defineConfig({
       VITE_E2E_BYPASS_AUTH: "true",
       VITE_E2E_DOMAIN_FIXTURES: "1",
       VITE_E2E_KEYWORD_FIXTURES: "1",
+      PLATFORM_ADMIN_USER_IDS: "e2e-user-id",
       PORT: "3101",
     },
     reuseExistingServer: true,

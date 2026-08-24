@@ -97,8 +97,8 @@ export function requireProjectRole(minRole: Role) {
 }
 
 /**
- * Gate a server function to platform admins only. Checks
- * PLATFORM_ADMIN_EMAILS, PLATFORM_ADMIN_USER_IDS, and built-in admins. Stacks on
+ * Gate a server function to platform admins only. Checks the runtime
+ * PLATFORM_ADMIN_USER_IDS / PLATFORM_ADMIN_EMAILS allowlists. Stacks on
  * `requireAuthenticatedContext`:
  * `.middleware([requireAuthenticatedContext, requirePlatformAdmin])`.
  */
@@ -106,6 +106,16 @@ export const requirePlatformAdmin = createMiddleware({
   type: "function",
 }).server(async ({ next, context }) => {
   const authenticatedContext = getAuthenticatedContext(context);
+
+  // The explicit local E2E auth boundary uses a deterministic fake identity
+  // and no persisted user row. Mirror the project-role test boundary so admin
+  // pages can exercise their real server functions in Playwright.
+  if (
+    import.meta.env.BYPASS_AUTH === "true" ||
+    import.meta.env.VITE_E2E_BYPASS_AUTH === "true"
+  ) {
+    return next({ context: authenticatedContext });
+  }
 
   const isAdmin = await isPlatformAdmin({
     userId: authenticatedContext.userId,

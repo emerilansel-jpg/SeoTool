@@ -10,6 +10,13 @@ import { getRequiredEnvValue } from "@/server/lib/runtime-env";
 
 let tokenPromise: Promise<{ token: string; expiresAt: number }> | undefined;
 
+/** Drop the cached OAuth token after an admin changes PayPal credentials or
+ * mode. Without this, a live settings update can keep using the previous
+ * account's token for almost eight hours. */
+export function clearPaypalAccessTokenCache(): void {
+  tokenPromise = undefined;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -17,13 +24,24 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 async function getAccessToken(): Promise<string> {
   const now = Date.now();
   if (tokenPromise) {
-    const cached = await tokenPromise;
-    if (cached.expiresAt > now) return cached.token;
+    try {
+      const cached = await tokenPromise;
+      if (cached.expiresAt > now) return cached.token;
+    } catch {
+      // A transient token failure must not poison this worker isolate until
+      // its next restart. The fresh request below gets another chance.
+      tokenPromise = undefined;
+    }
   }
 
   tokenPromise = fetchToken();
-  const result = await tokenPromise;
-  return result.token;
+  try {
+    const result = await tokenPromise;
+    return result.token;
+  } catch (error) {
+    tokenPromise = undefined;
+    throw error;
+  }
 }
 
 async function fetchToken(): Promise<{ token: string; expiresAt: number }> {
@@ -65,9 +83,9 @@ async function fetchToken(): Promise<{ token: string; expiresAt: number }> {
 
 async function getApiBaseUrl(): Promise<string> {
   const mode = await getRequiredEnvValue("PAYPAL_MODE");
-  return mode === "live"
-    ? "https://api-m.paypal.com"
-    : "https://api-m.sandbox.paypal.com";
+  if (mode === "live") return "https://api-m.paypal.com";
+  if (mode === "sandbox") return "https://api-m.sandbox.paypal.com";
+  throw new Error('PAYPAL_MODE must be exactly "live" or "sandbox"');
 }
 
 // ---------------------------------------------------------------------------
@@ -163,6 +181,37 @@ export interface PayPalBillingPlan {
   status: string;
   name: string;
   description: string;
+  billing_cycles?: Array<{
+    tenure_type?: string;
+    pricing_scheme?: {
+      fixed_price?: { value?: string; currency_code?: string };
+    };
+  }>;
+}
+
+export interface PayPalOrder {
+  id: string;
+  status:
+    | "CREATED"
+    | "SAVED"
+    | "APPROVED"
+    | "VOIDED"
+    | "COMPLETED"
+    | "PAYER_ACTION_REQUIRED";
+  purchase_units?: Array<{
+    reference_id?: string;
+    custom_id?: string;
+    amount?: { currency_code?: string; value?: string };
+    payments?: {
+      captures?: Array<{
+        id?: string;
+        status?: string;
+        custom_id?: string;
+        amount?: { currency_code?: string; value?: string };
+      }>;
+    };
+  }>;
+  links?: Array<{ rel: string; href: string; method: string }>;
 }
 
 // ---------------------------------------------------------------------------
@@ -183,6 +232,9 @@ export const paypal = {
 
   /** Billing plan management. */
   billingPlans: {
+    get: (planId: string) =>
+      paypalRequest<PayPalBillingPlan>("GET", `/v1/billing/plans/${planId}`),
+
     create: (args: {
       product_id: string;
       name: string;
@@ -237,12 +289,52 @@ export const paypal = {
 
   /** Subscription lifecycle. */
   subscriptions: {
+    /** Create a subscription and return the buyer approval link. */
+    create: (args: {
+      plan_id: string;
+      custom_id: string;
+      subscriber: { email_address: string };
+      application_context: {
+        brand_name: string;
+        locale: string;
+        shipping_preference: string;
+        user_action: string;
+        return_url: string;
+        cancel_url: string;
+      };
+    }) =>
+      paypalRequest<{
+        id: string;
+        links: Array<{ rel: string; href: string; method: string }>;
+      }>("POST", "/v1/billing/subscriptions", args),
+
     /** Get subscription details. */
     get: (subscriptionId: string) =>
       paypalRequest<PayPalSubscription>(
         "GET",
         `/v1/billing/subscriptions/${subscriptionId}`,
       ),
+
+    /** Move an existing subscription to another plan without creating a
+     * second recurring charge. PayPal returns an approval link. */
+    revise: (
+      subscriptionId: string,
+      args: {
+        plan_id: string;
+        application_context: {
+          brand_name: string;
+          locale: string;
+          shipping_preference: string;
+          user_action: string;
+          return_url: string;
+          cancel_url: string;
+        };
+      },
+    ) =>
+      paypalRequest<{
+        id?: string;
+        links: Array<{ rel: string; href: string; method: string }>;
+      }>("POST", `/v1/billing/subscriptions/${subscriptionId}/revise`, args),
 
     /** Activate a subscription (used after approval). */
     activate: (subscriptionId: string, note?: string) =>
@@ -261,19 +353,48 @@ export const paypal = {
       ),
   },
 
-  /** Customer portal (hosted billing management page). */
-  billingPortal: {
-    /** Create a billing portal session URL for the customer. */
-    createSession: async (subscriptionId: string) => {
-      const returnUrl = await getRequiredEnvValue("BETTER_AUTH_URL");
-      return paypalRequest<{ urls: { billing_portal: string } }>(
+  /** One-time checkout order lifecycle. */
+  orders: {
+    create: (args: {
+      intent: "CAPTURE";
+      purchase_units: Array<{
+        reference_id: string;
+        description: string;
+        custom_id: string;
+        amount: { currency_code: "USD"; value: string };
+      }>;
+      application_context: {
+        brand_name: string;
+        locale: string;
+        shipping_preference: string;
+        user_action: string;
+        return_url: string;
+        cancel_url: string;
+      };
+    }) => paypalRequest<PayPalOrder>("POST", "/v2/checkout/orders", args),
+    get: (orderId: string) =>
+      paypalRequest<PayPalOrder>("GET", `/v2/checkout/orders/${orderId}`),
+    capture: (orderId: string) =>
+      paypalRequest<PayPalOrder>(
         "POST",
-        `/v1/billing/subscriptions/${subscriptionId}/revise`,
-        {
-          return_url: `${returnUrl}/billing`,
-          cancel_url: `${returnUrl}/billing`,
+        `/v2/checkout/orders/${orderId}/capture`,
+        {},
+      ),
+  },
+
+  /** Buyer-facing PayPal page for managing automatic payments. PayPal does
+   * not expose a Stripe-style billing-portal session endpoint. */
+  billingPortal: {
+    createSession: async (_subscriptionId: string) => {
+      const baseUrl = await getApiBaseUrl();
+      return {
+        urls: {
+          billing_portal:
+            baseUrl === "https://api-m.paypal.com"
+              ? "https://www.paypal.com/myaccount/autopay/"
+              : "https://www.sandbox.paypal.com/myaccount/autopay/",
         },
-      );
+      };
     },
   },
 

@@ -30,3 +30,7 @@ export const removeAdminSetting = createServerFn({ method: "POST" })
     await AdminSettingsService.removeOverride(data.envKey);
     return { ok: true };
   });
+
+export const testPaypalConfiguration = createServerFn({ method: "POST" })
+  .middleware([requireAuthenticatedContext, requirePlatformAdmin])
+  .handler(async () => AdminSettingsService.testPaypalConfiguration());

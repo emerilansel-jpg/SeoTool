@@ -31,20 +31,21 @@ export async function getPlanTier(organizationId: string): Promise<PlanTier> {
   return row?.planTier ?? "free";
 }
 
-/** Returns the email of the org's owner (member with role "owner"), or null
- *  when the org has no owner row. Used by the platform-admin quota bypass. */
-export async function getOwnerEmail(
+/** Returns the identity of the org's owner, or null when no owner row exists.
+ * Used by the platform-admin quota bypass with the same runtime allowlists as
+ * the admin routes. */
+export async function getOwnerIdentity(
   organizationId: string,
-): Promise<string | null> {
+): Promise<{ userId: string; userEmail: string } | null> {
   const rows = await db
-    .select({ email: user.email })
+    .select({ userId: user.id, userEmail: user.email })
     .from(member)
     .innerJoin(user, eq(member.userId, user.id))
     .where(
       and(eq(member.organizationId, organizationId), eq(member.role, "owner")),
     )
     .limit(1);
-  return rows[0]?.email ?? null;
+  return rows[0] ?? null;
 }
 
 /** Upsert the org's subscription. Called by the billing webhook when PayPal
@@ -207,7 +208,7 @@ export async function resetUsageQuotaForOrg(
 export const QuotaRepository = {
   getSubscription,
   getPlanTier,
-  getOwnerEmail,
+  getOwnerIdentity,
   upsertSubscription,
   getUsageQuota,
   listUsageQuota,

@@ -4,6 +4,7 @@ import { syncPaypalCustomerStatus } from "./customer-status-sync";
 import { addTopupCredits } from "./credits";
 import { CREDITS_PER_USD } from "@/shared/billing";
 import { PayPalWebhookEventRepository } from "@/server/features/admin/repositories/PayPalWebhookEventRepository";
+import { parseTopupMarker } from "./paypal-topup";
 import {
   extractWebhookHeaders,
   verifyWebhookSignature,
@@ -13,7 +14,7 @@ export const PAYPAL_WEBHOOK_PATH = "/api/paypal/webhook";
 
 const paypalWebhookEventSchema = z
   .object({
-    id: z.string().optional(),
+    id: z.string().min(1),
     event_type: z.string(),
     resource: z.record(z.string(), z.unknown()).optional().default({}),
   })
@@ -66,7 +67,7 @@ export async function handlePaypalWebhookRequest(request: Request) {
   }
 
   const orgId = getOrganizationId(payload);
-  const eventId = payload.id ?? crypto.randomUUID();
+  const eventId = payload.id;
 
   // Idempotency + audit trail: the PayPal event id is the row id, so a
   // retried delivery returns early instead of double-processing.
@@ -97,19 +98,42 @@ export async function handlePaypalWebhookRequest(request: Request) {
       const topup = extractTopupGrant(payload, orgId);
       if (topup) {
         await addTopupCredits(topup.organizationId, topup.credits);
-      }
+        try {
+          await PayPalWebhookEventRepository.markStatus(
+            eventId,
+            "processed",
+            null,
+          );
+        } catch (statusError) {
+          // The credit grant is the irreversible step. Leave the event in its
+          // received state when only the audit-status update fails, so a
+          // duplicate delivery is acknowledged without granting twice.
+          console.error(
+            "PayPal top-up status update failed",
+            orgId,
+            statusError,
+          );
+          await captureServerError(statusError, {
+            source: "paypal_webhook_topup_status",
+            organization_id: orgId,
+          });
+        }
 
-      // Only subscription events carry a usable subscription resource; a
-      // capture payload has no plan_id and would otherwise derive a free-tier
-      // snapshot, silently downgrading a paying org on every renewal. For
-      // capture events the sync fetches the live subscription from PayPal.
-      const isSubscriptionEvent = payload.event_type.startsWith(
-        "BILLING.SUBSCRIPTION.",
-      );
-      await syncPaypalCustomerStatus(
-        orgId,
-        isSubscriptionEvent ? payload : undefined,
-      );
+        return json({ received: true });
+      } else {
+        // Only subscription events carry a usable subscription resource; a
+        // renewal capture has no plan_id, so fetch its live subscription.
+        // Top-ups do not need a subscription sync at all. Keeping the grant as
+        // the only top-up side effect prevents a later sync failure from
+        // causing PayPal's retry to add credits twice.
+        const isSubscriptionEvent = payload.event_type.startsWith(
+          "BILLING.SUBSCRIPTION.",
+        );
+        await syncPaypalCustomerStatus(
+          orgId,
+          isSubscriptionEvent ? payload : undefined,
+        );
+      }
 
       await PayPalWebhookEventRepository.markStatus(eventId, "processed", null);
     } catch (error) {
@@ -133,10 +157,13 @@ export async function handlePaypalWebhookRequest(request: Request) {
 }
 
 function getOrganizationId(payload: PayPalWebhookEvent): string | null {
-  // PayPal subscription events store custom_id on the resource
+  // Subscription events store the raw organization id. Top-up captures carry
+  // a prefixed marker so they cannot be confused with subscription renewals.
   const resource = payload.resource;
   const customId =
     typeof resource.custom_id === "string" ? resource.custom_id : null;
+  const topupOrganizationId = parseTopupReference(customId);
+  if (topupOrganizationId) return topupOrganizationId;
   if (customId && customId.length > 0) return customId;
 
   // For payment capture events, extract from purchase_units
@@ -145,8 +172,8 @@ function getOrganizationId(payload: PayPalWebhookEvent): string | null {
       typeof unit.reference_id === "string" ? unit.reference_id : null;
     if (refId) {
       // reference_id format: "topup-{orgId}-{timestamp}"
-      const match = refId.match(/^topup-([^-]+(?:-[^-]+)*)-\d+$/);
-      if (match) return match[1];
+      const organizationId = parseTopupReference(refId);
+      if (organizationId) return organizationId;
     }
   }
 
@@ -163,12 +190,18 @@ export function extractTopupGrant(
   if (payload.event_type !== "PAYMENT.CAPTURE.COMPLETED") return null;
 
   const resource = payload.resource;
-  const topupUnit = toRecordArray(resource.purchase_units).find((unit) => {
-    const refId =
-      typeof unit.reference_id === "string" ? unit.reference_id : "";
-    return refId.startsWith("topup-");
-  });
-  if (!topupUnit) return null;
+  const resourceMarker = parseTopupReference(resource.custom_id);
+  const unitMarker = toRecordArray(resource.purchase_units)
+    .map(
+      (unit) =>
+        parseTopupReference(unit.custom_id) ??
+        parseTopupReference(unit.reference_id),
+    )
+    .find((organizationId) => organizationId !== null);
+  const markerOrganizationId = resourceMarker ?? unitMarker ?? null;
+  if (!markerOrganizationId || markerOrganizationId !== fallbackOrgId) {
+    return null;
+  }
 
   const amount = isRecord(resource.amount) ? resource.amount : null;
   const currency =
@@ -183,9 +216,19 @@ export function extractTopupGrant(
   if (!Number.isFinite(amountUsd) || amountUsd <= 0) return null;
 
   return {
-    organizationId: fallbackOrgId,
+    organizationId: markerOrganizationId,
     credits: Math.round(amountUsd * CREDITS_PER_USD),
   };
+}
+
+function parseTopupReference(value: unknown): string | null {
+  const markerOrganizationId = parseTopupMarker(value);
+  if (markerOrganizationId) return markerOrganizationId;
+  if (typeof value !== "string") return null;
+  // Backwards compatibility for orders created before the explicit custom-id
+  // marker was introduced. New orders use `topup:{orgId}:{timestamp}`.
+  const legacy = value.match(/^topup-(.+)-\d+$/);
+  return legacy?.[1] ?? null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

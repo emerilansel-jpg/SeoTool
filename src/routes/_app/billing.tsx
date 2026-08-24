@@ -1,5 +1,5 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CreditCard, Zap } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { isHostedClientAuthMode } from "@/lib/auth-mode";
@@ -14,7 +14,10 @@ import {
   getQuotaStateSummary,
   getCustomerPortalUrl,
 } from "@/serverFunctions/billing";
-import { createPaypalTopup } from "@/serverFunctions/paypal-checkout";
+import {
+  capturePaypalTopup,
+  createPaypalTopup,
+} from "@/serverFunctions/paypal-checkout";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { QuotaBar } from "@/client/features/billing/QuotaBar";
@@ -37,20 +40,64 @@ export const Route = createFileRoute("/_app/billing")({
 function BillingPage() {
   const { prices } = Route.useLoaderData();
   const { data: session, isPending: isSessionPending } = useSession();
+  const isE2EBypass =
+    import.meta.env.BYPASS_AUTH === "true" ||
+    (typeof window !== "undefined" &&
+      Boolean(Reflect.get(window, "__E2E_BYPASS_AUTH")));
+  const activeUserId =
+    session?.user?.id ?? (isE2EBypass ? "e2e-user-id" : undefined);
   const [isPortalLoading, setIsPortalLoading] = useState(false);
   const [isBuyingCredits, setIsBuyingCredits] = useState(false);
+  const [topupStatus, setTopupStatus] = useState<
+    "idle" | "capturing" | "completed" | "cancelled" | "error"
+  >("idle");
+  const topupCaptureStarted = useRef(false);
 
   const { planTier, isLoading: isPlanLoading } = usePlanTier();
   const isFreePlan = planTier === "free";
 
   const getQuotaState = useServerFn(getQuotaStateSummary);
   const quotaQuery = useQuery({
-    queryKey: ["quotaState", session?.user?.id],
+    queryKey: ["quotaState", activeUserId],
     queryFn: () => getQuotaState(),
-    enabled: Boolean(session?.user?.id),
+    enabled: Boolean(activeUserId),
   });
 
   const openPortal = useServerFn(getCustomerPortalUrl);
+  const captureTopup = useServerFn(capturePaypalTopup);
+
+  useEffect(() => {
+    const search = new URLSearchParams(window.location.search);
+    const status = search.get("topup");
+    if (status === "cancelled") {
+      setTopupStatus("cancelled");
+      return;
+    }
+    if (status === "complete") {
+      setTopupStatus("completed");
+      return;
+    }
+    if (status !== "success" || topupCaptureStarted.current) return;
+
+    const orderId = search.get("token");
+    if (!orderId) {
+      setTopupStatus("error");
+      return;
+    }
+
+    topupCaptureStarted.current = true;
+    setTopupStatus("capturing");
+    void captureTopup({ data: { orderId } })
+      .then(async (result) => {
+        if (!result.completed) throw new Error("PayPal capture is pending");
+        setTopupStatus("completed");
+        window.history.replaceState({}, "", "/billing?topup=complete");
+        await quotaQuery.refetch();
+      })
+      .catch(() => {
+        setTopupStatus("error");
+      });
+  }, [captureTopup, quotaQuery]);
 
   async function handleManageSubscription() {
     setIsPortalLoading(true);
@@ -77,8 +124,8 @@ function BillingPage() {
   }
 
   const billingRouteState = getBillingRouteState({
-    hasSession: Boolean(session?.user?.id),
-    isSessionPending,
+    hasSession: Boolean(activeUserId),
+    isSessionPending: isE2EBypass ? false : isSessionPending,
     isCustomerLoading: isPlanLoading || quotaQuery.isLoading,
     isCustomerError: quotaQuery.isError,
   });
@@ -258,6 +305,32 @@ function BillingPage() {
         Any limits exceeded will draw from your credit pool if available. Top up
         anytime, credits roll over and never expire.
       </p>
+
+      {topupStatus !== "idle" ? (
+        <div
+          role="status"
+          className={`alert py-3 text-sm ${
+            topupStatus === "completed"
+              ? "alert-success"
+              : topupStatus === "error"
+                ? "alert-error"
+                : "alert-info"
+          }`}
+        >
+          {topupStatus === "capturing" ? (
+            <>
+              <span className="loading loading-spinner loading-sm" />
+              Completing your PayPal payment&hellip;
+            </>
+          ) : topupStatus === "completed" ? (
+            "Payment completed. Your credits will appear as soon as PayPal confirms the webhook."
+          ) : topupStatus === "cancelled" ? (
+            "Top-up cancelled. You were not charged."
+          ) : (
+            "We could not confirm this top-up. Do not start another payment; refresh to retry confirmation or contact support."
+          )}
+        </div>
+      ) : null}
 
       <BillingUsageChart />
       <BillingFeatureBreakdown />

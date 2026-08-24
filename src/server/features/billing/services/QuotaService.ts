@@ -16,10 +16,8 @@ async function isPlatformAdminOrg(organizationId: string): Promise<boolean> {
   const cached = adminOrgCache.get(organizationId);
   if (cached !== undefined) return cached;
 
-  const ownerEmail = await QuotaRepository.getOwnerEmail(organizationId);
-  const isAdmin = ownerEmail
-    ? await isPlatformAdmin({ userEmail: ownerEmail })
-    : false;
+  const owner = await QuotaRepository.getOwnerIdentity(organizationId);
+  const isAdmin = owner ? await isPlatformAdmin(owner) : false;
   adminOrgCache.set(organizationId, isAdmin);
   return isAdmin;
 }

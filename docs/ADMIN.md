@@ -35,8 +35,9 @@ API Keys.
 
 ### PayPal behaviors worth knowing
 
-- Top-up purchases (`PAYMENT.CAPTURE.COMPLETED` with a `topup-{orgId}-{ts}`
-  reference) grant credits at `CREDITS_PER_USD`. Subscription renewals (same
+- Top-up purchases (`PAYMENT.CAPTURE.COMPLETED` with a
+  `topup:{orgId}:{timestamp}` custom ID) grant credits at `CREDITS_PER_USD`.
+  Subscription renewals (same
   event type, `custom_id` instead) are excluded.
 - Only `BILLING.SUBSCRIPTION.*` payloads are used directly as the subscription
   resource; capture events re-fetch the live subscription from PayPal. (Using
@@ -86,6 +87,11 @@ API Keys.
   and override env vars in `getOptionalEnvValue` (60s cache, empty value
   falls back to env). Bonus: overrides survive alchemy's env reconciliation.
 - Secret values are write-only: never returned to the browser after saving.
+- The PayPal section has a read-only **Test PayPal configuration** action. It
+  authenticates to the selected PayPal environment and verifies every active
+  paid plan's status, USD currency, and price parity without creating a charge.
+- PayPal setting changes invalidate the cached OAuth token immediately, and
+  `PAYPAL_MODE` accepts only `live` or `sandbox`.
 - Keys read at worker init (Google OAuth, Loops, Turnstile, PostHog, Reddit,
   `PLATFORM_ADMIN_USER_IDS`) are status-only and need a redeploy to change.
 

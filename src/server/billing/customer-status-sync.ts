@@ -92,7 +92,10 @@ async function getSubscriptionForOrg(
       sub.paypalSubscriptionId,
       error,
     );
-    return null;
+    // A transient upstream failure is not evidence that the subscription no
+    // longer exists. Let the caller retry instead of silently downgrading a
+    // paying organization to the free tier.
+    throw error;
   }
 }
 
