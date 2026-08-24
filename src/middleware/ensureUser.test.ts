@@ -1,3 +1,4 @@
+// oxlint-disable typescript-eslint(no-unsafe-type-assertion)
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppError } from "@/server/lib/errors";
 
@@ -30,13 +31,9 @@ type MiddlewareHandler = (opts: {
   next: (ctx?: { context?: Record<string, unknown> }) => Promise<unknown>;
 }) => Promise<unknown>;
 
-const handler =
-  // oxlint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- tests invoke the compiled middleware handler shape directly
-  (
-    ensureUserMiddleware as unknown as {
-      options: { server: MiddlewareHandler };
-    }
-  ).options.server;
+const handler = (
+  ensureUserMiddleware as unknown as { options: { server: MiddlewareHandler } }
+).options.server;
 
 const authenticatedContext = {
   userId: "user-1",

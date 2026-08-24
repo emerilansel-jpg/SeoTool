@@ -1,3 +1,4 @@
+// oxlint-disable typescript-eslint(no-unsafe-type-assertion)
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/server/billing/subscription", () => ({
@@ -21,13 +22,11 @@ type MiddlewareHandler = (opts: {
   next: (ctx?: { context?: Record<string, unknown> }) => Promise<unknown>;
 }) => Promise<unknown>;
 
-const handler =
-  // oxlint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- tests invoke the compiled middleware handler shape directly
-  (
-    paidPlanGateMiddleware as unknown as {
-      options: { server: MiddlewareHandler };
-    }
-  ).options.server;
+const handler = (
+  paidPlanGateMiddleware as unknown as {
+    options: { server: MiddlewareHandler };
+  }
+).options.server;
 
 const cmsMeta = {
   id: "fn-1",

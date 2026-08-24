@@ -14,3 +14,4 @@ drizzle-pg/
 planning/
 worker-configuration.d.ts
 web/
+.playwright-mcp/

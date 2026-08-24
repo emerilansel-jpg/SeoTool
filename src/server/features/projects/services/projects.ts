@@ -81,7 +81,7 @@ export async function listProjectsEnsuringOne(organizationId: string) {
   if (organizationId === "e2e-org-id") {
     return [
       {
-        id: "00000000-0000-0000-0000-000000000001",
+        id: "00000000-0000-4000-8000-000000000001",
         organizationId: "e2e-org-id",
         name: "E2E Test Project",
         domain: null,

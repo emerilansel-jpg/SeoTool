@@ -8,6 +8,11 @@ import {
   isHostedClientAuthMode,
 } from "@/lib/auth-mode";
 
+// Paths that must remain accessible even when onboarding is incomplete.
+// Users stuck in the onboarding loop need access to settings (to delete
+// their account) and billing (to subscribe).
+const ONBOARDING_EXEMPT_PATHS = ["/onboarding", "/settings", "/billing"];
+
 /**
  * Redirects incomplete-onboarding users to /onboarding and returns the
  * check state so callers (like _app layout) can delay their own guards
@@ -31,6 +36,12 @@ export function useOnboardingRedirect(): {
     enabled: isHostedMode && Boolean(session?.user?.id) && isEmailVerified,
   });
 
+  const currentPath =
+    typeof window !== "undefined" ? window.location.pathname : "";
+  const isExemptPath = ONBOARDING_EXEMPT_PATHS.some(
+    (p) => currentPath === p || currentPath.startsWith(`${p}/`),
+  );
+
   const isChecking = onboardingQuery.isLoading && !onboardingQuery.isError;
   const needsOnboarding =
     isHostedMode &&
@@ -39,7 +50,7 @@ export function useOnboardingRedirect(): {
     !onboardingQuery.isLoading &&
     !onboardingQuery.isError &&
     !onboardingQuery.data?.completedAt &&
-    window.location.pathname !== "/onboarding";
+    !isExemptPath;
 
   useEffect(() => {
     if (!needsOnboarding) {

@@ -59,8 +59,17 @@ function AppRouteLayout() {
   }
 
   // 2. Auth OK, but onboarding still loading -> spinner (don't render tools
-  //    yet; the onboarding redirect useEffect may fire next tick).
-  if (onboarding.isChecking) {
+  //    yet; the onboarding redirect useEffect may fire next tick). Exempt
+  //    paths like /settings and /billing must render even during onboarding
+  //    so users can delete their account or manage their subscription.
+  const isOnboardingExemptPath =
+    typeof window !== "undefined" &&
+    ["/settings", "/billing"].some(
+      (p) =>
+        window.location.pathname === p ||
+        window.location.pathname.startsWith(`${p}/`),
+    );
+  if (onboarding.isChecking && !isOnboardingExemptPath) {
     return (
       <div className="flex h-full items-center justify-center">
         <span className="loading loading-spinner loading-md" />

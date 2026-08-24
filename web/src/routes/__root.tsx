@@ -18,6 +18,49 @@ export const Route = createRootRoute({
         name: "viewport",
         content: "width=device-width, initial-scale=1",
       },
+      {
+        title: "SeoTool.im - Open Source SEO Platform",
+      },
+      {
+        name: "description",
+        content:
+          "Open source alternative to Ahrefs and Semrush. Keyword research, backlinks, rank tracking, and site audits, billed by usage instead of a $100-plus monthly subscription.",
+      },
+      { property: "og:site_name", content: "SeoTool.im" },
+      { property: "og:type", content: "website" },
+      {
+        property: "og:title",
+        content: "SeoTool.im - Open Source SEO Platform",
+      },
+      {
+        property: "og:description",
+        content:
+          "Open source alternative to Ahrefs and Semrush. Keyword research, backlinks, rank tracking, and site audits, billed by usage instead of a $100-plus monthly subscription.",
+      },
+      { property: "og:url", content: "https://seotool.im/" },
+      { property: "og:image", content: "https://seotool.im/social-card.png" },
+      { property: "og:image:alt", content: "SeoTool.im product preview" },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { name: "twitter:card", content: "summary_large_image" },
+      {
+        name: "twitter:title",
+        content: "SeoTool.im - Open Source SEO Platform",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Open source alternative to Ahrefs and Semrush. Keyword research, backlinks, rank tracking, and site audits.",
+      },
+      {
+        name: "twitter:image",
+        content: "https://seotool.im/social-card.png",
+      },
+      {
+        name: "twitter:image:alt",
+        content: "SeoTool.im product preview",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -40,6 +83,7 @@ export const Route = createRootRoute({
         href: "/favicon-16x16.png",
       },
       { rel: "manifest", href: "/site.webmanifest" },
+      { rel: "canonical", href: "https://seotool.im/" },
     ],
   }),
   component: RootComponent,

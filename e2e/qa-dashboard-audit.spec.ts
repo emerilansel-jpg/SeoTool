@@ -115,7 +115,7 @@ test.describe("Full Dashboard UI/UX QA and Screenshot Capture", () => {
       (window as unknown as Record<string, boolean>).__E2E_BYPASS_AUTH = true;
     });
 
-    const projectId = "00000000-0000-0000-0000-000000000001";
+    const projectId = "00000000-0000-4000-8000-000000000001";
 
     await page.goto(`/p/${projectId}`, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1500);

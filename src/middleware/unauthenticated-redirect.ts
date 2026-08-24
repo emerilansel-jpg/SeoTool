@@ -28,6 +28,24 @@ const PUBLIC_PATH_PREFIXES = [
   "/site.webmanifest",
 ];
 
+// Known authenticated app route prefixes. Only these paths trigger a
+// sign-in redirect for unauthenticated visitors. Unknown paths fall through
+// to the 404 handler so anonymous users see a proper "not found" page.
+const AUTHENTICATED_ROUTE_PREFIXES = [
+  "/projects",
+  "/settings",
+  "/billing",
+  "/admin",
+  "/help",
+  "/support",
+  "/ai",
+  "/p/",
+  "/subscribe",
+  "/onboarding",
+  "/reports",
+  "/alerts",
+];
+
 async function isE2EBypassEnabled(): Promise<boolean> {
   // Same check as ensure-user/hosted.ts: the Vite define first, then the
   // runtime env, so the Playwright webServer shell variable is honored.
@@ -71,10 +89,23 @@ export const unauthenticatedRedirectMiddleware = createMiddleware().server(
       return ctx.next();
     }
 
+    // Only redirect known authenticated routes. Unknown paths fall through
+    // to the 404 handler so anonymous users see a proper "not found" page
+    // instead of being redirected to sign-in.
+    const isKnownAppRoute = AUTHENTICATED_ROUTE_PREFIXES.some((prefix) =>
+      url.pathname.startsWith(prefix),
+    );
+    if (!isKnownAppRoute) {
+      return ctx.next();
+    }
+
     const redirectTo = `${url.pathname}${url.search}`;
     const search =
       redirectTo === "/" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`;
 
-    return Response.redirect(new URL(`/sign-in${search}`, url.origin), 307);
+    // Force HTTPS in redirect URLs. Behind Cloudflare the incoming protocol
+    // may be HTTP; always emit HTTPS so the browser lands on the secure origin.
+    const httpsOrigin = url.origin.replace(/^http:/, "https:");
+    return Response.redirect(new URL(`/sign-in${search}`, httpsOrigin), 307);
   },
 );
