@@ -119,6 +119,50 @@ export function PropertyPicker({
       )
     : -1;
 
+  if (options.length === 0) {
+    const hasExpiredAccount = accounts.some(
+      (account) => account.requiresReconnect,
+    );
+    return (
+      <div className="space-y-3">
+        <p className="text-sm text-base-content/70">
+          {hasExpiredAccount
+            ? "A Google Analytics connection expired, and no other GA4 properties are available."
+            : "No Google Analytics 4 properties were found for this Google account."}
+        </p>
+        <p className="text-xs text-base-content/55">
+          Make sure the Google account has access to a GA4 property, then
+          reconnect it.
+        </p>
+        <div className="flex flex-wrap items-center gap-1">
+          <button
+            type="button"
+            onClick={onReconnect}
+            className="inline-flex items-center gap-2.5 rounded-lg border border-base-300 bg-base-100 px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:bg-base-200"
+          >
+            <GoogleGlyph className="size-[18px]" />
+            Reconnect with Google
+          </button>
+          {secondaryAction ? (
+            <button
+              type="button"
+              className={[
+                "btn btn-ghost btn-sm",
+                secondaryAction.destructive
+                  ? "text-error hover:bg-error/10"
+                  : "",
+              ].join(" ")}
+              onClick={secondaryAction.onClick}
+              disabled={secondaryAction.disabled}
+            >
+              {secondaryAction.label}
+            </button>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <label className="block">

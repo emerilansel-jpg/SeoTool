@@ -1,5 +1,6 @@
 import { getAuth } from "@/lib/auth";
 import { GA4_OAUTH_PROVIDER_ID } from "@/shared/ga4";
+import { z } from "zod";
 
 const GA4_DATA_API_BASE = "https://analyticsdata.googleapis.com/v1beta";
 const GA4_ADMIN_API_BASE = "https://analyticsadmin.googleapis.com/v1beta";
@@ -37,17 +38,28 @@ export type Ga4Property = {
   accountId: string;
 };
 
-// Subset of the Admin API `accountSummaries` response we consume. The wire
-// shape is richer; extra fields are ignored.
-type AccountSummariesResponse = {
-  accountSummaries?: Array<{
-    account?: { name?: string };
-    propertySummaries?: Array<{
-      property?: string;
-      displayName?: string;
-    }>;
-  }>;
-};
+// Subset of the Admin API `accountSummaries` response we consume. Google sends
+// `account` as a resource-name string ("accounts/123"), not an Account object.
+// Keep the response validation at the HTTP boundary so a wire-shape drift fails
+// visibly instead of silently discarding every property.
+const accountSummariesResponseSchema = z.object({
+  accountSummaries: z
+    .array(
+      z.object({
+        account: z.string().optional(),
+        propertySummaries: z
+          .array(
+            z.object({
+              property: z.string().optional(),
+              displayName: z.string().optional(),
+            }),
+          )
+          .optional(),
+      }),
+    )
+    .optional(),
+  nextPageToken: z.string().optional(),
+});
 
 /** GA4 Data API `runReport` request body. Keep permissive — filters and order
  *  clauses are passed through unchanged. */
@@ -172,22 +184,33 @@ export function createGa4Client(opts: {
      *  see, flattened to a selectable list. Each property is a
      *  "properties/NNN" resource name used verbatim by runReport. */
     async listProperties(): Promise<Ga4Property[]> {
-      const data = await request<AccountSummariesResponse>(
-        `${GA4_ADMIN_API_BASE}/accountSummaries`,
-      );
       const properties: Ga4Property[] = [];
-      for (const summary of data.accountSummaries ?? []) {
-        const accountId = summary.account?.name;
-        if (!accountId) continue;
-        for (const prop of summary.propertySummaries ?? []) {
-          if (!prop.property) continue;
-          properties.push({
-            property: prop.property,
-            displayName: prop.displayName ?? prop.property,
-            accountId,
-          });
+      let pageToken: string | undefined;
+
+      do {
+        const url = new URL(`${GA4_ADMIN_API_BASE}/accountSummaries`);
+        url.searchParams.set("pageSize", "200");
+        if (pageToken) url.searchParams.set("pageToken", pageToken);
+
+        const data = accountSummariesResponseSchema.parse(
+          await request<unknown>(url.toString()),
+        );
+        for (const summary of data.accountSummaries ?? []) {
+          const accountId = summary.account;
+          if (!accountId) continue;
+          for (const prop of summary.propertySummaries ?? []) {
+            if (!prop.property) continue;
+            properties.push({
+              property: prop.property,
+              displayName: prop.displayName ?? prop.property,
+              accountId,
+            });
+          }
         }
-      }
+
+        pageToken = data.nextPageToken?.trim() || undefined;
+      } while (pageToken);
+
       return properties;
     },
 
