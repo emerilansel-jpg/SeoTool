@@ -393,6 +393,13 @@
       "when": 1787560000000,
       "tag": "0055_gmb_grid_reliability",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "6",
+      "when": 1787752182271,
+      "tag": "0056_keyword_research_pro",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,10 @@
 /* eslint-disable max-lines */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CREDITS_PER_USD, SEO_DATA_COST_MARKUP } from "@/shared/billing";
+import {
+  CREDITS_PER_USD,
+  SEO_DATA_BYOK_FEE_MULTIPLIER,
+  SEO_DATA_COST_MARKUP,
+} from "@/shared/billing";
 
 const {
   checkMock,
@@ -334,6 +338,30 @@ describe("meterDataforseoCall with split balances", () => {
     await client.backlinks.summary(backlinksInput);
 
     expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
+  });
+
+  it("charges only the 10% service fee and forwards a request-scoped BYOK key", async () => {
+    setupHostedMode();
+    mockBalances(5000, 3000);
+    mockDataforseoResult(RAW_COST);
+
+    const client = createDataforseoClient(billingCustomer, {
+      billingMode: "byok",
+      apiKey: "request-scoped-key",
+      skipQuota: true,
+    });
+    await client.backlinks.summary(backlinksInput);
+
+    const expectedByokCredits = Math.ceil(
+      Number((RAW_COST * SEO_DATA_BYOK_FEE_MULTIPLIER).toFixed(6)) *
+        CREDITS_PER_USD,
+    );
+    expect(fetchBacklinksSummary).toHaveBeenCalledWith({
+      ...backlinksInput,
+      apiKey: "request-scoped-key",
+    });
+    expect(quotaMock).not.toHaveBeenCalled();
+    expect(trackMock).toHaveBeenCalledWith("org_123", expectedByokCredits);
   });
 });
 

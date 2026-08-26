@@ -11,7 +11,11 @@ export const SUBSCRIBE_ROUTE = "/subscribe";
 export const PAYPAL_CREDITS_FEATURE_ID = "usage_credits";
 export const PAYPAL_TOPUP_CREDITS_FEATURE_ID = "topup_credits";
 export const CREDITS_PER_USD = 1000;
-export const SEO_DATA_COST_MARKUP = 1.28;
+/** Hosted DataForSEO requests use the platform credential and include a 30%
+ * service margin. BYOK requests are paid to DataForSEO by the customer and
+ * only deduct the 10% SeoTool service fee from usage credits. */
+export const SEO_DATA_COST_MARKUP = 1.3;
+export const SEO_DATA_BYOK_FEE_MULTIPLIER = 0.1;
 export const LOW_CREDITS_THRESHOLD_USD = 0.25;
 
 /** Monthly credit grant per tier. Must stay importable from client code, so

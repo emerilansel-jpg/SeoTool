@@ -18,6 +18,10 @@ export {
   fetchBacklinksSummary,
   fetchDomainPagesSummary,
   fetchReferringDomains,
+  fetchBacklinksBulkRanks,
+  fetchBacklinksBulkBacklinks,
+  fetchBacklinksBulkSpamScores,
+  fetchBacklinksBulkReferringDomains,
 } from "@/server/lib/dataforseo/backlinks";
 
 export { fetchBacklinksDomainIntersection } from "@/server/lib/dataforseo/backlinks-intersect";
@@ -41,6 +45,7 @@ export {
 
 export {
   fetchLiveSerp,
+  fetchCompetitionSerp,
   fetchLocalSerp,
   fetchRankCheckSerp,
   fetchRankCheckTaskResult,

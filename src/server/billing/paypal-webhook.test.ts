@@ -23,6 +23,20 @@ vi.mock(
     },
   }),
 );
+vi.mock("@/server/features/keywords/repositories/KeywordProRepository", () => ({
+  KeywordProRepository: {
+    getMembershipByPaypalSubscription: vi.fn(),
+  },
+}));
+vi.mock(
+  "@/server/features/keywords/services/KeywordProMembershipService",
+  () => ({
+    KeywordProMembershipService: {
+      syncWebhookSubscription: vi.fn(),
+      rewardReferralSale: vi.fn(),
+    },
+  }),
+);
 
 import { addTopupCredits } from "./credits";
 import { syncPaypalCustomerStatus } from "./customer-status-sync";
@@ -33,12 +47,16 @@ import {
 import { createTopupMarker } from "./paypal-topup";
 import { handlePaypalWebhookRequest } from "./paypal-webhook";
 import { PayPalWebhookEventRepository } from "@/server/features/admin/repositories/PayPalWebhookEventRepository";
+import { KeywordProRepository } from "@/server/features/keywords/repositories/KeywordProRepository";
+import { KeywordProMembershipService } from "@/server/features/keywords/services/KeywordProMembershipService";
 
 const extractHeaders = vi.mocked(extractWebhookHeaders);
 const verifySignature = vi.mocked(verifyWebhookSignature);
 const webhookEvents = vi.mocked(PayPalWebhookEventRepository);
 const addCredits = vi.mocked(addTopupCredits);
 const syncCustomer = vi.mocked(syncPaypalCustomerStatus);
+const keywordProRepository = vi.mocked(KeywordProRepository);
+const keywordProMembership = vi.mocked(KeywordProMembershipService);
 
 const verifiedHeaders = {
   transmissionId: "transmission-1",
@@ -66,6 +84,11 @@ beforeEach(() => {
   webhookEvents.record.mockResolvedValue(true);
   webhookEvents.markStatus.mockResolvedValue();
   addCredits.mockResolvedValue();
+  keywordProRepository.getMembershipByPaypalSubscription.mockResolvedValue(
+    null,
+  );
+  keywordProMembership.syncWebhookSubscription.mockResolvedValue(null);
+  keywordProMembership.rewardReferralSale.mockResolvedValue(false);
   syncCustomer.mockResolvedValue({
     organizationId: "org-1",
     isPaying: false,
@@ -154,6 +177,62 @@ describe("handlePaypalWebhookRequest", () => {
 
     expect(addCredits).not.toHaveBeenCalled();
     expect(syncCustomer).toHaveBeenCalledWith("org-1", undefined);
+  });
+
+  it("routes Keyword Research Pro subscription events away from the main plan sync", async () => {
+    const response = await handlePaypalWebhookRequest(
+      request({
+        id: "WH-KRP-ACTIVE-1",
+        event_type: "BILLING.SUBSCRIPTION.ACTIVATED",
+        resource: {
+          id: "I-KRP-1",
+          custom_id: "krp:org-krp:krp_founder_10",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(keywordProMembership.syncWebhookSubscription).toHaveBeenCalledWith(
+      "I-KRP-1",
+    );
+    expect(syncCustomer).not.toHaveBeenCalled();
+  });
+
+  it("credits a verified Keyword Research Pro referral sale", async () => {
+    keywordProRepository.getMembershipByPaypalSubscription.mockResolvedValue({
+      organizationId: "org-referred",
+      cohortKey: "krp_founder_10",
+      lockedPriceUsdCents: 1900,
+      status: "ACTIVE",
+      paypalPlanId: "P-KRP-1",
+      paypalSubscriptionId: "I-KRP-1",
+      referralCodeUsed: null,
+      activatedAt: "2026-08-24T00:00:00.000Z",
+      currentPeriodEnd: null,
+      createdAt: "2026-08-24T00:00:00.000Z",
+      updatedAt: "2026-08-24T00:00:00.000Z",
+    });
+    keywordProMembership.rewardReferralSale.mockResolvedValue(true);
+
+    const response = await handlePaypalWebhookRequest(
+      request({
+        id: "WH-KRP-SALE-1",
+        event_type: "PAYMENT.SALE.COMPLETED",
+        resource: {
+          id: "SALE-1",
+          billing_agreement_id: "I-KRP-1",
+          amount: { currency: "USD", total: "19.00" },
+        },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(keywordProMembership.rewardReferralSale).toHaveBeenCalledWith({
+      paypalSubscriptionId: "I-KRP-1",
+      paypalSaleId: "SALE-1",
+      grossAmountUsdCents: 1900,
+    });
+    expect(syncCustomer).not.toHaveBeenCalled();
   });
 
   it("does not make a granted top-up retryable when only its audit update fails", async () => {

@@ -11,6 +11,12 @@ import {
 import type { EffectivePlanConfig } from "@/server/billing/plan-config";
 import { PLAN_TIER_LABELS } from "@/shared/plans";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
+import {
+  getAdminKeywordProCohorts,
+  initializeAdminKeywordProPaypalPlans,
+  saveAdminKeywordProCohort,
+} from "@/serverFunctions/admin-keyword-pro";
+import type { EffectiveKeywordProCohort } from "@/server/features/keywords/services/KeywordProConfigService";
 
 export function AdminPricingPage() {
   const getConfigs = useServerFn(getAdminPlanConfigs);
@@ -53,6 +59,169 @@ export function AdminPricingPage() {
       {data.map((config) => (
         <TierCard key={config.tier} config={config} onSaved={invalidate} />
       ))}
+      <KeywordProPricingSection />
+    </div>
+  );
+}
+
+function KeywordProPricingSection() {
+  const getCohorts = useServerFn(getAdminKeywordProCohorts);
+  const initializePlans = useServerFn(initializeAdminKeywordProPaypalPlans);
+  const queryClient = useQueryClient();
+  const cohorts = useQuery({
+    queryKey: ["admin-keyword-pro-cohorts"],
+    queryFn: () => getCohorts(),
+  });
+  const initialize = useMutation({
+    mutationFn: () => initializePlans({ data: { confirmed: true } }),
+    onSuccess: (result) => {
+      toast.success(
+        result.created > 0
+          ? `${result.created} Keyword Research Pro PayPal plans created.`
+          : "All Keyword Research Pro PayPal plans are already configured.",
+      );
+      void queryClient.invalidateQueries({
+        queryKey: ["admin-keyword-pro-cohorts"],
+      });
+    },
+    onError: (error) =>
+      toast.error(
+        getStandardErrorMessage(error, "Could not create PayPal plans."),
+      ),
+  });
+  const invalidate = () =>
+    void queryClient.invalidateQueries({
+      queryKey: ["admin-keyword-pro-cohorts"],
+    });
+
+  return (
+    <section className="space-y-4 pt-6">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-t border-base-300 pt-6">
+        <div>
+          <h2 className="text-lg font-semibold">
+            Keyword Research Pro cohorts
+          </h2>
+          <p className="max-w-3xl text-sm text-base-content/70">
+            Prices are locked per member. Changing a cohort price creates a new
+            PayPal plan for future buyers; existing subscriptions stay on their
+            original plan and price.
+          </p>
+        </div>
+        <button
+          className="btn btn-primary btn-sm"
+          disabled={initialize.isPending}
+          onClick={() => initialize.mutate()}
+        >
+          {initialize.isPending ? "Creating plans…" : "Set up PayPal plans"}
+        </button>
+      </div>
+      {cohorts.isLoading ? (
+        <div className="skeleton h-40 rounded-lg" />
+      ) : (
+        cohorts.data?.map((cohort) => (
+          <KeywordProCohortCard
+            key={`${cohort.key}-${cohort.priceUsdCents}-${cohort.paypalPlanId}`}
+            cohort={cohort}
+            onSaved={invalidate}
+          />
+        ))
+      )}
+    </section>
+  );
+}
+
+function KeywordProCohortCard({
+  cohort,
+  onSaved,
+}: {
+  cohort: EffectiveKeywordProCohort;
+  onSaved: () => void;
+}) {
+  const saveCohort = useServerFn(saveAdminKeywordProCohort);
+  const [price, setPrice] = useState((cohort.priceUsdCents / 100).toString());
+  const [active, setActive] = useState(cohort.active);
+  const save = useMutation({
+    mutationFn: () =>
+      saveCohort({
+        data: {
+          key: cohort.key,
+          priceUsdCents: Math.round((Number.parseFloat(price) || 0) * 100),
+          active,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Cohort pricing saved.");
+      onSaved();
+    },
+    onError: (error) =>
+      toast.error(getStandardErrorMessage(error, "Could not save cohort.")),
+  });
+  return (
+    <div className="card border border-base-300 bg-base-100">
+      <div className="card-body gap-3 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold">{cohort.label}</h3>
+              <span
+                className={`badge badge-sm ${cohort.configured ? "badge-success" : "badge-warning"}`}
+              >
+                {cohort.configured ? "PayPal ready" : "Not configured"}
+              </span>
+            </div>
+            <p className="text-xs text-base-content/60">
+              {cohort.occupied} member{cohort.occupied === 1 ? "" : "s"}
+              {cohort.capacity == null
+                ? " · unlimited"
+                : ` / ${cohort.capacity}`}
+            </p>
+          </div>
+          <label className="label cursor-pointer gap-2 text-xs">
+            Active
+            <input
+              type="checkbox"
+              className="toggle toggle-primary toggle-sm"
+              checked={active}
+              onChange={(event) => setActive(event.target.checked)}
+            />
+          </label>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="form-control">
+            <span className="label-text text-xs font-medium">
+              Price (USD/month)
+            </span>
+            <input
+              type="number"
+              min="1"
+              step="0.01"
+              className="input input-bordered input-sm"
+              value={price}
+              onChange={(event) => setPrice(event.target.value)}
+            />
+          </label>
+          <label className="form-control">
+            <span className="label-text text-xs font-medium">
+              PayPal plan ID
+            </span>
+            <input
+              readOnly
+              className="input input-bordered input-sm font-mono text-xs"
+              value={cohort.paypalPlanId ?? ""}
+              placeholder="Created by Set up PayPal plans"
+            />
+          </label>
+        </div>
+        <div className="flex justify-end">
+          <button
+            className="btn btn-primary btn-sm"
+            disabled={save.isPending}
+            onClick={() => save.mutate()}
+          >
+            {save.isPending ? "Saving…" : "Save cohort"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

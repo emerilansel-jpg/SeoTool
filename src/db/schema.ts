@@ -37,6 +37,8 @@ import * as sqliteAdmin from "./admin.schema";
 import * as pgAdmin from "./pg/admin.schema";
 import * as sqliteNotifications from "./notifications.schema";
 import * as pgNotifications from "./pg/notifications.schema";
+import * as sqliteKeywordResearchPro from "./keyword-research-pro.schema";
+import * as pgKeywordResearchPro from "./pg/keyword-research-pro.schema";
 
 // Canonical schema barrel. Repositories import their tables from here and the
 // provider-aware `db` from "@/db", so each repository is written ONCE for both
@@ -66,7 +68,8 @@ type AppSchema = typeof sqliteApp &
   typeof sqliteSerpVolatility &
   typeof sqliteApiKeys &
   typeof sqliteNotifications &
-  typeof sqliteAdmin;
+  typeof sqliteAdmin &
+  typeof sqliteKeywordResearchPro;
 
 const runtimeSchema =
   getDatabaseProvider() === "postgres"
@@ -90,6 +93,7 @@ const runtimeSchema =
         ...pgApiKeys,
         ...pgNotifications,
         ...pgAdmin,
+        ...pgKeywordResearchPro,
       }
     : {
         ...sqliteApp,
@@ -111,6 +115,7 @@ const runtimeSchema =
         ...sqliteApiKeys,
         ...sqliteNotifications,
         ...sqliteAdmin,
+        ...sqliteKeywordResearchPro,
       };
 
 // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- guarded by schema-parity.test.ts
@@ -172,4 +177,8 @@ export const {
   gmbGridConfigs,
   gmbGridRuns,
   gmbGridSnapshots,
+  keywordProMemberships,
+  keywordProReferralCodes,
+  keywordProReferralAttributions,
+  keywordProReferralCommissions,
 } = schema;

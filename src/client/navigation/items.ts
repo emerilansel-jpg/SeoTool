@@ -22,6 +22,7 @@ import {
   MapPin,
   Target,
   Waypoints,
+  SearchCheck,
 } from "lucide-react";
 import { linkOptions } from "@tanstack/react-router";
 import { GoogleGlyphMuted } from "@/client/features/gsc/GoogleGlyph";
@@ -39,6 +40,11 @@ const projectNavItems = [
     to: "/p/$projectId/keywords" as const,
     label: "Keyword Research",
     icon: Search,
+  },
+  {
+    to: "/p/$projectId/keyword-research-pro" as const,
+    label: "Keyword Research Pro",
+    icon: SearchCheck,
   },
   {
     to: "/p/$projectId/saved" as const,
@@ -186,6 +192,7 @@ export function getProjectNavGroups(projectId: string) {
       label: "Keywords & Ranking",
       items: [
         byPath("/p/$projectId/keywords"),
+        byPath("/p/$projectId/keyword-research-pro"),
         byPath("/p/$projectId/saved"),
         byPath("/p/$projectId/rank-tracking"),
         byPath("/p/$projectId/gmb-grid"),

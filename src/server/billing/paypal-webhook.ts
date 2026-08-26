@@ -5,6 +5,9 @@ import { addTopupCredits } from "./credits";
 import { CREDITS_PER_USD } from "@/shared/billing";
 import { PayPalWebhookEventRepository } from "@/server/features/admin/repositories/PayPalWebhookEventRepository";
 import { parseTopupMarker } from "./paypal-topup";
+import { parseKeywordProMarker } from "@/shared/keyword-pro-membership";
+import { KeywordProRepository } from "@/server/features/keywords/repositories/KeywordProRepository";
+import { KeywordProMembershipService } from "@/server/features/keywords/services/KeywordProMembershipService";
 import {
   extractWebhookHeaders,
   verifyWebhookSignature,
@@ -32,6 +35,7 @@ const SYNC_EVENTS = new Set([
   "BILLING.SUBSCRIPTION.ACTIVATED",
   "BILLING.SUBSCRIPTION.SUSPENDED",
   "PAYMENT.CAPTURE.COMPLETED",
+  "PAYMENT.SALE.COMPLETED",
 ]);
 
 export async function handlePaypalWebhookRequest(request: Request) {
@@ -66,7 +70,7 @@ export async function handlePaypalWebhookRequest(request: Request) {
     return json({ error: "Invalid webhook payload" }, 400);
   }
 
-  const orgId = getOrganizationId(payload);
+  const orgId = await getOrganizationId(payload);
   const eventId = payload.id;
 
   // Idempotency + audit trail: the PayPal event id is the row id, so a
@@ -92,6 +96,15 @@ export async function handlePaypalWebhookRequest(request: Request) {
     }
 
     try {
+      if (await processKeywordProEvent(payload)) {
+        await PayPalWebhookEventRepository.markStatus(
+          eventId,
+          "processed",
+          null,
+        );
+        return json({ received: true });
+      }
+
       // One-time credit top-up purchase: grant the purchased credits.
       // Subscription renewals also arrive as PAYMENT.CAPTURE.COMPLETED but
       // carry a custom_id (not a topup reference), so the grant is skipped.
@@ -156,15 +169,31 @@ export async function handlePaypalWebhookRequest(request: Request) {
   return json({ received: true });
 }
 
-function getOrganizationId(payload: PayPalWebhookEvent): string | null {
+async function getOrganizationId(
+  payload: PayPalWebhookEvent,
+): Promise<string | null> {
   // Subscription events store the raw organization id. Top-up captures carry
   // a prefixed marker so they cannot be confused with subscription renewals.
   const resource = payload.resource;
   const customId =
     typeof resource.custom_id === "string" ? resource.custom_id : null;
+  const keywordPro = parseKeywordProMarker(customId);
+  if (keywordPro) return keywordPro.organizationId;
   const topupOrganizationId = parseTopupReference(customId);
   if (topupOrganizationId) return topupOrganizationId;
   if (customId && customId.length > 0) return customId;
+
+  const billingAgreementId =
+    typeof resource.billing_agreement_id === "string"
+      ? resource.billing_agreement_id
+      : null;
+  if (billingAgreementId) {
+    const membership =
+      await KeywordProRepository.getMembershipByPaypalSubscription(
+        billingAgreementId,
+      );
+    if (membership) return membership.organizationId;
+  }
 
   // For payment capture events, extract from purchase_units
   for (const unit of toRecordArray(resource.purchase_units)) {
@@ -178,6 +207,59 @@ function getOrganizationId(payload: PayPalWebhookEvent): string | null {
   }
 
   return null;
+}
+
+async function processKeywordProEvent(payload: PayPalWebhookEvent) {
+  const resource = payload.resource;
+  if (payload.event_type.startsWith("BILLING.SUBSCRIPTION.")) {
+    const subscriptionId = typeof resource.id === "string" ? resource.id : null;
+    if (!subscriptionId) return false;
+    const marker = parseKeywordProMarker(resource.custom_id);
+    const membership =
+      await KeywordProRepository.getMembershipByPaypalSubscription(
+        subscriptionId,
+      );
+    if (!marker && !membership) return false;
+    await KeywordProMembershipService.syncWebhookSubscription(subscriptionId);
+    return true;
+  }
+
+  if (payload.event_type !== "PAYMENT.SALE.COMPLETED") return false;
+  const subscriptionId =
+    typeof resource.billing_agreement_id === "string"
+      ? resource.billing_agreement_id
+      : null;
+  const saleId = typeof resource.id === "string" ? resource.id : null;
+  if (!subscriptionId || !saleId) return false;
+  const membership =
+    await KeywordProRepository.getMembershipByPaypalSubscription(
+      subscriptionId,
+    );
+  if (!membership) return false;
+
+  const amount = isRecord(resource.amount) ? resource.amount : null;
+  const amountValue =
+    amount && typeof amount.total === "string"
+      ? amount.total
+      : amount && typeof amount.value === "string"
+        ? amount.value
+        : null;
+  const currency =
+    amount && typeof amount.currency === "string"
+      ? amount.currency
+      : amount && typeof amount.currency_code === "string"
+        ? amount.currency_code
+        : null;
+  const amountUsd = Number.parseFloat(amountValue ?? "");
+  if (currency !== "USD" || !Number.isFinite(amountUsd) || amountUsd <= 0) {
+    throw new Error("Invalid Keyword Research Pro PayPal sale amount");
+  }
+  await KeywordProMembershipService.rewardReferralSale({
+    paypalSubscriptionId: subscriptionId,
+    paypalSaleId: saleId,
+    grossAmountUsdCents: Math.round(amountUsd * 100),
+  });
+  return true;
 }
 
 /** For a completed top-up capture, resolve the credited amount in credits.

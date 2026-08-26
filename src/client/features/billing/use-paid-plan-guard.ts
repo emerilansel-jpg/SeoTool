@@ -42,8 +42,11 @@ export function usePaidPlanGuard(onboardingIncomplete: boolean = false) {
         window.location.pathname.startsWith("/support") ||
         window.location.pathname.startsWith("/settings") ||
         window.location.pathname.startsWith("/billing"));
+    const isKeywordProPath =
+      typeof window !== "undefined" &&
+      window.location.pathname.endsWith("/keyword-research-pro");
 
-    if (!isPaid && !isExemptPath) {
+    if (!isPaid && !isExemptPath && !isKeywordProPath) {
       void navigate({
         href: `${SUBSCRIBE_ROUTE}?redirect=${encodeURIComponent(
           window.location.pathname + window.location.search,
@@ -67,12 +70,16 @@ export function usePaidPlanGuard(onboardingIncomplete: boolean = false) {
       window.location.pathname.startsWith("/support") ||
       window.location.pathname.startsWith("/settings") ||
       window.location.pathname.startsWith("/billing"));
+  const isKeywordProPath =
+    typeof window !== "undefined" &&
+    window.location.pathname.endsWith("/keyword-research-pro");
 
   return {
     canUseTools:
       isE2EBypass ||
       !isHostedMode ||
       isExemptPath ||
+      isKeywordProPath ||
       (!isLoading && !onboardingIncomplete && isPaid),
   };
 }

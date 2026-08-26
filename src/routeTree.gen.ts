@@ -69,6 +69,7 @@ import { Route as ProjectPProjectIdGa4InsightsRouteImport } from './routes/_proj
 import { Route as ProjectPProjectIdGmbGridRouteImport } from './routes/_project/p/$projectId/gmb-grid'
 import { Route as ProjectPProjectIdJetRouteImport } from './routes/_project/p/$projectId/jet'
 import { Route as ProjectPProjectIdKeywordClusteringRouteImport } from './routes/_project/p/$projectId/keyword-clustering'
+import { Route as ProjectPProjectIdKeywordResearchProRouteImport } from './routes/_project/p/$projectId/keyword-research-pro'
 import { Route as ProjectPProjectIdKeywordsRouteImport } from './routes/_project/p/$projectId/keywords'
 import { Route as ProjectPProjectIdLinkIntersectRouteImport } from './routes/_project/p/$projectId/link-intersect'
 import { Route as ProjectPProjectIdOnPageCheckerRouteImport } from './routes/_project/p/$projectId/on-page-checker'
@@ -400,6 +401,12 @@ const ProjectPProjectIdKeywordClusteringRoute =
     path: '/keyword-clustering',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
+const ProjectPProjectIdKeywordResearchProRoute =
+  ProjectPProjectIdKeywordResearchProRouteImport.update({
+    id: '/keyword-research-pro',
+    path: '/keyword-research-pro',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
 const ProjectPProjectIdKeywordsRoute =
   ProjectPProjectIdKeywordsRouteImport.update({
     id: '/keywords',
@@ -581,6 +588,7 @@ export interface FileRoutesByFullPath {
   '/p/$projectId/gmb-grid': typeof ProjectPProjectIdGmbGridRoute
   '/p/$projectId/jet': typeof ProjectPProjectIdJetRoute
   '/p/$projectId/keyword-clustering': typeof ProjectPProjectIdKeywordClusteringRoute
+  '/p/$projectId/keyword-research-pro': typeof ProjectPProjectIdKeywordResearchProRoute
   '/p/$projectId/keywords': typeof ProjectPProjectIdKeywordsRoute
   '/p/$projectId/link-intersect': typeof ProjectPProjectIdLinkIntersectRoute
   '/p/$projectId/on-page-checker': typeof ProjectPProjectIdOnPageCheckerRoute
@@ -657,6 +665,7 @@ export interface FileRoutesByTo {
   '/p/$projectId/gmb-grid': typeof ProjectPProjectIdGmbGridRoute
   '/p/$projectId/jet': typeof ProjectPProjectIdJetRoute
   '/p/$projectId/keyword-clustering': typeof ProjectPProjectIdKeywordClusteringRoute
+  '/p/$projectId/keyword-research-pro': typeof ProjectPProjectIdKeywordResearchProRoute
   '/p/$projectId/keywords': typeof ProjectPProjectIdKeywordsRoute
   '/p/$projectId/link-intersect': typeof ProjectPProjectIdLinkIntersectRoute
   '/p/$projectId/on-page-checker': typeof ProjectPProjectIdOnPageCheckerRoute
@@ -741,6 +750,7 @@ export interface FileRoutesById {
   '/_project/p/$projectId/gmb-grid': typeof ProjectPProjectIdGmbGridRoute
   '/_project/p/$projectId/jet': typeof ProjectPProjectIdJetRoute
   '/_project/p/$projectId/keyword-clustering': typeof ProjectPProjectIdKeywordClusteringRoute
+  '/_project/p/$projectId/keyword-research-pro': typeof ProjectPProjectIdKeywordResearchProRoute
   '/_project/p/$projectId/keywords': typeof ProjectPProjectIdKeywordsRoute
   '/_project/p/$projectId/link-intersect': typeof ProjectPProjectIdLinkIntersectRoute
   '/_project/p/$projectId/on-page-checker': typeof ProjectPProjectIdOnPageCheckerRoute
@@ -823,6 +833,7 @@ export interface FileRouteTypes {
     | '/p/$projectId/gmb-grid'
     | '/p/$projectId/jet'
     | '/p/$projectId/keyword-clustering'
+    | '/p/$projectId/keyword-research-pro'
     | '/p/$projectId/keywords'
     | '/p/$projectId/link-intersect'
     | '/p/$projectId/on-page-checker'
@@ -899,6 +910,7 @@ export interface FileRouteTypes {
     | '/p/$projectId/gmb-grid'
     | '/p/$projectId/jet'
     | '/p/$projectId/keyword-clustering'
+    | '/p/$projectId/keyword-research-pro'
     | '/p/$projectId/keywords'
     | '/p/$projectId/link-intersect'
     | '/p/$projectId/on-page-checker'
@@ -982,6 +994,7 @@ export interface FileRouteTypes {
     | '/_project/p/$projectId/gmb-grid'
     | '/_project/p/$projectId/jet'
     | '/_project/p/$projectId/keyword-clustering'
+    | '/_project/p/$projectId/keyword-research-pro'
     | '/_project/p/$projectId/keywords'
     | '/_project/p/$projectId/link-intersect'
     | '/_project/p/$projectId/on-page-checker'
@@ -1460,6 +1473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectPProjectIdKeywordClusteringRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
+    '/_project/p/$projectId/keyword-research-pro': {
+      id: '/_project/p/$projectId/keyword-research-pro'
+      path: '/keyword-research-pro'
+      fullPath: '/p/$projectId/keyword-research-pro'
+      preLoaderRoute: typeof ProjectPProjectIdKeywordResearchProRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
     '/_project/p/$projectId/keywords': {
       id: '/_project/p/$projectId/keywords'
       path: '/keywords'
@@ -1741,6 +1761,7 @@ interface ProjectPProjectIdRouteRouteChildren {
   ProjectPProjectIdGmbGridRoute: typeof ProjectPProjectIdGmbGridRoute
   ProjectPProjectIdJetRoute: typeof ProjectPProjectIdJetRoute
   ProjectPProjectIdKeywordClusteringRoute: typeof ProjectPProjectIdKeywordClusteringRoute
+  ProjectPProjectIdKeywordResearchProRoute: typeof ProjectPProjectIdKeywordResearchProRoute
   ProjectPProjectIdKeywordsRoute: typeof ProjectPProjectIdKeywordsRoute
   ProjectPProjectIdLinkIntersectRoute: typeof ProjectPProjectIdLinkIntersectRoute
   ProjectPProjectIdOnPageCheckerRoute: typeof ProjectPProjectIdOnPageCheckerRoute
@@ -1772,6 +1793,8 @@ const ProjectPProjectIdRouteRouteChildren: ProjectPProjectIdRouteRouteChildren =
     ProjectPProjectIdJetRoute: ProjectPProjectIdJetRoute,
     ProjectPProjectIdKeywordClusteringRoute:
       ProjectPProjectIdKeywordClusteringRoute,
+    ProjectPProjectIdKeywordResearchProRoute:
+      ProjectPProjectIdKeywordResearchProRoute,
     ProjectPProjectIdKeywordsRoute: ProjectPProjectIdKeywordsRoute,
     ProjectPProjectIdLinkIntersectRoute: ProjectPProjectIdLinkIntersectRoute,
     ProjectPProjectIdOnPageCheckerRoute: ProjectPProjectIdOnPageCheckerRoute,

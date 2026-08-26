@@ -74,6 +74,25 @@ vi.mock(
     },
   }),
 );
+vi.mock("@/server/features/keywords/services/KeywordProConfigService", () => ({
+  KeywordProConfigService: { getCohorts: vi.fn() },
+}));
+vi.mock("@/server/features/keywords/repositories/KeywordProRepository", () => ({
+  KeywordProRepository: {
+    getMembershipByPaypalSubscription: vi.fn(),
+    findMembershipByPaypalPlanId: vi.fn(),
+    getMembership: vi.fn(),
+  },
+}));
+vi.mock(
+  "@/server/features/keywords/services/KeywordProMembershipService",
+  () => ({
+    KeywordProMembershipService: {
+      syncFromPaypalSubscription: vi.fn(),
+      recordReferralSale: vi.fn(),
+    },
+  }),
+);
 
 import { CmsRepository } from "@/server/features/admin/repositories/CmsRepository";
 import { PlanConfigRepository } from "@/server/features/admin/repositories/PlanConfigRepository";
@@ -88,6 +107,7 @@ import {
 import { extractTopupGrant } from "@/server/billing/paypal-webhook";
 import { clearPaypalAccessTokenCache, paypal } from "@/server/billing/paypal";
 import { getRequiredEnvValue } from "@/server/lib/runtime-env";
+import { KeywordProConfigService } from "@/server/features/keywords/services/KeywordProConfigService";
 
 const cmsRepo = vi.mocked(CmsRepository);
 const planRepo = vi.mocked(PlanConfigRepository);
@@ -95,10 +115,12 @@ const settingsRepo = vi.mocked(AdminSettingsRepository);
 const clearPaypalToken = vi.mocked(clearPaypalAccessTokenCache);
 const getPaypalPlan = vi.mocked(paypal.billingPlans.get);
 const getRequiredEnv = vi.mocked(getRequiredEnvValue);
+const keywordProConfig = vi.mocked(KeywordProConfigService);
 
 beforeEach(() => {
   vi.clearAllMocks();
   clearPlanConfigCache();
+  keywordProConfig.getCohorts.mockResolvedValue([]);
 });
 
 describe("CmsService: slug handling", () => {
@@ -303,6 +325,19 @@ describe("AdminSettingsService: editable key guard", () => {
 
   it("tests live credentials, webhook configuration, plan status, and prices", async () => {
     planRepo.listAll.mockResolvedValue([]);
+    keywordProConfig.getCohorts.mockResolvedValue([
+      {
+        key: "krp_founder_10",
+        label: "Founder 10",
+        capacity: 10,
+        occupied: 0,
+        remaining: 10,
+        priceUsdCents: 1900,
+        paypalPlanId: "krp-founder-plan",
+        active: true,
+        configured: true,
+      },
+    ]);
     getRequiredEnv.mockImplementation(async (key: string) =>
       key === "PAYPAL_MODE" ? "live" : "WH-123",
     );
@@ -311,6 +346,7 @@ describe("AdminSettingsService: editable key guard", () => {
         "lite-plan": "49.00",
         "pro-plan": "149.00",
         "agency-plan": "499.00",
+        "krp-founder-plan": "19.00",
       };
       return {
         id: planId,
@@ -334,9 +370,13 @@ describe("AdminSettingsService: editable key guard", () => {
 
     const result = await AdminSettingsService.testPaypalConfiguration();
     expect(result.mode).toBe("live");
-    expect(result.plans).toHaveLength(3);
+    expect(result.plans).toHaveLength(4);
     expect(result.plans[0]).toMatchObject({ tier: "lite", priceUsd: 49 });
-    expect(getPaypalPlan).toHaveBeenCalledTimes(3);
+    expect(result.plans[3]).toMatchObject({
+      tier: "krp_founder_10",
+      priceUsd: 19,
+    });
+    expect(getPaypalPlan).toHaveBeenCalledTimes(4);
   });
 });
 

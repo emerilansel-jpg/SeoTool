@@ -58,6 +58,7 @@ For each product, create a **Billing Plan**:
    - `BILLING.SUBSCRIPTION.ACTIVATED`
    - `BILLING.SUBSCRIPTION.SUSPENDED`
    - `PAYMENT.CAPTURE.COMPLETED`
+   - `PAYMENT.SALE.COMPLETED` (required for Keyword Research Pro referral rewards)
 4. Save the **Webhook ID** — set it as `PAYPAL_WEBHOOK_ID` in your env
 
 ### 4. Environment Variables
@@ -114,6 +115,30 @@ grant credits exactly once. The marker format is `topup:{organizationId}:{ts}`.
 Changing an existing paid tier uses PayPal's subscription revision flow. It
 does not create a second recurring subscription.
 
+## Keyword Research Pro membership
+
+Keyword Research Pro is an independent monthly membership with progressive,
+grandfathered cohort pricing. Open **Admin > Pricing > Keyword Research Pro
+cohorts** and click **Set up PayPal plans**. SeoTool.im creates one PayPal
+product and a separate plan for each active cohort:
+
+- Founder 10: $19/month for the first 10 members
+- Early 20: $29/month for the next 20 members
+- Growth 45: $39/month for the next 45 members
+- Scale 75: $49/month for the next 75 members
+- Public: $59/month after the limited cohorts fill
+
+Never update an existing cohort plan's price. The admin pricing workflow
+creates a new PayPal plan whenever a cohort price changes, while each existing
+membership retains its original plan ID and locked price. Keyword Research Pro
+checkout uses a `krp:{organizationId}:{cohortKey}` custom marker so its webhook
+cannot overwrite the organization's main Lite/Pro/Agency subscription.
+
+The referral program grants the referred organization $5 in usage credits once
+its membership becomes active. The referrer receives credits equal to 20% of
+up to 12 verified `PAYMENT.SALE.COMPLETED` membership payments. Top-ups and
+DataForSEO usage charges do not generate referral rewards.
+
 ## Customer Portal
 
 PayPal does not expose a Stripe-style billing portal session. The **Manage
@@ -127,7 +152,8 @@ Before accepting customers:
 1. Set `PAYPAL_MODE=live` and configure the live client ID, client secret, and
    webhook ID.
 2. In **Admin > Pricing**, confirm each active paid tier uses its real live
-   PayPal plan ID and is marked `synced`.
+   PayPal plan ID and is marked `synced`. Initialize all Keyword Research Pro
+   cohort plans and confirm they show `PayPal ready`.
 3. In **Admin > API Keys**, click **Test PayPal configuration**. This read-only
    check verifies the OAuth credentials, live/sandbox mode, webhook setting,
    active plan status, currency, and price parity. It creates no order or

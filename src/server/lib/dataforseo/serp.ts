@@ -13,6 +13,7 @@ import {
   buildTaskBilling,
   isNoResultsTask,
   parseTaskItems,
+  isRecord,
   type DataforseoApiResponse,
 } from "@/server/lib/dataforseo/envelope";
 import { AppError } from "@/server/lib/errors";
@@ -103,6 +104,49 @@ export async function fetchLiveSerp(input: {
       task,
       serpSnapshotItemSchema,
     ),
+    billing: buildTaskBilling(task),
+  };
+}
+
+export type CompetitionSerpResult = {
+  items: SerpLiveItem[];
+  /** Google's approximate result count, used by the allintitle KGR query. */
+  seResultsCount: number | null;
+};
+
+/** A page-one SERP request for Keyword Research Pro. Kept separate from the
+ * depth-100 legacy call so competition research never pays for unused pages. */
+export async function fetchCompetitionSerp(input: {
+  keyword: string;
+  locationCode: number;
+  languageCode: string;
+  apiKey?: string;
+}): Promise<DataforseoApiResponse<CompetitionSerpResult>> {
+  const response = await serpApi(input.apiKey).googleOrganicLiveAdvanced([
+    new SerpGoogleOrganicLiveAdvancedRequestInfo({
+      keyword: input.keyword,
+      location_code: input.locationCode,
+      language_code: input.languageCode,
+      device: "desktop",
+      os: "windows",
+      depth: 10,
+    }),
+  ]);
+  const task = assertOk(response, { treatNoResultsAsEmpty: true });
+  const firstResult = task.result?.[0];
+  return {
+    data: {
+      items: parseTaskItems(
+        "google-organic-live-advanced",
+        task,
+        serpSnapshotItemSchema,
+      ),
+      seResultsCount:
+        isRecord(firstResult) &&
+        typeof firstResult.se_results_count === "number"
+          ? firstResult.se_results_count
+          : null,
+    },
     billing: buildTaskBilling(task),
   };
 }

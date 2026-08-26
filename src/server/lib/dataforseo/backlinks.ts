@@ -39,7 +39,6 @@ type BacklinksTimeseriesRequest = {
   dateFrom: string;
   dateTo: string;
 };
-
 const classifyBacklinksError = createDataforseoBillingClassifier({
   pathPrefix: "/backlinks/",
   billingIssueCode: "BACKLINKS_BILLING_ISSUE",
@@ -372,3 +371,10 @@ export type ReferringDomainItem = z.infer<typeof referringDomainItemSchema>;
 export type DomainPageSummaryItem = z.infer<typeof domainPageSummaryItemSchema>;
 export type BacklinksHistoryItem = z.infer<typeof backlinksHistoryItemSchema>;
 export type AnchorsItem = z.infer<typeof anchorsItemSchema>;
+export {
+  fetchBacklinksBulkBacklinks,
+  fetchBacklinksBulkRanks,
+  fetchBacklinksBulkReferringDomains,
+  fetchBacklinksBulkSpamScores,
+  type BacklinksBulkRankItem,
+} from "./backlinks-bulk";

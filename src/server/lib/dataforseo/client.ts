@@ -20,6 +20,7 @@ import {
 } from "@/server/lib/dataforseo/envelope";
 import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import { AppError } from "@/server/lib/errors";
+import { SEO_DATA_BYOK_FEE_MULTIPLIER } from "@/shared/billing";
 
 export { mapDataforseoPathToCreditFeature };
 
@@ -47,8 +48,21 @@ export function loadDataforseoSections(): Promise<DataforseoSections> {
  * spend to its own feature). The extra field is ignored by the fetchers, which
  * read named fields rather than spreading the input.
  */
+type MeteringCustomer = BillingCustomerContext & {
+  dataforseoBillingMode?: DataforseoBillingMode;
+  dataforseoApiKey?: string;
+  dataforseoSkipQuota?: boolean;
+};
+
+type MeteringOptions = {
+  creditFeature?: CreditFeature;
+  quotaUnits?: number;
+  billingMode?: DataforseoBillingMode;
+  skipQuota?: boolean;
+};
+
 function meter<I, T>(
-  customer: BillingCustomerContext,
+  customer: MeteringCustomer,
   pick: (
     sections: DataforseoSections,
   ) => (input: I) => Promise<DataforseoApiResponse<T>>,
@@ -59,13 +73,42 @@ function meter<I, T>(
   return (input) =>
     meterDataforseoCall(
       customer,
-      async () => pick(await loadDataforseoSections())(input),
-      input.creditFeature ?? defaultFeature,
-      input.quotaUnits,
+      async () =>
+        pick(await loadDataforseoSections())(
+          customer.dataforseoApiKey
+            ? { ...input, apiKey: customer.dataforseoApiKey }
+            : input,
+        ),
+      {
+        creditFeature: input.creditFeature ?? defaultFeature,
+        quotaUnits: input.quotaUnits,
+        billingMode: customer.dataforseoBillingMode,
+        skipQuota: customer.dataforseoSkipQuota,
+      },
     );
 }
 
-export function createDataforseoClient(customer: BillingCustomerContext) {
+export type DataforseoBillingMode = "standard" | "byok";
+
+export type DataforseoClientOptions = {
+  billingMode?: DataforseoBillingMode;
+  /** Base64-encoded DataForSEO login:password. Kept request-scoped only. */
+  apiKey?: string;
+  /** Credit-metered add-ons can own their access gate independently of the
+   * base-plan daily feature quota. */
+  skipQuota?: boolean;
+};
+
+export function createDataforseoClient(
+  customerInput: BillingCustomerContext,
+  options?: DataforseoClientOptions,
+) {
+  const customer: MeteringCustomer = {
+    ...customerInput,
+    dataforseoBillingMode: options?.billingMode,
+    dataforseoApiKey: options?.apiKey,
+    dataforseoSkipQuota: options?.skipQuota,
+  };
   return {
     business: {
       businessListings: meter(
@@ -89,6 +132,13 @@ export function createDataforseoClient(customer: BillingCustomerContext) {
       domainIntersection: meter(
         customer,
         (s) => s.fetchBacklinksDomainIntersection,
+      ),
+      bulkRanks: meter(customer, (s) => s.fetchBacklinksBulkRanks),
+      bulkBacklinks: meter(customer, (s) => s.fetchBacklinksBulkBacklinks),
+      bulkSpamScores: meter(customer, (s) => s.fetchBacklinksBulkSpamScores),
+      bulkReferringDomains: meter(
+        customer,
+        (s) => s.fetchBacklinksBulkReferringDomains,
       ),
     },
     keywords: {
@@ -117,6 +167,11 @@ export function createDataforseoClient(customer: BillingCustomerContext) {
     },
     serp: {
       live: meter(customer, (s) => s.fetchLiveSerp),
+      competition: meter(
+        customer,
+        (s) => s.fetchCompetitionSerp,
+        "keyword_research",
+      ),
       rankCheck: meter(customer, (s) => s.fetchRankCheckSerp, "rank_tracking"),
       // Posts up to 100 queued rank check tasks; one metered charge covers the
       // whole batch (DataForSEO bills task_post at post time, collection is
@@ -176,9 +231,14 @@ export function createDataforseoClient(customer: BillingCustomerContext) {
 async function meterDataforseoCall<T>(
   customer: BillingCustomerContext,
   execute: () => Promise<DataforseoApiResponse<T>>,
-  creditFeature?: CreditFeature,
-  quotaUnits = 1,
+  options: MeteringOptions,
 ): Promise<T> {
+  const {
+    creditFeature,
+    quotaUnits = 1,
+    billingMode = "standard",
+    skipQuota = false,
+  } = options;
   const isHostedMode = await isHostedServerAuthMode();
 
   if (!isHostedMode) {
@@ -195,7 +255,7 @@ async function meterDataforseoCall<T>(
   const creditFeatureForQuota =
     creditFeature ?? mapDataforseoPathToCreditFeature([]);
   const quotaFeature = creditFeatureToQuotaFeature(creditFeatureForQuota);
-  if (quotaFeature && quotaFeature !== "rank_tracking") {
+  if (!skipQuota && quotaFeature && quotaFeature !== "rank_tracking") {
     await assertFeatureQuota(customer.organizationId, quotaFeature, quotaUnits);
   }
 
@@ -222,6 +282,7 @@ async function meterDataforseoCall<T>(
         billing: error.billing,
         monthlyRemaining,
         creditFeature,
+        billingMode,
       });
     }
     throw error;
@@ -233,6 +294,7 @@ async function meterDataforseoCall<T>(
     billing: result.billing,
     monthlyRemaining,
     creditFeature,
+    billingMode,
   });
 
   return result.data;
@@ -244,6 +306,7 @@ async function trackDataforseoCost(args: {
   billing: DataforseoApiCallCost;
   monthlyRemaining: number;
   creditFeature?: CreditFeature;
+  billingMode: DataforseoBillingMode;
 }) {
   await trackUsageCreditSpend({
     customer: args.customer,
@@ -252,8 +315,11 @@ async function trackDataforseoCost(args: {
       args.creditFeature ?? mapDataforseoPathToCreditFeature(args.billing.path),
     costUsd: args.billing.costUsd,
     monthlyRemaining: args.monthlyRemaining,
+    billingMultiplier:
+      args.billingMode === "byok" ? SEO_DATA_BYOK_FEE_MULTIPLIER : undefined,
     properties: {
       provider: "dataforseo",
+      billing_mode: args.billingMode,
       paths: [args.billing.path.join("/")],
       fromCache: false,
     },

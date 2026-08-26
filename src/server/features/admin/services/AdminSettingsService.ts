@@ -11,6 +11,7 @@ import {
 import { clearPaypalAccessTokenCache, paypal } from "@/server/billing/paypal";
 import { getEffectivePlanConfigs } from "@/server/billing/plan-config";
 import { AdminSettingsRepository } from "../repositories/AdminSettingsRepository";
+import { KeywordProConfigService } from "@/server/features/keywords/services/KeywordProConfigService";
 
 export interface AdminSettingStatus {
   envKey: string;
@@ -140,7 +141,7 @@ export const AdminSettingsService = {
       );
     }
 
-    const plans = await Promise.all(
+    const basePlans = await Promise.all(
       activePaidConfigs.map(async (config) => {
         if (!config.paypalPlanId) {
           throw new AppError(
@@ -180,7 +181,43 @@ export const AdminSettingsService = {
       }),
     );
 
-    return { mode, plans };
+    const keywordProCohorts = (
+      await KeywordProConfigService.getCohorts()
+    ).filter((cohort) => cohort.active);
+    const keywordProPlans = await Promise.all(
+      keywordProCohorts.map(async (cohort) => {
+        if (!cohort.paypalPlanId) {
+          throw new AppError(
+            "VALIDATION_ERROR",
+            `${cohort.label} is active but has no PayPal plan ID. Use Set up PayPal plans in Admin > Pricing.`,
+          );
+        }
+        const plan = await paypal.billingPlans.get(cohort.paypalPlanId);
+        const regularCycle = plan.billing_cycles?.find(
+          (cycle) => cycle.tenure_type === "REGULAR",
+        );
+        const fixedPrice = regularCycle?.pricing_scheme?.fixed_price;
+        const paypalPriceUsd = Number(fixedPrice?.value);
+        if (
+          plan.status !== "ACTIVE" ||
+          fixedPrice?.currency_code !== "USD" ||
+          !Number.isFinite(paypalPriceUsd) ||
+          Math.round(paypalPriceUsd * 100) !== cohort.priceUsdCents
+        ) {
+          throw new AppError(
+            "VALIDATION_ERROR",
+            `PayPal plan for ${cohort.label} is inactive or its USD price does not match SeoTool.im.`,
+          );
+        }
+        return {
+          tier: cohort.key,
+          planId: cohort.paypalPlanId,
+          priceUsd: paypalPriceUsd,
+        };
+      }),
+    );
+
+    return { mode, plans: [...basePlans, ...keywordProPlans] };
   },
 };
 

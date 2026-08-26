@@ -148,9 +148,14 @@ export async function trackUsageCreditSpend(args: {
   creditFeature: CreditFeature;
   costUsd: number;
   monthlyRemaining: number;
+  /** Defaults to the hosted platform markup. BYOK callers pass 0.10 because
+   * the provider charge is paid directly on the customer's DataForSEO key. */
+  billingMultiplier?: number;
   properties?: Record<string, unknown>;
 }): Promise<void> {
-  const totalCostUsd = roundUsdForBilling(args.costUsd * SEO_DATA_COST_MARKUP);
+  const totalCostUsd = roundUsdForBilling(
+    args.costUsd * (args.billingMultiplier ?? SEO_DATA_COST_MARKUP),
+  );
   const totalCostCredits = Math.ceil(totalCostUsd * CREDITS_PER_USD);
   if (totalCostCredits <= 0) return;
 

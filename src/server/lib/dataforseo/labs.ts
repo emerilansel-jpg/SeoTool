@@ -326,13 +326,16 @@ export async function fetchKeywordOverview(input: {
   locationCode: number;
   languageCode: string;
   includeClickstreamData?: boolean;
+  includeSerpInfo?: boolean;
+  apiKey?: string;
 }): Promise<DataforseoApiResponse<KeywordOverviewItem[]>> {
-  const response = await labsApi().googleKeywordOverviewLive([
+  const response = await labsApi(input.apiKey).googleKeywordOverviewLive([
     new DataforseoLabsGoogleKeywordOverviewLiveRequestInfo({
       keywords: input.keywords,
       location_code: input.locationCode,
       language_code: input.languageCode,
       include_clickstream_data: input.includeClickstreamData ?? false,
+      include_serp_info: input.includeSerpInfo ?? false,
     }),
   ]);
   const task = assertOk(response);

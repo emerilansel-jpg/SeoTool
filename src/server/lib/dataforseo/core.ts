@@ -65,9 +65,13 @@ function formatDataforseoRequestPath(url: RequestInfo): string {
  * (which return HTTP 200) are handled downstream by {@link assertOk}. An
  * optional classifier maps recognised HTTP failures to product errors.
  */
-function createAuthenticatedFetch(classify?: DataforseoErrorClassifier) {
+function createAuthenticatedFetch(
+  classify?: DataforseoErrorClassifier,
+  apiKeyOverride?: string,
+) {
   return async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    const apiKey = await getRequiredEnvValue("DATAFORSEO_API_KEY");
+    const apiKey =
+      apiKeyOverride ?? (await getRequiredEnvValue("DATAFORSEO_API_KEY"));
     const headers = new Headers(init?.headers);
     headers.set("Authorization", `Basic ${apiKey}`);
     // Resolve the signal once so retries share the overall request timeout
@@ -116,21 +120,25 @@ function createAuthenticatedFetch(classify?: DataforseoErrorClassifier) {
   };
 }
 
-function http(classify?: DataforseoErrorClassifier) {
-  return { fetch: createAuthenticatedFetch(classify) };
+function http(classify?: DataforseoErrorClassifier, apiKey?: string) {
+  return { fetch: createAuthenticatedFetch(classify, apiKey) };
 }
 
 // Per-section API factories. Each is created per-request so the auth secret is
 // read lazily (it lives in the Worker env, not in module scope).
-export const labsApi = () => new DataforseoLabsApi(API_BASE, http());
+export const labsApi = (apiKey?: string) =>
+  new DataforseoLabsApi(API_BASE, http(undefined, apiKey));
 export const keywordsDataApi = () => new KeywordsDataApi(API_BASE, http());
-export const serpApi = () => new SerpApi(API_BASE, http());
+export const serpApi = (apiKey?: string) =>
+  new SerpApi(API_BASE, http(undefined, apiKey));
 export const businessDataApi = () => new BusinessDataApi(API_BASE, http());
 export const onPageApi = () => new OnPageApi(API_BASE, http());
 // Account/appendix data (spend, balance, rates). userData() is FREE ($0) and
 // read-only — do NOT wire it through metering.
 export const appendixApi = () => new AppendixApi(API_BASE, http());
-export const backlinksApi = (classify?: DataforseoErrorClassifier) =>
-  new BacklinksApi(API_BASE, http(classify));
+export const backlinksApi = (
+  classify?: DataforseoErrorClassifier,
+  apiKey?: string,
+) => new BacklinksApi(API_BASE, http(classify, apiKey));
 export const aiOptimizationApi = (classify?: DataforseoErrorClassifier) =>
   new AiOptimizationApi(API_BASE, http(classify));
