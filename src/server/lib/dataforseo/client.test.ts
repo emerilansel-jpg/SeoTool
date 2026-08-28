@@ -4,14 +4,21 @@ import {
   CREDITS_PER_USD,
   SEO_DATA_BYOK_FEE_MULTIPLIER,
   SEO_DATA_COST_MARKUP,
+  roundUsdForBilling,
 } from "@/shared/billing";
 
 const {
   checkMock,
   trackMock,
+  reserveMock,
+  settleMock,
+  refundMock,
+  captureMock,
   getOrCreateMock,
   isHostedServerAuthModeMock,
   quotaMock,
+  fetchBacklinksSummaryMock,
+  postMapsTasksMock,
 } = vi.hoisted(() => ({
   checkMock: vi.fn(),
   trackMock:
@@ -21,9 +28,15 @@ const {
         amount: number,
       ) => { monthlyDeducted: number; topupDeducted: number }
     >(),
+  reserveMock: vi.fn(),
+  settleMock: vi.fn(),
+  refundMock: vi.fn(),
+  captureMock: vi.fn(),
   getOrCreateMock: vi.fn(),
   isHostedServerAuthModeMock: vi.fn(),
   quotaMock: vi.fn().mockResolvedValue(undefined),
+  fetchBacklinksSummaryMock: vi.fn(),
+  postMapsTasksMock: vi.fn(),
 }));
 
 vi.mock("cloudflare:workers", () => ({
@@ -34,6 +47,12 @@ vi.mock("@/server/billing/credits", () => ({
   getCreditBalance: checkMock,
   deductCredits: trackMock,
   grantMonthlyCredits: vi.fn(),
+}));
+
+vi.mock("@/server/billing/credit-reservations", () => ({
+  reserveUsageCredits: reserveMock,
+  settleUsageCreditReservation: settleMock,
+  refundUsageCreditReservation: refundMock,
 }));
 
 // Keep the real subscription module (its assertUsageCreditsAvailable calls the
@@ -67,7 +86,7 @@ vi.mock("@/server/features/billing/repositories/QuotaRepository", () => ({
 }));
 
 vi.mock("@/server/lib/posthog", () => ({
-  captureServerEvent: vi.fn(),
+  captureServerEvent: captureMock,
 }));
 
 // Mock every section module the client wraps so meterDataforseoCall's
@@ -90,7 +109,7 @@ vi.mock("@/server/lib/dataforseo/serp", () => ({
   fetchLocalSerp: vi.fn(),
 }));
 vi.mock("@/server/lib/dataforseo/maps-serp", () => ({
-  postMapsTasks: vi.fn(),
+  postMapsTasks: postMapsTasksMock,
   fetchMapsTaskResult: vi.fn(),
 }));
 vi.mock("@/server/lib/dataforseo/business", () => ({
@@ -98,7 +117,7 @@ vi.mock("@/server/lib/dataforseo/business", () => ({
   fetchQuestionsAnswers: vi.fn(),
 }));
 vi.mock("@/server/lib/dataforseo/backlinks", () => ({
-  fetchBacklinksSummary: vi.fn(),
+  fetchBacklinksSummary: fetchBacklinksSummaryMock,
   fetchBacklinksRows: vi.fn(),
   fetchReferringDomains: vi.fn(),
   fetchDomainPagesSummary: vi.fn(),
@@ -113,6 +132,15 @@ vi.mock("@/server/lib/dataforseo/ai", () => ({
   fetchLlmTopPages: vi.fn(),
   fetchLlmCrossAggregatedMetrics: vi.fn(),
   fetchLlmResponse: vi.fn(),
+}));
+
+// `client.ts` loads the aggregate section barrel lazily. Mock that exact
+// boundary so this unit test does not import the full DataForSEO SDK graph or
+// leave a cold dynamic import running after a test timeout under full-suite
+// worker pressure.
+vi.mock("@/server/lib/dataforseo/sections", () => ({
+  fetchBacklinksSummary: fetchBacklinksSummaryMock,
+  postMapsTasks: postMapsTasksMock,
 }));
 
 import {
@@ -148,6 +176,33 @@ function mockBalances(monthly: number, topup: number) {
     monthlyDeducted: Math.min(monthly, amount),
     topupDeducted: Math.max(0, amount - monthly),
   }));
+  reserveMock.mockImplementation(
+    (input: { organizationId: string; credits: number }) => {
+      if (monthly + topup < input.credits) {
+        return Promise.reject({ code: "INSUFFICIENT_CREDITS" });
+      }
+      const monthlyReserved = Math.min(monthly, input.credits);
+      return Promise.resolve({
+        id: "reservation-1",
+        organizationId: input.organizationId,
+        reservedCredits: input.credits,
+        monthlyReserved,
+        topupReserved: input.credits - monthlyReserved,
+        status: "reserved",
+      });
+    },
+  );
+  settleMock.mockImplementation((_reservationId: string, amount: number) => {
+    const monthlyCharged = Math.min(monthly, amount);
+    return Promise.resolve({
+      reservation: { reservedCredits: Math.max(amount, 10_000) },
+      monthlyCharged,
+      topupCharged: amount - monthlyCharged,
+      totalCharged: amount,
+      overageCredits: 0,
+    });
+  });
+  refundMock.mockResolvedValue({ totalCharged: 0 });
 }
 
 function mockDataforseoResult(costUsd: number) {
@@ -176,9 +231,10 @@ describe("meterDataforseoCall with split balances", () => {
     expect(result).toEqual({ rank: 42 });
     expect(checkMock).not.toHaveBeenCalled();
     expect(trackMock).not.toHaveBeenCalled();
-  });
+    expect(reserveMock).not.toHaveBeenCalled();
+  }, 60_000);
 
-  it("checks both monthly and topup balances in parallel", async () => {
+  it("reserves an endpoint-aware ceiling before dispatching the provider", async () => {
     setupHostedMode();
     mockBalances(5000, 3000);
     mockDataforseoResult(0.05);
@@ -186,8 +242,16 @@ describe("meterDataforseoCall with split balances", () => {
     const client = createDataforseoClient(billingCustomer);
     await client.backlinks.summary(backlinksInput);
 
-    expect(checkMock).toHaveBeenCalledTimes(1);
-    expect(checkMock).toHaveBeenCalledWith("org_123");
+    expect(reserveMock).toHaveBeenCalledTimes(1);
+    expect(reserveMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        organizationId: "org_123",
+        credits: 32,
+        provider: "dataforseo",
+        billingMode: "standard",
+      }),
+    );
+    expect(fetchBacklinksSummary).toHaveBeenCalledTimes(1);
   });
 
   it("charges the dedicated daily quota by Maps grid point", async () => {
@@ -216,9 +280,9 @@ describe("meterDataforseoCall with split balances", () => {
     expect(quotaMock).toHaveBeenCalledWith("org_123", "local_map_points", 49);
   });
 
-  const RAW_COST = 0.05;
+  const RAW_COST = 0.02;
   const EXPECTED_CREDITS = Math.ceil(
-    RAW_COST * SEO_DATA_COST_MARKUP * CREDITS_PER_USD,
+    roundUsdForBilling(RAW_COST * SEO_DATA_COST_MARKUP) * CREDITS_PER_USD,
   );
 
   it("deducts entirely from monthly when monthly has enough", async () => {
@@ -229,8 +293,8 @@ describe("meterDataforseoCall with split balances", () => {
     const client = createDataforseoClient(billingCustomer);
     await client.backlinks.summary(backlinksInput);
 
-    expect(trackMock).toHaveBeenCalledTimes(1);
-    expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
+    expect(settleMock).toHaveBeenCalledTimes(1);
+    expect(settleMock).toHaveBeenCalledWith("reservation-1", EXPECTED_CREDITS);
   });
 
   it("deducts entirely from topup when monthly is empty", async () => {
@@ -241,8 +305,7 @@ describe("meterDataforseoCall with split balances", () => {
     const client = createDataforseoClient(billingCustomer);
     await client.backlinks.summary(backlinksInput);
 
-    expect(trackMock).toHaveBeenCalledTimes(1);
-    expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
+    expect(settleMock).toHaveBeenCalledWith("reservation-1", EXPECTED_CREDITS);
   });
 
   it("splits deduction across monthly and topup when monthly is partially sufficient", async () => {
@@ -254,21 +317,70 @@ describe("meterDataforseoCall with split balances", () => {
     const client = createDataforseoClient(billingCustomer);
     await client.backlinks.summary(backlinksInput);
 
-    expect(trackMock).toHaveBeenCalledTimes(1);
-    expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
+    expect(settleMock).toHaveBeenCalledWith("reservation-1", EXPECTED_CREDITS);
   });
 
   it("throws INSUFFICIENT_CREDITS when both balances are exactly zero", async () => {
     setupHostedMode();
     mockBalances(0, 0);
-    mockDataforseoResult(0.05);
+    mockDataforseoResult(RAW_COST);
 
     const client = createDataforseoClient(billingCustomer);
     await expect(
       client.backlinks.summary(backlinksInput),
     ).rejects.toMatchObject({ code: "INSUFFICIENT_CREDITS" });
 
-    expect(trackMock).not.toHaveBeenCalled();
+    expect(fetchBacklinksSummary).not.toHaveBeenCalled();
+    expect(settleMock).not.toHaveBeenCalled();
+  });
+
+  it("does not dispatch when the remaining balance is below the call ceiling", async () => {
+    setupHostedMode();
+    mockBalances(1, 0);
+    mockDataforseoResult(RAW_COST);
+
+    const client = createDataforseoClient(billingCustomer);
+    await expect(
+      client.backlinks.summary(backlinksInput),
+    ).rejects.toMatchObject({ code: "INSUFFICIENT_CREDITS" });
+
+    expect(reserveMock).toHaveBeenCalledWith(
+      expect.objectContaining({ credits: 32 }),
+    );
+    expect(fetchBacklinksSummary).not.toHaveBeenCalled();
+  });
+
+  it("dispatches only the request that wins a concurrent reservation", async () => {
+    setupHostedMode();
+    mockBalances(32, 0);
+    mockDataforseoResult(RAW_COST);
+    let claims = 0;
+    reserveMock.mockImplementation(() => {
+      claims += 1;
+      return claims === 1
+        ? Promise.resolve({
+            id: "reservation-1",
+            reservedCredits: 32,
+            monthlyReserved: 32,
+            topupReserved: 0,
+            status: "reserved",
+          })
+        : Promise.reject({ code: "INSUFFICIENT_CREDITS" });
+    });
+
+    const client = createDataforseoClient(billingCustomer);
+    const results = await Promise.allSettled([
+      client.backlinks.summary(backlinksInput),
+      client.backlinks.summary(backlinksInput),
+    ]);
+
+    expect(
+      results.filter((result) => result.status === "fulfilled"),
+    ).toHaveLength(1);
+    expect(
+      results.filter((result) => result.status === "rejected"),
+    ).toHaveLength(1);
+    expect(fetchBacklinksSummary).toHaveBeenCalledTimes(1);
   });
 
   it("meters charged DataForSEO task errors before rethrowing", async () => {
@@ -286,8 +398,7 @@ describe("meterDataforseoCall with split balances", () => {
       "DataForSEO task failed",
     );
 
-    expect(trackMock).toHaveBeenCalledTimes(1);
-    expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
+    expect(settleMock).toHaveBeenCalledWith("reservation-1", EXPECTED_CREDITS);
   });
 
   it("skips the charge for an unbilled invalid-field failure and rethrows VALIDATION_ERROR", async () => {
@@ -306,7 +417,24 @@ describe("meterDataforseoCall with split balances", () => {
       client.backlinks.summary(backlinksInput),
     ).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
 
-    expect(trackMock).not.toHaveBeenCalled();
+    expect(refundMock).toHaveBeenCalledWith("reservation-1");
+    expect(settleMock).not.toHaveBeenCalled();
+  });
+
+  it("refunds the reservation when the provider fails without billing metadata", async () => {
+    setupHostedMode();
+    mockBalances(5000, 3000);
+    vi.mocked(fetchBacklinksSummary).mockRejectedValue(
+      new Error("network unavailable"),
+    );
+
+    const client = createDataforseoClient(billingCustomer);
+    await expect(client.backlinks.summary(backlinksInput)).rejects.toThrow(
+      "network unavailable",
+    );
+
+    expect(refundMock).toHaveBeenCalledWith("reservation-1");
+    expect(settleMock).not.toHaveBeenCalled();
   });
 
   it("still meters an invalid-field failure that DataForSEO actually billed", async () => {
@@ -325,19 +453,18 @@ describe("meterDataforseoCall with split balances", () => {
       "Invalid Field: 'target'.",
     );
 
-    expect(trackMock).toHaveBeenCalledTimes(1);
-    expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
+    expect(settleMock).toHaveBeenCalledWith("reservation-1", EXPECTED_CREDITS);
   });
 
   it("deducts the correct credit amount", async () => {
     setupHostedMode();
     mockBalances(30, 5000);
-    mockDataforseoResult(0.05);
+    mockDataforseoResult(RAW_COST);
 
     const client = createDataforseoClient(billingCustomer);
     await client.backlinks.summary(backlinksInput);
 
-    expect(trackMock).toHaveBeenCalledWith("org_123", EXPECTED_CREDITS);
+    expect(settleMock).toHaveBeenCalledWith("reservation-1", EXPECTED_CREDITS);
   });
 
   it("charges only the 10% service fee and forwards a request-scoped BYOK key", async () => {
@@ -361,7 +488,10 @@ describe("meterDataforseoCall with split balances", () => {
       apiKey: "request-scoped-key",
     });
     expect(quotaMock).not.toHaveBeenCalled();
-    expect(trackMock).toHaveBeenCalledWith("org_123", expectedByokCredits);
+    expect(settleMock).toHaveBeenCalledWith(
+      "reservation-1",
+      expectedByokCredits,
+    );
   });
 });
 

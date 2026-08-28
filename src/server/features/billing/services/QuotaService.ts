@@ -7,6 +7,7 @@ import {
 } from "@/shared/plans";
 import { AppError } from "@/server/lib/errors";
 import { isPlatformAdmin } from "@/server/lib/platform-admin";
+import { hasSubscriptionAccess } from "@/shared/subscription-access";
 
 // Cache orgId → is-admin-org so repeated quota checks don't re-query the
 // owner email. Entries are small and orgs are few; no TTL needed.
@@ -80,7 +81,10 @@ export async function getPlanTier(organizationId: string): Promise<PlanTier> {
   if (await isPlatformAdminOrg(organizationId)) {
     return "agency";
   }
-  return QuotaRepository.getPlanTier(organizationId);
+  const subscription = await QuotaRepository.getSubscription(organizationId);
+  return subscription && hasSubscriptionAccess(subscription)
+    ? subscription.planTier
+    : "free";
 }
 
 /** Returns the full subscription row (plan tier, status, period end). */

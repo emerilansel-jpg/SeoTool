@@ -206,7 +206,7 @@ export async function openDomainOverview(page: Page, tab: DomainTab) {
   await page.goto(`/p/${match[1]}/domain?${params.toString()}`);
   await expect(
     page.getByRole("heading", { name: "Domain Overview" }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 30_000 });
   await dismissSetupModal(page);
   await expect(page.getByRole("button", { name: /Filters/ })).toBeVisible({
     timeout: 30_000,

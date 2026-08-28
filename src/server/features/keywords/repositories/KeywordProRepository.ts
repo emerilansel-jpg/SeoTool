@@ -1,13 +1,26 @@
-import { and, count, countDistinct, eq, inArray, sql, sum } from "drizzle-orm";
+import {
+  and,
+  count,
+  countDistinct,
+  eq,
+  inArray,
+  lte,
+  sql,
+  sum,
+} from "drizzle-orm";
 import { db } from "@/db";
 import {
   keywordProMemberships,
   keywordProReferralAttributions,
   keywordProReferralCodes,
   keywordProReferralCommissions,
+  member,
   planConfig,
 } from "@/db/schema";
-import type { KeywordProCohortKey } from "@/shared/keyword-pro-membership";
+import {
+  KEYWORD_PRO_COHORT_KEYS,
+  type KeywordProCohortKey,
+} from "@/shared/keyword-pro-membership";
 
 const RESERVED_MEMBERSHIP_STATUSES = [
   "APPROVAL_PENDING",
@@ -23,15 +36,7 @@ export const KeywordProRepository = {
     return db
       .select()
       .from(planConfig)
-      .where(
-        inArray(planConfig.tier, [
-          "krp_founder_10",
-          "krp_early_20",
-          "krp_growth_45",
-          "krp_scale_75",
-          "krp_public",
-        ]),
-      );
+      .where(inArray(planConfig.tier, KEYWORD_PRO_COHORT_KEYS));
   },
 
   async upsertCohortConfig(input: {
@@ -70,10 +75,18 @@ export const KeywordProRepository = {
       .select({ value: count() })
       .from(keywordProMemberships)
       .where(
-        and(
-          eq(keywordProMemberships.cohortKey, cohortKey),
-          inArray(keywordProMemberships.status, RESERVED_MEMBERSHIP_STATUSES),
-        ),
+        cohortKey === "krp_public"
+          ? and(
+              eq(keywordProMemberships.cohortKey, cohortKey),
+              inArray(
+                keywordProMemberships.status,
+                RESERVED_MEMBERSHIP_STATUSES,
+              ),
+            )
+          : and(
+              eq(keywordProMemberships.cohortKey, cohortKey),
+              eq(keywordProMemberships.seatReserved, true),
+            ),
       );
     return row?.value ?? 0;
   },
@@ -83,7 +96,7 @@ export const KeywordProRepository = {
       .select({ value: count() })
       .from(keywordProMemberships)
       .where(
-        inArray(keywordProMemberships.status, RESERVED_MEMBERSHIP_STATUSES),
+        sql`(${keywordProMemberships.seatReserved} = true or (${keywordProMemberships.cohortKey} = 'krp_public' and ${keywordProMemberships.status} in ('APPROVAL_PENDING', 'APPROVED', 'ACTIVE', 'SUSPENDED')))`,
       );
     return row?.value ?? 0;
   },
@@ -112,37 +125,95 @@ export const KeywordProRepository = {
     return row ?? null;
   },
 
-  async upsertMembership(input: {
+  async claimCheckout(input: {
     organizationId: string;
     cohortKey: KeywordProCohortKey;
     lockedPriceUsdCents: number;
-    status: string;
     paypalPlanId: string;
-    paypalSubscriptionId: string;
+    checkoutToken: string;
+    checkoutExpiresAt: string;
     referralCodeUsed?: string;
-    activatedAt?: string | null;
-    currentPeriodEnd?: string | null;
-  }) {
+    seatReserved: boolean;
+  }): Promise<KeywordProMembership | null> {
     const [row] = await db
       .insert(keywordProMemberships)
-      .values(input)
-      .onConflictDoUpdate({
-        target: keywordProMemberships.organizationId,
-        set: {
-          cohortKey: input.cohortKey,
-          lockedPriceUsdCents: input.lockedPriceUsdCents,
-          status: input.status,
-          paypalPlanId: input.paypalPlanId,
-          paypalSubscriptionId: input.paypalSubscriptionId,
-          referralCodeUsed: input.referralCodeUsed,
-          activatedAt: input.activatedAt,
-          currentPeriodEnd: input.currentPeriodEnd,
-          updatedAt: sql`(current_timestamp)`,
-        },
+      .values({
+        organizationId: input.organizationId,
+        cohortKey: input.cohortKey,
+        lockedPriceUsdCents: input.lockedPriceUsdCents,
+        status: "CHECKOUT_CREATING",
+        paypalPlanId: input.paypalPlanId,
+        paypalSubscriptionId: `checkout:${input.checkoutToken}`,
+        referralCodeUsed: input.referralCodeUsed,
+        checkoutExpiresAt: input.checkoutExpiresAt,
+        seatReserved: input.seatReserved,
       })
+      .onConflictDoNothing()
       .returning();
-    if (!row) throw new Error("Failed to save Keyword Research Pro membership");
-    return row;
+    return row ?? null;
+  },
+
+  async attachCheckout(input: {
+    organizationId: string;
+    checkoutToken: string;
+    paypalSubscriptionId: string;
+    checkoutExpiresAt: string;
+  }): Promise<KeywordProMembership | null> {
+    const [row] = await db
+      .update(keywordProMemberships)
+      .set({
+        status: "APPROVAL_PENDING",
+        paypalSubscriptionId: input.paypalSubscriptionId,
+        checkoutExpiresAt: input.checkoutExpiresAt,
+        updatedAt: sql`(current_timestamp)`,
+      })
+      .where(
+        and(
+          eq(keywordProMemberships.organizationId, input.organizationId),
+          eq(keywordProMemberships.status, "CHECKOUT_CREATING"),
+          eq(
+            keywordProMemberships.paypalSubscriptionId,
+            `checkout:${input.checkoutToken}`,
+          ),
+        ),
+      )
+      .returning();
+    return row ?? null;
+  },
+
+  async deleteReleasedMembership(organizationId: string) {
+    await db
+      .delete(keywordProMemberships)
+      .where(
+        and(
+          eq(keywordProMemberships.organizationId, organizationId),
+          eq(keywordProMemberships.seatReserved, false),
+          inArray(keywordProMemberships.status, [
+            "CHECKOUT_CREATING",
+            "CANCELLED",
+            "EXPIRED",
+            "FAILED",
+          ]),
+        ),
+      );
+  },
+
+  async listExpiredCheckoutReservations(now: string, limit = 20) {
+    return db
+      .select()
+      .from(keywordProMemberships)
+      .where(
+        and(
+          eq(keywordProMemberships.seatReserved, true),
+          inArray(keywordProMemberships.status, [
+            "CHECKOUT_CREATING",
+            "APPROVAL_PENDING",
+            "APPROVED",
+          ]),
+          lte(keywordProMemberships.checkoutExpiresAt, now),
+        ),
+      )
+      .limit(limit);
   },
 
   async updateMembershipStatus(
@@ -155,7 +226,19 @@ export const KeywordProRepository = {
   ): Promise<KeywordProMembership | null> {
     const [row] = await db
       .update(keywordProMemberships)
-      .set({ ...input, updatedAt: sql`(current_timestamp)` })
+      .set({
+        ...input,
+        checkoutExpiresAt: [
+          "ACTIVE",
+          "SUSPENDED",
+          "CANCELLED",
+          "EXPIRED",
+          "FAILED",
+        ].includes(input.status)
+          ? null
+          : undefined,
+        updatedAt: sql`(current_timestamp)`,
+      })
       .where(
         eq(keywordProMemberships.paypalSubscriptionId, paypalSubscriptionId),
       )
@@ -205,9 +288,40 @@ export const KeywordProRepository = {
     if (referralCode.organizationId === input.referredOrganizationId) {
       return null;
     }
+    const referredMembers = await db
+      .select({ userId: member.userId })
+      .from(member)
+      .where(eq(member.organizationId, input.referredOrganizationId));
+    if (referredMembers.length > 0) {
+      const [sharedMember] = await db
+        .select({ userId: member.userId })
+        .from(member)
+        .where(
+          and(
+            eq(member.organizationId, referralCode.organizationId),
+            inArray(
+              member.userId,
+              referredMembers.map((row) => row.userId),
+            ),
+          ),
+        )
+        .limit(1);
+      // A teammate cannot refer the same people through a second organization.
+      if (sharedMember) return null;
+    }
     const [existing] = await db
-      .select()
+      .select({
+        attribution: keywordProReferralAttributions,
+        code: keywordProReferralCodes.code,
+      })
       .from(keywordProReferralAttributions)
+      .innerJoin(
+        keywordProReferralCodes,
+        eq(
+          keywordProReferralCodes.id,
+          keywordProReferralAttributions.referralCodeId,
+        ),
+      )
       .where(
         eq(
           keywordProReferralAttributions.referredOrganizationId,
@@ -215,23 +329,45 @@ export const KeywordProRepository = {
         ),
       )
       .limit(1);
-    if (existing?.status !== "pending") return existing ?? null;
+    // First valid attribution wins. Pending attributions are intentionally not
+    // overwritten by a later code, preventing referral-code swapping.
+    if (existing) return existing;
     const [row] = await db
       .insert(keywordProReferralAttributions)
       .values({
-        id: existing?.id ?? crypto.randomUUID(),
+        id: crypto.randomUUID(),
         referralCodeId: referralCode.id,
         referredOrganizationId: input.referredOrganizationId,
       })
-      .onConflictDoUpdate({
+      .onConflictDoNothing({
         target: keywordProReferralAttributions.referredOrganizationId,
-        set: {
-          referralCodeId: referralCode.id,
-          updatedAt: sql`(current_timestamp)`,
-        },
       })
       .returning();
-    return row ?? null;
+    if (row) return { attribution: row, code: referralCode.code };
+
+    // A concurrent checkout won the unique referred-organization insert.
+    // Resolve and return that winner rather than overwriting its attribution.
+    const [winner] = await db
+      .select({
+        attribution: keywordProReferralAttributions,
+        code: keywordProReferralCodes.code,
+      })
+      .from(keywordProReferralAttributions)
+      .innerJoin(
+        keywordProReferralCodes,
+        eq(
+          keywordProReferralCodes.id,
+          keywordProReferralAttributions.referralCodeId,
+        ),
+      )
+      .where(
+        eq(
+          keywordProReferralAttributions.referredOrganizationId,
+          input.referredOrganizationId,
+        ),
+      )
+      .limit(1);
+    return winner ?? null;
   },
 
   async getAttributionForReferredOrganization(organizationId: string) {
@@ -258,42 +394,6 @@ export const KeywordProRepository = {
     return row ?? null;
   },
 
-  async qualifyAttribution(id: string, referredRewardGranted: boolean) {
-    const [row] = await db
-      .update(keywordProReferralAttributions)
-      .set({
-        status: "qualified",
-        referredRewardGranted,
-        qualifiedAt: sql`coalesce(${keywordProReferralAttributions.qualifiedAt}, current_timestamp)`,
-        updatedAt: sql`(current_timestamp)`,
-      })
-      .where(eq(keywordProReferralAttributions.id, id))
-      .returning();
-    return row ?? null;
-  },
-
-  async recordCommission(input: {
-    attributionId: string;
-    paypalSaleId: string;
-    grossAmountUsdCents: number;
-    rewardCredits: number;
-  }) {
-    const [commission] = await db
-      .insert(keywordProReferralCommissions)
-      .values({ id: crypto.randomUUID(), ...input })
-      .onConflictDoNothing()
-      .returning();
-    if (!commission) return null;
-    await db
-      .update(keywordProReferralAttributions)
-      .set({
-        rewardedMonths: sql`${keywordProReferralAttributions.rewardedMonths} + 1`,
-        updatedAt: sql`(current_timestamp)`,
-      })
-      .where(eq(keywordProReferralAttributions.id, input.attributionId));
-    return commission;
-  },
-
   async getReferralStats(organizationId: string) {
     const code = await this.getOrCreateReferralCode(organizationId);
     const [summary] = await db
@@ -304,9 +404,12 @@ export const KeywordProRepository = {
       .from(keywordProReferralAttributions)
       .leftJoin(
         keywordProReferralCommissions,
-        eq(
-          keywordProReferralCommissions.attributionId,
-          keywordProReferralAttributions.id,
+        and(
+          eq(
+            keywordProReferralCommissions.attributionId,
+            keywordProReferralAttributions.id,
+          ),
+          eq(keywordProReferralCommissions.status, "credited"),
         ),
       )
       .where(eq(keywordProReferralAttributions.referralCodeId, code.id));

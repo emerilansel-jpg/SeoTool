@@ -10,7 +10,7 @@ const byokCredentialSchema = z
 export const keywordResearchProSchema = z
   .object({
     projectId: z.string().min(1),
-    keywords: z.array(z.string().trim().min(1).max(200)).min(1).max(10),
+    keywords: z.array(z.string().trim().min(1).max(200)).min(1).max(25),
     locationCode: z.number().int().positive().optional(),
     languageCode: z.string().min(2).max(8).optional(),
     mode: z.enum(["basic", "full"]).default("basic"),
@@ -18,6 +18,13 @@ export const keywordResearchProSchema = z
     byokCredential: byokCredentialSchema.optional(),
   })
   .superRefine((value, context) => {
+    if (value.mode === "full" && value.keywords.length > 10) {
+      context.addIssue({
+        code: "custom",
+        path: ["keywords"],
+        message: "Full backlink research supports up to 10 keywords per run",
+      });
+    }
     if (value.billingMode === "byok" && !value.byokCredential) {
       context.addIssue({
         code: "custom",

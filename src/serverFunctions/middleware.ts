@@ -96,6 +96,31 @@ export function requireProjectRole(minRole: Role) {
   );
 }
 
+/** Organization-scoped equivalent for billing/account mutations that are not
+ * tied to a project route. */
+export function requireOrganizationRole(minRole: Role) {
+  return createMiddleware({ type: "function" }).server(
+    async ({ next, context }) => {
+      const authenticatedContext = getAuthenticatedContext(context);
+      if (
+        import.meta.env.BYPASS_AUTH === "true" ||
+        import.meta.env.VITE_E2E_BYPASS_AUTH === "true"
+      ) {
+        return next({ context: authenticatedContext });
+      }
+      const role =
+        (await getMemberRole(
+          authenticatedContext.userId,
+          authenticatedContext.organizationId,
+        )) ?? "viewer";
+      if (!roleAtLeast(role, minRole)) {
+        throw new AppError("FORBIDDEN", "Your role doesn't allow this action.");
+      }
+      return next({ context: authenticatedContext });
+    },
+  );
+}
+
 /**
  * Gate a server function to platform admins only. Checks the runtime
  * PLATFORM_ADMIN_USER_IDS / PLATFORM_ADMIN_EMAILS allowlists. Stacks on

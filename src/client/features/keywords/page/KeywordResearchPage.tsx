@@ -26,6 +26,7 @@ import { KeywordResearchLoadingState } from "./KeywordResearchLoadingState";
 import { KeywordResearchResults } from "./KeywordResearchResults";
 import { KeywordResearchSearchBar } from "./KeywordResearchSearchBar";
 import type { KeywordResearchControllerState } from "./types";
+import { KeywordResearchViewTabs } from "./KeywordResearchViewTabs";
 
 type ControllerProps = Omit<KeywordResearchControllerInput, "onFormSubmit">;
 type Props = Omit<
@@ -228,6 +229,7 @@ export function KeywordResearchPage(input: Props) {
             Discover keyword ideas, search demand, and ranking opportunities.
           </p>
         </div>
+        <KeywordResearchViewTabs projectId={projectId} active="discover" />
 
         <KeywordResearchSearchBar controller={controller} />
         {controller.hasSearched ? (

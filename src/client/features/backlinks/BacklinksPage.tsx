@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { SortingState, Updater } from "@tanstack/react-table";
 import { BacklinksSearchCard } from "./BacklinksSearchCard";
 import { BacklinksBody } from "./BacklinksPageContent";
@@ -27,6 +27,10 @@ export function BacklinksPage({
   navigate,
 }: BacklinksPageProps) {
   const filters = useBacklinksFilters();
+  const [billingMode, setBillingMode] = useState<"standard" | "byok">(
+    "standard",
+  );
+  const [byokCredential, setByokCredential] = useState("");
 
   // Sort lives in the URL so sort changes and the page reset commit in one
   // navigation (no transient fetch of the old page with the new sort).
@@ -115,6 +119,8 @@ export function BacklinksPage({
     projectId,
     searchState,
     filters,
+    billingMode,
+    byokCredential,
   });
 
   const {
@@ -143,9 +149,10 @@ export function BacklinksPage({
       navigateToBacklinksSearch(navigate, {
         target: input.target,
         scope: input.scope,
+        provider: searchState.provider,
       });
     },
-    [navigate],
+    [navigate, searchState.provider],
   );
   const handleResultTabChange = useCallback(
     (tab: BacklinksSearchState["tab"]) => {
@@ -193,6 +200,24 @@ export function BacklinksPage({
         </div>
 
         <BacklinksSearchCard
+          provider={searchState.provider}
+          billingMode={billingMode}
+          byokCredential={byokCredential}
+          onBillingModeChange={setBillingMode}
+          onByokCredentialChange={setByokCredential}
+          onProviderChange={(provider) => {
+            navigate({
+              search: (prev) => ({
+                ...prev,
+                provider: provider === "live" ? "live" : undefined,
+                tab: undefined,
+                page: undefined,
+                sort: undefined,
+                order: undefined,
+              }),
+              replace: true,
+            });
+          }}
           errorMessage={overviewErrorMessage}
           initialValues={searchCardInitialValues}
           canOpenSearch={(values) =>
@@ -201,7 +226,10 @@ export function BacklinksPage({
           tabLimit={searchTabs.limit}
           onSubmit={(values) => {
             searchTabs.openTab(toBacklinksTabInput(values));
-            navigateToBacklinksSearch(navigate, values);
+            navigateToBacklinksSearch(navigate, {
+              ...values,
+              provider: searchState.provider,
+            });
             addSearch({ target: values.target, scope: values.scope });
           }}
         />

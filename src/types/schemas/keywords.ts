@@ -202,6 +202,10 @@ const keywordSortFields = [
 const keywordModes = ["auto", "related", "suggestions", "ideas"] as const;
 
 export const keywordsSearchSchema = z.object({
+  view: z.enum(["discover", "pro"]).optional(),
+  checkout: z.enum(["success", "cancelled"]).optional().catch(undefined),
+  subscription_id: z.string().max(128).optional().catch(undefined),
+  ref: z.string().max(32).optional().catch(undefined),
   q: z.string().optional(),
   loc: z.coerce.number().int().positive().optional(),
   kLimit: z.union([z.literal(150), z.literal(300), z.literal(500)]).optional(),

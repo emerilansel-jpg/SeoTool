@@ -28,7 +28,10 @@ vi.mock("@/server/lib/dataforseo", () => ({
   })),
 }));
 
-import { normalizeBacklinksTarget } from "@/server/lib/dataforseo";
+import {
+  createDataforseoClient,
+  normalizeBacklinksTarget,
+} from "@/server/lib/dataforseo";
 import { createBacklinksService } from "./BacklinksService";
 
 const billingCustomer = {
@@ -112,6 +115,30 @@ it("profiles only the summary and history for the overview and reuses cache on r
   expect(backlinksSummaryMock).toHaveBeenCalledOnce();
   expect(backlinksHistoryMock).toHaveBeenCalledOnce();
   expect(second).toEqual(first);
+});
+
+it("uses the request-scoped BYOK credential for a live overview", async () => {
+  vi.mocked(normalizeBacklinksTarget).mockReturnValue({
+    apiTarget: "example.com",
+    displayTarget: "example.com",
+    scope: "domain",
+  });
+  backlinksSummaryMock.mockResolvedValue({});
+  backlinksHistoryMock.mockResolvedValue([]);
+
+  await service.profileOverview(
+    {
+      target: "example.com",
+      billingMode: "byok",
+      byokCredential: "login:password",
+    },
+    billingCustomer,
+  );
+
+  expect(createDataforseoClient).toHaveBeenCalledWith(billingCustomer, {
+    billingMode: "byok",
+    apiKey: btoa("login:password"),
+  });
 });
 
 it("profiles backlink rows per page with offset and total count", async () => {

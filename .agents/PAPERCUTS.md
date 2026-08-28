@@ -10,7 +10,7 @@ data, or sensitive paths.
 
 ## Open
 
-- [ ] `2026-08-26T13:49:00Z` — `codex` — `drizzle-kit generate` compares against the last stored Postgres snapshot (`0030`) while later manual migrations (`0031`/`0032`, plus the earlier Autumn→PayPal rename) have no matching snapshot, so every new migration opens unrelated create-vs-rename prompts and cannot run non-interactively. Reconcile the migration journal/snapshots or add a documented generator-safe workflow for manual migrations.
+- [ ] `2026-08-27T10:24:24Z` — `codex` — `pnpm db:generate` can print fatal non-TTY errors for both Drizzle generators yet still exit 0, so automation may report success without creating migrations. Wrap each generator with an explicit output/artifact check (or upgrade/fix the generator exit behavior) so the combined script fails reliably.
 - [ ] `2026-07-20T20:08:28Z` — `claude` — In a fresh git worktree, `oxlint --type-aware` crashes with `Cannot find module '@oxlint/binding-darwin-arm64'` — the platform-specific optional dep is missing from the worktree's node_modules while tsc/prettier work fine, and plain `pnpm install` reports up-to-date without restoring it; `pnpm install --force` (~22s) fixes it. Worth making the worktree-setup hook (or a documented step) run the forced install so lint doesn't die on fresh worktrees.
 - [ ] `2026-07-19T04:06:52Z` — `codex` — `pnpm --dir web build` fails with `vite: command not found` when `web/node_modules` is absent, despite the root toolchain being installed. Document or enforce the package-local install required before validating the `web/` subpackage.
 - [ ] `2026-07-19T02:55:56Z` — `claude` — Adding a docs folder under `web/content/docs` whose `meta.json` lists an `[Overview](...)` link renders a duplicated, double-highlighted sidebar entry, because the folder-index strip in `web/src/lib/source.ts` (`transformPageTree.folder`) is a per-folder-name allowlist. Derive it from the meta convention (or strip the index for all folders) so new sections don't need a hidden source.ts edit.
@@ -25,3 +25,5 @@ data, or sensitive paths.
 ## Resolved
 
 Move fixed entries here, mark them checked, and append the resolving date or commit.
+
+- [x] `2026-08-26T13:49:00Z` — `codex` — `drizzle-kit generate` compared against stale snapshots and prompted for unrelated manual migrations. Resolved 2026-08-27 by adding current D1/Postgres snapshots (`0057`/`0034`) with repaired parent chains; both generators now report no schema changes non-interactively.

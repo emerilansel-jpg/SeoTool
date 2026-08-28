@@ -8,6 +8,7 @@ export const backlinksTabSchema = z.enum([
   "toxic",
 ]);
 export const backlinksTargetScopeSchema = z.enum(["domain", "page"]);
+export const backlinksProviderSchema = z.enum(["basic", "live"]);
 const DEFAULT_BACKLINKS_SPAM_THRESHOLD = 40;
 
 function normalizeBacklinksSpamThreshold(value: number) {
@@ -40,10 +41,13 @@ export function normalizeBacklinksSpamFilterOptions(
 export const backlinksLookupSchema = z.object({
   target: z.string().min(1, "Target is required").max(2048),
   scope: backlinksTargetScopeSchema.optional(),
+  billingMode: z.enum(["standard", "byok"]).optional(),
+  byokCredential: z.string().trim().min(8).max(500).optional(),
 });
 
 export const backlinksOverviewInputSchema = backlinksLookupSchema.extend({
   projectId: z.string().min(1),
+  provider: backlinksProviderSchema.default("basic"),
 });
 
 /* ------------------------------------------------------------------ */
@@ -217,6 +221,7 @@ export const anchorsPageRequestSchema = backlinksPageRequestBase.extend({
 });
 
 export const backlinksSearchSchema = z.object({
+  provider: backlinksProviderSchema.optional(),
   target: z.string().optional(),
   scope: backlinksTargetScopeSchema.optional(),
   tab: backlinksTabSchema.optional(),
@@ -241,6 +246,7 @@ export const backlinksSearchSchema = z.object({
 export type BacklinksLookupInput = z.infer<typeof backlinksLookupSchema>;
 export type BacklinksTab = z.infer<typeof backlinksTabSchema>;
 export type BacklinksTargetScope = z.infer<typeof backlinksTargetScopeSchema>;
+export type BacklinksProvider = z.infer<typeof backlinksProviderSchema>;
 export type BacklinksSortOrder = z.infer<typeof backlinksSortOrderSchema>;
 export type BacklinksRowsSortField = z.infer<
   typeof backlinksRowsSortFieldSchema

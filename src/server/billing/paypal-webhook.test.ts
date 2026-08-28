@@ -198,6 +198,24 @@ describe("handlePaypalWebhookRequest", () => {
     expect(syncCustomer).not.toHaveBeenCalled();
   });
 
+  it("keeps legacy cohort markers routable during the All Access migration", async () => {
+    const response = await handlePaypalWebhookRequest(
+      request({
+        id: "WH-KRP-LEGACY-1",
+        event_type: "BILLING.SUBSCRIPTION.ACTIVATED",
+        resource: {
+          id: "I-KRP-LEGACY-1",
+          custom_id: "krp:org-legacy:krp_growth_45",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(keywordProMembership.syncWebhookSubscription).toHaveBeenCalledWith(
+      "I-KRP-LEGACY-1",
+    );
+  });
+
   it("credits a verified Keyword Research Pro referral sale", async () => {
     keywordProRepository.getMembershipByPaypalSubscription.mockResolvedValue({
       organizationId: "org-referred",
@@ -209,6 +227,9 @@ describe("handlePaypalWebhookRequest", () => {
       referralCodeUsed: null,
       activatedAt: "2026-08-24T00:00:00.000Z",
       currentPeriodEnd: null,
+      checkoutExpiresAt: null,
+      seatReserved: true,
+      seatReleaseToken: null,
       createdAt: "2026-08-24T00:00:00.000Z",
       updatedAt: "2026-08-24T00:00:00.000Z",
     });

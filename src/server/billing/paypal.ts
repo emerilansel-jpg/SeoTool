@@ -94,6 +94,16 @@ async function getApiBaseUrl(): Promise<string> {
 
 export type PayPalApiResponse<T = unknown> = { data: T; status: number };
 
+export class PayPalRequestError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "PayPalRequestError";
+  }
+}
+
 export async function paypalRequest<T = unknown>(
   method: string,
   path: string,
@@ -133,7 +143,8 @@ export async function paypalRequest<T = unknown>(
     const msg =
       details.map((d) => d.description ?? d.issue).join("; ") ??
       response.statusText;
-    throw new Error(
+    throw new PayPalRequestError(
+      response.status,
       `PayPal ${method} ${path} failed (${response.status}): ${msg}`,
     );
   }

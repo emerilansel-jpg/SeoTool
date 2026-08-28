@@ -11,7 +11,7 @@
     },
     {
       "type": "action",
-      "description": "Fill in email qa@tester.com and password Lastalone99 into the sign-in form"
+      "description": "Sign in with the configured TestSprite test account credentials"
     },
     {
       "type": "action",

@@ -63,8 +63,8 @@ function mapPaypalStatus(paypalStatus: string): string {
       return "past_due";
     case "APPROVAL_PENDING":
     case "APPROVED":
-      return "active";
+      return "pending";
     default:
-      return "active";
+      return "inactive";
   }
 }

@@ -91,6 +91,26 @@ describe("deriveBillingCustomerStatusSnapshot", () => {
     expect(snapshot.paidPlanStatus).toBe("past_due");
   });
 
+  it("does not map pending or unknown PayPal states to active access", () => {
+    const pending = deriveBillingCustomerStatusSnapshot({
+      organizationId: "org_pending",
+      subscription: {
+        plan_id: PAYPAL_PLAN_IDS.pro,
+        status: "APPROVAL_PENDING",
+      },
+    });
+    const unknown = deriveBillingCustomerStatusSnapshot({
+      organizationId: "org_unknown",
+      subscription: {
+        plan_id: PAYPAL_PLAN_IDS.pro,
+        status: "FAILED",
+      },
+    });
+
+    expect(pending.paidPlanStatus).toBe("pending");
+    expect(unknown.paidPlanStatus).toBe("inactive");
+  });
+
   it("extracts next_billing_time as currentPeriodEnd", () => {
     const snapshot = deriveBillingCustomerStatusSnapshot({
       organizationId: "org_period",

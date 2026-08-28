@@ -32,6 +32,18 @@ export const ADMIN_SETTING_GROUPS: AdminSettingGroup[] = [
     ],
   },
   {
+    provider: "OpenPageRank",
+    settings: [
+      {
+        envKey: "OPENPAGERANK_API_KEY",
+        label: "API key",
+        secret: true,
+        editable: true,
+        hint: "Powers the low-cost Basic backlink snapshot. Live detailed backlinks continue to use DataForSEO.",
+      },
+    ],
+  },
+  {
     provider: "OpenAI",
     settings: [
       {

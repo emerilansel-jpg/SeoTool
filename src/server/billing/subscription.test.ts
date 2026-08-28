@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getPlanTierMock, upsertSubscriptionMock, grantMonthlyCreditsMock } =
-  vi.hoisted(() => ({
-    getPlanTierMock: vi.fn(),
-    upsertSubscriptionMock: vi.fn(),
-    grantMonthlyCreditsMock: vi.fn(),
-  }));
+const {
+  createFreeSubscriptionIfMissingMock,
+  getSubscriptionMock,
+  grantMonthlyCreditsMock,
+} = vi.hoisted(() => ({
+  createFreeSubscriptionIfMissingMock: vi.fn(),
+  getSubscriptionMock: vi.fn(),
+  grantMonthlyCreditsMock: vi.fn(),
+}));
 
 vi.mock("@/server/billing/credits", () => ({
   getCreditBalance: vi.fn().mockResolvedValue({
@@ -28,9 +31,8 @@ vi.mock("@/server/lib/posthog", () => ({
 
 vi.mock("@/server/features/billing/repositories/QuotaRepository", () => ({
   QuotaRepository: {
-    getPlanTier: getPlanTierMock,
-    upsertSubscription: upsertSubscriptionMock,
-    getSubscription: vi.fn().mockResolvedValue(null),
+    createFreeSubscriptionIfMissing: createFreeSubscriptionIfMissingMock,
+    getSubscription: getSubscriptionMock,
   },
 }));
 
@@ -42,23 +44,49 @@ import {
 describe("subscription billing", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    upsertSubscriptionMock.mockResolvedValue({});
+    createFreeSubscriptionIfMissingMock.mockResolvedValue({
+      organizationId: "org_123",
+      planTier: "free",
+      status: "active",
+    });
+    getSubscriptionMock.mockResolvedValue(null);
     grantMonthlyCreditsMock.mockResolvedValue(undefined);
   });
 
   it("returns true when the org is on a paid tier (lite)", async () => {
-    getPlanTierMock.mockResolvedValue("lite");
+    getSubscriptionMock.mockResolvedValue({
+      planTier: "lite",
+      status: "active",
+      currentPeriodEnd: null,
+    });
     await expect(customerHasPaidPlan("org_123")).resolves.toBe(true);
-    expect(getPlanTierMock).toHaveBeenCalledWith("org_123");
+    expect(getSubscriptionMock).toHaveBeenCalledWith("org_123");
   });
 
   it("returns true when the org is on a paid tier (agency)", async () => {
-    getPlanTierMock.mockResolvedValue("agency");
+    getSubscriptionMock.mockResolvedValue({
+      planTier: "agency",
+      status: "active",
+      currentPeriodEnd: null,
+    });
     await expect(customerHasPaidPlan("org_123")).resolves.toBe(true);
   });
 
   it("returns false when org is on the free tier", async () => {
-    getPlanTierMock.mockResolvedValue("free");
+    getSubscriptionMock.mockResolvedValue({
+      planTier: "free",
+      status: "active",
+      currentPeriodEnd: null,
+    });
+    await expect(customerHasPaidPlan("org_123")).resolves.toBe(false);
+  });
+
+  it("returns false for a cancelled paid tier", async () => {
+    getSubscriptionMock.mockResolvedValue({
+      planTier: "pro",
+      status: "canceled",
+      currentPeriodEnd: null,
+    });
     await expect(customerHasPaidPlan("org_123")).resolves.toBe(false);
   });
 
@@ -69,12 +97,21 @@ describe("subscription billing", () => {
       userEmail: "alice@example.com",
     });
 
-    expect(upsertSubscriptionMock).toHaveBeenCalledWith({
-      organizationId: "org_123",
-      planTier: "free",
-      status: "active",
-    });
+    expect(createFreeSubscriptionIfMissingMock).toHaveBeenCalledWith("org_123");
     expect(grantMonthlyCreditsMock).toHaveBeenCalledWith("org_123", "free");
+  });
+
+  it("does not overwrite or re-grant credits for an existing subscription", async () => {
+    createFreeSubscriptionIfMissingMock.mockResolvedValueOnce(null);
+
+    await getOrCreateOrganizationCustomer({
+      organizationId: "org_123",
+      userId: "user_123",
+      userEmail: "alice@example.com",
+    });
+
+    expect(createFreeSubscriptionIfMissingMock).toHaveBeenCalledWith("org_123");
+    expect(grantMonthlyCreditsMock).not.toHaveBeenCalled();
   });
 
   it("returns the organization id", async () => {
@@ -89,7 +126,9 @@ describe("subscription billing", () => {
 
   it("handles subscription upsert failure gracefully", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    upsertSubscriptionMock.mockRejectedValue(new Error("DB error"));
+    createFreeSubscriptionIfMissingMock.mockRejectedValue(
+      new Error("DB error"),
+    );
 
     const result = await getOrCreateOrganizationCustomer({
       organizationId: "org_123",

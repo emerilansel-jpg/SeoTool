@@ -376,5 +376,4 @@ export {
   fetchBacklinksBulkRanks,
   fetchBacklinksBulkReferringDomains,
   fetchBacklinksBulkSpamScores,
-  type BacklinksBulkRankItem,
 } from "./backlinks-bulk";

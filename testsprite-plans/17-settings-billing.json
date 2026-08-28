@@ -11,7 +11,7 @@
     },
     {
       "type": "action",
-      "description": "Log in with qa@tester.com and Lastalone99"
+      "description": "Sign in with the configured TestSprite test account credentials"
     },
     {
       "type": "action",

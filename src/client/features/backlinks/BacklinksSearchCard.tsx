@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { Search } from "lucide-react";
+import { KeyRound, Search } from "lucide-react";
 import {
   createFormValidationErrors,
   getFieldError,
@@ -54,12 +54,24 @@ export function BacklinksSearchCard({
   errorMessage,
   initialValues,
   onSubmit,
+  provider,
+  onProviderChange,
+  billingMode,
+  byokCredential,
+  onBillingModeChange,
+  onByokCredentialChange,
   tabLimit,
 }: {
   canOpenSearch?: (values: SearchDraft) => boolean;
   errorMessage: string | null;
   initialValues: SearchDraft;
   onSubmit: (values: SearchDraft) => void;
+  provider: BacklinksSearchState["provider"];
+  onProviderChange: (provider: BacklinksSearchState["provider"]) => void;
+  billingMode: "standard" | "byok";
+  byokCredential: string;
+  onBillingModeChange: (mode: "standard" | "byok") => void;
+  onByokCredentialChange: (credential: string) => void;
   tabLimit?: number;
 }) {
   const [userSelectedScope, setUserSelectedScope] = useState(false);
@@ -100,6 +112,68 @@ export function BacklinksSearchCard({
   return (
     <div className="card bg-base-100 border border-base-300">
       <div className="card-body gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="text-sm font-medium">Data depth</div>
+            <p className="text-xs text-base-content/55">
+              Basic is a low-cost domain snapshot. Live unlocks detailed link
+              evidence.
+            </p>
+          </div>
+          <div className="join">
+            <button
+              type="button"
+              className={`btn btn-sm join-item ${provider === "basic" ? "btn-primary" : "btn-ghost border-base-300"}`}
+              onClick={() => onProviderChange("basic")}
+            >
+              Basic snapshot
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm join-item ${provider === "live" ? "btn-primary" : "btn-ghost border-base-300"}`}
+              onClick={() => onProviderChange("live")}
+            >
+              Live detailed
+            </button>
+          </div>
+        </div>
+        {provider === "live" ? (
+          <div className="rounded-xl border border-base-300 bg-base-200/30 p-3">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className={`btn btn-xs ${billingMode === "standard" ? "btn-primary" : "btn-ghost"}`}
+                onClick={() => onBillingModeChange("standard")}
+              >
+                Standard · provider +30%
+              </button>
+              <button
+                type="button"
+                className={`btn btn-xs ${billingMode === "byok" ? "btn-primary" : "btn-ghost"}`}
+                onClick={() => onBillingModeChange("byok")}
+              >
+                <KeyRound className="size-3.5" /> BYOK · service fee 10%
+              </button>
+            </div>
+            {billingMode === "byok" ? (
+              <div className="mt-3">
+                <input
+                  type="password"
+                  autoComplete="off"
+                  className="input input-bordered input-sm w-full max-w-xl"
+                  value={byokCredential}
+                  onChange={(event) =>
+                    onByokCredentialChange(event.target.value)
+                  }
+                  placeholder="DataForSEO login:password or Base64 credential"
+                />
+                <p className="mt-1 text-xs text-base-content/50">
+                  Used for this browser session only and never saved.
+                </p>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
         <form
           className="space-y-3"
           onSubmit={(event) => {
@@ -142,7 +216,12 @@ export function BacklinksSearchCard({
                   <button
                     type="submit"
                     className="btn btn-primary shrink-0 px-6"
-                    disabled={isSubmitting}
+                    disabled={
+                      isSubmitting ||
+                      (provider === "live" &&
+                        billingMode === "byok" &&
+                        byokCredential.trim().length < 8)
+                    }
                   >
                     {isSubmitting ? "Loading..." : "Search"}
                   </button>

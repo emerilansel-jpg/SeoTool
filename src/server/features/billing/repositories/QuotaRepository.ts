@@ -31,6 +31,18 @@ export async function getPlanTier(organizationId: string): Promise<PlanTier> {
   return row?.planTier ?? "free";
 }
 
+/** Create the default Free row without mutating an existing paid subscription. */
+export async function createFreeSubscriptionIfMissing(
+  organizationId: string,
+): Promise<SubscriptionRow | null> {
+  const [row] = await db
+    .insert(subscription)
+    .values({ organizationId, planTier: "free", status: "active" })
+    .onConflictDoNothing({ target: subscription.organizationId })
+    .returning();
+  return row ?? null;
+}
+
 /** Returns the identity of the org's owner, or null when no owner row exists.
  * Used by the platform-admin quota bypass with the same runtime allowlists as
  * the admin routes. */
@@ -208,6 +220,7 @@ export async function resetUsageQuotaForOrg(
 export const QuotaRepository = {
   getSubscription,
   getPlanTier,
+  createFreeSubscriptionIfMissing,
   getOwnerIdentity,
   upsertSubscription,
   getUsageQuota,

@@ -179,6 +179,11 @@ async function getOrganizationId(
     typeof resource.custom_id === "string" ? resource.custom_id : null;
   const keywordPro = parseKeywordProMarker(customId);
   if (keywordPro) return keywordPro.organizationId;
+  if (customId?.startsWith("membership:") || customId?.startsWith("krp:")) {
+    // A malformed/unknown membership marker must not be treated as a literal
+    // organization id (which would violate the webhook audit-log FK).
+    return null;
+  }
   const topupOrganizationId = parseTopupReference(customId);
   if (topupOrganizationId) return topupOrganizationId;
   if (customId && customId.length > 0) return customId;
@@ -252,7 +257,7 @@ async function processKeywordProEvent(payload: PayPalWebhookEvent) {
         : null;
   const amountUsd = Number.parseFloat(amountValue ?? "");
   if (currency !== "USD" || !Number.isFinite(amountUsd) || amountUsd <= 0) {
-    throw new Error("Invalid Keyword Research Pro PayPal sale amount");
+    throw new Error("Invalid All Access PayPal sale amount");
   }
   await KeywordProMembershipService.rewardReferralSale({
     paypalSubscriptionId: subscriptionId,

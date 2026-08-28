@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getOwnerIdentityMock, getPlanTierMock, getOptionalEnvValueMock } =
+const { getOwnerIdentityMock, getSubscriptionMock, getOptionalEnvValueMock } =
   vi.hoisted(() => ({
     getOwnerIdentityMock: vi.fn(),
-    getPlanTierMock: vi.fn(),
+    getSubscriptionMock: vi.fn(),
     getOptionalEnvValueMock: vi.fn(),
   }));
 
 vi.mock("@/server/features/billing/repositories/QuotaRepository", () => ({
   QuotaRepository: {
     getOwnerIdentity: getOwnerIdentityMock,
-    getPlanTier: getPlanTierMock,
+    getSubscription: getSubscriptionMock,
   },
 }));
 
@@ -34,10 +34,10 @@ describe("QuotaService platform-admin tier override", () => {
       userId: "admin-user-1",
       userEmail: "admin@example.com",
     });
-    getPlanTierMock.mockResolvedValue("free");
+    getSubscriptionMock.mockResolvedValue(null);
 
     await expect(getPlanTier("org-admin-id")).resolves.toBe("agency");
-    expect(getPlanTierMock).not.toHaveBeenCalled();
+    expect(getSubscriptionMock).not.toHaveBeenCalled();
   });
 
   it("supports the explicitly configured email fallback", async () => {
@@ -50,7 +50,7 @@ describe("QuotaService platform-admin tier override", () => {
     });
 
     await expect(getPlanTier("org-admin-email")).resolves.toBe("agency");
-    expect(getPlanTierMock).not.toHaveBeenCalled();
+    expect(getSubscriptionMock).not.toHaveBeenCalled();
   });
 
   it("preserves the stored plan for non-admin org owners", async () => {
@@ -58,9 +58,27 @@ describe("QuotaService platform-admin tier override", () => {
       userId: "customer-1",
       userEmail: "customer@example.com",
     });
-    getPlanTierMock.mockResolvedValue("pro");
+    getSubscriptionMock.mockResolvedValue({
+      planTier: "pro",
+      status: "active",
+      currentPeriodEnd: null,
+    });
 
     await expect(getPlanTier("org-customer")).resolves.toBe("pro");
-    expect(getPlanTierMock).toHaveBeenCalledWith("org-customer");
+    expect(getSubscriptionMock).toHaveBeenCalledWith("org-customer");
+  });
+
+  it("falls back to Free when a stored paid tier is no longer entitled", async () => {
+    getOwnerIdentityMock.mockResolvedValue({
+      userId: "customer-2",
+      userEmail: "customer-2@example.com",
+    });
+    getSubscriptionMock.mockResolvedValue({
+      planTier: "pro",
+      status: "canceled",
+      currentPeriodEnd: null,
+    });
+
+    await expect(getPlanTier("org-canceled")).resolves.toBe("free");
   });
 });

@@ -40,6 +40,12 @@ const toolMeta = {
   filename: "src/serverFunctions/audit.ts",
 };
 
+const membershipMeta = {
+  id: "fn-3",
+  name: "createMembershipCheckout",
+  filename: "src/serverFunctions/membership.ts",
+};
+
 const anonymousContext = {};
 
 beforeEach(() => {
@@ -66,5 +72,18 @@ describe("paidPlanGateMiddleware hosted mode", () => {
       handler({ context: anonymousContext, serverFnMeta: toolMeta, next }),
     ).rejects.toMatchObject({ code: "PAYMENT_REQUIRED" });
     expect(next).not.toHaveBeenCalled();
+  });
+
+  it("keeps the All Access membership funnel reachable before payment", async () => {
+    const next = vi.fn(async () => ({ ok: true }));
+
+    const result = await handler({
+      context: anonymousContext,
+      serverFnMeta: membershipMeta,
+      next,
+    });
+
+    expect(result).toEqual({ ok: true });
+    expect(next).toHaveBeenCalledOnce();
   });
 });

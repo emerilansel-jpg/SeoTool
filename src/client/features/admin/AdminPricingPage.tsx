@@ -50,6 +50,13 @@ export function AdminPricingPage() {
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold">Legacy plan tiers</h2>
+        <p className="text-sm text-base-content/70">
+          Kept for existing subscribers and quota administration. New customers
+          purchase All Access below.
+        </p>
+      </div>
       <p className="text-sm text-base-content/70">
         Prices and monthly credit grants apply immediately to checkout displays,
         credit grants, and MRR. Changing a price also updates the PayPal plan so
@@ -77,8 +84,8 @@ function KeywordProPricingSection() {
     onSuccess: (result) => {
       toast.success(
         result.created > 0
-          ? `${result.created} Keyword Research Pro PayPal plans created.`
-          : "All Keyword Research Pro PayPal plans are already configured.",
+          ? `${result.created} All Access PayPal plans created.`
+          : "All All Access PayPal plans are already configured.",
       );
       void queryClient.invalidateQueries({
         queryKey: ["admin-keyword-pro-cohorts"],
@@ -99,12 +106,13 @@ function KeywordProPricingSection() {
       <div className="flex flex-wrap items-start justify-between gap-3 border-t border-base-300 pt-6">
         <div>
           <h2 className="text-lg font-semibold">
-            Keyword Research Pro cohorts
+            All Access membership cohorts
           </h2>
           <p className="max-w-3xl text-sm text-base-content/70">
-            Prices are locked per member. Changing a cohort price creates a new
-            PayPal plan for future buyers; existing subscriptions stay on their
-            original plan and price.
+            This membership applies to the whole product, including Keyword
+            Research Pro, Backlinks and Local Map Rank. Prices are locked per
+            member. Editing a price creates a new PayPal plan only for future
+            buyers.
           </p>
         </div>
         <button

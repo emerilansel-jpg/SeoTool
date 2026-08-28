@@ -88,6 +88,21 @@ export const backlinksOverviewSchema = z.object({
   }),
   trends: z.array(backlinksTrendRowSchema),
   newLostTrends: z.array(backlinksNewLostTrendRowSchema),
+  dataSource: z
+    .object({
+      provider: z.enum(["openpagerank", "dataforseo"]),
+      mode: z.enum(["basic", "live"]),
+      confidence: z.enum(["low", "high"]),
+      capabilities: z.array(z.string()),
+      note: z.string(),
+    })
+    .default({
+      provider: "dataforseo",
+      mode: "live",
+      confidence: "high",
+      capabilities: ["aggregate", "individual-links"],
+      note: "Live detailed backlink index with page-level evidence.",
+    }),
   fetchedAt: z.string(),
 });
 

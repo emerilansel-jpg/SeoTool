@@ -90,3 +90,44 @@ export const subscription = sqliteTable(
     index("subscription_paypal_sub_idx").on(table.paypalSubscriptionId),
   ],
 );
+
+// Durable hold placed before a billable provider request. Reserving credits
+// up front prevents concurrent requests from spending the same balance; the
+// hold is settled to the provider's reported cost or refunded when the
+// provider confirms that no charge was made.
+export const usageCreditReservations = sqliteTable(
+  "usage_credit_reservations",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull(),
+    billingMode: text("billing_mode", { enum: ["standard", "byok"] })
+      .notNull()
+      .default("standard"),
+    creditFeature: text("credit_feature"),
+    status: text("status", {
+      enum: ["pending", "reserved", "rejected", "settling", "settled"],
+    })
+      .notNull()
+      .default("pending"),
+    reservedCredits: integer("reserved_credits").notNull(),
+    monthlyReserved: integer("monthly_reserved").notNull().default(0),
+    topupReserved: integer("topup_reserved").notNull().default(0),
+    actualCredits: integer("actual_credits"),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`(current_timestamp)`),
+    updatedAt: text("updated_at")
+      .notNull()
+      .default(sql`(current_timestamp)`),
+    settledAt: text("settled_at"),
+  },
+  (table) => [
+    index("usage_credit_reservations_org_status_idx").on(
+      table.organizationId,
+      table.status,
+    ),
+  ],
+);

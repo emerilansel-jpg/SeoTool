@@ -13,6 +13,7 @@ import {
   deductCredits,
   grantMonthlyCredits,
 } from "@/server/billing/credits";
+import { hasSubscriptionAccess } from "@/shared/subscription-access";
 
 export type BillingCustomerContext = Pick<
   EnsuredUserContext,
@@ -34,22 +35,25 @@ export async function getOrCreateOrganizationCustomer(
   // row already exists (from a prior request or webhook), the upsert is a
   // no-op. This ensures every org has a subscription row for QuotaService to
   // read, even before their first PayPal webhook fires.
+  let created = false;
   try {
-    await QuotaRepository.upsertSubscription({
-      organizationId: context.organizationId,
-      planTier: "free",
-      status: "active",
-    });
+    created = Boolean(
+      await QuotaRepository.createFreeSubscriptionIfMissing(
+        context.organizationId,
+      ),
+    );
   } catch (error) {
     // Non-fatal: the webhook will create it on first sync. Log and continue.
     console.warn("billing.subscription-default-create failed:", error);
   }
 
   // Ensure free-tier credits exist for new orgs
-  try {
-    await grantMonthlyCredits(context.organizationId, "free");
-  } catch (error) {
-    console.warn("billing.credits-default-grant failed:", error);
+  if (created) {
+    try {
+      await grantMonthlyCredits(context.organizationId, "free");
+    } catch (error) {
+      console.warn("billing.credits-default-grant failed:", error);
+    }
   }
 
   return { id: context.organizationId };
@@ -59,8 +63,8 @@ export async function getOrCreateOrganizationCustomer(
  *  Reads from the local subscription table (synced from PayPal webhooks) so
  *  it's fast and doesn't add a PayPal round-trip to the hot path. */
 export async function customerHasPaidPlan(customerId: string) {
-  const tier = await QuotaRepository.getPlanTier(customerId);
-  return tier !== "free";
+  const subscription = await QuotaRepository.getSubscription(customerId);
+  return hasSubscriptionAccess(subscription);
 }
 
 // Remaining shared usage credits — the monthly `usage_credits` balance plus the
@@ -153,10 +157,10 @@ export async function trackUsageCreditSpend(args: {
   billingMultiplier?: number;
   properties?: Record<string, unknown>;
 }): Promise<void> {
-  const totalCostUsd = roundUsdForBilling(
-    args.costUsd * (args.billingMultiplier ?? SEO_DATA_COST_MARKUP),
+  const { totalCostUsd, totalCostCredits } = calculateUsageCreditCharge(
+    args.costUsd,
+    args.billingMultiplier,
   );
-  const totalCostCredits = Math.ceil(totalCostUsd * CREDITS_PER_USD);
   if (totalCostCredits <= 0) return;
 
   const { monthlyDeducted, topupDeducted } = await deductCredits(
@@ -177,4 +181,15 @@ export async function trackUsageCreditSpend(args: {
       cost_usd: totalCostUsd,
     },
   });
+}
+
+export function calculateUsageCreditCharge(
+  costUsd: number,
+  billingMultiplier = SEO_DATA_COST_MARKUP,
+) {
+  const totalCostUsd = roundUsdForBilling(costUsd * billingMultiplier);
+  return {
+    totalCostUsd,
+    totalCostCredits: Math.max(0, Math.ceil(totalCostUsd * CREDITS_PER_USD)),
+  };
 }

@@ -1,8 +1,8 @@
-import { type FormEvent, useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { type FormEvent, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { KeyRound, Search } from "lucide-react";
 import { toast } from "sonner";
-import { MembershipOffer, ReferralPanel } from "./KeywordResearchProAccess";
 import { ResearchResults } from "./KeywordResearchProResults";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { researchKeywordsPro } from "@/serverFunctions/keyword-research-pro";
@@ -12,20 +12,14 @@ import {
   type KeywordResearchProMode,
 } from "@/shared/keyword-research-pro";
 import { LOCATION_OPTIONS } from "@/shared/keyword-locations";
-import {
-  getKeywordProMembershipStatus,
-  verifyKeywordProCheckout,
-} from "@/serverFunctions/keyword-pro-membership";
+import { getMembershipStatus } from "@/serverFunctions/membership";
 import { isHostedClientAuthMode } from "@/lib/auth-mode";
 
 type Props = {
   projectId: string;
-  checkout?: "success" | "cancelled";
-  subscriptionId?: string;
-  initialReferralCode?: string;
 };
 
-function parseKeywords(value: string) {
+function parseKeywords(value: string, limit: number) {
   return [
     ...new Set(
       value
@@ -33,7 +27,7 @@ function parseKeywords(value: string) {
         .map((keyword) => keyword.trim())
         .filter(Boolean),
     ),
-  ].slice(0, 10);
+  ].slice(0, limit);
 }
 
 function money(value: number) {
@@ -45,42 +39,17 @@ function money(value: number) {
   }).format(value);
 }
 
-export function KeywordResearchProPage({
-  projectId,
-  checkout,
-  subscriptionId,
-  initialReferralCode,
-}: Props) {
+export function KeywordResearchProPage({ projectId }: Props) {
   const hosted = isHostedClientAuthMode();
   const isE2EBypass =
     import.meta.env.BYPASS_AUTH === "true" ||
     (typeof window !== "undefined" &&
       Reflect.get(window, "__E2E_BYPASS_AUTH") === true);
-  const queryClient = useQueryClient();
   const membership = useQuery({
-    queryKey: ["keyword-pro-membership", projectId],
-    queryFn: () => getKeywordProMembershipStatus({ data: { projectId } }),
+    queryKey: ["membership-status"],
+    queryFn: () => getMembershipStatus(),
     enabled: hosted && !isE2EBypass,
-    refetchInterval: (query) =>
-      checkout === "success" && !query.state.data?.hasAccess ? 2_000 : false,
   });
-  const verify = useMutation({
-    mutationFn: (paypalSubscriptionId: string) =>
-      verifyKeywordProCheckout({
-        data: { projectId, subscriptionId: paypalSubscriptionId },
-      }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: ["keyword-pro-membership", projectId],
-      }),
-    onError: (error) =>
-      toast.error(getStandardErrorMessage(error, "Could not verify checkout")),
-  });
-  useEffect(() => {
-    if (checkout === "success" && subscriptionId && verify.isIdle) {
-      verify.mutate(subscriptionId);
-    }
-  }, [checkout, subscriptionId, verify]);
 
   const [keywordText, setKeywordText] = useState("");
   const [mode, setMode] = useState<KeywordResearchProMode>("basic");
@@ -88,7 +57,11 @@ export function KeywordResearchProPage({
     useState<KeywordResearchProBillingMode>("standard");
   const [credential, setCredential] = useState("");
   const [locationCode, setLocationCode] = useState<number | undefined>();
-  const keywords = useMemo(() => parseKeywords(keywordText), [keywordText]);
+  const keywordLimit = mode === "basic" ? 25 : 10;
+  const keywords = useMemo(
+    () => parseKeywords(keywordText, keywordLimit),
+    [keywordLimit, keywordText],
+  );
   const estimate = estimateKeywordResearchProCost(
     Math.max(1, keywords.length),
     mode,
@@ -126,12 +99,26 @@ export function KeywordResearchProPage({
 
   if (hosted && !isE2EBypass && !membership.data?.hasAccess) {
     return (
-      <MembershipOffer
-        projectId={projectId}
-        status={membership.data}
-        checkout={checkout}
-        initialReferralCode={initialReferralCode}
-      />
+      <div className="rounded-2xl border border-primary/30 bg-base-100 p-6 shadow-sm">
+        <h2 className="text-xl font-semibold">
+          Pro Analysis is part of All Access
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm text-base-content/70">
+          Upgrade once to unlock this pipeline and every other paid SeoTool.im
+          feature. Your cohort price stays locked while the membership remains
+          uninterrupted.
+        </p>
+        <Link
+          to="/subscribe"
+          search={{
+            upgrade: true,
+            redirect: `/p/${projectId}/keywords?view=pro`,
+          }}
+          className="btn btn-primary mt-5"
+        >
+          View All Access
+        </Link>
+      </div>
     );
   }
 
@@ -147,12 +134,6 @@ export function KeywordResearchProPage({
 
   return (
     <div className="space-y-6">
-      {membership.data?.referral ? (
-        <ReferralPanel
-          projectId={projectId}
-          referral={membership.data.referral}
-        />
-      ) : null}
       <form
         onSubmit={submit}
         className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm md:p-6"
@@ -162,7 +143,7 @@ export function KeywordResearchProPage({
             <label className="text-sm font-semibold" htmlFor="krp-keywords">
               Keywords{" "}
               <span className="font-normal text-base-content/50">
-                (up to 10)
+                (up to {keywordLimit})
               </span>
             </label>
             <textarea

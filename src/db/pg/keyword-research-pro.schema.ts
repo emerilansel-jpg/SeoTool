@@ -25,6 +25,9 @@ export const keywordProMemberships = pgTable(
     referralCodeUsed: text("referral_code_used"),
     activatedAt: text("activated_at"),
     currentPeriodEnd: text("current_period_end"),
+    checkoutExpiresAt: text("checkout_expires_at"),
+    seatReserved: boolean("seat_reserved").notNull().default(false),
+    seatReleaseToken: text("seat_release_token"),
     createdAt: text("created_at").notNull().default(isoNow),
     updatedAt: text("updated_at").notNull().default(isoNow),
   },
@@ -35,6 +38,10 @@ export const keywordProMemberships = pgTable(
     index("keyword_pro_memberships_cohort_status_idx").on(
       table.cohortKey,
       table.status,
+    ),
+    index("keyword_pro_memberships_checkout_expiry_idx").on(
+      table.status,
+      table.checkoutExpiresAt,
     ),
   ],
 );
@@ -110,6 +117,26 @@ export const keywordProReferralCommissions = pgTable(
     ),
     index("keyword_pro_referral_commissions_attribution_idx").on(
       table.attributionId,
+    ),
+  ],
+);
+
+export const keywordProMembershipPayments = pgTable(
+  "keyword_pro_membership_payments",
+  {
+    paypalSaleId: text("paypal_sale_id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    paypalSubscriptionId: text("paypal_subscription_id").notNull(),
+    grossAmountUsdCents: integer("gross_amount_usd_cents").notNull(),
+    status: text("status").notNull().default("pending"),
+    createdAt: text("created_at").notNull().default(isoNow),
+  },
+  (table) => [
+    index("keyword_pro_membership_payments_org_created_idx").on(
+      table.organizationId,
+      table.createdAt,
     ),
   ],
 );

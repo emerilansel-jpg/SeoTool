@@ -19,6 +19,7 @@ function BacklinksRoute() {
   const { projectId } = Route.useParams();
   const navigate = useNavigate({ from: Route.fullPath });
   const {
+    provider = "basic",
     target = "",
     scope: rawScope,
     tab = "backlinks",
@@ -36,6 +37,7 @@ function BacklinksRoute() {
       projectId={projectId}
       navigate={navigate}
       searchState={{
+        provider,
         target,
         scope,
         tab,

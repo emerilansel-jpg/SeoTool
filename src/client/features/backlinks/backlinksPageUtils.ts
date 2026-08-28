@@ -34,9 +34,13 @@ export function buildSummaryStats(data: BacklinksOverviewData | undefined) {
       description: "Unique pages linking to this site or page.",
     },
     {
-      label: "Rank",
+      label:
+        data.dataSource.provider === "openpagerank" ? "Open Page Rank" : "Rank",
       value: formatNumber(data.summary.rank),
-      description: "DataForSEO's 0-100 authority score.",
+      description:
+        data.dataSource.provider === "openpagerank"
+          ? "OpenPageRank's domain-level authority signal (0-10)."
+          : "DataForSEO's 0-100 authority score.",
     },
     {
       label: "Backlink Spam Score",

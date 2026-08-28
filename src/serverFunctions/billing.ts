@@ -7,7 +7,6 @@ import {
   getQuotaState,
   getPlanTier,
 } from "@/server/features/billing/services/QuotaService";
-import { customerHasPaidPlan } from "@/server/billing/subscription";
 import {
   getCreditBalance,
   grantMonthlyCredits,
@@ -107,17 +106,8 @@ export const getCustomerPortalUrl = createServerFn({ method: "POST" })
       );
     }
 
-    // Only paid customers can access the billing portal — free tier has
-    // nothing to manage there.
-    const hasPaidPlan = await customerHasPaidPlan(context.organizationId);
-    if (!hasPaidPlan) {
-      throw new AppError(
-        "PLAN_LIMIT_REACHED",
-        "No active paid subscription to manage",
-      );
-    }
-
-    // Get the PayPal subscription id from the local subscription table
+    // A past-due membership must retain portal access even after its feature
+    // grace period ends, otherwise the owner cannot recover payment.
     const sub = await QuotaRepository.getSubscription(context.organizationId);
     if (!sub?.paypalSubscriptionId) {
       throw new AppError(

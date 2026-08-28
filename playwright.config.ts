@@ -23,7 +23,8 @@ export default defineConfig({
     // fixture flags injected here so they never leak into `npm run dev` via
     // .dev.vars. `env` is used instead of a shell `VAR=x` prefix because that
     // syntax fails on Windows cmd.
-    command: "pnpm exec vite dev --host 127.0.0.1 --strictPort",
+    command:
+      "pnpm test:e2e:prepare && pnpm exec vite dev --host 127.0.0.1 --strictPort",
     url: "http://localhost:3101",
     env: {
       BYPASS_AUTH: "true",

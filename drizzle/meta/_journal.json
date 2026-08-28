@@ -400,6 +400,27 @@
       "when": 1787752182271,
       "tag": "0056_keyword_research_pro",
       "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "6",
+      "when": 1787826311274,
+      "tag": "0057_keyword_pro_cohort_seats",
+      "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "6",
+      "when": 1787878503370,
+      "tag": "0058_keyword_pro_checkout_safety",
+      "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "6",
+      "when": 1787879431461,
+      "tag": "0059_usage_credit_reservations",
+      "breakpoints": true
     }
   ]
 }

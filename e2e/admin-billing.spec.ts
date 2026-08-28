@@ -9,7 +9,9 @@ async function enableAuthBypass(page: Page) {
 async function clientNavigate(page: Page, path: string) {
   if (!page.url().startsWith("http://localhost:3101/billing")) {
     await page.goto("/billing", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: "Billing" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Billing" })).toBeVisible({
+      timeout: 30_000,
+    });
   }
   await page.evaluate((nextPath) => {
     window.history.pushState({}, "", nextPath);

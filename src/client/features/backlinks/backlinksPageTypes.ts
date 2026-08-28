@@ -2,6 +2,7 @@ import type {
   BacklinksSortOrder,
   BacklinksTab,
   BacklinksTargetScope,
+  BacklinksProvider,
 } from "@/types/schemas/backlinks";
 import type {
   getBacklinksAnchors,
@@ -33,6 +34,7 @@ export type TopPageRow = BacklinksTopPagesData["rows"][number];
 export type AnchorRow = BacklinksAnchorsData["rows"][number];
 
 export type BacklinksSearchState = {
+  provider: BacklinksProvider;
   target: string;
   scope: BacklinksTargetScope;
   tab: BacklinksTab;

@@ -9,6 +9,8 @@ import {
 } from "@/client/features/keywords/keywordSearchParams";
 import { keywordsSearchSchema } from "@/types/schemas/keywords";
 import type { z } from "zod";
+import { KeywordResearchProPage } from "@/client/features/keywords-pro/KeywordResearchProPage";
+import { KeywordResearchViewTabs } from "@/client/features/keywords/page/KeywordResearchViewTabs";
 
 export const Route = createFileRoute("/_project/p/$projectId/keywords")({
   validateSearch: keywordsSearchSchema,
@@ -40,6 +42,26 @@ function KeywordResearchPageRoute() {
     sort: sortField = "searchVolume",
     order: sortDir = "desc",
   } = search;
+  if (search.view === "pro") {
+    return (
+      <div className="overflow-auto px-4 py-4 pb-24 md:px-6 md:py-6 md:pb-8">
+        <div className="mx-auto max-w-7xl space-y-5">
+          <div>
+            <div className="mb-1 flex items-center gap-2">
+              <h1 className="text-2xl font-semibold">Keyword Research</h1>
+              <span className="badge badge-primary badge-sm">PRO</span>
+            </div>
+            <p className="max-w-3xl text-sm text-base-content/70">
+              Combine KGR, weak page-one signals and optional live backlink
+              competition in one opportunity report.
+            </p>
+          </div>
+          <KeywordResearchViewTabs projectId={projectId} active="pro" />
+          <KeywordResearchProPage projectId={projectId} />
+        </div>
+      </div>
+    );
+  }
   return (
     <KeywordResearchPage
       // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment -- typed via routeTree.gen.ts

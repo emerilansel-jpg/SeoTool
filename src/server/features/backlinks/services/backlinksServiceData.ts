@@ -69,6 +69,26 @@ export type BacklinksCache = {
   set(key: string, data: unknown, ttlSeconds: number): Promise<void>;
 };
 
+type BacklinksBillingInput = {
+  billingMode?: "standard" | "byok";
+  byokCredential?: string;
+};
+
+function createBacklinksClient(
+  billingCustomer: BillingCustomerContext,
+  input: BacklinksBillingInput,
+) {
+  const credential = input.byokCredential?.trim();
+  return createDataforseoClient(billingCustomer, {
+    billingMode: input.billingMode ?? "standard",
+    apiKey: credential
+      ? credential.includes(":")
+        ? btoa(credential)
+        : credential
+      : undefined,
+  });
+}
+
 type BacklinksOverviewProfile = {
   overview: BacklinksOverviewResult;
 };
@@ -94,7 +114,7 @@ export async function profileBacklinksOverview(
     };
   }
 
-  const dataforseo = createDataforseoClient(billingCustomer);
+  const dataforseo = createBacklinksClient(billingCustomer, input);
 
   const now = new Date();
   const normalizedTarget = normalizeBacklinksTarget(input.target, {
@@ -146,7 +166,7 @@ export async function profileBacklinksRowsPage(
     return cached.data;
   }
 
-  const dataforseo = createDataforseoClient(billingCustomer);
+  const dataforseo = createBacklinksClient(billingCustomer, input);
   const offset = (input.page - 1) * input.pageSize;
   const filters = buildBacklinksRowsApiFilters(input.filters);
 
@@ -184,7 +204,7 @@ export async function profileReferringDomainsPage(
     return cached.data;
   }
 
-  const dataforseo = createDataforseoClient(billingCustomer);
+  const dataforseo = createBacklinksClient(billingCustomer, input);
   const offset = (input.page - 1) * input.pageSize;
   const filters = buildReferringDomainsApiFilters(input.filters);
 
@@ -218,7 +238,7 @@ export async function profileTopPagesPage(
     return cached.data;
   }
 
-  const dataforseo = createDataforseoClient(billingCustomer);
+  const dataforseo = createBacklinksClient(billingCustomer, input);
   const offset = (input.page - 1) * input.pageSize;
   const filters = buildTopPagesApiFilters(input.filters);
 
@@ -252,7 +272,7 @@ export async function profileAnchorsPage(
     return cached.data;
   }
 
-  const dataforseo = createDataforseoClient(billingCustomer);
+  const dataforseo = createBacklinksClient(billingCustomer, input);
   const offset = (input.page - 1) * input.pageSize;
   const filters = buildAnchorsApiFilters(input.filters);
 
@@ -375,6 +395,21 @@ function buildOverviewResult(args: {
       newReferringDomains: item.newReferringDomains,
       lostReferringDomains: item.lostReferringDomains,
     })),
+    dataSource: {
+      provider: "dataforseo" as const,
+      mode: "live" as const,
+      confidence: "high" as const,
+      capabilities: [
+        "aggregate",
+        "individual-links",
+        "referring-domains",
+        "top-pages",
+        "anchors",
+        "spam-signals",
+        "history",
+      ],
+      note: "Live detailed backlink index with page-level evidence.",
+    },
     fetchedAt: args.now.toISOString(),
   };
 }

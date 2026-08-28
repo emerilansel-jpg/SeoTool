@@ -7,6 +7,7 @@ import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import { isPlatformAdmin } from "@/server/lib/platform-admin";
 import { KeywordProRepository } from "@/server/features/keywords/repositories/KeywordProRepository";
 import { AppError } from "@/server/lib/errors";
+import { hasMembershipAccess } from "@/shared/keyword-pro-membership";
 
 export const researchKeywordsPro = createServerFn({ method: "POST" })
   .middleware([requireProjectContext])
@@ -20,10 +21,13 @@ export const researchKeywordsPro = createServerFn({ method: "POST" })
           userEmail: context.userEmail,
         }),
       ]);
-      if (!admin && membership?.status !== "ACTIVE") {
+      if (
+        !admin &&
+        !hasMembershipAccess(membership?.status, membership?.currentPeriodEnd)
+      ) {
         throw new AppError(
           "PAYMENT_REQUIRED",
-          "Keyword Research Pro membership is required for this research.",
+          "An active SeoTool.im All Access membership is required for Pro Analysis.",
         );
       }
     }

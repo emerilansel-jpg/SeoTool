@@ -2,12 +2,13 @@ import { AppError } from "@/server/lib/errors";
 import { paypal } from "@/server/billing/paypal";
 import { AdminSettingsRepository } from "@/server/features/admin/repositories/AdminSettingsRepository";
 import { KeywordProRepository } from "@/server/features/keywords/repositories/KeywordProRepository";
+import { KeywordProCohortSeatRepository } from "@/server/features/keywords/repositories/KeywordProCohortSeatRepository";
 import {
   KEYWORD_PRO_COHORTS,
   type KeywordProCohortKey,
 } from "@/shared/keyword-pro-membership";
 
-const PRODUCT_SETTING_KEY = "PAYPAL_KRP_PRODUCT_ID";
+const PRODUCT_SETTING_KEY = "PAYPAL_ALL_ACCESS_PRODUCT_ID";
 
 export type EffectiveKeywordProCohort = {
   key: KeywordProCohortKey;
@@ -25,8 +26,8 @@ async function ensureProduct(adminUserId: string) {
   const existing = await AdminSettingsRepository.get(PRODUCT_SETTING_KEY);
   if (existing?.value) return existing.value;
   const product = await paypal.products.create({
-    name: "SeoTool.im Keyword Research Pro",
-    description: "KGR, weak SERP and backlink competition research add-on",
+    name: "SeoTool.im All Access",
+    description: "All SeoTool.im features with grandfathered cohort pricing",
   });
   await AdminSettingsRepository.upsert({
     key: PRODUCT_SETTING_KEY,
@@ -44,8 +45,8 @@ async function createPlan(input: {
 }) {
   return paypal.billingPlans.create({
     product_id: input.productId,
-    name: `Keyword Research Pro — ${input.label}`,
-    description: `Grandfathered ${input.label} monthly membership`,
+    name: `SeoTool.im All Access — ${input.label}`,
+    description: `Grandfathered All Access ${input.label} monthly membership`,
     monthly_price_cents: input.priceUsdCents,
   });
 }
@@ -57,9 +58,12 @@ export const KeywordProConfigService = {
     return Promise.all(
       KEYWORD_PRO_COHORTS.map(async (cohort) => {
         const row = byKey.get(cohort.key);
-        const occupied = await KeywordProRepository.countReservedMemberships(
-          cohort.key,
-        );
+        const persistedMemberships =
+          await KeywordProRepository.countReservedMemberships(cohort.key);
+        const occupied =
+          cohort.capacity == null
+            ? persistedMemberships
+            : Math.max(row?.reservedSeats ?? 0, persistedMemberships);
         return {
           key: cohort.key,
           label: cohort.label,
@@ -88,10 +92,45 @@ export const KeywordProConfigService = {
     if (!cohort) {
       throw new AppError(
         "UPSTREAM_UNAVAILABLE",
-        "Keyword Research Pro membership is temporarily unavailable.",
+        "All Access membership is temporarily unavailable.",
       );
     }
     return cohort;
+  },
+
+  async reserveCheckoutCohort() {
+    const cohorts = await this.getCohorts();
+    for (const cohort of cohorts) {
+      if (!cohort.active) continue;
+      if (cohort.capacity != null && cohort.occupied >= cohort.capacity) {
+        continue;
+      }
+      if (!cohort.paypalPlanId) {
+        throw new AppError(
+          "UPSTREAM_UNAVAILABLE",
+          "All Access checkout is not configured yet. Please contact support.",
+        );
+      }
+      const configuredCohort = {
+        ...cohort,
+        paypalPlanId: cohort.paypalPlanId,
+      };
+      if (cohort.capacity == null) {
+        return { cohort: configuredCohort, seatReserved: false };
+      }
+      if (
+        await KeywordProCohortSeatRepository.reserve(
+          cohort.key,
+          cohort.capacity,
+        )
+      ) {
+        return { cohort: configuredCohort, seatReserved: true };
+      }
+    }
+    throw new AppError(
+      "UPSTREAM_UNAVAILABLE",
+      "All Access membership is temporarily unavailable.",
+    );
   },
 
   async saveCohort(

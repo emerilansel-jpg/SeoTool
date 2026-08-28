@@ -163,31 +163,41 @@ export function BacklinksBody({
         data={overviewData}
         summaryStats={summaryStats}
       />
-      <BacklinksResultsCard
-        projectId={projectId}
-        activeTab={searchState.tab}
-        tabRows={tabRows}
-        toxicRows={toxicPage?.rows ?? []}
-        filters={filters}
-        sorting={sorting}
-        view={searchState.view}
-        domainExpansion={domainExpansion}
-        isTabLoading={tabLoading}
-        tabErrorMessage={tabErrorMessage}
-        exportTarget={overviewData.displayTarget || searchState.target}
-        pagination={{
-          page: searchState.page,
-          pageSize: searchState.pageSize,
-          totalCount: activeTabPage?.totalCount ?? null,
-          hasNextPage: activeTabPage?.hasMore ?? false,
-          isFetching: tabFetching,
-        }}
-        onPageChange={onPageChange}
-        onPageSizeChange={onPageSizeChange}
-        onSortingChange={onSortingChange}
-        onTabChange={onTabChange}
-        onViewChange={onViewChange}
-      />
+      {searchState.provider === "basic" ? (
+        <div className="alert alert-info text-sm">
+          <span>
+            Basic mode intentionally shows aggregate domain signals only. It
+            does not invent individual links, anchors, toxic scores or top
+            pages. Switch to <strong>Live detailed</strong> for that evidence.
+          </span>
+        </div>
+      ) : (
+        <BacklinksResultsCard
+          projectId={projectId}
+          activeTab={searchState.tab}
+          tabRows={tabRows}
+          toxicRows={toxicPage?.rows ?? []}
+          filters={filters}
+          sorting={sorting}
+          view={searchState.view}
+          domainExpansion={domainExpansion}
+          isTabLoading={tabLoading}
+          tabErrorMessage={tabErrorMessage}
+          exportTarget={overviewData.displayTarget || searchState.target}
+          pagination={{
+            page: searchState.page,
+            pageSize: searchState.pageSize,
+            totalCount: activeTabPage?.totalCount ?? null,
+            hasNextPage: activeTabPage?.hasMore ?? false,
+            isFetching: tabFetching,
+          }}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+          onSortingChange={onSortingChange}
+          onTabChange={onTabChange}
+          onViewChange={onViewChange}
+        />
+      )}
     </>
   );
 }

@@ -33,6 +33,7 @@ export function BacklinksOverviewPanels({
             size: undefined,
             sort: undefined,
             order: undefined,
+            provider: data.dataSource.mode === "live" ? "live" : undefined,
           }}
           replace
           className="btn btn-ghost btn-sm gap-2 px-0 text-base-content/70 hover:bg-transparent"
@@ -46,7 +47,18 @@ export function BacklinksOverviewPanels({
         <span>Target: {data.displayTarget}</span>
         <span>-</span>
         <span>Updated {formatRelativeTimestamp(data.fetchedAt)}</span>
+        <span className="badge badge-sm badge-outline">
+          {data.dataSource.provider === "dataforseo"
+            ? "DataForSEO"
+            : "OpenPageRank"}
+        </span>
+        <span
+          className={`badge badge-sm ${data.dataSource.confidence === "high" ? "badge-success" : "badge-warning"}`}
+        >
+          {data.dataSource.confidence} confidence
+        </span>
       </div>
+      <p className="text-xs text-base-content/55">{data.dataSource.note}</p>
       <OverviewGrid data={data} summaryStats={summaryStats} />
       {data.scope === "page" ? (
         <div className="alert alert-info">

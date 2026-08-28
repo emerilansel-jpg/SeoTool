@@ -36,6 +36,8 @@ type UseBacklinksPageDataArgs = {
   projectId: string;
   searchState: BacklinksSearchState;
   filters: BacklinksFiltersState;
+  billingMode: "standard" | "byok";
+  byokCredential: string;
 };
 
 // Five-minute client staleness on top of the server's 6h R2 cache, so window
@@ -76,6 +78,8 @@ export function useBacklinksPageData({
   projectId,
   searchState,
   filters,
+  billingMode,
+  byokCredential,
 }: UseBacklinksPageDataArgs) {
   const searchCardInitialValues = useMemo(
     () => ({
@@ -88,14 +92,37 @@ export function useBacklinksPageData({
   const { target, scope, tab, page, pageSize, sort, order, view } = searchState;
   const rowsMode = view === "all" ? "as_is" : "one_per_domain";
   const targetReady = Boolean(target);
-  const baseQueryKeyParts = [projectId, scope, target] as const;
+  const billingReady =
+    searchState.provider === "basic" ||
+    billingMode === "standard" ||
+    byokCredential.trim().length >= 8;
+  const baseQueryKeyParts = [
+    projectId,
+    searchState.provider,
+    scope,
+    target,
+  ] as const;
   const pageInputBase = { projectId, target, scope, page, pageSize };
+  const billingInput = {
+    billingMode,
+    byokCredential:
+      billingMode === "byok" ? byokCredential.trim() || undefined : undefined,
+  } as const;
 
   const overviewQuery = useQuery({
     queryKey: ["backlinksOverview", ...baseQueryKeyParts],
-    enabled: targetReady,
+    enabled: targetReady && billingReady,
     staleTime: BACKLINKS_QUERY_STALE_TIME_MS,
-    queryFn: () => getBacklinksOverview({ data: { projectId, target, scope } }),
+    queryFn: () =>
+      getBacklinksOverview({
+        data: {
+          projectId,
+          target,
+          scope,
+          provider: searchState.provider,
+          ...billingInput,
+        },
+      }),
   });
 
   const rowsSort = toSort(
@@ -119,12 +146,17 @@ export function useBacklinksPageData({
       rowsFilters,
       rowsMode,
     ],
-    enabled: targetReady && tab === "backlinks",
+    enabled:
+      targetReady &&
+      billingReady &&
+      searchState.provider === "live" &&
+      tab === "backlinks",
     staleTime: BACKLINKS_QUERY_STALE_TIME_MS,
     queryFn: () =>
       getBacklinksRows({
         data: {
           ...pageInputBase,
+          ...billingInput,
           sortField: rowsSort.field,
           sortOrder: rowsSort.order,
           filters: rowsFilters,
@@ -153,12 +185,17 @@ export function useBacklinksPageData({
       domainsSort.order,
       domainsFilters,
     ],
-    enabled: targetReady && tab === "domains",
+    enabled:
+      targetReady &&
+      billingReady &&
+      searchState.provider === "live" &&
+      tab === "domains",
     staleTime: BACKLINKS_QUERY_STALE_TIME_MS,
     queryFn: () =>
       getBacklinksReferringDomains({
         data: {
           ...pageInputBase,
+          ...billingInput,
           sortField: domainsSort.field,
           sortOrder: domainsSort.order,
           filters: domainsFilters,
@@ -186,12 +223,17 @@ export function useBacklinksPageData({
       pagesSort.order,
       pagesFilters,
     ],
-    enabled: targetReady && tab === "pages",
+    enabled:
+      targetReady &&
+      billingReady &&
+      searchState.provider === "live" &&
+      tab === "pages",
     staleTime: BACKLINKS_QUERY_STALE_TIME_MS,
     queryFn: () =>
       getBacklinksTopPages({
         data: {
           ...pageInputBase,
+          ...billingInput,
           sortField: pagesSort.field,
           sortOrder: pagesSort.order,
           filters: pagesFilters,
@@ -219,12 +261,17 @@ export function useBacklinksPageData({
       anchorsSort.order,
       anchorsFilters,
     ],
-    enabled: targetReady && tab === "anchors",
+    enabled:
+      targetReady &&
+      billingReady &&
+      searchState.provider === "live" &&
+      tab === "anchors",
     staleTime: BACKLINKS_QUERY_STALE_TIME_MS,
     queryFn: () =>
       getBacklinksAnchors({
         data: {
           ...pageInputBase,
+          ...billingInput,
           sortField: anchorsSort.field,
           sortOrder: anchorsSort.order,
           filters: anchorsFilters,
@@ -251,12 +298,17 @@ export function useBacklinksPageData({
       toxicSort.field,
       toxicSort.order,
     ],
-    enabled: targetReady && tab === "toxic",
+    enabled:
+      targetReady &&
+      billingReady &&
+      searchState.provider === "live" &&
+      tab === "toxic",
     staleTime: BACKLINKS_QUERY_STALE_TIME_MS,
     queryFn: () =>
       getBacklinksRows({
         data: {
           ...pageInputBase,
+          ...billingInput,
           sortField: toxicSort.field,
           sortOrder: toxicSort.order,
           filters: { minSpamScore: 70 },
@@ -300,13 +352,16 @@ export function useBacklinksPageData({
 
 export function navigateToBacklinksSearch(
   navigate: BacklinksPageProps["navigate"],
-  values: Pick<BacklinksSearchState, "target" | "scope">,
+  values: Pick<BacklinksSearchState, "target" | "scope"> & {
+    provider?: BacklinksSearchState["provider"];
+  },
 ) {
   navigate({
     search: (prev) => ({
       ...prev,
       target: values.target,
       scope: getPersistedBacklinksSearchScope(values.target, values.scope),
+      provider: values.provider === "live" ? "live" : undefined,
       tab: undefined,
       page: undefined,
       sort: undefined,

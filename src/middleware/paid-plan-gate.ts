@@ -35,7 +35,7 @@ const ALWAYS_ALLOWED_FILES = new Set([
   "src/serverFunctions/onboarding.ts",
   "src/serverFunctions/onboardingChat.ts",
   "src/serverFunctions/paypal-checkout.ts",
-  "src/serverFunctions/keyword-pro-membership.ts",
+  "src/serverFunctions/membership.ts",
   "src/serverFunctions/keyword-research-pro.ts",
   "src/serverFunctions/admin-keyword-pro.ts",
 ]);

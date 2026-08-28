@@ -151,5 +151,3 @@ export async function fetchBacklinksBulkReferringDomains(
     billing: buildTaskBilling(task),
   };
 }
-
-export type BacklinksBulkRankItem = z.infer<typeof backlinksBulkRankItemSchema>;

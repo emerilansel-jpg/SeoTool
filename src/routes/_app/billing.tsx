@@ -1,6 +1,7 @@
-import { Link, createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { CreditCard, Zap } from "lucide-react";
+import { Zap } from "lucide-react";
+import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
 import { isHostedClientAuthMode } from "@/lib/auth-mode";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
@@ -19,10 +20,14 @@ import {
   createPaypalTopup,
 } from "@/serverFunctions/paypal-checkout";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QuotaBar } from "@/client/features/billing/QuotaBar";
 import { getEffectivePricesUsd } from "@/server/billing/plan-config";
-import { PLAN_TIER_LABELS } from "@/shared/plans";
+import {
+  cancelMembership,
+  getMembershipStatus,
+} from "@/serverFunctions/membership";
+import { BillingSubscriptionCards } from "@/client/features/billing/BillingSubscriptionCards";
 
 export const Route = createFileRoute("/_app/billing")({
   beforeLoad: () => {
@@ -38,6 +43,7 @@ export const Route = createFileRoute("/_app/billing")({
 });
 
 function BillingPage() {
+  const queryClient = useQueryClient();
   const { prices } = Route.useLoaderData();
   const { data: session, isPending: isSessionPending } = useSession();
   const isE2EBypass =
@@ -54,13 +60,32 @@ function BillingPage() {
   const topupCaptureStarted = useRef(false);
 
   const { planTier, isLoading: isPlanLoading } = usePlanTier();
-  const isFreePlan = planTier === "free";
 
   const getQuotaState = useServerFn(getQuotaStateSummary);
   const quotaQuery = useQuery({
     queryKey: ["quotaState", activeUserId],
     queryFn: () => getQuotaState(),
     enabled: Boolean(activeUserId),
+  });
+  const membershipQuery = useQuery({
+    queryKey: ["membership-status", activeUserId],
+    queryFn: () => getMembershipStatus(),
+    enabled: Boolean(activeUserId),
+  });
+  const cancelMembershipMutation = useMutation({
+    mutationFn: () => cancelMembership({ data: { confirmed: true } }),
+    onSuccess: () => {
+      toast.success("All Access membership cancelled.");
+      void queryClient.invalidateQueries({ queryKey: ["membership-status"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["billing", "plan-tier"],
+      });
+      void quotaQuery.refetch();
+    },
+    onError: (error) =>
+      toast.error(
+        getStandardErrorMessage(error, "Could not cancel the membership."),
+      ),
   });
 
   const openPortal = useServerFn(getCustomerPortalUrl);
@@ -126,7 +151,8 @@ function BillingPage() {
   const billingRouteState = getBillingRouteState({
     hasSession: Boolean(activeUserId),
     isSessionPending: isE2EBypass ? false : isSessionPending,
-    isCustomerLoading: isPlanLoading || quotaQuery.isLoading,
+    isCustomerLoading:
+      isPlanLoading || quotaQuery.isLoading || membershipQuery.isLoading,
     isCustomerError: quotaQuery.isError,
   });
 
@@ -144,6 +170,19 @@ function BillingPage() {
       data: { attribution, eventType: "PURCHASE" },
     });
   }, [billingRouteState, checkoutCompleted]);
+
+  const membership = membershipQuery.data?.membership;
+  const referral = membershipQuery.data?.referral;
+  const membershipStatus = membership?.status.toUpperCase();
+  const canManageAllAccess =
+    Boolean(membership) &&
+    membershipStatus !== "CANCELLED" &&
+    membershipStatus !== "EXPIRED" &&
+    membershipStatus !== "FAILED";
+  const currentPrice =
+    canManageAllAccess && membership
+      ? membership.lockedPriceUsdCents / 100
+      : prices[planTier];
 
   if (billingRouteState === "loading") {
     return null;
@@ -176,90 +215,25 @@ function BillingPage() {
     <div className="mx-auto w-full max-w-2xl space-y-5 p-4 py-10 md:p-6 md:py-12">
       <h1 className="text-xl font-semibold">Billing</h1>
 
-      <div className="grid gap-5 md:grid-cols-2">
-        {/* Subscription card */}
-        <div className="flex flex-col justify-between rounded-lg border border-primary/50 bg-primary/5 p-4 gap-4 ring-1 ring-primary/30">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="font-medium">Current Plan</span>
-              <span className="badge border-none bg-base-100 font-medium">
-                {PLAN_TIER_LABELS[planTier]}
-              </span>
-            </div>
-            <div className="mt-3 text-2xl font-semibold tabular-nums">
-              ${prices[planTier].toFixed(2)}{" "}
-              <span className="text-sm font-normal text-base-content/50">
-                / month
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            {isFreePlan ? (
-              <Link
-                to="/subscribe"
-                search={{ upgrade: true }}
-                className="btn btn-primary w-full"
-              >
-                Upgrade Plan
-              </Link>
-            ) : (
-              <div className="space-y-2">
-                <Link
-                  to="/subscribe"
-                  search={{ upgrade: true }}
-                  className="btn btn-outline w-full"
-                >
-                  Change Plan
-                </Link>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm w-full"
-                  disabled={isPortalLoading}
-                  onClick={handleManageSubscription}
-                >
-                  {isPortalLoading ? (
-                    <span className="loading loading-spinner loading-xs" />
-                  ) : (
-                    <CreditCard className="w-4 h-4" />
-                  )}
-                  Manage Subscription
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Upgrade options card */}
-        {!isFreePlan && planTier !== "agency" ? (
-          <div className="flex flex-col justify-between rounded-lg border border-base-300 bg-base-100 p-4 gap-4">
-            <div>
-              <span className="font-medium">Need more limits?</span>
-              <p className="mt-2 text-sm text-base-content/70">
-                Upgrade to the next tier for higher quotas and unlimited
-                projects.
-              </p>
-            </div>
-            <Link
-              to="/subscribe"
-              search={{ upgrade: true }}
-              className="btn btn-soft w-full"
-            >
-              View Plans
-            </Link>
-          </div>
-        ) : isFreePlan ? (
-          <div className="flex flex-col justify-between rounded-lg border border-base-300 bg-base-100 p-4 gap-4">
-            <div>
-              <span className="font-medium">Unlock full features</span>
-              <p className="mt-2 text-sm text-base-content/70">
-                Paid plans include high daily quotas, on-demand AI agents, and
-                unlimited projects.
-              </p>
-            </div>
-          </div>
-        ) : null}
-      </div>
+      <BillingSubscriptionCards
+        planTier={planTier}
+        currentPrice={currentPrice}
+        hasAccess={membershipQuery.data?.hasAccess ?? false}
+        canManageAllAccess={canManageAllAccess}
+        isPortalLoading={isPortalLoading}
+        isCancelPending={cancelMembershipMutation.isPending}
+        referral={referral}
+        onManageSubscription={() => void handleManageSubscription()}
+        onCancelMembership={() => {
+          if (
+            window.confirm(
+              "Cancel All Access? Your lifetime cohort price lock will end immediately.",
+            )
+          ) {
+            cancelMembershipMutation.mutate();
+          }
+        }}
+      />
 
       <div className="rounded-lg border border-base-300 bg-base-100 overflow-hidden">
         <div className="border-b border-base-300 bg-base-200 p-4">

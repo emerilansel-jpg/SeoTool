@@ -27,6 +27,7 @@ export const planConfig = pgTable("plan_config", {
   paypalPlanId: text("paypal_plan_id"),
   syncStatus: text("sync_status").notNull().default("synced"),
   active: boolean("active").notNull().default(true),
+  reservedSeats: integer("reserved_seats").notNull().default(0),
   updatedByUserId: text("updated_by_user_id"),
   updatedAt: text("updated_at").notNull().default(isoNow),
 });

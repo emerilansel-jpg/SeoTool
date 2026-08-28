@@ -60,3 +60,36 @@ export const subscription = pgTable(
     index("subscription_paypal_sub_idx").on(table.paypalSubscriptionId),
   ],
 );
+
+export const usageCreditReservations = pgTable(
+  "usage_credit_reservations",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull(),
+    billingMode: text("billing_mode", { enum: ["standard", "byok"] })
+      .notNull()
+      .default("standard"),
+    creditFeature: text("credit_feature"),
+    status: text("status", {
+      enum: ["pending", "reserved", "rejected", "settling", "settled"],
+    })
+      .notNull()
+      .default("pending"),
+    reservedCredits: integer("reserved_credits").notNull(),
+    monthlyReserved: integer("monthly_reserved").notNull().default(0),
+    topupReserved: integer("topup_reserved").notNull().default(0),
+    actualCredits: integer("actual_credits"),
+    createdAt: text("created_at").notNull().default(isoNow),
+    updatedAt: text("updated_at").notNull().default(isoNow),
+    settledAt: text("settled_at"),
+  },
+  (table) => [
+    index("usage_credit_reservations_org_status_idx").on(
+      table.organizationId,
+      table.status,
+    ),
+  ],
+);
