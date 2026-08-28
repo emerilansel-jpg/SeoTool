@@ -2,11 +2,185 @@
 
 Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 
+Terakhir diperbarui: 2026-08-28. Versi aplikasi: `0.1.4`. Commit aplikasi production: `05225e2`.
+
+> **STATUS AUTHORITATIVE:** release v0.1.4 sudah di-commit, dipush ke `origin/main`, dan live di `https://seotool.im` pada commit `05225e2`. Source aplikasi bersih; perubahan lokal yang disengaja hanya pembaruan `coldstart.md`. Folder `.playwright-mcp/` dan `.testsprite/runs/` adalah artefak lokal/untracked, bukan source release dan jangan di-commit.
+
+---
+
+## Release v0.1.4 live dan terverifikasi (2026-08-28)
+
+- Release feature commit: `fc6e3b7` (`release: v0.1.4`). Hotfix subscribe untuk legacy paid entitlement: `05225e2` (`fix: return paid subscribers to workspace`). `origin/main`, branch `codex/v0.1.4`, dan production sekarang berada di `05225e2`.
+- Backup Postgres sebelum migrasi tersimpan di VPS: `/home/seotool/backups/openseo-pre-v0.1.4-20260828.dump`; `pg_restore --list` berhasil.
+- Journal migrasi Postgres yang stale sudah diaudit dan direkonsiliasi. Migration `0032` yang benar-benar belum ada diterapkan manual; schema/index `0026`–`0033` diverifikasi, hash journal diisi dari file release, lalu deploy menerapkan `0034`, `0035`, dan `0036`. Journal dan schema production sekarang konsisten sampai `0036`.
+- Container `jetdigitalseo-open-seo-1` dan `jetdigitalseo-postgres-1` healthy. External smoke terakhir: `/api/health`, `/`, dan `/sign-in` `200`; route authenticated mengarahkan anonymous user ke sign-in dengan benar.
+- Outer `gateway-caddy` sempat direstart monitor setiap ~30 detik karena healthcheck `/opt/gateway/compose.yaml` memanggil admin API `127.0.0.1:2019` padahal Caddy memakai `admin off`. Healthcheck production sudah diganti ke listener lokal `http://127.0.0.1:80/`, compose tervalidasi, dan container verified `healthy`/restart count 0. Backup: `/opt/gateway/compose.yaml.bak-20260828-healthcheck`. File outer compose ini berada di VPS dan bukan file repo `gateway-caddy/docker-compose.yml` (yang mengelola inner `seotool-caddy`).
+- Akun QA `qa@tester.com` dan akun owner `alfu13.sf@gmail.com` diberi legacy Pro sementara 30 hari untuk live testing. Entitlement owner berakhir 2026-09-27; ini bukan PayPal membership dan harus dibatalkan/dikembalikan ke Free setelah pengujian bila tidak lagi diperlukan.
+- Review complexity, security, billing/metering, local static checks, build, unit/integration test, migration test, dan seluruh E2E sudah hijau.
+- Blocker review yang sudah diperbaiki dan diuji:
+  1. checkout PayPal sekarang memakai claim/lease atomik sebelum provider call, attach CAS, orphan cancellation, dan seat cleanup; request yang kalah tidak membuat subscription;
+  2. membership pending dengan remote PayPal `ACTIVE`/`SUSPENDED` disinkronkan dan memblokir checkout pengganti; remote 404 melepas reservation stale;
+  3. pelepasan cohort seat memakai `seatReleaseToken`, sehingga cancel + webhook paralel hanya decrement sekali;
+  4. stale creation/approval lease direkonsiliasi eksplisit oleh `KeywordProCheckoutReconciler`;
+  5. pembuatan checkout account-wide sekarang owner-only;
+  6. `PAYMENT.SALE.COMPLETED` dideduplikasi oleh payment ledger sebelum refill monthly credits;
+  7. qualification, referred reward, referrer commission, dan cap 12 cycle memakai shared-row locking/status claim agar retry/concurrency hanya memberi reward sekali;
+  8. seluruh DataForSEO call hosted sekarang melakukan reservasi credit atomik sebelum provider dispatch, lalu settle/refund berdasarkan cost aktual; request concurrent dengan saldo sama hanya mengirim pemenang;
+  9. lifecycle/grace access disatukan di `shared/subscription-access.ts`, cohort keys memakai source-of-truth bersama, dan service besar dipecah menjadi lifecycle + checkout reconciler.
+- Temuan tambahan saat E2E juga sudah diperbaiki:
+  - lazy DataForSEO loader tidak lagi menyimpan in-flight Promise global yang dapat bocor lintas request Cloudflare;
+  - live SERP pre-authorization dinaikkan ke ceiling konservatif, sedangkan sisa hold tetap direfund dari cost provider aktual;
+  - cold-start admin dan test performance dengan CPU throttle memakai timeout readiness eksplisit 30 detik, bukan timeout global yang longgar.
+- Follow-up non-blocking: pipeline multi-call Keyword Research Pro belum memiliki checkpoint per stage; retry setelah late failure masih dapat mengulang provider spend. Tambahkan durable stage checkpoints sebelum menaikkan ukuran batch atau menjalankan jobs asynchronous besar.
+- Warning non-blocking yang masih terlihat: export `ReportsLayout` dari route mengurangi code splitting, Better Auth menyarankan plugin `tanstack-start-cookies` diletakkan terakhir, dan production build melaporkan beberapa chunk besar/static+dynamic import lama.
+
+---
+
+## Handoff terbaru — All Access, Keyword Research Pro merge, referral global, dan Backlinks hybrid (2026-08-28)
+
+### Arsitektur produk yang sudah diimplementasikan
+
+Masukan Pak Nell dikoreksi menjadi arsitektur berikut:
+
+1. **Keyword Research Pro bukan produk/route terpisah.** Ia adalah mode upgrade dari Keyword Research yang sudah ada.
+2. **Membership progresif berlaku untuk seluruh SeoTool.im**, bukan hanya Keyword Research Pro.
+3. **Referral adalah user/account mengundang user lain**, dengan reward di level akun, bukan referral khusus satu fitur.
+4. **Pemakaian provider berbayar tetap credit-based**: Standard memakai credential platform dan dikenakan biaya provider +30%; BYOK memakai credential user secara request-scoped dan SeoTool mengenakan service fee 10% dari biaya provider.
+5. **Backlinks memiliki dua kedalaman data**:
+   - Basic Snapshot: agregat domain murah via OpenPageRank, tanpa mengarang link/page/anchor/spam detail.
+   - Live Detailed: DataForSEO dengan data individual links, referring domains, top pages, anchors, spam, dan history.
+
+### Status implementasi live
+
+#### 1. Membership All Access dan PayPal
+
+- Checkout baru berada di `/subscribe` dan hanya menawarkan **Free + All Access** untuk customer baru. UI plan picker lama dihapus (`src/client/features/billing/PlanPickerGrid.tsx`). Legacy Free/Lite/Pro/Agency tetap dipertahankan di backend/admin untuk existing subscribers dan quota compatibility.
+- Server functions account-level baru: `src/serverFunctions/membership.ts` (`getMembershipStatus`, `createMembershipCheckout`, `verifyMembershipCheckout`, `cancelMembership`).
+- `paidPlanGateMiddleware` sudah diubah agar `src/serverFunctions/membership.ts` selalu dapat dipanggil user free-tier. Nama file allowlist lama `keyword-pro-membership.ts` sudah dihapus.
+- Checkout marker baru: `membership:{organizationId}:{cohortKey}`. Parser tetap menerima marker legacy `krp:*`.
+- Cohort baru:
+  - Founder 10: **$29/bulan** (10 slot)
+  - Early 20: **$39/bulan** (20 slot)
+  - Growth 50: **$49/bulan** (50 slot)
+  - Public: **$59/bulan** (unlimited)
+- Harga terkunci selama membership tidak terputus. `ACTIVE` memiliki akses; `SUSPENDED` mendapat grace 14 hari dari `currentPeriodEnd`; `CANCELLED`/`EXPIRED` kehilangan lock.
+- Aktivasi membership menyinkronkan tabel subscription utama ke internal entitlement `pro`, mengisi PayPal subscription id, dan memberikan monthly credits sesuai konfigurasi Pro. Renewal `PAYMENT.SALE.COMPLETED` menyegarkan monthly credits.
+- Cancel dari Billing memanggil PayPal, menandai membership cancelled, dan langsung menurunkan subscription lokal ke `free`; webhook tetap menjadi reconciliation path.
+- **Perbaikan entitlement kritis:** pembuatan customer/quota tidak lagi meng-upsert subscription `free` setiap kali DataForSEO/chat dipakai. Sekarang hanya membuat row Free jika belum ada (`createFreeSubscriptionIfMissing`), sehingga subscription berbayar tidak dapat tertimpa secara tidak sengaja. Penentuan akses juga memakai status efektif bersama (`active`/`trialing`, atau grace 14 hari untuk `past_due`/`suspended`), bukan hanya nama tier yang tersimpan.
+- Checkout mencegah subscription ganda: membership All Access aktif/suspended dan legacy paid plan aktif sama-sama mengarahkan user kembali ke Billing. Portal PayPal tetap dapat dibuka setelah grace berakhir untuk recovery/cancellation selama PayPal subscription id masih ada.
+- PayPal product setting baru adalah `PAYPAL_ALL_ACCESS_PRODUCT_ID`. Admin → Pricing membuat product `SeoTool.im All Access` dan plan immutable per cohort. Setting lama `PAYPAL_KRP_PRODUCT_ID` tidak lagi dipakai checkout baru.
+- Admin Pricing sekarang menjelaskan bahwa tier lama adalah **Legacy plan tiers**, sedangkan progressive cohort adalah **All Access membership cohorts**.
+- Kapasitas cohort terbatas sekarang memakai **reservasi kursi atomik** (`plan_config.reserved_seats` + `keyword_pro_memberships.seat_reserved`), bukan count-then-check. Dua checkout simultan tidak dapat mengambil slot terakhir yang sama; checkout yang kalah otomatis mencoba cohort berikutnya. Kursi dilepas kembali jika pembuatan PayPal/upsert gagal, checkout pending menjadi terminal, webhook membatalkan membership, atau user cancel.
+
+**Catatan kompatibilitas data:** tabel fisik masih bernama `keyword_pro_memberships`, `keyword_pro_referral_*`, dan key cohort masih berprefix `krp_`. Ini sengaja untuk menghindari migrasi destruktif pada release ini; semantik aplikasinya sekarang account-wide. Audit pre-deploy tidak menemukan member/config live pada cohort lama. Key baru adalah `krp_growth_50`.
+
+#### 2. Referral account-wide
+
+- Referral panel dipindahkan ke `/billing`; link share berbentuk `/subscribe?ref=CODE`.
+- Referred account mendapat **5.000 credits** setelah activation.
+- Referrer mendapat **20% nilai membership dalam credits** selama maksimum 12 successful billing cycles. Top-up dan pemakaian API tidak menghasilkan referral reward.
+- Proteksi yang sudah ada/ditambah:
+  - organization tidak dapat mereferensikan dirinya sendiri;
+  - account dengan shared member/team overlap ditolak;
+  - first valid attribution wins (pending attribution tidak dapat ditimpa code lain);
+  - PayPal sale id unique/idempotent;
+  - reward baru qualified setelah membership ACTIVE.
+- Grant 5.000 credits dan komisi renewal sekarang dilakukan sebagai perubahan database atomik bersama status referral. Commission memakai state `pending → credited`; retry sale yang berhenti di tengah melanjutkan commission pending tanpa menggandakan credits. Batas 12 cycle dihitung dari commission berstatus `credited`, sehingga concurrent retry tidak dapat melewati cap.
+- Storage referral masih organization-based karena account billing dan quota juga organization-based. UX-nya user-to-user; reward masuk ke organization milik referrer.
+
+#### 3. Keyword Research Pro digabung ke Keyword Research
+
+- Sidebar hanya memiliki satu item **Keyword Research**.
+- Route utama `/p/$projectId/keywords` sekarang memiliki tab **Discover** dan **Pro Analysis** (`KeywordResearchViewTabs.tsx`).
+- Route legacy `/p/$projectId/keyword-research-pro` hanya redirect ke `/p/$projectId/keywords?view=pro`, sambil meneruskan query kompatibel.
+- Membership/checkout card khusus KRP dihapus (`KeywordResearchProAccess.tsx` dan `keyword-pro-membership.ts`). Jika tidak punya All Access, Pro Analysis menampilkan CTA ke `/subscribe` dengan redirect kembali ke mode Pro.
+- Limit pipeline:
+  - Pro Core/Basic tanpa backlink: maksimum **25 keywords/run**.
+  - Full + backlinks: maksimum **10 keywords/run** karena biaya dan jumlah competitor URL jauh lebih besar.
+- Standard +30% dan BYOK +10% tetap tersedia. BYOK credential hanya berada di state browser/request dan tidak disimpan.
+- Pipeline KGR + live `allintitle` + weak SERP + optional DataForSEO bulk backlink competition tetap memakai implementasi sebelumnya (`KeywordResearchProService`).
+
+#### 4. Backlinks Basic vs Live
+
+- URL/search state baru: `provider=live`; default tanpa param adalah `basic`.
+- Basic memakai `OpenPageRankBacklinksService.ts`:
+  - endpoint modern bulk OpenPageRank dengan fallback endpoint legacy;
+  - cache R2 24 jam;
+  - hanya memetakan authority dan referring-domain aggregate yang benar-benar diberikan provider;
+  - source=`openpagerank`, mode=`basic`, confidence=`low`;
+  - individual links, referring pages, anchors, spam, broken links, top pages, dan history tetap `null`/kosong, bukan angka palsu;
+  - health/toxic score tidak dibuat karena data tidak memenuhi minimum faktor.
+- Live memakai DataForSEO existing dengan source=`dataforseo`, mode=`live`, confidence=`high` dan semua detail tabs.
+- Live Backlinks kini memiliki pemilih Standard +30% atau BYOK +10%. Credential BYOK request-scoped, tidak masuk URL/cache/DB.
+- Basic mode menyembunyikan detailed tabs dan menjelaskan keterbatasan data secara eksplisit.
+- Admin → API Keys memiliki setting editable/secret baru `OPENPAGERANK_API_KEY`.
+
+### File baru penting
+
+- `src/serverFunctions/membership.ts`
+- `src/shared/subscription-access.ts`
+- `src/server/features/keywords/repositories/KeywordProReferralRewardRepository.ts`
+- `src/server/features/keywords/repositories/KeywordProCohortSeatRepository.ts`
+- `src/server/features/keywords/repositories/KeywordProMembershipPaymentRepository.ts`
+- `src/server/features/keywords/services/KeywordProCheckoutReconciler.ts`
+- `src/server/features/keywords/services/KeywordProSubscriptionLifecycle.ts`
+- `src/server/features/keywords/services/KeywordProConfigService.test.ts`
+- `src/server/features/keywords/services/KeywordProMembershipService.test.ts`
+- `src/client/features/billing/BillingSubscriptionCards.tsx`
+- `src/client/features/keywords/page/KeywordResearchViewTabs.tsx`
+- `src/server/features/backlinks/services/OpenPageRankBacklinksService.ts`
+- `src/server/features/backlinks/services/openPageRankOverview.ts`
+- `src/server/features/backlinks/services/OpenPageRankBacklinksService.test.ts`
+- `src/server/billing/credit-reservations.ts`
+- `src/server/billing/credit-reservations.test.ts`
+- `src/server/lib/dataforseo/metering.ts`
+- `src/server/lib/dataforseo/cost-ceiling.ts`
+- `src/server/lib/dataforseo/cost-ceiling.test.ts`
+- `src/types/schemas/keyword-research-pro.test.ts`
+- `e2e/keyword-pro-backlinks-modes.spec.ts`
+- `e2e/fixtures/seed.sql`
+- `drizzle/0057_keyword_pro_cohort_seats.sql` + snapshot `0057`
+- `drizzle-pg/0034_keyword_pro_cohort_seats.sql` + snapshot `0034`
+- `drizzle/0058_keyword_pro_checkout_safety.sql` + snapshot `0058`
+- `drizzle-pg/0035_keyword_pro_checkout_safety.sql` + snapshot `0035`
+- `drizzle/0059_usage_credit_reservations.sql` + snapshot `0059`
+- `drizzle-pg/0036_usage_credit_reservations.sql` + snapshot `0036`
+
+### File yang sengaja dihapus
+
+- `src/client/features/billing/PlanPickerGrid.tsx` — checkout customer baru tidak lagi memilih Lite/Pro/Agency.
+- `src/client/features/keywords-pro/KeywordResearchProAccess.tsx` — membership tidak lagi khusus KRP.
+- `src/serverFunctions/keyword-pro-membership.ts` — diganti server functions account-level `membership.ts`.
+
+### Verifikasi yang sudah dilakukan
+
+| Check                                                  | Hasil                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm ci:check`                                        | ✅ pass pada source terbaru: Prettier, knip, root TypeScript, `badseo` TypeScript, dan oxlint type-aware **0 warning / 0 error pada 1.013 file**.                                                                                                                                |
+| Production Vite build (client + SSR + final typecheck) | ✅ pass; hanya warning non-blocking chunk size/static+dynamic imports lama.                                                                                                                                                                                                      |
+| Full Vitest                                            | ✅ **128/128 files, 1.125/1.125 tests** pass. Termasuk real libsql concurrency untuk credit reservation, payment replay, seat release, referral qualification/commission, checkout race, lifecycle PayPal, migration, dan DataForSEO error settlement/refund.                    |
+| Migration generation                                   | ✅ D1 through `0059` + PG through `0036`; kedua generator menghasilkan `No schema changes`.                                                                                                                                                                                      |
+| Local D1 migration                                     | ✅ `0058` dan `0059` diterapkan ke D1 E2E lokal dan fixture berhasil di-seed.                                                                                                                                                                                                    |
+| Focused Playwright regression                          | ✅ **7/7 pass**: seluruh Admin/Billing, throttled Domain Overview performance, dan keyword navigation lintas request.                                                                                                                                                            |
+| Full Playwright E2E                                    | ✅ **22/22 pass** dalam satu run (7,6 menit): Admin analytics/pricing/API keys, Billing, Local Map Rank, All Access/referral, KRP merge, Backlinks Basic/Live Standard/BYOK, 25-route dashboard audit, dan mobile.                                                               |
+| `git diff --check`                                     | ✅ bersih; warning CRLF Windows saja.                                                                                                                                                                                                                                            |
+| TestSprite production                                  | ✅ Backlinks Explorer run `3660bc7b-b934-449e-a9ca-8f024d921459` **passed 7/7 steps** pada production v0.1.4. Keyword Research test lama sempat blocked oleh Free paywall lalu memakai stale V3 auto-healed code; jangan gunakan verdict test lama itu sebagai regresi aplikasi. |
+
+### Langkah WAJIB untuk agent berikutnya
+
+1. **Jangan reset artefak user.** `.playwright-mcp/` dan `.testsprite/runs/` untracked; jangan commit. Source release sudah berada di `05225e2`.
+2. Semua quality gate release hijau: 1.125 Vitest, CI static checks, production build, migration apply/generate, 7 focused Playwright, 22 full Playwright E2E, production smoke, dan TestSprite Backlinks 7/7. Jika ada perubahan lanjutan, rerun gate yang proporsional.
+3. Reservasi cohort dan usage credits sudah atomik. Pertahankan `reserved_seats`/`seat_reserved`, checkout lease/CAS, payment ledger, serta reserve/settle/refund paths saat mengubah checkout, cancel, webhook, atau provider calls.
+4. **PayPal production belum dapat dipakai** karena credential/plan belum dikonfigurasi. Admin harus mengisi semua `PAYPAL_*`, membuat product/plans lewat Admin → Pricing, mendaftarkan `https://seotool.im/api/paypal/webhook`, lalu menguji lifecycle checkout → ACTIVE → renewal → cancel. Jangan mengklaim payment gateway operational sebelum flow ini lulus dengan sandbox/live credential resmi.
+5. **Backlinks Basic belum dapat dipakai** karena `OPENPAGERANK_API_KEY` belum tersedia. Backlinks Live/DataForSEO sudah memiliki credential platform. Isi key melalui Admin → API Keys lalu uji Basic Snapshot live.
+6. Akun owner `alfu13.sf@gmail.com` mempunyai Pro sementara sampai 2026-09-27 agar fitur dapat diuji tanpa menunggu PayPal. Jangan salah menganggap entitlement manual ini sebagai bukti checkout/webhook PayPal.
+7. Keyword Research TestSprite test case lama membawa stale auto-healed code setelah run pertama. Buat/regenerate test case baru bila ingin menguji mode Pro secara otomatis; production route sendiri sudah lolos smoke dan legacy subscriber redirect hotfix.
+
 ---
 
 ## Identitas project
 
-**SeoTool.im** (`package.json: open-seo` v0.1.3) — SEO SaaS dashboard (Semrush/Ahrefs alternative). Cloudflare Workers + TanStack Start, Postgres (primary) / D1 (SQLite, dev fallback), hosted-only. Ahrefs-style tiered billing: Free / Lite ($49) / Pro ($149) / Agency ($499) dengan per-feature quotas.
+**SeoTool.im** (`package.json: open-seo` v0.1.4) — SEO SaaS dashboard (Semrush/Ahrefs alternative). Cloudflare Workers + TanStack Start, Postgres (primary) / D1 (SQLite, dev fallback), hosted-only. Production `05225e2` menawarkan Free + progressive All Access untuk customer baru sambil mempertahankan legacy tiers untuk existing subscriber/quota compatibility.
 
 **Transformasi SaaS (2026-08-08)**: Project ini dulunya open-source self-host (3 auth mode, BYO API key, credit-pool billing). Sekarang **hosted-only** — `cloudflare_access` dan `local_noauth` auth modes dihapus, hanya `hosted` (Better Auth). Billing model berubah dari single-plan + credit pool → **4 tier dengan per-feature quotas** (Ahrefs-style).
 
@@ -16,30 +190,38 @@ Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 
 **In-App Landing Page + Hard Paywall (2026-08-19)**: SaaS app kini punya homepage publik di `/` (landing page DaisyUI) dan halaman pricing publik di `/pricing`. Hard paywall: server function gate (`paidPlanGateMiddleware`) + client guard (`usePaidPlanGuard`) — user free-tier tidak bisa memakai tools sampai berlangganan. E2E bypass tetap jalan (BYPASS_AUTH). Funnel: sign-up → onboarding → /projects → /subscribe → bayar → tools terbuka.
 
-**Production Deploy + Caddy Re-architecture (2026-08-19/20)**: Seluruh P2 batch + landing/paywall deployed ke VPS (commit `751d389`, migrations D1 0048 + PG 0025). Ingress di-re-arsitektur: dedicated container `seotool-caddy` (127.0.0.1:8080) memisahkan routing seotool.im dari `pesat-control-plane-caddy-1` (host network, forward-only). Verified end-to-end: health, homepage marketing, /pricing. Detail + gotchas di section "Produksi LIVE" dan "Deploy 2026-08-19/20".
+**Production Deploy + Caddy Re-architecture (2026-08-19/20)**: Seluruh P2 batch + landing/paywall deployed ke VPS (commit `751d389`, migrations D1 0048 + PG 0025). Ingress di-re-arsitektur menjadi inner `seotool-caddy` pada `127.0.0.1:8080` di belakang outer Caddy host-network. Nama outer container dan source config berubah lagi setelah deploy awal; gunakan topologi verified 2026-08-26 di bagian "Produksi LIVE".
 
 **Dashboard UI/UX QA & Container Layout Standardization (2026-08-20/21)**: Audit E2E menyeluruh pada 25 rute dashboard (`qa-dashboard-audit.spec.ts`). Redesign search bar Content Gap dan Link Intersect menjadi form horizontal 1 baris yang ramping dengan instant presets. Standarisasi seluruh wrapper rute dengan kontainer `max-w-7xl mx-auto space-y-4` dan padding `px-4 py-4 pb-24 overflow-auto md:px-6 md:py-6 md:pb-8`.
 
 **VPS Caddy Assets & Fresh Startup Build Fix (2026-08-21)**: Perbaikan Caddyfile root (`@marketingAssetFile`) agar request `/assets/*` milik SPA app tidak ditelan oleh direktori marketing; perbaikan `docker-entrypoint.sh` untuk selalu mengompilasi build baru saat container start; verified live di `https://seotool.im` (commit `f969bb3`).
 
+**Local Map Rank Tracker Rebuild (2026-08-24)**: Pipeline GMB Grid dibangun ulang dari pencarian Google Business Profile sampai workflow scan, persistence, scheduler, kuota, serta UI hasil. Implementasi memakai DataForSEO Maps SERP, mendukung scan manual/terjadwal, dan menyimpan snapshot per titik (commit `6206027`).
+
+**Hosted PayPal + Admin Fixes (2026-08-24/25)**: Checkout PayPal hosted, top-up, webhook, admin pricing/settings, dan platform-admin guard diperkuat (`8114af9`). Agregasi analytics Postgres di `/admin` diperbaiki (`8e2bf1d`). Penemuan GA4 property sekarang menangani pagination, account summaries, dan pesan error/empty state dengan benar (`8481324`).
+
+**Keyword Research Pro (2026-08-28, production v0.1.4)**: Pro Analysis sudah digabung ke `/p/$projectId/keywords?view=pro`; route terpisah lama hanya menjadi redirect kompatibel. Membership/referral sudah dipromosikan menjadi account-wide All Access.
+
+**Production Deploy 2026-08-28**: Commit `05225e2` live di VPS. Container app/Postgres healthy, migration journal konsisten sampai PG `0036`, DataForSEO credential tersedia, dan public health melalui Cloudflare `200`. PayPal belum aktif karena setting/plan belum dikonfigurasi; OpenPageRank Basic belum aktif karena API key belum tersedia.
+
 ---
 
 ## Tech stack
 
-| Layer      | Teknologi                                                                                                                                       |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Framework  | TanStack Start (SSR) + TanStack Router/Query/Form, React 19, Vite 7                                                                             |
-| Runtime    | Cloudflare Workers (workerd) + Wrangler 4                                                                                                       |
-| DB         | Drizzle ORM, dual-backend: Postgres (hosted SaaS, primary) / D1 (SQLite, dev fallback)                                                          |
-| Auth       | Better Auth **hosted-only** (email/password + Google OAuth + Turnstile captcha). Self-host modes (`cloudflare_access`, `local_noauth`) dihapus. |
-| Data SEO   | `dataforseo-client` (metered), GSC (first-party, gratis)                                                                                        |
-| AI         | Cloudflare Agents SDK, OpenRouter, MCP SDK (36 tools)                                                                                           |
-| Billing    | PayPal Subscriptions (Billing Plans) — **4-tier plan** (Free/Lite/Pro/Agency) + per-feature quotas + local credits system                       |
-| Quota      | `QuotaService` — 11 features (daily/monthly/gauge windows), atomic upsert enforcement                                                           |
-| UI         | Tailwind v4 + DaisyUI v5, lucide-react, recharts, jspdf (client PDF)                                                                            |
-| Email      | Loops (transactional)                                                                                                                           |
-| Analytics  | PostHog                                                                                                                                         |
-| Deploy VPS | Docker Compose (workerd + Postgres 17) di belakang dedicated seotool-caddy + pesat-caddy forward (TLS via Cloudflare)                           |
+| Layer      | Teknologi                                                                                                                                                                                    |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework  | TanStack Start (SSR) + TanStack Router/Query/Form, React 19, Vite 7                                                                                                                          |
+| Runtime    | Cloudflare Workers (workerd) + Wrangler 4                                                                                                                                                    |
+| DB         | Drizzle ORM, dual-backend: Postgres (hosted SaaS, primary) / D1 (SQLite, dev fallback)                                                                                                       |
+| Auth       | Better Auth **hosted-only** (email/password + Google OAuth + Turnstile captcha). Self-host modes (`cloudflare_access`, `local_noauth`) dihapus.                                              |
+| Data SEO   | `dataforseo-client` (metered), GSC (first-party, gratis)                                                                                                                                     |
+| AI         | Cloudflare Agents SDK, OpenRouter, MCP SDK (36 tools)                                                                                                                                        |
+| Billing    | Production: Free + progressive All Access untuk signup baru; legacy tiers dipertahankan; top-up/local credits dan referral account-wide. PayPal/OpenPageRank production belum dikonfigurasi. |
+| Quota      | `QuotaService` — 11 features (daily/monthly/gauge windows), atomic upsert enforcement                                                                                                        |
+| UI         | Tailwind v4 + DaisyUI v5, lucide-react, recharts, jspdf (client PDF)                                                                                                                         |
+| Email      | Loops (transactional)                                                                                                                                                                        |
+| Analytics  | PostHog                                                                                                                                                                                      |
+| Deploy VPS | Docker Compose (workerd + Postgres 17) di belakang inner `seotool-caddy` dan outer `gateway-caddy` host-network; public TLS melalui Cloudflare                                               |
 
 **Kunci**: `pnpm dev:agents` (portless), `pnpm ci:check`, `pnpm test:ci`. File di bawah `Supastarter/` diabaikan (unrelated starter kit).
 
@@ -484,7 +666,7 @@ Hook quota gates ke setiap feature call site.
 | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `docker-compose.hosted.yaml`                             | 2 services: `open-seo` (workerd, AUTH_MODE=hosted, DATABASE_PROVIDER=postgres) + `postgres` (17-alpine, healthcheck). Caddy TIDAK termasuk — ditangani oleh seotool-caddy dedicated + pesat forward (lihat "Produksi LIVE" bawah). Volumes: app data + pg data. |
 | `gateway-caddy/docker-compose.yml` + `Caddyfile.seotool` | **Config ingress seotool.im yang aktif** (2026-08-20): seotool-caddy binds 127.0.0.1:8080, network jetdigitalseo_default. Semua routing seotool.im (marketing static + proxy SaaS) di sini. Ada juga `deploy.sh` + `MANUAL-DEPLOY.md`.                          |
-| `gateway-caddy/Caddyfile` + `Caddyfile`                  | **STALE** — arsitektur lama shared gateway-caddy (`/opt/gateway/`) sudah tidak dipakai. Source of truth sekarang `Caddyfile.seotool` + forward block di Caddyfile pesat.                                                                                        |
+| `gateway-caddy/Caddyfile` + root `Caddyfile`             | **STALE sebagai source outer gateway**. Outer Caddy aktif membaca `/opt/gateway/Caddyfile`; file repo ini jangan disalin ke sana tanpa review karena juga memuat konfigurasi domain lain.                                                                       |
 | `.env.hosted.example`                                    | Template: POSTGRES_PASSWORD, BETTER_AUTH_SECRET/URL, GOOGLE_CLIENT_ID/SECRET, TURNSTILE, LOOPS, DATAFORSEO_API_KEY, PAYPAL_CLIENT_ID/SECRET/MODE/WEBHOOK_ID, OPENROUTER_API_KEY, POSTHOG.                                                                       |
 | `scripts/deploy-vps.sh`                                  | Deploy script: pre-flight checks (env, placeholders, docker) + compose up --build + health wait loop + summary.                                                                                                                                                 |
 | `auto-deploy.sh`                                         | Wrapper untuk CI: backup `.env.hosted` → `git fetch + reset --hard origin/main` → restore `.env.hosted` → `scripts/deploy-vps.sh --build`. Dipanggil oleh GitHub Action.                                                                                        |
@@ -493,34 +675,122 @@ Hook quota gates ke setiap feature call site.
 
 ---
 
-## Produksi LIVE (seotool.im) — arsitektur seotool-caddy dedicated (2026-08-20)
+## Update 2026-08-24–26: Local Map, admin, GA4, dan Keyword Research Pro
 
-**VPS**: 148.230.103.98, user `seotool` (uid 1005, docker group, NO sudo; root login tersedia). Domain `seotool.im` live dengan TLS via Cloudflare (mode Full non-strict).
+### Local Map Rank Tracker (`6206027`)
 
-### Topologi ingress (VERIFIED WORKING 2026-08-20)
+- Route utama tetap `/p/$projectId/gmb-grid`.
+- `GmbProfileSearch` menggantikan autocomplete lama. User memilih GBP yang jelas sebelum scan dibuat.
+- Alur backend mengikuti pola server function → `GmbGridService` → `GmbGridRepository` → `GmbGridWorkflow`.
+- DataForSEO Maps SERP diproses per grid point. Run menyimpan total/completed/failed/found points, SoLV, average rank, biaya, serta error per titik.
+- Hanya satu run aktif per config. Scheduler menjalankan config yang sudah jatuh tempo.
+- Schema reliability: D1 `0055_gmb_grid_reliability.sql`, PG `0032_gmb_grid_reliability.sql`.
+- Unit/integration coverage ada di `src/server/features/gmb-grid/gmb-grid.test.ts`, `src/server/lib/dataforseo/serp.test.ts`, dan `e2e/gmb-grid.spec.ts`.
+
+### Hosted PayPal, admin, dan GA4 (`8114af9`, `8e2bf1d`, `8481324`)
+
+- Checkout subscription dan top-up dipindah ke service teruji (`paypal-checkout-service.ts`); webhook menyimpan event dan menyinkronkan subscription/credits secara idempotent.
+- Admin dapat mengelola runtime settings, pricing, PayPal plan IDs, dan menjalankan live configuration test tanpa membuat charge.
+- Platform admin memakai server-side allowlist dan guard yang sama untuk route serta server functions.
+- Error `Unable to load analytics data` di Postgres diperbaiki dengan agregasi timestamp yang kompatibel dan error state yang tetap menampilkan detail berguna.
+- GA4 property discovery sekarang mencoba Admin API pagination lalu account summaries fallback. Empty state membedakan account tanpa property dari kegagalan API.
+
+### Keyword Research Pro (`b2bd639`)
+
+Route: `/p/$projectId/keyword-research-pro`.
+
+Mode riset:
+
+- Basic: keyword metrics, KGR/allintitle, intent, dan weak-SERP signals.
+- Full: semua hasil Basic ditambah bulk backlink competition. User memilih mode ini karena backlink lookup lebih mahal.
+
+Mode billing DataForSEO:
+
+- Standard memakai credential platform dan membebankan raw provider cost +30%.
+- BYOK memakai credential request-scoped milik user dan hanya membebankan service fee +10%. Credential tidak disimpan.
+
+Progressive membership:
+
+| Cohort     |   Kapasitas |   Default |
+| ---------- | ----------: | --------: |
+| Founder 10 |          10 | $19/bulan |
+| Early 20   |          20 | $29/bulan |
+| Growth 45  |          45 | $39/bulan |
+| Scale 75   |          75 | $49/bulan |
+| Public     | Tanpa batas | $59/bulan |
+
+Harga cohort terkunci selama subscription tetap aktif. Perubahan harga admin membuat PayPal plan baru untuk pembeli berikutnya; plan member lama tidak diubah.
+
+Referral:
+
+- Organisasi yang direferensikan mendapat 5.000 credits setelah qualification.
+- Referrer mendapat 20% nilai pembayaran membership dalam credits, maksimal 12 bulan per referral.
+- `paypal_sale_id` unik mencegah komisi ganda saat webhook di-replay.
+
+Komponen utama:
+
+| Area              | File                                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------- |
+| UI                | `src/client/features/keywords-pro/*`, route `keyword-research-pro.tsx`                |
+| Server functions  | `keyword-research-pro.ts`, `keyword-pro-membership.ts`, `admin-keyword-pro.ts`        |
+| Services          | `KeywordResearchProService`, `KeywordProMembershipService`, `KeywordProConfigService` |
+| Repository/schema | `KeywordProRepository`, dual schema `keyword-research-pro.schema.ts`                  |
+| DataForSEO        | `backlinks-bulk.ts`, tambahan di `serp.ts`, `client.ts`, `core.ts`                    |
+| Billing/webhook   | `paypal-webhook.ts`, `subscription.ts`, admin pricing/settings                        |
+| Migrations        | D1 `0056_keyword_research_pro.sql`, PG `0033_keyword_research_pro.sql`                |
+
+### QA baseline terbaru
+
+- Vitest: 121 files, 1.069 tests pass.
+- TypeScript: pass.
+- Oxlint: 0 error.
+- Vite client + SSR production build: pass.
+- Local Playwright smoke untuk KRP: pass tanpa console error. Test tidak menjalankan paid DataForSEO research.
+- Production smoke: `/api/health` `200`; KRP dan `/admin` memberi `307` ke sign-in untuk anonymous user; GET PayPal webhook memberi `405` + `Allow: POST`.
+- DataForSEO production auth check: `200`.
+
+### Status production yang belum selesai
+
+PayPal source code sudah siap, tetapi checkout production belum aktif. Pada deploy 2026-08-26:
+
+- `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_MODE`, dan `PAYPAL_WEBHOOK_ID` tidak ada di container maupun `app_settings`.
+- Belum ada row `plan_config` untuk cohort `krp_*`, dan `PAYPAL_KRP_PRODUCT_ID` belum dibuat.
+- Admin harus mengisi credential live, mendaftarkan `https://seotool.im/api/paypal/webhook`, mengaktifkan event subscription + `PAYMENT.CAPTURE.COMPLETED` + `PAYMENT.SALE.COMPLETED`, lalu klik **Set up PayPal plans** dan **Test PayPal configuration**.
+- Jangan menyimpan atau menyalin Client Secret ke dokumen/repo/chat.
+
+Postgres migration journal juga tertinggal di `0025`, walaupun schema `0026`–`0033` sudah di-hot-apply/fallback secara bertahap. Pada deploy terakhir `drizzle-kit migrate` exit 1 tanpa detail; script hanya me-replay DDL GMB. KRP `0033` diterapkan manual via `psql` dan keempat tabel diverifikasi. Sebelum migration baru setelah `0033`, rekonsiliasi `drizzle.__drizzle_migrations` dengan schema aktual. Jangan menandai journal sebagai applied tanpa audit tiap migration.
+
+---
+
+## Produksi LIVE (seotool.im): arsitektur dua lapis Caddy (verified 2026-08-26)
+
+**VPS**: `148.230.103.98`, user deploy `seotool` (docker group, tidak punya sudo). Jangan simpan password VPS di repo atau dokumen ini. Domain live melalui Cloudflare.
+
+### Topologi ingress (VERIFIED WORKING 2026-08-26)
 
 ```
-Cloudflare (public TLS)
-  → pesat-control-plane-caddy-1 :443 (HOST network, origin.crt/key, forward-only)
-    → 127.0.0.1:8080 (seotool-caddy, dedicated container, plain HTTP :80)
-      → /srv/marketing (static marketing HTML)
-      → open-seo:3001 (SaaS app, header_up Host localhost)
+Cloudflare
+  → gateway-caddy :80/:443 (host network, /opt/gateway/Caddyfile)
+    → 127.0.0.1:8080 (seotool-caddy, plain HTTP)
+      → /srv/marketing (static marketing)
+      → open-seo:3001 (SaaS app, Host localhost)
 ```
 
-- **pesat-control-plane-caddy-1** (host network mode, owns public 80/443): hanya carry 2 site block forward untuk seotool.im → `reverse_proxy 127.0.0.1:8080` + redirect www. Semua routing seotool.im TIDAK ada di sini. Caddyfile: `/opt/pesat-control-plane/caddy/Caddyfile` (root-owned, bind-mount single-file ke `/etc/caddy/Caddyfile`).
-- **seotool-caddy** (dedicated, `gateway-caddy/docker-compose.yml`): binds `127.0.0.1:8080:80` ONLY (tidak reachable dari luar), network `jetdigitalseo_default` (external). Semua routing seotool.im ada di `gateway-caddy/Caddyfile.seotool` (block `:80` plain HTTP — TLS diterminasi di pesat). Marketing files di volume `marketing_files:/srv/marketing`, populate via `docker cp web/dist/client/. seotool-caddy:/srv/marketing/`.
-- `gateway-caddy/Caddyfile` (lama) + `/opt/gateway/` setup **STALE** — digantikan arsitektur ini. `gateway-caddy/deploy.sh` + `gateway-caddy/MANUAL-DEPLOY.md` ada sebagai referensi.
+- **gateway-caddy** memiliki public 80/443. File aktif `/opt/gateway/Caddyfile` di-bind ke `/etc/caddy/Caddyfile`; admin API dimatikan. Blok `seotool.im:443` memakai `tls internal` dan proxy ke `127.0.0.1:8080`. `www` redirect ke apex.
+- **seotool-caddy** berasal dari `gateway-caddy/docker-compose.yml`, bind `127.0.0.1:8080:80`, dan join network `jetdigitalseo_default`. Source routing SeoTool ada di `gateway-caddy/Caddyfile.seotool`.
+- **open-seo** dan **postgres** dikelola `docker-compose.hosted.yaml`. App dipublish hanya ke `127.0.0.1:3001`; Postgres hanya ke `127.0.0.1:5432`.
+- Marketing files berada di volume `marketing_files:/srv/marketing` dan tetap perlu disalin jika output marketing berubah.
 
-### Gotchas infra VPS (dipelajari 2026-08-19/20, keras)
+### Gotchas infra VPS
 
-1. **pesat-caddy = host network + `auto_https off`**: site block WAJIB port eksplisit (`seotool.im:443`) + file certs (`tls /opt/pesat-control-plane/certs/origin.crt /opt/pesat-control-plane/certs/origin.key`). `tls internal` TIDAK provision cert saat auto_https off → TLS alert internal error. Cloudflare Full non-strict terima cert mismatched.
-2. **Tidak bisa `docker network connect` ke pesat-caddy** (host network). Backend container harus publish `127.0.0.1:<port>` lalu pesat proxy ke situ.
-3. **Cloud provider firewall hanya allow 22/80/443** — port 4443/8080 time out dari luar walau `ufw allow` (upstream filtering). Jangan pakai non-standard port untuk public service di VPS ini. Cloudflare Origin Rule port 4443 lama SUDAH tidak dipakai — pastikan tidak ada rule tersisa (menyebabkan 522).
-4. **`sed -i`/vim pada Caddyfile pesat mengganti inode** → single-file bind mount di container tetap menunjuk inode lama → edit tidak terlihat oleh Caddy. FIX: setelah edit apapun, `docker restart pesat-control-plane-caddy-1`. (Append `cat >>` aman — same inode.) Diagnosa: `docker exec pesat-control-plane-caddy-1 wget -qO- http://localhost:2019/config/ | grep -c seotool`.
-5. **Vite preview Tolak Host non-localhost**: `reverse_proxy open-seo:3001` mengirim `Host: open-seo` → 403 "Blocked request". WAJIB `header_up Host localhost` di semua reverse_proxy block ke open-seo (catch-all + websockets).
-6. **Marketing prerender hanya jalan TANPA `DOCKER_BUILD=1`** (perlu Cloudflare SSR plugin). Build di local `cd web && npm run build` → commit `web/dist/client/` → VPS `git pull` → `docker cp` ke seotool-caddy. Build Docker (entrypoint) menghasilkan dist TANPA HTML → homepage kosong.
-7. **Caddy TLS test lokal**: `curl -sk https://localhost:PORT` gagal SNI mismatch; pakai `curl -sk --resolve seotool.im:PORT:127.0.0.1 https://seotool.im:PORT/...`.
-8. **Cloudflare error codes**: 525 = TLS handshake fail di origin; 522 = connection timeout (port tidak reachable/firewall).
+1. Outer `gateway-caddy` wajib memuat domain `seotool.im`. Pada 2026-08-26 file `/opt/gateway/Caddyfile` hanya berisi `api.jetdigitalpro.com`; hasilnya Cloudflare `525`. Fix: tambahkan blok TLS/proxy SeoTool, validasi dengan `caddy validate`, lalu `docker restart gateway-caddy`.
+2. `/opt/gateway/Caddyfile` root-owned. User `seotool` tidak punya sudo, tetapi punya Docker access. Buat backup dan gunakan container sementara untuk copy file hanya setelah config tervalidasi. Perubahan outer gateway dapat memengaruhi domain lain.
+3. Outer Caddy memakai host network. Backend harus publish port loopback; jangan mencoba menghubungkan outer Caddy ke Docker bridge.
+4. Port 8080 hanya untuk loopback. Public traffic tetap memakai 80/443.
+5. Inner Caddy wajib mengirim `header_up Host localhost` ke `open-seo:3001`; Vite preview menolak Host lain.
+6. Auto-deploy me-recreate inner `seotool-caddy`, tetapi tidak menjamin blok domain outer masih ada. Setelah deploy, selalu cek public HTTPS, bukan hanya `127.0.0.1:3001`.
+7. Cloudflare `525` berarti TLS handshake origin gagal. `522` berarti koneksi ke origin/port timeout.
+8. Marketing prerender perlu build yang menghasilkan `web/dist/client`; jika marketing content berubah, copy output ke volume `seotool-caddy`.
 
 ### Bug /assets/\* collision (FIXED 2026-08-13, tetap relevan)
 
@@ -528,11 +798,18 @@ Marketing static site dan SaaS app sama-sama serve JS/CSS bundles di `/assets/*`
 
 ### CI/CD auto-deploy
 
-Push ke `main` → GitHub Action (`.github/workflows/deploy.yml`) → `appleboy/ssh-action` SSH → `auto-deploy.sh`. **Deployment permission gotcha** (FIXED commit fd5aaf9): `auto-deploy.sh` + `scripts/deploy-vps.sh` wajib executable bit di git (`git update-index --chmod=+x`), else CI error "Permission denied" (exit 126). Repo di VPS sering root-owned (hasil `git reset --hard`); fix ownership via `docker run --rm -v <path>:/repo alpine chown -R 1005:1005 /repo` (docker group = root-equivalent). **Git pull sebagai root** di VPS perlu `git config --global --add safe.directory /home/seotool/JetDigitalSEO`.
+Normal path: push `main` → GitHub Action → SSH → `auto-deploy.sh`. Pada outage GitHub Actions 2026-08-26, deploy dijalankan langsung sebagai `seotool` dengan `bash auto-deploy.sh`.
 
-**Auto-deploy HANYA update container SaaS** (`jetdigitalseo-open-seo-1` + migrations otomatis via entrypoint). TIDAK update: (1) marketing static files — perlu `docker cp web/dist/client/. seotool-caddy:/srv/marketing/` manual; (2) routing seotool-caddy — perlu `docker compose -f gateway-caddy/docker-compose.yml up -d` + restart jika Caddyfile.seotool berubah; (3) forward block di pesat Caddyfile — hanya berubah saat menambah domain baru.
+`auto-deploy.sh` melakukan fetch/reset ke `origin/main`, rebuild/recreate app, menjalankan `scripts/migrate-pg.sh`, lalu me-recreate inner Caddy. Script migration saat ini selalu exit 0 setelah fallback, walaupun `drizzle-kit` gagal. Baca `MIGRATE_EXIT_CODE` dan verifikasi tabel/kolom baru lewat Postgres.
 
-**Deploy checklist penuh** (lihat "Deploy 2026-08-19/20" di bawah untuk contoh): commit + push → tunggu auto-deploy selesai (container healthy) → SSH root → `git pull` → `docker cp` marketing → verify `curl -sk --resolve seotool.im:443:127.0.0.1 https://seotool.im/api/health` → verify eksternal `curl -k https://seotool.im/api/health`.
+Deploy checklist:
+
+1. Push commit dan pastikan HEAD VPS sama dengan commit target.
+2. Jalankan `bash auto-deploy.sh`; tunggu app dan Postgres healthy.
+3. Periksa output migration. Jika Drizzle gagal, audit schema sebelum replay SQL atau menyentuh migration journal.
+4. Verifikasi `http://127.0.0.1:3001/api/health` dan `http://127.0.0.1:8080/api/health` dengan Host `seotool.im`.
+5. Verifikasi `https://seotool.im/api/health` melalui Cloudflare. Cek route fitur, `/admin`, dan contract endpoint seperti PayPal webhook.
+6. Periksa log `open-seo`, `seotool-caddy`, dan `gateway-caddy` setelah smoke test.
 
 ---
 
@@ -811,18 +1088,18 @@ User → Subscribe Page → createPaypalSubscription (server fn)
 #### 1. PayPal Developer Dashboard
 
 1. Go to https://developer.paypal.com/dashboard/applications
-2. Create **Products** (one per tier):
+2. Create **Products** (one per base tier):
    - SeoTool Lite ($49/mo)
    - SeoTool Pro ($149/mo)
    - SeoTool Agency ($499/mo)
 3. Create **Billing Plans** for each product:
-   - Plan IDs: `lite-plan`, `pro-plan`, `agency-plan` (must match `PAYPAL_PLAN_IDS` in `src/shared/plans.ts`)
+   - Simpan plan ID melalui `/admin` pricing. `lite-plan`, `pro-plan`, dan `agency-plan` hanya fallback constants di `src/shared/plans.ts`.
    - Billing cycle: Monthly
    - Auto-bill outstanding: Yes
    - Payment failure threshold: 3
 4. Create **Webhook**:
-   - URL: `https://yourdomain.com/api/paypal/webhook`
-   - Events: `BILLING.SUBSCRIPTION.CREATED`, `BILLING.SUBSCRIPTION.UPDATED`, `BILLING.SUBSCRIPTION.CANCELLED`, `BILLING.SUBSCRIPTION.EXPIRED`, `BILLING.SUBSCRIPTION.ACTIVATED`, `BILLING.SUBSCRIPTION.SUSPENDED`, `PAYMENT.CAPTURE.COMPLETED`
+   - URL production: `https://seotool.im/api/paypal/webhook`
+   - Events: `BILLING.SUBSCRIPTION.CREATED`, `BILLING.SUBSCRIPTION.UPDATED`, `BILLING.SUBSCRIPTION.CANCELLED`, `BILLING.SUBSCRIPTION.EXPIRED`, `BILLING.SUBSCRIPTION.ACTIVATED`, `BILLING.SUBSCRIPTION.SUSPENDED`, `PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.SALE.COMPLETED`
    - Save the **Webhook ID**
 
 #### 2. Environment Variables
@@ -834,6 +1111,12 @@ PAYPAL_CLIENT_SECRET=your-client-secret
 PAYPAL_MODE=sandbox  # or "live" for production
 PAYPAL_WEBHOOK_ID=your-webhook-id
 ```
+
+Untuk hosted production, nilai yang disimpan dari `/admin` masuk ke `app_settings` dan mengoverride env. Secret bersifat write-only di UI. Setelah empat setting tersimpan:
+
+1. Simpan plan ID dan harga base tiers di admin pricing.
+2. Klik **Set up PayPal plans** untuk membuat product dan lima progressive plan KRP.
+3. Klik **Test PayPal configuration**. Test ini read-only: mengambil semua active plans dan mencocokkan harga tanpa membuat charge.
 
 #### 3. Database Migration
 
@@ -892,6 +1175,7 @@ Credits are stored in `usage_quota` table with special feature names:
 | `BILLING.SUBSCRIPTION.ACTIVATED` | Sync subscription status                   |
 | `BILLING.SUBSCRIPTION.SUSPENDED` | Sync to past_due status                    |
 | `PAYMENT.CAPTURE.COMPLETED`      | Handle top-up credit purchase              |
+| `PAYMENT.SALE.COMPLETED`         | Renewal sync + KRP referral commission     |
 
 ### Customer Portal
 
@@ -975,7 +1259,7 @@ Perbaikan komprehensif untuk pengujian fitur dashboard oleh platform admin, perb
 
 | File                                                              | Keterangan                                                                                                                                                                                                                                                                                               |
 | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/server/features/billing/services/QuotaService.ts`            | **Platform Admin Quota Bypass**: `getPlanTier()` secara otomatis mengembalikan tier `"agency"` untuk organisasi milik platform admin (`alfu13.sf@gmail.com`, `emerilansel@gmail.com`). Menggunakan cached owner-email lookup agar tidak membebani database pada setiap query.                            |
+| `src/server/features/billing/services/QuotaService.ts`            | **Platform Admin Quota Bypass**: `getPlanTier()` mengembalikan tier `"agency"` untuk organisasi milik platform admin. Implementasi awal memakai owner-email lookup; sejak `8114af9`, authority berasal dari runtime allowlist, bukan email yang di-hardcode.                                             |
 | `src/server/features/billing/repositories/QuotaRepository.ts`     | +`getOwnerEmail(organizationId)` helper untuk membaca email pemilik organisasi (member dengan role `"owner"`).                                                                                                                                                                                           |
 | `src/server/lib/dataforseo/client.ts`                             | **DataForSEO Mapping Fix**: `rankedKeywords` dan `relevantPages` di-meter secara eksplisit dengan credit feature `"domain_overview"`. Mencegah keyword suggestions jatuh ke default `"site_audit"` yang kuotanya kecil (1/bulan pada free) sehingga tidak lagi memicu error _"Couldn't fetch keywords"_. |
 | `src/shared/billing-credit-features.ts`                           | Default fallback untuk path DataForSEO yang tidak terpetakan diubah dari `"site_audit"` (bulanan) menjadi `"keyword_research"` (harian).                                                                                                                                                                 |
@@ -990,8 +1274,8 @@ Perbaikan komprehensif untuk pengujian fitur dashboard oleh platform admin, perb
 ### Status VPS
 
 - Commit `4e86cba` dideploy dan berjalan sehat di VPS (`148.230.103.98`).
-- Database PostgreSQL: Subscription kedua admin (`alfu13.sf@gmail.com`, `emerilansel@gmail.com`) telah diupdate ke plan tier `agency`.
-- Environment VPS (`.env.hosted`): `PLATFORM_ADMIN_USER_IDS=H9Qk2yYXpiVanOgB6KbDcFuypW4pGlZ7,VR4JUE2y0NyzaWemz1BGUQRCF62k9kDe`.
+- Database PostgreSQL: subscription organisasi admin telah diupdate ke plan tier `agency` pada deploy tersebut.
+- Environment VPS memakai `PLATFORM_ADMIN_USER_IDS`; nilai aktual tidak boleh dicatat di repo atau coldstart.
 
 ---
 
@@ -1051,16 +1335,16 @@ Audit independen setelah sesi QA sebelumnya (2026-08-23) yang menghasilkan verdi
 
 ### Temuan & Fix yang Diimplementasikan (commit `bcc552f`)
 
-| # | Temuan | Severity | Status | File Diubah |
-|---|--------|----------|--------|-------------|
-| F1 | OG/meta tags tidak render di SSR | HIGH (SEO) | Fix workaround | `web/src/routes/__root.tsx` — default OG tags di root `head()` |
-| F2 | HTTP tidak redirect ke HTTPS (Location header `http://`) | HIGH (Security) | Fix app-level | `src/middleware/unauthenticated-redirect.ts` — force HTTPS origin |
-| F3 | E2E UUID fixture invalid (RFC 4122) | HIGH (QA) | Fixed | `src/server/features/projects/services/projects.ts`, `e2e/qa-dashboard-audit.spec.ts` |
-| F4 | Anonymous 404 → redirect ke sign-in | MEDIUM (UX) | Fixed | `src/middleware/unauthenticated-redirect.ts` — `AUTHENTICATED_ROUTE_PREFIXES` allowlist |
-| F5 | Account deletion terjebak onboarding | MEDIUM (UX) | Fixed | `src/client/features/onboarding/useOnboardingRedirect.ts`, `src/routes/_app/route.tsx` |
-| F6 | 2 oxlint errors di test files | MEDIUM (CI) | Fixed | `src/middleware/ensureUser.test.ts`, `src/middleware/paid-plan-gate.test.ts` |
-| F7 | 2 HIGH dependency vulns (undici, nanoid) | MEDIUM (Security) | Fixed | `package.json` — pnpm overrides |
-| F10 | Tidak ada security.txt | LOW | Fixed | `web/public/.well-known/security.txt` (baru) |
+| #   | Temuan                                                   | Severity          | Status         | File Diubah                                                                             |
+| --- | -------------------------------------------------------- | ----------------- | -------------- | --------------------------------------------------------------------------------------- |
+| F1  | OG/meta tags tidak render di SSR                         | HIGH (SEO)        | Fix workaround | `web/src/routes/__root.tsx` — default OG tags di root `head()`                          |
+| F2  | HTTP tidak redirect ke HTTPS (Location header `http://`) | HIGH (Security)   | Fix app-level  | `src/middleware/unauthenticated-redirect.ts` — force HTTPS origin                       |
+| F3  | E2E UUID fixture invalid (RFC 4122)                      | HIGH (QA)         | Fixed          | `src/server/features/projects/services/projects.ts`, `e2e/qa-dashboard-audit.spec.ts`   |
+| F4  | Anonymous 404 → redirect ke sign-in                      | MEDIUM (UX)       | Fixed          | `src/middleware/unauthenticated-redirect.ts` — `AUTHENTICATED_ROUTE_PREFIXES` allowlist |
+| F5  | Account deletion terjebak onboarding                     | MEDIUM (UX)       | Fixed          | `src/client/features/onboarding/useOnboardingRedirect.ts`, `src/routes/_app/route.tsx`  |
+| F6  | 2 oxlint errors di test files                            | MEDIUM (CI)       | Fixed          | `src/middleware/ensureUser.test.ts`, `src/middleware/paid-plan-gate.test.ts`            |
+| F7  | 2 HIGH dependency vulns (undici, nanoid)                 | MEDIUM (Security) | Fixed          | `package.json` — pnpm overrides                                                         |
+| F10 | Tidak ada security.txt                                   | LOW               | Fixed          | `web/public/.well-known/security.txt` (baru)                                            |
 
 ### Detail Fix
 
@@ -1080,26 +1364,26 @@ Audit independen setelah sesi QA sebelumnya (2026-08-23) yang menghasilkan verdi
 
 ### Temuan yang BELUM di-fix (perlu tindakan manual)
 
-| # | Temuan | Severity | Alasan Belum Fix |
-|---|--------|----------|------------------|
-| F8 | Tidak ada error monitoring (Sentry/PostHog) | MEDIUM | Butuh setup Sentry DSN + source maps upload |
-| F9 | Tidak ada incident response runbook | LOW | Butuh dokumentasi manual |
-| OG-SSR | OG tags via `head()` child routes tidak render di SSR | HIGH | Framework limitation — workaround di root route sudah dipasang, tapi per-page OG tags (title/description berbeda per halaman) belum SSR-rendered |
-| HTTPS-CF | Cloudflare "Always Use HTTPS" belum di-enable | HIGH | Manual step di Cloudflare dashboard |
+| #        | Temuan                                                | Severity | Alasan Belum Fix                                                                                                                                 |
+| -------- | ----------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| F8       | Tidak ada error monitoring (Sentry/PostHog)           | MEDIUM   | Butuh setup Sentry DSN + source maps upload                                                                                                      |
+| F9       | Tidak ada incident response runbook                   | LOW      | Butuh dokumentasi manual                                                                                                                         |
+| OG-SSR   | OG tags via `head()` child routes tidak render di SSR | HIGH     | Framework limitation — workaround di root route sudah dipasang, tapi per-page OG tags (title/description berbeda per halaman) belum SSR-rendered |
+| HTTPS-CF | Cloudflare "Always Use HTTPS" belum di-enable         | HIGH     | Manual step di Cloudflare dashboard                                                                                                              |
 
 ### Status CI/CD
 
-| Check | Status |
-|-------|--------|
-| `pnpm run ci:check` | ✅ GREEN (prettier + knip + tsc + oxlint all pass) |
-| `pnpm run test:ci` | ✅ 994/994 pass |
-| `pnpm audit --audit-level=high` | ✅ 0 HIGH vulnerabilities |
-| E2E (`npx playwright test`) | ⚠️ 8/16 pass (domain-overview-filters masih gagal — UUID fix perlu deploy dulu) |
-| Deploy VPS | ✅ `bcc552f` deployed via GitHub Actions |
+| Check                           | Status                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------- |
+| `pnpm run ci:check`             | ✅ GREEN (prettier + knip + tsc + oxlint all pass)                              |
+| `pnpm run test:ci`              | ✅ 994/994 pass                                                                 |
+| `pnpm audit --audit-level=high` | ✅ 0 HIGH vulnerabilities                                                       |
+| E2E (`npx playwright test`)     | ⚠️ 8/16 pass (domain-overview-filters masih gagal — UUID fix perlu deploy dulu) |
+| Deploy VPS                      | ✅ `bcc552f` deployed via GitHub Actions                                        |
 
-### Test baseline BARU
+### Baseline pada audit 2026-08-24
 
-`pnpm test:ci`: **994 pass**, 0 fail. `pnpm ci:check`: **GREEN** (0 errors). E2E: 8/16 pass (8 domain-overview failures — akan fix setelah UUID fix di-deploy).
+Saat commit `bcc552f`, `pnpm test:ci` menghasilkan **994 pass**, 0 fail dan `pnpm ci:check` GREEN. Baseline terbaru setelah Keyword Research Pro ada di bagian update 2026-08-24–26: **1.069 tests pass**.
 
 ---
 
@@ -1112,7 +1396,7 @@ pnpm exec tsc --noEmit
 
 # Tests
 pnpm test:ci
-# Harus: 994 pass, 0 fail
+# Baseline b2bd639: 121 files, 1.069 pass, 0 fail
 
 # CI pipeline (prettier + knip + tsc + oxlint)
 pnpm run ci:check
@@ -1140,7 +1424,8 @@ npx drizzle-kit generate --config drizzle-pg.config.ts    # PG
 
 # E2E tests
 npx playwright test
-# Harus: 16/16 pass (setelah UUID fix di-deploy)
+# Harus: semua spec yang terpilih pass. Jangan memakai angka 16 sebagai
+# baseline karena suite sudah bertambah (GMB Grid, admin billing, KRP smoke).
 ```
 
 ---
@@ -1158,16 +1443,20 @@ npx playwright test
 | 6                     | **Semi-gap** ✅ (Slice A)                                     | —                                     | DONE (Slice A). SERP snapshot persistence — full top-20 SERP composition persisted per rank check, zero extra API cost. Competitor table + tracked domain highlight. Domain first-class entity (Slice B) + Local SEO persistence (Slice C) deferred.                   |
 | 7                     | **PayPal Customer Portal** ✅                                 | PayPal SDK                            | DONE. `getCustomerPortalUrl` server fn + "Manage Subscription" button di billing page. Cancellation via PayPal portal → webhook sync.                                                                                                                                  |
 | 8                     | **Quota Analytics Dashboard** ✅                              | QuotaService                          | DONE. Admin dashboard: plan distribution, MRR estimate, quota usage summary, recent orgs. `requirePlatformAdmin` middleware (env-var allowlist). Route `/admin`.                                                                                                       |
+| Local SEO             | **Local Map Rank Tracker rebuild** ✅                         | DataForSEO Maps SERP                  | DONE (`6206027`). GBP profile selection, persisted geo-grid run/snapshots, scheduler, workflow, kuota, reliability indexes, dan test coverage. Deployed.                                                                                                               |
+| Admin                 | **Hosted PayPal + analytics fixes** ✅                        | PayPal/Postgres                       | DONE (`8114af9`, `8e2bf1d`). Checkout/top-up/webhook services, admin controls, dan analytics aggregation Postgres diperbaiki. Source code deployed; PayPal credential production masih belum diisi.                                                                    |
+| GA4                   | **Property discovery fix** ✅                                 | Google Analytics Admin API            | DONE (`8481324`). Pagination + account summaries fallback + empty/error states. Deployed; authenticated production flow belum di-smoke-test pada deploy KRP.                                                                                                           |
+| KRP                   | **Keyword Research Pro merged** ✅                            | DataForSEO + PayPal                   | DONE (`fc6e3b7`, hotfix `05225e2`). Pro Analysis ada di Keyword Research; KGR, allintitle, weak SERP, optional backlink competition, Standard/BYOK billing. Membership/referral berlaku account-wide. Checkout menunggu PayPal setup.                                  |
 | QA                    | **QA Sprint 1-3** ✅                                          | All features                          | DONE (commit `5a0b3e0`). 15 features, 47 files. P0 fixes, P1 compliance, P2 partial. Deployed to production.                                                                                                                                                           |
-| Billing               | **PayPal Migration** ✅                                       | Autumn/Stripe                         | DONE (commit `0510bbd`). Autumn/Stripe → PayPal Subscriptions. ~40 files. Credits in `usage_quota` table. New env vars `PAYPAL_*`.                                                                                                                                     |
+| Billing               | **PayPal Migration** ✅                                       | Autumn/Stripe                         | Source code DONE (`0510bbd`, diperkuat `8114af9`). Production belum operasional sampai `PAYPAL_*`, webhook, base plan, dan KRP cohort plans dikonfigurasi dari `/admin`.                                                                                               |
 | Marketing             | **Dark Command Center** ✅                                    | —                                     | DONE (commits `d85a798`, `a99ee84`). Dark theme redesign + conversion UX (hero analyzer, tooltips, pricing toggle, structured data). CSS-only animations.                                                                                                              |
 | Cleanup               | **Rebrand OpenSEO → SeoTool.im** ✅                           | —                                     | DONE (commit `1343430`). All user-facing identifiers cleaned. Only infra IDs remain.                                                                                                                                                                                   |
 | **P2**                | **P2 Features Batch (9 fitur)** ✅                            | All features                          | DONE (2026-08-18). P2-1 Bing support, P2-4 Link intersect, P2-6 Anchor distribution, P2-7 Sitemap validator, P2-9 Crawl budget, P2-10 On-page checker, P2-12 Keyword clustering, P2-13 Toxic links, P2-15 SERP volatility. ~60 files. 8 MCP tools. P2-14 PPC excluded. |
 | **Landing + Paywall** | **In-App Landing Page + Hard Paywall** ✅                     | —                                     | DONE (2026-08-19). Public landing at `/` (DaisyUI), pricing at `/pricing` (import from plans.ts), hard paywall server+client. E2E bypass preserved. Funnel: signup → onboarding → /projects → /subscribe. Fixed broken `customerHasManagedAccess` imports.             |
-| **Deploy**            | **Production Deploy + Caddy Re-architecture** ✅              | —                                     | DONE (2026-08-19/20, commits `751d389`..`a0b67c4`). P2 batch + landing deployed; migrations D1 0048 + PG 0025; 12 TS errors + 3 test failures fixed. Dedicated `seotool-caddy` (127.0.0.1:8080) behind pesat-caddy forward. Verified end-to-end.                       |
+| **Deploy**            | **Production Deploy + Caddy re-architecture** ✅              | —                                     | Current verified topology: outer `gateway-caddy` → `127.0.0.1:8080` inner `seotool-caddy` → app. Commit `05225e2` live; Cloudflare health `200`; Postgres journal/schema reconciled through `0036`.                                                                    |
 | **UI/UX QA**          | **Dashboard UI/UX Audit & Layout Standardization** ✅         | All features                          | DONE (2026-08-20/21). Full 25-route Playwright visual audit, single-line search bar on Content Gap & Link Intersect, standardized `max-w-7xl mx-auto space-y-4` layout container across all routes.                                                                    |
 | **VPS Assets Fix**    | **VPS Caddy Asset Routing & Fresh Startup Build** ✅          | —                                     | DONE (2026-08-21, commit `f969bb3`). Fixed `@marketingAssetFile` in Caddyfile to prevent CSS/JS 404s, fixed `docker-entrypoint.sh` for guaranteed fresh build on boot. Verified live at `https://seotool.im`.                                                          |
-| **QA Re-Audit**       | **Independent QA Re-Audit + 8 Fixes** ✅                      | All features                          | DONE (2026-08-24, commit `bcc552f`). Independent audit after previous QA session. Fixed: OG tags SSR workaround, HTTPS redirect, E2E UUID, anonymous 404, account deletion trap, oxlint errors, dependency vulns, security.txt. CI green, 994/994 tests.               |
+| **QA Re-Audit**       | **Independent QA Re-Audit + 8 Fixes** ✅                      | All features                          | DONE (2026-08-24, commit `bcc552f`). Historical baseline 994 tests. Baseline setelah KRP: 1.069 tests, typecheck/lint/build pass, local KRP smoke pass.                                                                                                                |
 
 ---
 
@@ -1191,9 +1480,11 @@ pnpm test:ci             # vitest run --reporter=dot
 - `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` — billing (PayPal Subscriptions)
 - `PAYPAL_MODE` — `sandbox` (dev) atau `live` (production)
 - `PAYPAL_WEBHOOK_ID` — webhook ID dari PayPal dashboard (after creating webhook endpoint)
+- `PAYPAL_ALL_ACCESS_PRODUCT_ID`: runtime setting di `app_settings`, dibuat otomatis oleh admin saat setup All Access plans; bukan secret env wajib. `PAYPAL_KRP_PRODUCT_ID` adalah legacy.
+- `OPENPAGERANK_API_KEY` — Basic Backlinks aggregate snapshot; editable sebagai secret di Admin → API Keys
 - `OPENROUTER_API_KEY` — AI agent (SAM, onboarding chat, entity extraction)
 - `TURNSTILE_SECRET_KEY` / `TURNSTILE_SITE_KEY` — signup captcha
 - `POSTGRES_PASSWORD` — DB password (Docker Compose VPS deploy)
 - `PLATFORM_ADMIN_USER_IDS` — comma-separated user IDs untuk admin dashboard access (`/admin`)
 
-**Deploy VPS**: Push ke `main` → GitHub Action auto-deploy (`auto-deploy.sh`) — hanya rebuild container SaaS + migrations. Marketing files + routing Caddy manual: `docker cp web/dist/client/. seotool-caddy:/srv/marketing/`. Edit Caddyfile pesat → WAJIB `docker restart pesat-control-plane-caddy-1` (sed -i inode gotcha). Lihat section "Produksi LIVE" + "Deploy 2026-08-19/20" di atas, `gateway-caddy/MANUAL-DEPLOY.md`, `.env.hosted.example`.
+**Deploy VPS**: Normalnya push `main` → GitHub Action → `auto-deploy.sh`. Outer config aktif ada di `/opt/gateway/Caddyfile` dan perlu `docker restart gateway-caddy` setelah perubahan. Inner routing ada di `gateway-caddy/Caddyfile.seotool`; marketing files berada di volume `seotool-caddy`. Selalu cek migration output, public HTTPS melalui Cloudflare, dan log ketiga container. Bagian "Produksi LIVE" di atas adalah source of truth terbaru; `gateway-caddy/MANUAL-DEPLOY.md` masih memuat langkah lama dan harus dibaca sebagai referensi historis.
