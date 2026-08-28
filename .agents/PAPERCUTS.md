@@ -26,4 +26,5 @@ data, or sensitive paths.
 
 Move fixed entries here, mark them checked, and append the resolving date or commit.
 
+- [x] `2026-08-28T13:28:00Z` — `codex` — Downloaded TestSprite failure bundles under `.testsprite/runs/` include raw production HTML that Prettier may reject, causing `pnpm ci:check` to fail on test evidence rather than source. Resolved 2026-08-28 by excluding the run-artifact directory in `.prettierignore`.
 - [x] `2026-08-26T13:49:00Z` — `codex` — `drizzle-kit generate` compared against stale snapshots and prompted for unrelated manual migrations. Resolved 2026-08-27 by adding current D1/Postgres snapshots (`0057`/`0034`) with repaired parent chains; both generators now report no schema changes non-interactively.

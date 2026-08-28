@@ -105,6 +105,10 @@ function SubscribePage() {
         ? 2_000
         : false,
   });
+  const shouldReturnToWorkspace = [
+    membership.data?.hasAccess,
+    membership.data?.hasLegacyPaidPlan,
+  ].some(Boolean);
   const checkout = useMutation({
     mutationFn: () =>
       createMembershipCheckout({
@@ -136,11 +140,11 @@ function SubscribePage() {
   }, [search.checkout, search.subscriptionId, verify]);
 
   useEffect(() => {
-    if (!membership.data?.hasAccess) return;
+    if (!shouldReturnToWorkspace) return;
     void navigate({ to: search.redirect ?? "/", replace: true });
-  }, [membership.data?.hasAccess, navigate, search.redirect]);
+  }, [navigate, search.redirect, shouldReturnToWorkspace]);
 
-  if (membership.isLoading || membership.data?.hasAccess) {
+  if (membership.isLoading || shouldReturnToWorkspace) {
     return null;
   }
 
