@@ -10,6 +10,7 @@ data, or sensitive paths.
 
 ## Open
 
+- [ ] `2026-08-29T03:10:00Z` — `zcode` — Playwright 1.59 removed `timeout` from `TestDetails`, so `test(title, { timeout })` fails tsc with TS2353 even though older suites use it; the per-test budget must be widened with `test.setTimeout(ms)` inside the test body (first navigation of a cold dev server can compile routes for ~42s against the 45s default).
 - [ ] `2026-08-27T10:24:24Z` — `codex` — `pnpm db:generate` can print fatal non-TTY errors for both Drizzle generators yet still exit 0, so automation may report success without creating migrations. Wrap each generator with an explicit output/artifact check (or upgrade/fix the generator exit behavior) so the combined script fails reliably.
 - [ ] `2026-07-20T20:08:28Z` — `claude` — In a fresh git worktree, `oxlint --type-aware` crashes with `Cannot find module '@oxlint/binding-darwin-arm64'` — the platform-specific optional dep is missing from the worktree's node_modules while tsc/prettier work fine, and plain `pnpm install` reports up-to-date without restoring it; `pnpm install --force` (~22s) fixes it. Worth making the worktree-setup hook (or a documented step) run the forced install so lint doesn't die on fresh worktrees.
 - [ ] `2026-07-19T04:06:52Z` — `codex` — `pnpm --dir web build` fails with `vite: command not found` when `web/node_modules` is absent, despite the root toolchain being installed. Document or enforce the package-local install required before validating the `web/` subpackage.

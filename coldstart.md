@@ -2,9 +2,26 @@
 
 Dokumen konteks untuk melanjutkan pengembangan di percakapan baru.
 
-Terakhir diperbarui: 2026-08-29. Versi aplikasi: `0.1.4`. Commit aplikasi production: `98b2383`.
+Terakhir diperbarui: 2026-08-29. Versi aplikasi: `0.1.4`. Commit aplikasi production: `98b2383`. Commit teratas `origin/main`: `bf3090c` (rebrand surface, MENUNGGU deploy).
 
-> **STATUS AUTHORITATIVE:** release v0.1.4 dan hotfix entitlement sudah di-commit, dipush ke `origin/main`, dan live di `https://seotool.im` pada commit `98b2383`. Folder `.playwright-mcp/` dan `.testsprite/runs/` adalah artefak lokal/untracked, bukan source release dan jangan di-commit.
+> **STATUS AUTHORITATIVE:** release v0.1.4 dan hotfix entitlement sudah di-commit, dipush ke `origin/main`, dan live di `https://seotool.im` pada commit `98b2383`. Folder `.playwright-mcp/` dan `.testsprite/` adalah artefak lokal dan sekarang sudah di-gitignore; jangan di-commit.
+
+---
+
+## Sesi 2026-08-29: penyelesaian rebrand + kanal deploy rusak (2026-08-29)
+
+**Commit `bf3090c` (`fix: finish seotool rebrand on user-facing surfaces`) sudah di `origin/main` tapi BELUM live di production** karena kanal deploy otomatis rusak (lihat bawah). Isi perubahan:
+
+- Semua referensi GitHub `every-app/open-seo` yang user-visible diarahkan ke repo publik `emerilansel-jpg/SeoTool` (terverifikasi ada dan public via `git ls-remote` anonim, HEAD-nya mengikuti main): perintah `npx skills add` + clone manual di halaman `/ai`, link GitHub Issues di `/support`, link docs setup di `AuthConfigErrorCard`, `GSC_SELF_HOSTED_SETUP_DOCS_URL` (`docs/SELF_HOSTING_GOOGLE_SEARCH_CONSOLE.md` ada di repo), dan `GA4_SELF_HOSTED_SETUP_DOCS_URL` (doc GA4 tidak ada di repo, diarahkan ke section auth `SELF_HOSTING_CLOUDFLARE.md`). Sisa `open-seo`/`openseo` di src kini hanya infra ID yang disengaja (HMAC salt `openseo:ga4:`/`openseo:gsc:`, localStorage legacy `openseo:lastProjectId`, URL dev portless `open-seo.localhost`, nama package) plus fixture URL test.
+- `.gitignore`: `.testsprite/` dan `.playwright-mcp/` di-ignore (artefak TestSprite sensitif, pernah bocor password di trace).
+- `e2e/admin-billing.spec.ts`: test pertama diberi `test.setTimeout(120_000)` — Playwright 1.59 menghapus `timeout` dari `TestDetails` (TS2353 kalau dipakai di options). Full E2E lokal **22/22 pass** setelah fix; sebelumnya 21/22 karena flake cold-start compile (42s vs default 45s).
+- Gates: tsc 0 error, oxlint 0, prettier bersih.
+
+**Kanal deploy GitHub Actions RUSAK**: workflow "Deploy to VPS" gagal di SSH handshake (`unable to authenticate, attempted methods [none password]`) untuk `bf3090c`, `98b2383`, `05225e2`, dan `fc6e3b7` — secret `VPS_PASSWORD` di GitHub sudah tidak diterima server VPS. Deploy sukses terakhir via Actions: `8e2bf1d` (2026-08-24). Semua release sejak itu dideploy manual dari mesin operator. **Agent berikutnya: jangan asumsikan push main = live.** Untuk deploy `bf3090c`, user perlu jalankan `bash auto-deploy.sh` sebagai `seotool` di VPS (atau update secret `VPS_PASSWORD`). SSH password dari mesin lokal juga tidak tersedia untuk agent (fail2ban + password berubah).
+
+**Verifikasi production (98b2383, sehat)**: `/api/health` 200 `{"status":"ok"}`, landing/pricing/sign-in 200, `/ai` 307 untuk anonim. GUI test via in-app browser dengan sesi owner: `/ai` render penuh (MCP URL `https://seotool.im/mcp`, 4 setup guide, 7 skills, 36 tools), Dashboard project render dengan data nyata (audit 46 halaman, Backlink Pulse 425 ref domains snapshot hari ini, Content Quality avg 87), `/billing` render plan Agency + quota limits. Catatan: pricing di marketing site (`web/`, statis) masih menampilkan kartu legacy Lite/Pro/Agency sedangkan `/subscribe` in-app hanya menawarkan Free + All Access untuk customer baru — inkonsistensi konten marketing yang perlu penyelarasan di sesi berikutnya. Screenshot IAB mengalami throttling (`browser screenshot activity capture failed for guest`) setelah beberapa panggilan; bukti memakai DOM snapshot.
+
+**TestSprite 2026-08-29: inconclusive** — 3 run (Billing, Backlinks, retry Billing) gagal/blocked semuanya di timeout sisi runner (goto 15s, scroll_into_view 15s, click 10s) padahal site merespons cepat via curl dan browser lokal. Jangan catat sebagai regresi produk; rerun saat runner sehat. Plan test baru untuk halaman AI & MCP sudah didraft di `.testsprite/ai-mcp-page-plan.json` (lokal, gitignored) — buat test-nya SETELAH `bf3090c` live supaya tidak menguji build lama.
 
 ---
 
