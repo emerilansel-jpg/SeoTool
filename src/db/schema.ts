@@ -39,6 +39,8 @@ import * as sqliteNotifications from "./notifications.schema";
 import * as pgNotifications from "./pg/notifications.schema";
 import * as sqliteKeywordResearchPro from "./keyword-research-pro.schema";
 import * as pgKeywordResearchPro from "./pg/keyword-research-pro.schema";
+import * as sqliteCancellationFeedback from "./cancellation-feedback.schema";
+import * as pgCancellationFeedback from "./pg/cancellation-feedback.schema";
 
 // Canonical schema barrel. Repositories import their tables from here and the
 // provider-aware `db` from "@/db", so each repository is written ONCE for both
@@ -69,7 +71,8 @@ type AppSchema = typeof sqliteApp &
   typeof sqliteApiKeys &
   typeof sqliteNotifications &
   typeof sqliteAdmin &
-  typeof sqliteKeywordResearchPro;
+  typeof sqliteKeywordResearchPro &
+  typeof sqliteCancellationFeedback;
 
 const runtimeSchema =
   getDatabaseProvider() === "postgres"
@@ -94,6 +97,7 @@ const runtimeSchema =
         ...pgNotifications,
         ...pgAdmin,
         ...pgKeywordResearchPro,
+        ...pgCancellationFeedback,
       }
     : {
         ...sqliteApp,
@@ -116,6 +120,7 @@ const runtimeSchema =
         ...sqliteNotifications,
         ...sqliteAdmin,
         ...sqliteKeywordResearchPro,
+        ...sqliteCancellationFeedback,
       };
 
 // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- guarded by schema-parity.test.ts
@@ -166,6 +171,7 @@ export const {
   topicClusters,
   contentBriefs,
   alertRules,
+  cancellationFeedback,
   serpSnapshots,
   serpVolatilitySnapshots,
   apiKeys,

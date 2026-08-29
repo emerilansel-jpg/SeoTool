@@ -28,6 +28,10 @@ import {
   getMembershipStatus,
 } from "@/serverFunctions/membership";
 import { BillingSubscriptionCards } from "@/client/features/billing/BillingSubscriptionCards";
+import {
+  CancelMembershipFlow,
+  type CancelSurvey,
+} from "@/client/features/billing/CancelMembershipFlow";
 
 export const Route = createFileRoute("/_app/billing")({
   beforeLoad: () => {
@@ -54,6 +58,7 @@ function BillingPage() {
     session?.user?.id ?? (isE2EBypass ? "e2e-user-id" : undefined);
   const [isPortalLoading, setIsPortalLoading] = useState(false);
   const [isBuyingCredits, setIsBuyingCredits] = useState(false);
+  const [isCancelFlowOpen, setIsCancelFlowOpen] = useState(false);
   const [topupStatus, setTopupStatus] = useState<
     "idle" | "capturing" | "completed" | "cancelled" | "error"
   >("idle");
@@ -73,7 +78,14 @@ function BillingPage() {
     enabled: Boolean(activeUserId),
   });
   const cancelMembershipMutation = useMutation({
-    mutationFn: () => cancelMembership({ data: { confirmed: true } }),
+    mutationFn: (survey: CancelSurvey) =>
+      cancelMembership({
+        data: {
+          confirmed: true,
+          reason: survey.reason,
+          reasonDetail: survey.reasonDetail,
+        },
+      }),
     onSuccess: () => {
       toast.success("All Access membership cancelled.");
       void queryClient.invalidateQueries({ queryKey: ["membership-status"] });
@@ -224,16 +236,17 @@ function BillingPage() {
         isCancelPending={cancelMembershipMutation.isPending}
         referral={referral}
         onManageSubscription={() => void handleManageSubscription()}
-        onCancelMembership={() => {
-          if (
-            window.confirm(
-              "Cancel All Access? Your lifetime cohort price lock will end immediately.",
-            )
-          ) {
-            cancelMembershipMutation.mutate();
-          }
-        }}
+        onCancelMembership={() => setIsCancelFlowOpen(true)}
       />
+
+      {isCancelFlowOpen ? (
+        <CancelMembershipFlow
+          priceUsd={currentPrice}
+          isPending={cancelMembershipMutation.isPending}
+          onConfirmed={(survey) => cancelMembershipMutation.mutate(survey)}
+          onClose={() => setIsCancelFlowOpen(false)}
+        />
+      ) : null}
 
       <div className="rounded-lg border border-base-300 bg-base-100 overflow-hidden">
         <div className="border-b border-base-300 bg-base-200 p-4">

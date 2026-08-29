@@ -40,6 +40,8 @@ import * as pgContentIntelligence from "./pg/content-intelligence.schema";
 import * as pgNotifications from "./pg/notifications.schema";
 import * as sqliteKeywordResearchPro from "./keyword-research-pro.schema";
 import * as pgKeywordResearchPro from "./pg/keyword-research-pro.schema";
+import * as sqliteCancellationFeedback from "./cancellation-feedback.schema";
+import * as pgCancellationFeedback from "./pg/cancellation-feedback.schema";
 
 // Guards the ONE structural artifact `db:generate` does not regenerate: the
 // hand-written Postgres schema. The provider-aware `db`/`@/db/schema` barrel
@@ -173,6 +175,7 @@ const sqliteAppTables = tablesFrom(
   sqliteContentIntelligence,
   sqliteNotifications,
   sqliteKeywordResearchPro,
+  sqliteCancellationFeedback,
 );
 const pgAppTables = tablesFrom(
   pgApp,
@@ -192,6 +195,7 @@ const pgAppTables = tablesFrom(
   pgContentIntelligence,
   pgNotifications,
   pgKeywordResearchPro,
+  pgCancellationFeedback,
 );
 const sqliteAuthTables = tablesFrom(sqliteAuth);
 const pgAuthTables = tablesFrom(pgAuth);

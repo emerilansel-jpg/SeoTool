@@ -10,6 +10,7 @@ import {
   setPlanTierSchema,
 } from "@/types/schemas/admin";
 import { AdminBillingService } from "@/server/features/admin/services/AdminBillingService";
+import { CancellationFeedbackRepository } from "@/server/features/billing/repositories/CancellationFeedbackRepository";
 
 export const listAdminSubscriptions = createServerFn({ method: "POST" })
   .middleware([requireAuthenticatedContext, requirePlatformAdmin])
@@ -22,6 +23,12 @@ export const listAdminWebhookEvents = createServerFn({ method: "GET" })
   .middleware([requireAuthenticatedContext, requirePlatformAdmin])
   .handler(async () => {
     return AdminBillingService.listWebhookEvents();
+  });
+
+export const listAdminCancellationFeedback = createServerFn({ method: "GET" })
+  .middleware([requireAuthenticatedContext, requirePlatformAdmin])
+  .handler(async () => {
+    return CancellationFeedbackRepository.listRecent(20);
   });
 
 export const setAdminPlanTier = createServerFn({ method: "POST" })

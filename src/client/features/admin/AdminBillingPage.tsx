@@ -7,9 +7,14 @@ import { Search } from "lucide-react";
 import {
   listAdminSubscriptions,
   listAdminWebhookEvents,
+  listAdminCancellationFeedback,
 } from "@/serverFunctions/admin-billing";
 import type { AdminSubscriptionListItem } from "@/server/features/admin/repositories/AdminBillingRepository";
 import { PLAN_TIER_LABELS, isPlanTier } from "@/shared/plans";
+import {
+  CANCELLATION_REASON_LABELS,
+  type CancellationReason,
+} from "@/shared/cancellation";
 import {
   AppDataTable,
   useAppTable,
@@ -25,11 +30,16 @@ const TIER_BADGE_CLASS: Record<string, string> = {
 
 const PAGE_SIZE = 20;
 
+function isCancellationReason(value: string): value is CancellationReason {
+  return value in CANCELLATION_REASON_LABELS;
+}
+
 export function AdminBillingPage() {
   const search = useSearch({ from: "/_app/admin/billing/" });
   const navigate = useNavigate();
   const listSubs = useServerFn(listAdminSubscriptions);
   const listEvents = useServerFn(listAdminWebhookEvents);
+  const listCancellations = useServerFn(listAdminCancellationFeedback);
 
   const q = search.q ?? "";
   const page = search.page ?? 1;
@@ -50,6 +60,11 @@ export function AdminBillingPage() {
   const eventsQuery = useQuery({
     queryKey: ["admin-webhook-events"],
     queryFn: () => listEvents(),
+  });
+
+  const cancellationsQuery = useQuery({
+    queryKey: ["admin-cancellation-feedback"],
+    queryFn: () => listCancellations(),
   });
 
   const onSearchChange = (value: string) => {
@@ -169,6 +184,7 @@ export function AdminBillingPage() {
   const total = subsQuery.data?.total ?? 0;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const events = eventsQuery.data ?? [];
+  const cancellations = cancellationsQuery.data ?? [];
 
   return (
     <div className="space-y-6">
@@ -283,6 +299,60 @@ export function AdminBillingPage() {
                           {event.errorMessage}
                         </span>
                       ) : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="card bg-base-100 border border-base-300 overflow-hidden">
+        <div className="border-b border-base-300 bg-base-200 p-4">
+          <h2 className="font-medium">Recent Cancellation Feedback</h2>
+          <p className="mt-1 text-xs text-base-content/50">
+            Exit-survey responses from the All Access cancel flow. Use the
+            reasons to target save offers and product fixes.
+          </p>
+        </div>
+        {cancellations.length === 0 ? (
+          <p className="p-8 text-center text-sm text-base-content/50">
+            No cancellation feedback recorded yet.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table table-sm">
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>Organization</th>
+                  <th>Plan</th>
+                  <th>Reason</th>
+                  <th>Detail</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cancellations.map((row) => (
+                  <tr key={row.id}>
+                    <td className="text-sm tabular-nums text-base-content/60">
+                      {row.createdAt
+                        ? new Date(row.createdAt).toLocaleString()
+                        : "-"}
+                    </td>
+                    <td className="text-sm">
+                      {row.organizationName ?? row.organizationId}
+                    </td>
+                    <td className="text-sm">{row.planTier}</td>
+                    <td>
+                      <span className="badge badge-sm badge-ghost">
+                        {isCancellationReason(row.reason)
+                          ? CANCELLATION_REASON_LABELS[row.reason]
+                          : row.reason}
+                      </span>
+                    </td>
+                    <td className="max-w-xs truncate text-xs text-base-content/60">
+                      {row.detail ?? "-"}
                     </td>
                   </tr>
                 ))}
