@@ -1,8 +1,8 @@
 {
   "projectId": "fd742ab8-7eb2-4e29-8cfb-0acbf64e0b6b",
   "type": "frontend",
-  "name": "Keyword Research — Search queries and metrics view",
-  "description": "User can access keyword research tool",
+  "name": "Keyword Research Pro — legacy paid user configures a full analysis",
+  "description": "A signed-in legacy paid user can configure Keyword Research Pro without being sent to the All Access upgrade screen.",
   "priority": "p1",
   "planSteps": [
     {
@@ -14,8 +14,32 @@
       "description": "Sign in with the configured TestSprite test account credentials"
     },
     {
+      "type": "action",
+      "description": "Open the existing Default project from the Projects page"
+    },
+    {
+      "type": "action",
+      "description": "Open Keyword Research from the project navigation"
+    },
+    {
+      "type": "action",
+      "description": "Select the Pro Analysis tab"
+    },
+    {
+      "type": "action",
+      "description": "Enter two different keywords in the keyword input"
+    },
+    {
+      "type": "action",
+      "description": "Select Full + backlinks research depth"
+    },
+    {
       "type": "assertion",
-      "description": "The navigation bar displays Keyword Research link"
+      "description": "Verify Pro Analysis remains open without an upgrade card and shows the keyword limit changed to 10, Standard and BYOK billing choices, and an enabled Run research button"
+    },
+    {
+      "type": "assertion",
+      "description": "Verify the estimated total is visible and reflects a Full + backlinks analysis for the two entered keywords"
     }
   ]
 }
