@@ -28,6 +28,9 @@ test.describe("Admin and billing smoke coverage", () => {
   test("all admin sections render for a configured platform admin", async ({
     page,
   }) => {
+    // Cold dev-server compile of /billing + /admin can approach the 45s
+    // default and flake the first run of the suite; allow a wider budget.
+    test.setTimeout(120_000);
     const runtimeErrors: string[] = [];
     page.on("pageerror", (error) => runtimeErrors.push(error.message));
     page.on("console", (message) => {

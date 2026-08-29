@@ -21,19 +21,19 @@ const SKILL_NAMES = [
   "competitor-analysis",
   "link-prospecting",
 ];
-const SKILLS_INSTALL = `npx skills add every-app/open-seo`;
-const ALL_SKILLS_INSTALL = `npx skills add every-app/open-seo --skill '*'`;
-const CLAUDE_CODE_SKILLS_INSTALL = `npx skills add every-app/open-seo --skill '*' --agent claude-code`;
-const CODEX_SKILLS_INSTALL = `npx skills add every-app/open-seo --skill '*' --agent codex`;
-const SKILLS_MANUAL_INSTALL = `git clone https://github.com/every-app/open-seo.git
+const SKILLS_INSTALL = `npx skills add emerilansel-jpg/SeoTool`;
+const ALL_SKILLS_INSTALL = `npx skills add emerilansel-jpg/SeoTool --skill '*'`;
+const CLAUDE_CODE_SKILLS_INSTALL = `npx skills add emerilansel-jpg/SeoTool --skill '*' --agent claude-code`;
+const CODEX_SKILLS_INSTALL = `npx skills add emerilansel-jpg/SeoTool --skill '*' --agent codex`;
+const SKILLS_MANUAL_INSTALL = `git clone https://github.com/emerilansel-jpg/SeoTool.git
 
 # Codex
 mkdir -p ~/.codex/skills
-cp -R open-seo/.agents/skills/* ~/.codex/skills/
+cp -R SeoTool/.agents/skills/* ~/.codex/skills/
 
 # Claude Code
 mkdir -p ~/.claude/skills
-cp -R open-seo/.agents/skills/* ~/.claude/skills/`;
+cp -R SeoTool/.agents/skills/* ~/.claude/skills/`;
 
 export const Route = createFileRoute("/_app/ai")({
   component: AiPage,

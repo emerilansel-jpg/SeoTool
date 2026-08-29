@@ -47,3 +47,7 @@ dist-sourcemaps/
 .alchemy/
 .zcode/plans/
 patch_ga4.cjs
+
+# TestSprite runs & local plans (contain sensitive trace artifacts)
+.testsprite/
+.playwright-mcp/
