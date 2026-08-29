@@ -6,28 +6,32 @@ import { requireProjectContext } from "@/serverFunctions/middleware";
 import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import { isPlatformAdmin } from "@/server/lib/platform-admin";
 import { KeywordProRepository } from "@/server/features/keywords/repositories/KeywordProRepository";
+import { QuotaRepository } from "@/server/features/billing/repositories/QuotaRepository";
 import { AppError } from "@/server/lib/errors";
-import { hasMembershipAccess } from "@/shared/keyword-pro-membership";
+import { resolveAllAccessFeatureEntitlement } from "@/shared/keyword-pro-membership";
 
 export const researchKeywordsPro = createServerFn({ method: "POST" })
   .middleware([requireProjectContext])
   .validator(keywordResearchProSchema)
   .handler(async ({ data, context }) => {
     if (await isHostedServerAuthMode()) {
-      const [membership, admin] = await Promise.all([
+      const [membership, subscription, admin] = await Promise.all([
         KeywordProRepository.getMembership(context.organizationId),
+        QuotaRepository.getSubscription(context.organizationId),
         isPlatformAdmin({
           userId: context.userId,
           userEmail: context.userEmail,
         }),
       ]);
-      if (
-        !admin &&
-        !hasMembershipAccess(membership?.status, membership?.currentPeriodEnd)
-      ) {
+      const entitlement = resolveAllAccessFeatureEntitlement({
+        membershipStatus: membership?.status,
+        membershipCurrentPeriodEnd: membership?.currentPeriodEnd,
+        subscription,
+      });
+      if (!admin && !entitlement.hasFeatureAccess) {
         throw new AppError(
           "PAYMENT_REQUIRED",
-          "An active SeoTool.im All Access membership is required for Pro Analysis.",
+          "An active SeoTool.im paid plan is required for Pro Analysis.",
         );
       }
     }

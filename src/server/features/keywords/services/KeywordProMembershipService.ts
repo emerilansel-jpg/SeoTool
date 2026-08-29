@@ -10,8 +10,8 @@ import { getEffectiveMonthlyCreditGrant } from "@/server/billing/plan-config";
 import {
   createKeywordProMarker,
   KEYWORD_PRO_REFERRER_RATE,
-  hasMembershipAccess,
   parseKeywordProMarker,
+  resolveAllAccessFeatureEntitlement,
 } from "@/shared/keyword-pro-membership";
 import { hasSubscriptionAccess } from "@/shared/subscription-access";
 import { reconcileExpiredCheckoutReservations } from "./KeywordProCheckoutReconciler";
@@ -60,10 +60,12 @@ export const KeywordProMembershipService = {
       KeywordProRepository.getMembership(organizationId),
       QuotaRepository.getSubscription(organizationId),
     ]);
-    const hasAccess = hasMembershipAccess(
-      membership?.status,
-      membership?.currentPeriodEnd,
-    );
+    const entitlement = resolveAllAccessFeatureEntitlement({
+      membershipStatus: membership?.status,
+      membershipCurrentPeriodEnd: membership?.currentPeriodEnd,
+      subscription,
+    });
+    const { hasAccess } = entitlement;
     // An active member keeps their locked plan even when every public cohort
     // is temporarily paused. Only prospective members need an open cohort.
     const currentCohort = hasAccess
@@ -74,7 +76,8 @@ export const KeywordProMembershipService = {
       : null;
     return {
       hasAccess,
-      hasLegacyPaidPlan: !hasAccess && hasSubscriptionAccess(subscription),
+      hasLegacyPaidPlan: entitlement.hasLegacyPaidPlan,
+      hasFeatureAccess: entitlement.hasFeatureAccess,
       membership,
       currentCohort,
       referral,

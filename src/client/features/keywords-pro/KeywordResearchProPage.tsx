@@ -97,7 +97,7 @@ export function KeywordResearchProPage({ projectId }: Props) {
     );
   }
 
-  if (hosted && !isE2EBypass && !membership.data?.hasAccess) {
+  if (hosted && !isE2EBypass && !membership.data?.hasFeatureAccess) {
     return (
       <div className="rounded-2xl border border-primary/30 bg-base-100 p-6 shadow-sm">
         <h2 className="text-xl font-semibold">

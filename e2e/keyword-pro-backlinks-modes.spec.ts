@@ -18,7 +18,7 @@ test.describe("Keyword and backlink research modes", () => {
     await page.goto("/subscribe?ref=friend123");
 
     await expect(
-      page.getByRole("heading", { name: "All Access", exact: true }),
+      page.locator("h1").filter({ hasText: /^SeoTool\.im All Access$/ }),
     ).toBeVisible();
     await expect(page.getByText("LIFETIME PRICE LOCK")).toBeVisible();
     await expect(page.getByPlaceholder("Friend's code")).toHaveValue(

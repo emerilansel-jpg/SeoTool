@@ -1,3 +1,9 @@
+import type { PlanTier } from "./plans";
+import {
+  hasPaymentStateAccess,
+  hasSubscriptionAccess,
+} from "./subscription-access";
+
 export const KEYWORD_PRO_COHORT_KEYS = [
   "krp_founder_10",
   "krp_early_20",
@@ -55,6 +61,39 @@ export function hasMembershipAccess(
   return hasPaymentStateAccess(status, currentPeriodEnd, now);
 }
 
+type LegacySubscriptionAccessState = {
+  planTier: PlanTier;
+  status: string | null | undefined;
+  currentPeriodEnd: string | null | undefined;
+};
+
+/**
+ * Resolve feature access during the migration from legacy paid tiers to the
+ * account-wide All Access membership. Existing paid customers keep the tools
+ * they already paid for and are not sent into an impossible upgrade loop.
+ */
+export function resolveAllAccessFeatureEntitlement(
+  input: {
+    membershipStatus: string | null | undefined;
+    membershipCurrentPeriodEnd: string | null | undefined;
+    subscription: LegacySubscriptionAccessState | null | undefined;
+  },
+  now = new Date(),
+) {
+  const hasAccess = hasMembershipAccess(
+    input.membershipStatus,
+    input.membershipCurrentPeriodEnd,
+    now,
+  );
+  const hasLegacyPaidPlan =
+    !hasAccess && hasSubscriptionAccess(input.subscription, now);
+  return {
+    hasAccess,
+    hasLegacyPaidPlan,
+    hasFeatureAccess: hasAccess || hasLegacyPaidPlan,
+  };
+}
+
 export function isKeywordProCohortKey(
   value: string,
 ): value is KeywordProCohortKey {
@@ -87,4 +126,3 @@ export function parseKeywordProMarker(value: unknown): {
   }
   return { organizationId: match[1], cohortKey };
 }
-import { hasPaymentStateAccess } from "./subscription-access";

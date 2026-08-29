@@ -3,6 +3,7 @@ import {
   createKeywordProMarker,
   hasMembershipAccess,
   parseKeywordProMarker,
+  resolveAllAccessFeatureEntitlement,
 } from "./keyword-pro-membership";
 
 describe("All Access PayPal marker", () => {
@@ -47,5 +48,77 @@ describe("All Access grace period", () => {
       hasMembershipAccess("SUSPENDED", "2026-08-01T00:00:00.000Z", now),
     ).toBe(false);
     expect(hasMembershipAccess("CANCELLED", "2026-09-01", now)).toBe(false);
+  });
+});
+
+describe("All Access feature entitlement", () => {
+  const now = new Date("2026-08-27T00:00:00.000Z");
+
+  it("allows both active All Access members and active legacy paid plans", () => {
+    expect(
+      resolveAllAccessFeatureEntitlement(
+        {
+          membershipStatus: "ACTIVE",
+          membershipCurrentPeriodEnd: null,
+          subscription: null,
+        },
+        now,
+      ),
+    ).toEqual({
+      hasAccess: true,
+      hasLegacyPaidPlan: false,
+      hasFeatureAccess: true,
+    });
+
+    expect(
+      resolveAllAccessFeatureEntitlement(
+        {
+          membershipStatus: null,
+          membershipCurrentPeriodEnd: null,
+          subscription: {
+            planTier: "pro",
+            status: "active",
+            currentPeriodEnd: "2026-09-27T00:00:00.000Z",
+          },
+        },
+        now,
+      ),
+    ).toEqual({
+      hasAccess: false,
+      hasLegacyPaidPlan: true,
+      hasFeatureAccess: true,
+    });
+  });
+
+  it("denies free and expired legacy subscriptions", () => {
+    expect(
+      resolveAllAccessFeatureEntitlement(
+        {
+          membershipStatus: "CANCELLED",
+          membershipCurrentPeriodEnd: "2026-09-27T00:00:00.000Z",
+          subscription: {
+            planTier: "free",
+            status: "active",
+            currentPeriodEnd: null,
+          },
+        },
+        now,
+      ).hasFeatureAccess,
+    ).toBe(false);
+
+    expect(
+      resolveAllAccessFeatureEntitlement(
+        {
+          membershipStatus: null,
+          membershipCurrentPeriodEnd: null,
+          subscription: {
+            planTier: "pro",
+            status: "past_due",
+            currentPeriodEnd: "2026-08-01T00:00:00.000Z",
+          },
+        },
+        now,
+      ).hasFeatureAccess,
+    ).toBe(false);
   });
 });
