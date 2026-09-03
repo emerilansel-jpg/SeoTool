@@ -285,12 +285,12 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
             <p className="text-lg font-bold text-base-content">
               {isComputable
                 ? "Ready to compute SERP Volatility"
-                : "Waiting for more rank tracking data"}
+                : "Collecting Rank Tracking Data"}
             </p>
             <p className="text-sm text-base-content/70 leading-relaxed">
               {isComputable
                 ? "SERP volatility tracks fluctuations across your tracked keywords over time. Click below to compute your first volatility score based on your latest rank tracking checks."
-                : "SERP volatility requires comparing keyword positions across at least two different days. Run periodic rank checks to start collecting data."}
+                : "SERP volatility requires comparing keyword positions across at least two different days. Your rank tracking is active and collecting data. Check back after your next scheduled rank check runs."}
             </p>
           </div>
 

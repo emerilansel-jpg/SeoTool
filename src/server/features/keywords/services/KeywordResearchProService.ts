@@ -171,30 +171,38 @@ export const KeywordResearchProService = {
       quotaUnits: input.keywords.length,
     });
 
-    const serpResearch = await mapWithConcurrency(
+    const serpResearchRaw = await mapWithConcurrency(
       input.keywords,
       3,
-      async (keyword): Promise<SerpResearch> => {
-        const [serp, allintitle] = await Promise.all([
-          client.serp.competition({
+      async (keyword): Promise<SerpResearch | null> => {
+        try {
+          const [serp, allintitle] = await Promise.all([
+            client.serp.competition({
+              keyword,
+              locationCode: input.locationCode,
+              languageCode: input.languageCode,
+              creditFeature,
+            }),
+            client.serp.competition({
+              keyword: `allintitle:"${keyword.replaceAll('"', "")}"`,
+              locationCode: input.locationCode,
+              languageCode: input.languageCode,
+              creditFeature,
+            }),
+          ]);
+          return {
             keyword,
-            locationCode: input.locationCode,
-            languageCode: input.languageCode,
-            creditFeature,
-          }),
-          client.serp.competition({
-            keyword: `allintitle:"${keyword.replaceAll('"', "")}"`,
-            locationCode: input.locationCode,
-            languageCode: input.languageCode,
-            creditFeature,
-          }),
-        ]);
-        return {
-          keyword,
-          items: serp.items,
-          allintitleCount: allintitle.seResultsCount,
-        };
+            items: serp.items,
+            allintitleCount: allintitle.seResultsCount,
+          };
+        } catch (error) {
+          console.warn(`[KRP] SERP fetch failed for "${keyword}":`, error);
+          return null;
+        }
       },
+    );
+    const serpResearch = serpResearchRaw.filter(
+      (entry): entry is SerpResearch => entry !== null,
     );
 
     const basicByKeyword = new Map(

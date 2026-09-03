@@ -205,6 +205,12 @@ function ValidationReportView({ report }: { report: ValidationReport }) {
                 URLs (showing {Math.min(report.urls.length, 100)} of{" "}
                 {report.totalUrls})
               </h3>
+              {report.truncated ? (
+                <p className="mt-1 text-xs text-warning">
+                  Large sitemap detected. Showing first 100 URLs for
+                  performance. Export to see all {report.totalUrls} URLs.
+                </p>
+              ) : null}
             </div>
             <div className="overflow-x-auto">
               <table className="table table-sm">

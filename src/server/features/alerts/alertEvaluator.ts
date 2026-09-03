@@ -95,6 +95,72 @@ export function evaluateRankDrop(
 }
 
 /**
+ * Evaluates a rank-increase alert. Triggers when any tracked keyword's position
+ * improves by more than `condition.threshold` positions compared to the previous
+ * snapshot. This is the "good news" alert that drives retention.
+ */
+export function evaluateRankIncrease(
+  condition: AlertCondition,
+  current: RankSnapshotInput[],
+  previous: RankSnapshotInput[],
+): AlertTrigger | null {
+  const threshold = condition.threshold;
+
+  const filtered = condition.keyword
+    ? current.filter(
+        (s) => s.keyword.toLowerCase() === condition.keyword!.toLowerCase(),
+      )
+    : current;
+
+  if (filtered.length === 0) return null;
+
+  const deviceFiltered = condition.device
+    ? filtered.filter((s) => s.device === condition.device)
+    : filtered;
+
+  const improved: {
+    keyword: string;
+    device: string;
+    from: string;
+    to: number;
+  }[] = [];
+
+  for (const snap of deviceFiltered) {
+    if (snap.position === null) continue;
+
+    const prev = previous.find(
+      (p) =>
+        p.keyword.toLowerCase() === snap.keyword.toLowerCase() &&
+        p.device === snap.device,
+    );
+
+    const prevPos = prev?.position;
+    if (prevPos === null || prevPos === undefined) continue;
+
+    const improvement = prevPos - snap.position;
+
+    if (improvement >= threshold) {
+      improved.push({
+        keyword: snap.keyword,
+        device: snap.device,
+        from: `#${prevPos}`,
+        to: snap.position,
+      });
+    }
+  }
+
+  if (improved.length === 0) return null;
+
+  return {
+    summary: `${improved.length} keyword${improved.length > 1 ? "s" : ""} improved by ${threshold}+ positions`,
+    details: improved.map(
+      (d) =>
+        `"${d.keyword}" (${d.device || "all devices"}): ${d.from} → #${d.to}`,
+    ),
+  };
+}
+
+/**
  * Evaluates an audit-critical alert. Triggers when the latest completed audit
  * has critical issues count >= `condition.threshold`.
  */

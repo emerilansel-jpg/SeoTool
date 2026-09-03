@@ -11,6 +11,7 @@ import { alertRules } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import {
   evaluateRankDrop,
+  evaluateRankIncrease,
   evaluateAuditCritical,
   type AlertCondition,
   type AlertTrigger,
@@ -106,6 +107,9 @@ async function evaluateCondition(
   if (metricType === "rank_drop") {
     return evaluateRankDropCondition(condition, projectId);
   }
+  if (metricType === "rank_increase") {
+    return evaluateRankIncreaseCondition(condition, projectId);
+  }
   if (metricType === "audit_critical") {
     return evaluateAuditCriticalCondition(condition, projectId);
   }
@@ -156,6 +160,48 @@ async function evaluateRankDropCondition(
   }));
 
   return evaluateRankDrop(condition, current, previous);
+}
+
+async function evaluateRankIncreaseCondition(
+  condition: AlertCondition,
+  projectId: string,
+): Promise<AlertTrigger | null> {
+  const configs = await RankTrackingRepository.getConfigsForProject(projectId);
+  if (configs.length === 0) return null;
+
+  const config = configs[0];
+
+  const currentSnapshots =
+    await RankTrackingRepository.getLatestSnapshotsForKeywords(config.id);
+
+  const latestRun = await RankTrackingRepository.getLatestRunForConfig(
+    config.id,
+  );
+  if (!latestRun) return null;
+
+  const beforeDate = new Date(latestRun.startedAt);
+  beforeDate.setDate(beforeDate.getDate() - 1);
+
+  const previousSnapshots = await RankTrackingRepository.getSnapshotsBeforeDate(
+    config.id,
+    beforeDate.toISOString(),
+  );
+
+  const current: RankSnapshotInput[] = currentSnapshots.map((s) => ({
+    keyword: s.keyword,
+    device: s.device,
+    position: s.position,
+    url: s.url,
+  }));
+
+  const previous: RankSnapshotInput[] = previousSnapshots.map((s) => ({
+    keyword: s.keyword,
+    device: s.device,
+    position: s.position,
+    url: s.url,
+  }));
+
+  return evaluateRankIncrease(condition, current, previous);
 }
 
 async function evaluateAuditCriticalCondition(

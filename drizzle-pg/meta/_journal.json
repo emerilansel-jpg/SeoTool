@@ -267,6 +267,13 @@
       "when": 1787982180642,
       "tag": "0037_volatile_baron_zemo",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1788408403835,
+      "tag": "0038_black_medusa",
+      "breakpoints": true
     }
   ]
 }

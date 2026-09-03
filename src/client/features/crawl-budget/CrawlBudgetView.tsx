@@ -1,13 +1,17 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Upload } from "lucide-react";
+import { Upload, FileText } from "lucide-react";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { analyzeCrawlBudgetFn } from "@/serverFunctions/crawl-budget";
 import type { CrawlBudgetReport } from "@/server/lib/log-parser/logParserTypes";
 
+const MAX_FILE_SIZE_MB = 50;
+
 export function CrawlBudgetView({ projectId }: { projectId: string }) {
   const [logText, setLogText] = useState("");
+  const [fileName, setFileName] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const mutation = useMutation({
     mutationFn: (text: string) =>
@@ -16,6 +20,18 @@ export function CrawlBudgetView({ projectId }: { projectId: string }) {
       toast.error(getStandardErrorMessage(error, "Failed to analyze logs"));
     },
   });
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      toast.error(`File too large. Maximum ${MAX_FILE_SIZE_MB}MB.`);
+      return;
+    }
+    setFileName(file.name);
+    const text = await file.text();
+    setLogText(text);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,12 +42,47 @@ export function CrawlBudgetView({ projectId }: { projectId: string }) {
   return (
     <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-3">
-        <textarea
-          value={logText}
-          onChange={(e) => setLogText(e.target.value)}
-          placeholder="Paste Apache/Nginx access log content here..."
-          className="textarea textarea-bordered w-full h-48 font-mono text-xs"
-        />
+        <div
+          className="border-2 border-dashed border-base-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors"
+          onClick={() => fileRef.current?.click()}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file) {
+              setFileName(file.name);
+              void file.text().then(setLogText);
+            }
+          }}
+        >
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".log,.txt,.gz"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          {fileName ? (
+            <div className="flex items-center justify-center gap-2">
+              <FileText className="size-5 text-primary" />
+              <span className="text-sm font-medium">{fileName}</span>
+              <span className="text-xs text-base-content/50">
+                ({(logText.length / 1024).toFixed(0)} KB)
+              </span>
+            </div>
+          ) : (
+            <>
+              <Upload className="size-8 mx-auto text-base-content/40" />
+              <p className="mt-2 text-sm text-base-content/60">
+                Drop your access log file here, or click to browse
+              </p>
+              <p className="mt-1 text-xs text-base-content/40">
+                Supports Apache Combined and Nginx default formats (max{" "}
+                {MAX_FILE_SIZE_MB}MB)
+              </p>
+            </>
+          )}
+        </div>
         <div className="flex items-center gap-3">
           <button
             type="submit"

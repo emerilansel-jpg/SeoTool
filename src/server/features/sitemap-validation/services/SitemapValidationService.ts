@@ -31,9 +31,15 @@ export async function validateSitemap(
     result.childSitemaps,
   );
 
+  const MAX_URLS_IN_REPORT = 100;
+  const totalUrls = report.urls.length;
+  const truncated = totalUrls > MAX_URLS_IN_REPORT;
+
   const reportWithUrls = {
     ...report,
-    urls: report.urls.slice(0, 100),
+    urls: report.urls.slice(0, MAX_URLS_IN_REPORT),
+    totalUrls,
+    truncated,
   };
 
   await setCached(cacheKey, reportWithUrls, SITEMAP_CACHE_TTL_SECONDS).catch(

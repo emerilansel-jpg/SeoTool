@@ -25,6 +25,7 @@ export const validationReportSchema = z.object({
   isSitemapIndex: z.boolean(),
   childSitemaps: z.number(),
   fetchedAt: z.string(),
+  truncated: z.boolean().optional(),
 });
 
 export type SitemapUrl = z.infer<typeof sitemapUrlSchema>;

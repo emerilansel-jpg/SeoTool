@@ -428,6 +428,13 @@
       "when": 1787982177662,
       "tag": "0060_fat_warlock",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "6",
+      "when": 1788408399609,
+      "tag": "0061_funny_shen",
+      "breakpoints": true
     }
   ]
 }

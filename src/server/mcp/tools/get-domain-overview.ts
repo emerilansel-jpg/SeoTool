@@ -73,8 +73,6 @@ export const getDomainOverviewTool = {
       `Domain: ${result.domain}`,
       `Organic traffic: ${result.organicTraffic ?? "?"}`,
       `Organic keywords: ${result.organicKeywords ?? "?"}`,
-      `Backlinks: ${result.backlinks ?? "?"}`,
-      `Referring domains: ${result.referringDomains ?? "?"}`,
     ].join("\n");
     return mcpResponse({
       text,

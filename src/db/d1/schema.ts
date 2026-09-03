@@ -23,3 +23,4 @@ export * from "./api-keys.schema";
 export * from "./admin.schema";
 export * from "../keyword-research-pro.schema";
 export * from "../cancellation-feedback.schema";
+export * from "../project-competitors.schema";

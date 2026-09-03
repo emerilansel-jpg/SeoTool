@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { SortingState } from "@tanstack/react-table";
 import { AlertCircle, Layers, Search, Sparkles, Split } from "lucide-react";
@@ -12,6 +12,11 @@ import {
 import { SortableHeader } from "@/client/components/table/SortableHeader";
 import { getContentGap } from "@/serverFunctions/content-intelligence";
 import { getProjects } from "@/serverFunctions/projects";
+import {
+  listProjectCompetitors,
+  addProjectCompetitor,
+  removeProjectCompetitor,
+} from "@/serverFunctions/project-competitors";
 import {
   DifficultyPill,
   GapSummaryCards,
@@ -120,16 +125,30 @@ const gapColumns = [
 ];
 
 export function ContentGapView({ projectId }: { projectId: string }) {
+  const queryClient = useQueryClient();
   const projectsQuery = useQuery({
     queryKey: ["projects"],
     queryFn: () => getProjects(),
   });
   const project = projectsQuery.data?.find((p) => p.id === projectId);
 
+  const savedCompetitorsQuery = useQuery({
+    queryKey: ["project-competitors", projectId],
+    queryFn: () => listProjectCompetitors({ data: { projectId } }),
+  });
+
   const [domainInput, setDomainInput] = useState("");
   const [competitorsText, setCompetitorsText] = useState("");
   // Seeded once the project's own domain resolves.
   const domain = domainInput || project?.domain || "";
+
+  // Auto-fill competitors from saved list on first load
+  useEffect(() => {
+    const saved = savedCompetitorsQuery.data;
+    if (saved && saved.length > 0 && !competitorsText) {
+      setCompetitorsText(saved.join(", "));
+    }
+  }, [savedCompetitorsQuery.data]);
 
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -229,6 +248,37 @@ export function ContentGapView({ projectId }: { projectId: string }) {
               )}
             </button>
           </form>
+
+          {/* Save competitors for future use */}
+          {parseCompetitors(competitorsText).length > 0 && (
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                className="btn btn-ghost btn-xs"
+                onClick={async () => {
+                  const domains = parseCompetitors(competitorsText);
+                  for (const d of domains) {
+                    await addProjectCompetitor({
+                      data: { projectId, domain: d },
+                    });
+                  }
+                  void queryClient.invalidateQueries({
+                    queryKey: ["project-competitors", projectId],
+                  });
+                  toast.success(
+                    `${domains.length} competitor${domains.length > 1 ? "s" : ""} saved for this project`,
+                  );
+                }}
+              >
+                Save competitors for this project
+              </button>
+              {(savedCompetitorsQuery.data?.length ?? 0) > 0 && (
+                <span className="text-xs text-base-content/40">
+                  {savedCompetitorsQuery.data?.length} saved
+                </span>
+              )}
+            </div>
+          )}
 
           {formError && (
             <div className="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error flex items-center gap-2">

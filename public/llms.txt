@@ -1,0 +1,31 @@
+# SeoTool.im
+> All-in-one SEO platform with keyword research, rank tracking, site audits, backlink intelligence, AI visibility monitoring, and white-label reporting.
+
+## Core Features
+- [Keyword Intelligence](https://seotool.im/#features): Accurate search volumes, keyword difficulty, and intent clustering powered by DataForSEO real-time indexes.
+- [SERP Rank Tracking](https://seotool.im/#features): Daily keyword positions across Google and Bing with volatility detection and competitor moves.
+- [Technical Site Audits](https://seotool.im/#features): Automated crawler inspecting 100+ technical SEO factors, Core Web Vitals, and indexability.
+- [Backlink Intelligence](https://seotool.im/#features): Referring domains, anchor distribution, toxic spam scores, and competitor link intersect.
+- [AI Visibility & Citations](https://seotool.im/#features): Track brand mentions across ChatGPT, Claude, Gemini, and Perplexity.
+- [Content Quality & Gaps](https://seotool.im/#features): Content scoring, semantic entity extraction, and domain gap analysis.
+- [White-Label PDF Reports](https://seotool.im/#features): Client-ready branded reports on automated schedules.
+- [SAM Agent & MCP Tools](https://seotool.im/#features): Autonomous SEO agent and 36+ native MCP tools for Claude Desktop and IDEs.
+
+## Key Pages
+- [Pricing](https://seotool.im/pricing): Progressive cohort pricing. Early members lock in a lower rate forever.
+- [Documentation](https://seotool.im/docs): Guides, API reference, and MCP tool documentation.
+- [Blog](https://seotool.im/blogs): SEO insights, product updates, and industry analysis.
+
+## Key Facts
+- 36+ native MCP agent tools
+- 100+ technical audit factors
+- 4 AI platforms tracked (ChatGPT, Claude, Gemini, Perplexity)
+- Daily rank updates across Google and Bing
+- Progressive cohort pricing from $29/month
+- 30-day money-back guarantee
+- PayPal verified checkout
+- Open-source SEO tools available
+
+## Contact
+- Website: https://seotool.im
+- Support: https://seotool.im/contact

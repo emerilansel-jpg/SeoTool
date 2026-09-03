@@ -147,7 +147,9 @@ export function AlertsPageView({ projectId }: { projectId: string }) {
                       <span className="badge badge-sm badge-outline">
                         {rule.metricType === "rank_drop"
                           ? "Rank Drop"
-                          : "Audit Critical"}
+                          : rule.metricType === "rank_increase"
+                            ? "Rank Increase"
+                            : "Audit Critical"}
                       </span>
                       <span className="badge badge-sm badge-ghost">
                         {rule.frequency}
@@ -291,6 +293,9 @@ function AlertRuleModal({
             <option value="rank_drop">
               Rank Drop (keywords losing positions)
             </option>
+            <option value="rank_increase">
+              Rank Increase (keywords gaining positions)
+            </option>
             <option value="audit_critical">
               Audit Critical Issues (new critical issues found)
             </option>
@@ -300,9 +305,9 @@ function AlertRuleModal({
         <div className="grid grid-cols-2 gap-4">
           <label className="block">
             <span className="mb-1 block text-sm">
-              {metricType === "rank_drop"
-                ? "Position Drop Threshold"
-                : "Critical Issue Threshold"}
+              {metricType === "audit_critical"
+                ? "Critical Issue Threshold"
+                : "Position Change Threshold"}
             </span>
             <input
               type="number"
@@ -326,7 +331,7 @@ function AlertRuleModal({
           </label>
         </div>
 
-        {metricType === "rank_drop" && (
+        {(metricType === "rank_drop" || metricType === "rank_increase") && (
           <label className="block">
             <span className="mb-1 block text-sm">
               Specific Keyword (optional, leave empty for all tracked keywords)

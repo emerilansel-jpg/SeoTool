@@ -1,0 +1,55 @@
+Using secrets defined in .dev.vars
+
+  [32m[1mVITE[22m v7.3.6[39m  [2mready in [0m[1m47486[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m3010[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+/*! 🌼 daisyUI 5.5.19 */
+[tanstack-router] These exports from "G:/SF Project/JetDigitalSEO/src/routes/_project/p/$projectId/reports/route.tsx" will not be code-split and will increase your bundle size:
+- ReportsLayout
+For the best optimization, these items should either have their export statements removed, or be imported from another location that is not a route file.
+[Client] [tanstack-router] These exports from "G:/SF Project/JetDigitalSEO/src/routes/_project/p/$projectId/reports/route.tsx" will not be code-split and will increase your bundle size:
+- ReportsLayout
+For the best optimization, these items should either have their export statements removed, or be imported from another location that is not a route file.
+2026-08-31T12:53:52.138Z WARN [Better Auth]: [better-auth] Cookie integration plugin "tanstack-start-cookies" should be placed last in the plugins array. Plugins with `hooks.after` running after it may set cookies that are not forwarded to the framework cookie store. Move your cookie integration plugin to the end of the `plugins` array to avoid missing `Set-Cookie` headers.
+[Client] [tanstack-router] These exports from "G:/SF Project/JetDigitalSEO/src/routes/_project/p/$projectId/reports/route.tsx" will not be code-split and will increase your bundle size:
+- ReportsLayout
+For the best optimization, these items should either have their export statements removed, or be imported from another location that is not a route file.
+[Client] [tanstack-router] These exports from "G:/SF Project/JetDigitalSEO/src/routes/_project/p/$projectId/reports/route.tsx" will not be code-split and will increase your bundle size:
+- ReportsLayout
+For the best optimization, these items should either have their export statements removed, or be imported from another location that is not a route file.
+[2m19.57.16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/client/styles/app.css?direct, /src/routes/__root.tsx[22m
+[2m19.57.16[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2m19.57.56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/client/styles/app.css?direct, /src/client/features/marketing/MarketingChrome.tsx[22m
+[2m19.57.56[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2m19.58.05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/client/styles/app.css?direct, /src/client/features/marketing/MarketingChrome.tsx[22m
+[2m19.58.05[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2m20.01.39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/client/styles/app.css?direct, /src/client/features/marketing/LandingPage.tsx[22m
+[2m20.01.39[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2m20.02.16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/client/styles/app.css?direct, /src/client/features/marketing/LandingPage.tsx[22m
+[2m20.02.16[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2m20.04.27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/client/styles/app.css?direct, /src/client/features/marketing/MarketingChrome.tsx[22m
+[2m20.04.27[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[Client] [tanstack-router] These exports from "G:/SF Project/JetDigitalSEO/src/routes/_project/p/$projectId/reports/route.tsx" will not be code-split and will increase your bundle size:
+- ReportsLayout
+For the best optimization, these items should either have their export statements removed, or be imported from another location that is not a route file.
+2026-08-31T13:07:52.640Z WARN [Better Auth]: [better-auth] Cookie integration plugin "tanstack-start-cookies" should be placed last in the plugins array. Plugins with `hooks.after` running after it may set cookies that are not forwarded to the framework cookie store. Move your cookie integration plugin to the end of the `plugins` array to avoid missing `Set-Cookie` headers.
+[2m20.09.27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/client/styles/app.css?direct, /src/client/features/marketing/LandingPage.tsx[22m
+[2m20.09.27[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2m20.09.27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/client/styles/app.css?direct, /src/client/features/marketing/LandingPage.tsx[22m
+[2m20.09.27[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2m20.09.27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/client/styles/app.css?direct, /src/routes/__root.tsx[22m
+[2m20.09.27[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[vite] hot updated: virtual:cloudflare/worker-entry
+[vite] hot updated: virtual:cloudflare/worker-entry
+[Client] [tanstack-router] These exports from "G:/SF Project/JetDigitalSEO/src/routes/_project/p/$projectId/reports/route.tsx" will not be code-split and will increase your bundle size:
+- ReportsLayout
+For the best optimization, these items should either have their export statements removed, or be imported from another location that is not a route file.
+2026-08-31T13:10:26.218Z WARN [Better Auth]: [better-auth] Cookie integration plugin "tanstack-start-cookies" should be placed last in the plugins array. Plugins with `hooks.after` running after it may set cookies that are not forwarded to the framework cookie store. Move your cookie integration plugin to the end of the `plugins` array to avoid missing `Set-Cookie` headers.

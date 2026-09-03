@@ -48,6 +48,31 @@ export const Route = createRootRoute({
         name: "viewport",
         content: "width=device-width, initial-scale=1, viewport-fit=cover",
       },
+      {
+        name: "description",
+        content:
+          "All-in-one SEO platform with keyword research, rank tracking, site audits, backlinks, AI visibility, and white-label reports.",
+      },
+      { property: "og:title", content: "SeoTool.im" },
+      {
+        property: "og:description",
+        content:
+          "The unified SEO workspace. Live SERP intelligence, technical audits, backlink tracking, and autonomous AI agents.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://seotool.im" },
+      {
+        property: "og:image",
+        content: "https://seotool.im/transparent-logo.png",
+      },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "SeoTool.im" },
+      {
+        name: "twitter:description",
+        content:
+          "The unified SEO workspace. Live SERP intelligence, technical audits, backlink tracking, and autonomous AI agents.",
+      },
+      { name: "theme-color", content: "#7624f4" },
       // Disable browser auto-translate (Google Translate) app-wide. It rewrites
       // text nodes into <font> wrappers, which React then can't remove/insert,
       // crashing render with NotFoundError ("removeChild"/"insertBefore"). The
