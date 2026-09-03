@@ -38,6 +38,7 @@ const ALWAYS_ALLOWED_FILES = new Set([
   "src/serverFunctions/membership.ts",
   "src/serverFunctions/keyword-research-pro.ts",
   "src/serverFunctions/admin-keyword-pro.ts",
+  "src/serverFunctions/public-cohorts.ts",
 ]);
 
 // Read-only functions inside otherwise-gated files that the app shell needs
