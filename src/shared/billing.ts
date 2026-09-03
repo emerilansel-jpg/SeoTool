@@ -25,6 +25,8 @@ export const MONTHLY_CREDIT_GRANTS: Record<PlanTier, number> = {
   lite: 5_000,
   pro: 25_000,
   agency: 100_000,
+  standard: 10_000,
+  byok: 500,
 };
 
 export function roundUsdForBilling(value: number) {

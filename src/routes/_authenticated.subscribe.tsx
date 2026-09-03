@@ -20,7 +20,7 @@ type Search = {
   ref?: string;
   upgrade?: true;
   /** Legacy deep links are accepted; All Access is the only new paid offer. */
-  plan?: "free" | "lite" | "pro" | "agency";
+  plan?: "free" | "lite" | "pro" | "agency" | "standard" | "byok";
 };
 
 export const Route = createFileRoute("/_authenticated/subscribe")({
@@ -202,7 +202,7 @@ function SubscribePage() {
         </div>
       ) : null}
 
-      <div className="mx-auto grid max-w-4xl gap-5 md:grid-cols-[0.8fr_1.2fr]">
+      <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-3">
         <section className="card border border-base-300 bg-base-100">
           <div className="card-body gap-5 p-6">
             <div>
@@ -210,7 +210,7 @@ function SubscribePage() {
               <h2 className="mt-2 text-xl font-semibold">Explore first</h2>
               <p className="mt-1 text-sm text-base-content/65">
                 Browse your workspace and set up projects. Metered SEO tools
-                unlock with All Access.
+                unlock with a paid plan.
               </p>
             </div>
             <button
@@ -227,31 +227,28 @@ function SubscribePage() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <span className="badge badge-primary badge-sm">
-                  LIFETIME PRICE LOCK
+                  MOST POPULAR
                 </span>
-                <h2 className="mt-2 text-xl font-semibold">All Access</h2>
+                <h2 className="mt-2 text-xl font-semibold">Standard</h2>
                 <p className="text-xs text-base-content/60">
-                  {cohort?.label ?? "Current cohort"}
-                  {cohort?.remaining == null
-                    ? ""
-                    : ` · ${cohort.remaining} spots left`}
+                  Platform credits + DataForSEO at +30% markup
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-primary">
-                  ${((cohort?.priceUsdCents ?? 2_900) / 100).toFixed(0)}
-                </div>
+                <div className="text-3xl font-bold text-primary">$9</div>
                 <div className="text-xs text-base-content/60">USD / month</div>
               </div>
             </div>
 
-            <ul className="grid gap-2 text-sm sm:grid-cols-2">
+            <ul className="grid gap-2 text-sm">
               {[
-                "Every current SeoTool.im feature",
+                "10,000 credits/month (roll over, never expire)",
+                "Every SeoTool.im feature included",
                 "Keyword Research Pro pipeline",
                 "Live backlink competition",
                 "Local Map Rank Tracker",
-                "Standard +30% or BYOK +10%",
+                "SAM AI agent + 36 MCP tools",
+                "Standard DataForSEO pricing +30%",
                 "Referral rewards for 12 cycles",
               ].map((feature) => (
                 <li key={feature} className="flex gap-2">
@@ -275,7 +272,7 @@ function SubscribePage() {
                 placeholder="Friend's code"
               />
               <span className="text-xs text-base-content/50">
-                You receive 5,000 usage credits after activation.
+                You receive 5,000 bonus credits after activation.
               </span>
             </label>
 
@@ -295,6 +292,71 @@ function SubscribePage() {
                 them from Admin → Pricing.
               </p>
             ) : null}
+          </div>
+        </section>
+
+        <section className="card border border-base-300 bg-base-100">
+          <div className="card-body gap-5 p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <span className="badge badge-ghost badge-sm">
+                  BRING YOUR OWN KEY
+                </span>
+                <h2 className="mt-2 text-xl font-semibold">BYOK</h2>
+                <p className="text-xs text-base-content/60">
+                  Your DataForSEO key, 10% service fee
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold">$4</div>
+                <div className="text-xs text-base-content/60">USD / month</div>
+              </div>
+            </div>
+
+            <ul className="grid gap-2 text-sm">
+              {[
+                "500 platform credits/month (roll over)",
+                "Every SeoTool.im feature included",
+                "Use your own DataForSEO API key",
+                "Only 10% service fee on your API calls",
+                "SAM AI agent + 36 MCP tools",
+                "Referral rewards for 12 cycles",
+              ].map((feature) => (
+                <li key={feature} className="flex gap-2">
+                  <Check className="mt-0.5 size-4 shrink-0 text-success" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <label className="form-control gap-1">
+              <span className="text-xs font-medium">
+                Referral code (optional)
+              </span>
+              <input
+                className="input input-bordered input-sm"
+                value={referralCode}
+                maxLength={32}
+                onChange={(event) =>
+                  setReferralCode(event.target.value.toUpperCase())
+                }
+                placeholder="Friend's code"
+              />
+              <span className="text-xs text-base-content/50">
+                You receive 5,000 bonus credits after activation.
+              </span>
+            </label>
+
+            <button
+              className="btn btn-outline"
+              disabled={checkout.isPending || !cohort?.configured}
+              onClick={() => checkout.mutate()}
+            >
+              {checkout.isPending ? (
+                <span className="loading loading-spinner loading-xs" />
+              ) : null}
+              Continue with PayPal
+            </button>
           </div>
         </section>
       </div>

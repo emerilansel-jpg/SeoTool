@@ -9,6 +9,8 @@ export const KEYWORD_PRO_COHORT_KEYS = [
   "krp_early_20",
   "krp_growth_50",
   "krp_public",
+  "krp_standard",
+  "krp_byok",
 ] as const;
 
 export const KEYWORD_PRO_COHORTS = [
@@ -35,6 +37,18 @@ export const KEYWORD_PRO_COHORTS = [
     label: "Public",
     capacity: null,
     defaultPriceUsdCents: 5_900,
+  },
+  {
+    key: KEYWORD_PRO_COHORT_KEYS[4],
+    label: "Standard",
+    capacity: null,
+    defaultPriceUsdCents: 900,
+  },
+  {
+    key: KEYWORD_PRO_COHORT_KEYS[5],
+    label: "BYOK",
+    capacity: null,
+    defaultPriceUsdCents: 400,
   },
 ] as const;
 

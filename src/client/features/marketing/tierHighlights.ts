@@ -3,7 +3,13 @@ import { MONTHLY_CREDIT_GRANTS } from "@/shared/billing";
 
 export type PaidTier = Exclude<PlanTier, "free">;
 
-export const PAID_TIERS: PaidTier[] = ["lite", "pro", "agency"];
+export const PAID_TIERS: PaidTier[] = [
+  "byok",
+  "standard",
+  "lite",
+  "pro",
+  "agency",
+];
 
 export type TierHighlight = {
   /** Positioning line under the tier name. */
@@ -19,6 +25,32 @@ export type TierHighlight = {
 };
 
 export const TIER_HIGHLIGHTS: Record<PaidTier, TierHighlight> = {
+  byok: {
+    blurb: "For power users with their own DataForSEO key.",
+    bullets: [
+      "5 projects",
+      "100 keyword searches per day",
+      "50 tracked keywords",
+      "3 site audits per month",
+      `${MONTHLY_CREDIT_GRANTS.byok.toLocaleString()} platform credits/month (roll over)`,
+      "Your DataForSEO key, only 10% service fee",
+    ],
+    badge: "BYOK",
+    popular: false,
+  },
+  standard: {
+    blurb: "Best value for most SEO professionals.",
+    bullets: [
+      "25 projects",
+      "500 keyword searches per day",
+      "500 tracked keywords",
+      "100 backlink checks per day",
+      "AI Visibility and Content Intelligence",
+      `${MONTHLY_CREDIT_GRANTS.standard.toLocaleString()} credits/month (roll over, never expire)`,
+    ],
+    badge: "Most Popular",
+    popular: true,
+  },
   lite: {
     blurb: "For solo founders validating one site.",
     bullets: [

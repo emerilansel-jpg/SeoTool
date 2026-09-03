@@ -123,6 +123,30 @@ const configs = {
     paypalPlanIdSource: "default" as const,
     updatedAt: null,
   },
+  standard: {
+    tier: "standard" as const,
+    priceUsdCents: 900,
+    monthlyCredits: 10000,
+    paypalPlanId: "P-STANDARD",
+    syncStatus: "synced",
+    active: true,
+    priceSource: "default" as const,
+    creditsSource: "default" as const,
+    paypalPlanIdSource: "default" as const,
+    updatedAt: null,
+  },
+  byok: {
+    tier: "byok" as const,
+    priceUsdCents: 400,
+    monthlyCredits: 500,
+    paypalPlanId: "P-BYOK",
+    syncStatus: "synced",
+    active: true,
+    priceSource: "default" as const,
+    creditsSource: "default" as const,
+    paypalPlanIdSource: "default" as const,
+    updatedAt: null,
+  },
 };
 
 beforeEach(() => {

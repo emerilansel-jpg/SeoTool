@@ -46,7 +46,7 @@ export const subscription = pgTable(
       .primaryKey()
       .references(() => organization.id, { onDelete: "cascade" }),
     planTier: text("plan_tier", {
-      enum: ["free", "lite", "pro", "agency"],
+      enum: ["free", "lite", "pro", "agency", "standard", "byok"],
     })
       .notNull()
       .default("free"),

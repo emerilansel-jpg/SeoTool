@@ -26,6 +26,8 @@ const TIER_BADGE_CLASS: Record<string, string> = {
   lite: "badge-primary",
   pro: "badge-success",
   agency: "badge-warning",
+  standard: "badge-info",
+  byok: "badge-ghost",
 };
 
 const PAGE_SIZE = 20;

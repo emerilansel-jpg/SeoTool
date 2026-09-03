@@ -70,9 +70,9 @@ export async function getCreditBalance(
 // ---------------------------------------------------------------------------
 
 /** Grant the monthly credit allowance for the given tier. Called on plan
- *  creation and on each renewal (via webhook). The grant replaces any
- *  remaining monthly balance (fresh cycle = fresh grant). The amount comes
- *  from the effective plan config (admin-editable, DB over constants). */
+ *  creation and on each renewal (via webhook). Credits ADD to the existing
+ *  balance (roll over, never expire while subscription is active). The amount
+ *  comes from the effective plan config (admin-editable, DB over constants). */
 export async function grantMonthlyCredits(
   organizationId: string,
   tier: PlanTier,
@@ -104,7 +104,7 @@ export async function grantMonthlyCredits(
         usageQuota.period,
       ],
       set: {
-        used: credits,
+        used: sql`${usageQuota.used} + ${credits}`,
         windowStart: now.toISOString(),
         windowEnd,
         updatedAt: sql`(current_timestamp)`,

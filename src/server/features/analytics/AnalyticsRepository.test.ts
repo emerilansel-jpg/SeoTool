@@ -55,6 +55,8 @@ beforeEach(() => {
     lite: 49,
     pro: 149,
     agency: 499,
+    standard: 9,
+    byok: 4,
   });
   query.groupBy.mockResolvedValue([
     { planTier: "lite", orgCount: 2 },

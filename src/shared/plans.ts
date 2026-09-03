@@ -13,7 +13,14 @@
 // the in-app billing page, the QuotaService, and the quota gate all import
 // from here so the numbers can't drift.
 
-export const PLAN_TIERS = ["free", "lite", "pro", "agency"] as const;
+export const PLAN_TIERS = [
+  "free",
+  "lite",
+  "pro",
+  "agency",
+  "standard",
+  "byok",
+] as const;
 export type PlanTier = (typeof PLAN_TIERS)[number];
 
 /** PayPal Billing Plan ID for each tier. Maps 1:1 to plans configured in the
@@ -23,6 +30,8 @@ export const PAYPAL_PLAN_IDS: Record<PlanTier, string | null> = {
   lite: "lite-plan",
   pro: "pro-plan",
   agency: "agency-plan",
+  standard: "standard-plan",
+  byok: "byok-plan",
 };
 
 /** Reverse lookup: PayPal plan id → our tier. Used by the webhook handler to
@@ -51,6 +60,8 @@ export const PLAN_PRICES_USD: Record<PlanTier, number> = {
   lite: 49,
   pro: 149,
   agency: 499,
+  standard: 9,
+  byok: 4,
 };
 
 /** Human-readable tier names for UI. */
@@ -59,6 +70,8 @@ export const PLAN_TIER_LABELS: Record<PlanTier, string> = {
   lite: "Lite",
   pro: "Pro",
   agency: "Agency",
+  standard: "Standard",
+  byok: "BYOK",
 };
 
 /** Quota feature ids. These are the keys used in the `usage_quota` table and
@@ -161,6 +174,34 @@ export const PLAN_LIMITS: Record<PlanTier, Record<QuotaFeature, number>> = {
     content_intelligence: 500,
     reports: Number.POSITIVE_INFINITY,
   },
+  standard: {
+    projects: 25,
+    keyword_search: 500,
+    saved_keywords: 5000,
+    rank_tracking: 500,
+    local_map_points: 500,
+    backlink_check: 100,
+    site_audit: 10,
+    audit_pages: 5000,
+    ai_brand_lookup: 50,
+    ai_prompt: 100,
+    content_intelligence: 100,
+    reports: 25,
+  },
+  byok: {
+    projects: 5,
+    keyword_search: 100,
+    saved_keywords: 500,
+    rank_tracking: 50,
+    local_map_points: 100,
+    backlink_check: 10,
+    site_audit: 3,
+    audit_pages: 500,
+    ai_brand_lookup: 10,
+    ai_prompt: 20,
+    content_intelligence: 20,
+    reports: 5,
+  },
 };
 
 /** Max concurrent running audits per tier. Abuse control on our compute. */
@@ -169,6 +210,8 @@ export const PLAN_AUDIT_CONCURRENCY: Record<PlanTier, number> = {
   lite: 3,
   pro: 10,
   agency: 50,
+  standard: 10,
+  byok: 3,
 };
 
 /** Feature access gates — boolean on/off, not quota-counted. */
@@ -180,10 +223,19 @@ export const PLAN_FEATURE_ACCESS: Record<
   lite: { samAgent: true, mcpTools: true, ga4: true, gsc: true },
   pro: { samAgent: true, mcpTools: true, ga4: true, gsc: true },
   agency: { samAgent: true, mcpTools: true, ga4: true, gsc: true },
+  standard: { samAgent: true, mcpTools: true, ga4: true, gsc: true },
+  byok: { samAgent: true, mcpTools: true, ga4: true, gsc: true },
 };
 
 /** Ordered tiers for UI rendering (lowest to highest). */
-export const ORDERED_PLAN_TIERS: PlanTier[] = ["free", "lite", "pro", "agency"];
+export const ORDERED_PLAN_TIERS: PlanTier[] = [
+  "free",
+  "byok",
+  "standard",
+  "lite",
+  "pro",
+  "agency",
+];
 
 /** The default tier assigned at signup. Autumn's Default (free) is attached
  *  at customer creation; our subscription row defaults to "free". */
