@@ -38,7 +38,10 @@ function getE2eMockProject(projectId: string): EnsuredProject {
 // Files whose server functions may run without a session: published CMS
 // content (legal pages, blog) is rendered anonymously through SSR loaders.
 // Scoped by filename so a colliding function name elsewhere stays gated.
-const ANONYMOUS_ALLOWED_FILES = new Set(["src/serverFunctions/cms-public.ts"]);
+const ANONYMOUS_ALLOWED_FILES = new Set([
+  "src/serverFunctions/cms-public.ts",
+  "src/serverFunctions/public-cohorts.ts",
+]);
 
 export const ensureUserMiddleware = createMiddleware({
   type: "function",
