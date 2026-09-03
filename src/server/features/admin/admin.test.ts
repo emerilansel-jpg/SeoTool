@@ -346,6 +346,8 @@ describe("AdminSettingsService: editable key guard", () => {
         "lite-plan": "49.00",
         "pro-plan": "149.00",
         "agency-plan": "499.00",
+        "standard-plan": "9.00",
+        "byok-plan": "4.00",
         "krp-founder-plan": "19.00",
       };
       return {
@@ -370,13 +372,13 @@ describe("AdminSettingsService: editable key guard", () => {
 
     const result = await AdminSettingsService.testPaypalConfiguration();
     expect(result.mode).toBe("live");
-    expect(result.plans).toHaveLength(4);
+    expect(result.plans).toHaveLength(6);
     expect(result.plans[0]).toMatchObject({ tier: "lite", priceUsd: 49 });
-    expect(result.plans[3]).toMatchObject({
+    expect(result.plans[5]).toMatchObject({
       tier: "krp_founder_10",
       priceUsd: 19,
     });
-    expect(getPaypalPlan).toHaveBeenCalledTimes(4);
+    expect(getPaypalPlan).toHaveBeenCalledTimes(6);
   });
 });
 

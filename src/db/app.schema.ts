@@ -528,6 +528,7 @@ export const gmbGridSnapshots = sqliteTable(
       .default("pending"),
     errorCode: text("error_code"),
     errorMessage: text("error_message"),
+    itemsJson: text("items_json"),
     checkedAt: text("checked_at"),
   },
   (table) => [

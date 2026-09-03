@@ -1,0 +1,1 @@
+ALTER TABLE "gmb_grid_snapshots" ADD COLUMN "items_json" text;

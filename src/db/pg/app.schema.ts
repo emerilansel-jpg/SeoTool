@@ -509,6 +509,7 @@ export const gmbGridSnapshots = pgTable(
       .default("pending"),
     errorCode: text("error_code"),
     errorMessage: text("error_message"),
+    itemsJson: text("items_json"),
     checkedAt: timestampColumn("checked_at"),
   },
   (table) => [

@@ -78,6 +78,7 @@ async function collectTasks(input: {
       rank?: number | null;
       errorCode?: string | null;
       errorMessage?: string | null;
+      itemsJson?: string | null;
       checkedAt: string;
     };
   }> = [];
@@ -92,6 +93,7 @@ async function collectTasks(input: {
           rank: outcome.rank,
           errorCode: null,
           errorMessage: null,
+          itemsJson: outcome.items ? JSON.stringify(outcome.items) : null,
           checkedAt,
         },
       });

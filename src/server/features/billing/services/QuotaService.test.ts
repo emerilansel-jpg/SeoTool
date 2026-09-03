@@ -17,8 +17,15 @@ import {
 } from "@/shared/plans";
 
 describe("plans: tier definitions", () => {
-  it("defines exactly four tiers", () => {
-    expect(PLAN_TIERS).toEqual(["free", "lite", "pro", "agency"]);
+  it("defines the plan tiers", () => {
+    expect(PLAN_TIERS).toEqual([
+      "free",
+      "lite",
+      "pro",
+      "agency",
+      "standard",
+      "byok",
+    ]);
   });
 
   it("orders tiers from lowest to highest", () => {

@@ -299,7 +299,7 @@ describe("Google Maps task queue", () => {
         placeId: "target",
         businessName: "Acme",
       }),
-    ).resolves.toEqual({ status: "completed", rank: 5 });
+    ).resolves.toMatchObject({ status: "completed", rank: 5 });
   });
 });
 

@@ -121,10 +121,21 @@ export async function postMapsTasks(input: {
   };
 }
 
+export interface GmbPinCompetitor {
+  rank: number;
+  title: string;
+  placeId?: string | null;
+  cid?: string | null;
+  address?: string | null;
+  category?: string | null;
+  domain?: string | null;
+  url?: string | null;
+}
+
 export type MapsTaskOutcome =
   | { status: "pending" }
   | { status: "failed"; code: string; message: string }
-  | { status: "completed"; rank: number | null };
+  | { status: "completed"; rank: number | null; items?: GmbPinCompetitor[] };
 
 const TASK_IN_PROGRESS_STATUS_CODES = new Set([20100, 40601, 40602]);
 
@@ -150,7 +161,8 @@ export async function fetchMapsTaskResult(input: {
   }
 
   if (task.status_code !== 20000) {
-    if (isNoResultsTask(task)) return { status: "completed", rank: null };
+    if (isNoResultsTask(task))
+      return { status: "completed", rank: null, items: [] };
     return {
       status: "failed",
       code: String(task.status_code ?? "PROVIDER_ERROR"),
@@ -164,11 +176,27 @@ export async function fetchMapsTaskResult(input: {
     task,
     mapsItemSchema,
   );
+
+  const topCompetitors: GmbPinCompetitor[] = items
+    .filter((it) => it.type === "maps_search" && Boolean(it.title))
+    .slice(0, 20)
+    .map((it, idx) => ({
+      rank: it.rank_group ?? it.rank_absolute ?? idx + 1,
+      title: it.title ?? "Unknown Business",
+      placeId: it.place_id ?? null,
+      cid: it.cid ?? null,
+      address: it.address ?? null,
+      category: it.category ?? null,
+      domain: it.domain ?? null,
+      url: it.url ?? null,
+    }));
+
   return {
     status: "completed",
     rank: findGmbRank(items, {
       placeId: input.placeId,
       businessName: input.businessName,
     }),
+    items: topCompetitors,
   };
 }

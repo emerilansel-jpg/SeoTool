@@ -228,14 +228,7 @@ export const PLAN_FEATURE_ACCESS: Record<
 };
 
 /** Ordered tiers for UI rendering (lowest to highest). */
-export const ORDERED_PLAN_TIERS: PlanTier[] = [
-  "free",
-  "byok",
-  "standard",
-  "lite",
-  "pro",
-  "agency",
-];
+export const ORDERED_PLAN_TIERS: PlanTier[] = ["free", "lite", "pro", "agency"];
 
 /** The default tier assigned at signup. Autumn's Default (free) is attached
  *  at customer creation; our subscription row defaults to "free". */

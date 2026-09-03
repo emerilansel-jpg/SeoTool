@@ -13,9 +13,9 @@ export const CreateGmbGridSchema = z.object({
     .number()
     .int()
     .min(3)
-    .max(9)
+    .max(15)
     .refine((val) => val % 2 !== 0, "Grid size must be odd"),
-  radiusMeters: z.number().int().min(100).max(10000),
+  radiusMeters: z.number().int().min(100).max(100000),
   languageCode: z.string().trim().min(2).max(5).default("en"),
   device: z.enum(["desktop", "mobile"]).default("mobile"),
   mapZoom: z.number().int().min(3).max(21).default(15),

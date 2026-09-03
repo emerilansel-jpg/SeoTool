@@ -49,12 +49,26 @@ export const getRankColor = (rank: number | null, status?: string) => {
   return "#ef4444";
 };
 
+export interface GmbPinCompetitor {
+  rank: number;
+  title: string;
+  placeId?: string | null;
+  cid?: string | null;
+  address?: string | null;
+  category?: string | null;
+  domain?: string | null;
+  url?: string | null;
+}
+
 export interface GmbSnapshotMarker {
   id: string;
   lat: number;
   lng: number;
   rank: number | null;
   status: string;
+  gridRow?: number;
+  gridCol?: number;
+  itemsJson?: string | null;
 }
 
 /**
@@ -67,11 +81,13 @@ export function GmbMap({
   centerLng,
   radiusMeters,
   snapshots,
+  onSelectSnapshot,
 }: {
   centerLat: number;
   centerLng: number;
   radiusMeters: number;
   snapshots?: GmbSnapshotMarker[];
+  onSelectSnapshot?: (snapshot: GmbSnapshotMarker) => void;
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -99,6 +115,11 @@ export function GmbMap({
               key={snap.id}
               center={[snap.lat, snap.lng]}
               radius={16}
+              eventHandlers={{
+                click: () => {
+                  if (onSelectSnapshot) onSelectSnapshot(snap);
+                },
+              }}
               pathOptions={{
                 color: "white",
                 weight: 2,
@@ -109,7 +130,7 @@ export function GmbMap({
               <Tooltip
                 direction="center"
                 permanent
-                className="bg-transparent border-none shadow-none text-white font-bold text-center"
+                className="bg-transparent border-none shadow-none text-white font-bold text-center cursor-pointer"
               >
                 {snap.status === "failed"
                   ? "!"

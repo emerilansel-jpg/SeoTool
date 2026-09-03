@@ -60,6 +60,7 @@ export type {
   MapsTaskInput,
   PostedMapsTask,
   MapsTaskOutcome,
+  GmbPinCompetitor,
 } from "@/server/lib/dataforseo/maps-serp";
 
 export type {

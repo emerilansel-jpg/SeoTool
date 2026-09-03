@@ -74,53 +74,145 @@ export function GmbScanPipeline({
   }
 
   const partial = run.status === "partial";
+  const ranks = snapshots
+    .map((s) => s.rank)
+    .filter((r): r is number => r != null);
+  const top3 = ranks.filter((r) => r <= 3).length;
+  const top10 = ranks.filter((r) => r > 3 && r <= 10).length;
+  const rank11Plus = ranks.filter((r) => r > 10).length;
+  const notFound = snapshots.filter(
+    (s) => s.status === "completed" && s.rank === null,
+  ).length;
+
   return (
-    <div
-      className={`rounded-xl border p-4 text-sm ${
-        partial
-          ? "border-warning/30 bg-warning/10"
-          : "border-success/30 bg-success/10"
-      }`}
-    >
-      <div className="flex items-start gap-3">
-        {partial ? (
-          <AlertTriangle className="mt-0.5 size-5 shrink-0 text-warning" />
-        ) : (
-          <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" />
-        )}
-        <div className="flex-1">
-          <p className="font-semibold">
-            {partial ? "Scan completed with some errors" : "Scan complete"}
+    <div className="space-y-4">
+      {/* Top Banner Status */}
+      <div
+        className={`rounded-xl border p-3 text-sm ${
+          partial
+            ? "border-warning/30 bg-warning/10"
+            : "border-success/30 bg-success/10"
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          {partial ? (
+            <AlertTriangle className="size-4 shrink-0 text-warning" />
+          ) : (
+            <CheckCircle2 className="size-4 shrink-0 text-success" />
+          )}
+          <span className="font-semibold">
+            {partial ? "Scan Completed with Errors" : "Scan Completed"}
+          </span>
+          <span className="text-base-content/60 text-xs ml-auto">
+            {run.foundPoints} of {total} found
+            {run.failedPoints > 0 ? ` · ${run.failedPoints} failed` : ""}
+          </span>
+        </div>
+      </div>
+
+      {/* Local Falcon Style Large Metrics Scorecards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="rounded-xl border border-base-300 bg-base-100 p-4 flex flex-col justify-between shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+              SoLV (Top 3)
+            </span>
+            <span className="badge badge-sm badge-success font-bold">
+              Top 3
+            </span>
+          </div>
+          <div className="my-2">
+            <span className="text-3xl font-extrabold tracking-tight text-success">
+              {run.solv == null ? "—" : `${run.solv}%`}
+            </span>
+          </div>
+          <p className="text-[11px] text-base-content/50 leading-tight">
+            Share of Local Voice within 3-pack
           </p>
-          <p className="text-base-content/70">
-            Found in {run.foundPoints} of {total} points
-            {run.failedPoints > 0 ? ` · ${run.failedPoints} failed` : ""}.
+        </div>
+
+        <div className="rounded-xl border border-base-300 bg-base-100 p-4 flex flex-col justify-between shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+              Avg Rank
+            </span>
+            <span className="badge badge-sm badge-neutral font-mono">ATRP</span>
+          </div>
+          <div className="my-2">
+            <span className="text-3xl font-extrabold tracking-tight">
+              {run.averageRank == null ? "—" : `#${run.averageRank}`}
+            </span>
+          </div>
+          <p className="text-[11px] text-base-content/50 leading-tight">
+            Average Total Rank Position across points
           </p>
-          <div className="mt-3 grid grid-cols-3 gap-3">
-            <Metric
-              label="SoLV (top 3)"
-              value={run.solv == null ? "—" : `${run.solv}%`}
-            />
-            <Metric
-              label="Average rank"
-              value={run.averageRank == null ? "—" : `#${run.averageRank}`}
-            />
-            <Metric
-              label="Provider cost"
-              value={`$${run.costUsd.toFixed(4)}`}
+        </div>
+
+        <div className="rounded-xl border border-base-300 bg-base-100 p-4 flex flex-col justify-between shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+              Coverage
+            </span>
+            <span className="badge badge-sm badge-ghost">{percentage}%</span>
+          </div>
+          <div className="my-2 flex items-baseline gap-1.5">
+            <span className="text-3xl font-extrabold tracking-tight">
+              {run.foundPoints}
+            </span>
+            <span className="text-xs text-base-content/50 font-normal">
+              / {total} pins
+            </span>
+          </div>
+          <div className="w-full bg-base-200 h-1.5 rounded-full overflow-hidden">
+            <div
+              className="bg-primary h-full"
+              style={{
+                width: `${Math.min(100, Math.round((run.foundPoints / (total || 1)) * 100))}%`,
+              }}
             />
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
 
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg bg-base-100/70 p-2">
-      <p className="text-xs text-base-content/60">{label}</p>
-      <p className="font-semibold">{value}</p>
+        <div className="rounded-xl border border-base-300 bg-base-100 p-4 flex flex-col justify-between shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+              Distribution
+            </span>
+            <span className="text-[10px] font-mono text-base-content/40">
+              Total {total}
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-1 text-center my-2">
+            <div className="rounded bg-success/15 py-1">
+              <span className="block text-xs font-bold text-success">
+                {top3}
+              </span>
+              <span className="text-[9px] text-base-content/50">1-3</span>
+            </div>
+            <div className="rounded bg-warning/15 py-1">
+              <span className="block text-xs font-bold text-warning">
+                {top10}
+              </span>
+              <span className="text-[9px] text-base-content/50">4-10</span>
+            </div>
+            <div className="rounded bg-error/15 py-1">
+              <span className="block text-xs font-bold text-error">
+                {rank11Plus}
+              </span>
+              <span className="text-[9px] text-base-content/50">11+</span>
+            </div>
+            <div className="rounded bg-neutral/15 py-1">
+              <span className="block text-xs font-bold text-base-content/60">
+                {notFound}
+              </span>
+              <span className="text-[9px] text-base-content/50">-</span>
+            </div>
+          </div>
+          <p className="text-[10px] text-base-content/50 text-right">
+            Cost: ${run.costUsd.toFixed(4)}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

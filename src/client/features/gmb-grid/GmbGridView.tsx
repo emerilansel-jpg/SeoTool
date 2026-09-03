@@ -1,3 +1,4 @@
+// oxlint-disable max-lines, max-lines-per-function
 import { useState, type FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -15,7 +16,8 @@ import {
   type GmbProfileSelection,
 } from "./components/GmbProfileSearch";
 import { GmbScanPipeline } from "./components/GmbScanPipeline";
-import { GmbMap } from "./components/GmbMap";
+import { GmbMap, type GmbSnapshotMarker } from "./components/GmbMap";
+import { PinCompetitorsModal } from "./components/GmbPinModal";
 
 type PendingScan = Omit<CreateGmbGridInput, "costConfirmed">;
 
@@ -35,6 +37,10 @@ export function GmbGridView({ projectId }: { projectId: string }) {
   const [scheduleInterval, setScheduleInterval] = useState<
     "weekly" | "monthly" | "manual"
   >("manual");
+  const [distanceUnit, setDistanceUnit] = useState<"km" | "mi">("mi");
+  const [selectedPin, setSelectedPin] = useState<GmbSnapshotMarker | null>(
+    null,
+  );
   const [pendingScan, setPendingScan] = useState<PendingScan | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
 
@@ -149,21 +155,40 @@ export function GmbGridView({ projectId }: { projectId: string }) {
 
             <div className="grid grid-cols-2 gap-3">
               <label className="form-control gap-1">
-                <span className="text-sm font-medium">Grid</span>
+                <span className="text-sm font-medium">Grid Matrix</span>
                 <select
                   className="select select-bordered w-full"
                   value={gridSize}
                   onChange={(event) => setGridSize(Number(event.target.value))}
                 >
-                  {[3, 5, 7, 9].map((size) => (
+                  {[3, 5, 7, 9, 11, 13, 15].map((size) => (
                     <option key={size} value={size}>
-                      {size} × {size} ({size * size} points)
+                      {size} × {size} ({size * size} pins)
                     </option>
                   ))}
                 </select>
               </label>
-              <label className="form-control gap-1">
-                <span className="text-sm font-medium">Radius</span>
+
+              <div className="form-control gap-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Radius</span>
+                  <div className="join border border-base-300 rounded-md p-0.5 scale-90 origin-right">
+                    <button
+                      type="button"
+                      className={`join-item btn btn-xs px-2 ${distanceUnit === "mi" ? "btn-primary font-bold" : "btn-ghost text-base-content/60"}`}
+                      onClick={() => setDistanceUnit("mi")}
+                    >
+                      mi
+                    </button>
+                    <button
+                      type="button"
+                      className={`join-item btn btn-xs px-2 ${distanceUnit === "km" ? "btn-primary font-bold" : "btn-ghost text-base-content/60"}`}
+                      onClick={() => setDistanceUnit("km")}
+                    >
+                      km
+                    </button>
+                  </div>
+                </div>
                 <select
                   className="select select-bordered w-full"
                   value={radiusMeters}
@@ -171,12 +196,30 @@ export function GmbGridView({ projectId }: { projectId: string }) {
                     setRadiusMeters(Number(event.target.value))
                   }
                 >
-                  <option value={1000}>1 km</option>
-                  <option value={2500}>2.5 km</option>
-                  <option value={5000}>5 km</option>
-                  <option value={10000}>10 km</option>
+                  {distanceUnit === "mi" ? (
+                    <>
+                      <option value={805}>0.5 mi</option>
+                      <option value={1609}>1.0 mi</option>
+                      <option value={3219}>2.0 mi</option>
+                      <option value={4828}>3.0 mi</option>
+                      <option value={8047}>5.0 mi</option>
+                      <option value={16093}>10.0 mi</option>
+                      <option value={32187}>20.0 mi</option>
+                      <option value={48280}>30.0 mi</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value={500}>500 m</option>
+                      <option value={1000}>1 km</option>
+                      <option value={2500}>2.5 km</option>
+                      <option value={5000}>5 km</option>
+                      <option value={10000}>10 km</option>
+                      <option value={20000}>20 km</option>
+                      <option value={50000}>50 km</option>
+                    </>
+                  )}
                 </select>
-              </label>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -279,7 +322,7 @@ export function GmbGridView({ projectId }: { projectId: string }) {
           )}
         </aside>
 
-        <section className="flex min-h-[560px] flex-col gap-4 xl:col-span-2 xl:h-[820px]">
+        <section className="flex min-h-[560px] flex-col gap-4 xl:col-span-2 xl:h-[820px] relative">
           {runData && (
             <GmbScanPipeline run={runData.run} snapshots={runData.snapshots} />
           )}
@@ -288,11 +331,20 @@ export function GmbGridView({ projectId }: { projectId: string }) {
             centerLng={mapCenterLng}
             radiusMeters={mapRadius}
             snapshots={runData?.snapshots}
+            onSelectSnapshot={(pin) => setSelectedPin(pin)}
           />
           {!centerSource && (
             <p className="text-center text-sm text-base-content/60">
               Find and select a business to center the map.
             </p>
+          )}
+
+          {/* Local Falcon Interactive Pin Inspector Modal */}
+          {selectedPin && (
+            <PinCompetitorsModal
+              pin={selectedPin}
+              onClose={() => setSelectedPin(null)}
+            />
           )}
         </section>
       </div>
