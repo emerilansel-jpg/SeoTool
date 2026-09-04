@@ -14,6 +14,7 @@ import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as ProjectRouteRouteImport } from './routes/_project/route'
+import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as DpaRouteImport } from './routes/dpa'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
@@ -112,6 +113,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 } as any)
 const ProjectRouteRoute = ProjectRouteRouteImport.update({
   id: '/_project',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangelogRoute = ChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiePolicyRoute = CookiePolicyRouteImport.update({
@@ -539,6 +545,7 @@ const ProjectPProjectIdStrategyBriefsBriefIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/changelog': typeof ChangelogRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/dpa': typeof DpaRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -620,6 +627,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/changelog': typeof ChangelogRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/dpa': typeof DpaRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -701,6 +709,7 @@ export interface FileRoutesById {
   '/_project': typeof ProjectRouteRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/changelog': typeof ChangelogRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/dpa': typeof DpaRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -784,6 +793,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/changelog'
     | '/cookie-policy'
     | '/dpa'
     | '/forgot-password'
@@ -865,6 +875,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/changelog'
     | '/cookie-policy'
     | '/dpa'
     | '/forgot-password'
@@ -945,6 +956,7 @@ export interface FileRouteTypes {
     | '/_project'
     | '/_auth'
     | '/_authenticated'
+    | '/changelog'
     | '/cookie-policy'
     | '/dpa'
     | '/forgot-password'
@@ -1031,6 +1043,7 @@ export interface RootRouteChildren {
   ProjectRouteRoute: typeof ProjectRouteRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  ChangelogRoute: typeof ChangelogRoute
   CookiePolicyRoute: typeof CookiePolicyRoute
   DpaRoute: typeof DpaRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -1086,6 +1099,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof ProjectRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/changelog': {
+      id: '/changelog'
+      path: '/changelog'
+      fullPath: '/changelog'
+      preLoaderRoute: typeof ChangelogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookie-policy': {
@@ -1870,6 +1890,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectRouteRoute: ProjectRouteRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  ChangelogRoute: ChangelogRoute,
   CookiePolicyRoute: CookiePolicyRoute,
   DpaRoute: DpaRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,

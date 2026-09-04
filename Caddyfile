@@ -1,26 +1,10 @@
 # SeoTool.im reverse proxy with marketing static files + SaaS app fallback.
 # Caddy automatically obtains and renews Let's Encrypt TLS certificates.
 #
-# Marketing routes are served as static files from /srv/marketing.
+# Marketing static assets and docs are served as static files from /srv/marketing.
 # Everything else is proxied to the SaaS app (open-seo:3001).
 
 seotool.im {
-    # Known marketing site routes. These are served as static HTML.
-    # Legal pages (/privacy, /terms-and-conditions, /cookie-policy,
-    # /refund-policy, /dpa) and /blogs* are served by the SaaS app from
-    # the CMS tables instead.
-    @marketingRoutes {
-        path /about /contact /careers /affiliates /changelog
-        path /features /features/*
-        path /free-tools /free-tools/*
-        path /open-source-seo /google-search-console-mcp
-    }
-    handle @marketingRoutes {
-        root * /srv/marketing
-        try_files {path} {path}/index.html /index.html
-        file_server
-    }
-
     # Marketing static assets (images, videos, avatars, blog).
     # NOTE: /assets/* is intentionally EXCLUDED here. The SaaS app also
     # serves its JS/CSS bundles under /assets/. /assets/* is handled
@@ -62,7 +46,7 @@ seotool.im {
         file_server
     }
 
-    # Everything else goes to the SaaS app (sign-in, dashboard, API, etc.)
+    # Everything else goes to the SaaS app (/, /pricing, /changelog, dashboard, API, etc.)
     handle {
         reverse_proxy open-seo:3001 {
             header_up Host localhost

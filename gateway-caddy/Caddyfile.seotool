@@ -10,24 +10,6 @@
 :80 {
     encode gzip zstd
 
-    # Marketing static files (prerendered HTML from web/dist/client).
-    # Content marketing routes are served as static files from /srv/marketing.
-    # Homepage (/) and /pricing are handled directly by the SaaS app
-    # (open-seo:3001). Legal pages (/privacy, /terms-and-conditions,
-    # /cookie-policy, /refund-policy, /dpa) and /blogs* are served by the
-    # SaaS app from the CMS tables instead.
-    @marketingRoutes {
-        path /about /contact /careers /affiliates /changelog
-        path /features /features/*
-        path /free-tools /free-tools/*
-        path /open-source-seo /google-search-console-mcp
-    }
-    handle @marketingRoutes {
-        root * /srv/marketing
-        try_files {path} {path}/index.html /index.html
-        file_server
-    }
-
     # Marketing static assets (images, videos, avatars, blog).
     # NOTE: /assets/* is intentionally EXCLUDED here. The SaaS app also
     # serves its JS/CSS bundles under /assets/. /assets/* is handled
@@ -58,8 +40,7 @@
         file_server
     }
 
-    # Docs, guides, library content. /blogs* is EXCLUDED: blog posts are
-    # served by the SaaS app from the cms_posts table (admin CMS).
+    # Docs, guides, library content.
     @marketingContent {
         path /docs* /guides* /library*
     }
@@ -69,9 +50,8 @@
         file_server
     }
 
-    # Everything else goes to the SaaS app.
-    # header_up Host localhost: Vite preview server rejects non-localhost
-    # Host headers ("Blocked request. This host ... is not allowed").
+    # Everything else (/, /pricing, /changelog, /blogs, /about, /features, /sign-in, dashboard, API, etc.)
+    # goes directly to the modern SaaS app.
     handle {
         reverse_proxy open-seo:3001 {
             header_up Host localhost
