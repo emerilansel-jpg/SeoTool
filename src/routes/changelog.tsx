@@ -22,11 +22,14 @@ export const Route = createFileRoute("/changelog")({
   }),
   loader: async (): Promise<{ logs: ChangelogItem[] }> => {
     // Statically import release notes at build time
-    const files = import.meta.glob("../../release-notes/*.md", {
-      query: "raw",
-      import: "default",
-      eager: true,
-    }) as Record<string, string>;
+    const files: Record<string, string> = import.meta.glob(
+      "../../release-notes/*.md",
+      {
+        query: "raw",
+        import: "default",
+        eager: true,
+      },
+    );
 
     const logs: ChangelogItem[] = [];
 

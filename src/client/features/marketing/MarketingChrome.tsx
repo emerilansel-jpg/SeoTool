@@ -16,13 +16,21 @@ const FOOTER_LINKS = [
     links: [
       { label: "Pricing", href: "/pricing", internal: true },
       { label: "Features", href: "/#features", internal: false },
-      { label: "Changelog", href: "https://seotool.im/changelog", internal: false },
+      {
+        label: "Changelog",
+        href: "https://seotool.im/changelog",
+        internal: false,
+      },
     ],
   },
   {
     heading: "Resources",
     links: [
-      { label: "Documentation", href: "https://seotool.im/docs", internal: false },
+      {
+        label: "Documentation",
+        href: "https://seotool.im/docs",
+        internal: false,
+      },
       { label: "Blog", href: "https://seotool.im/blogs", internal: false },
       { label: "Guides", href: "https://seotool.im/guides", internal: false },
     ],
@@ -30,9 +38,21 @@ const FOOTER_LINKS = [
   {
     heading: "Legal",
     links: [
-      { label: "Privacy Policy", href: "https://seotool.im/privacy", internal: false },
-      { label: "Terms of Service", href: "https://seotool.im/terms-and-conditions", internal: false },
-      { label: "Refund Policy", href: "https://seotool.im/refund-policy", internal: false },
+      {
+        label: "Privacy Policy",
+        href: "https://seotool.im/privacy",
+        internal: false,
+      },
+      {
+        label: "Terms of Service",
+        href: "https://seotool.im/terms-and-conditions",
+        internal: false,
+      },
+      {
+        label: "Refund Policy",
+        href: "https://seotool.im/refund-policy",
+        internal: false,
+      },
     ],
   },
 ] as const;
@@ -165,7 +185,9 @@ export function MarketingFooter() {
       </div>
       <div className="border-t border-base-300/80 bg-base-200/80">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-base-content/40 md:flex-row md:px-6">
-          <p>&copy; {new Date().getFullYear()} SeoTool.im. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} SeoTool.im. All rights reserved.
+          </p>
           <p className="text-base-content/30">
             Built for high-performance organic growth.
           </p>

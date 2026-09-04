@@ -26,16 +26,3 @@ export const addProjectCompetitor = createServerFn({ method: "POST" })
     await ProjectCompetitorRepository.add(data.projectId, data.domain);
     return { ok: true };
   });
-
-export const removeProjectCompetitor = createServerFn({ method: "POST" })
-  .middleware([requireProjectContext, requireProjectRole("member")])
-  .validator(
-    z.object({
-      projectId: z.string(),
-      domain: z.string().min(1),
-    }),
-  )
-  .handler(async ({ data }) => {
-    await ProjectCompetitorRepository.remove(data.projectId, data.domain);
-    return { ok: true };
-  });

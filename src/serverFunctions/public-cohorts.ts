@@ -9,9 +9,8 @@ import { createServerFn } from "@tanstack/react-start";
  */
 export const getPublicCohortPricing = createServerFn({ method: "GET" }).handler(
   async () => {
-    const { KeywordProConfigService } = await import(
-      "@/server/features/keywords/services/KeywordProConfigService"
-    );
+    const { KeywordProConfigService } =
+      await import("@/server/features/keywords/services/KeywordProConfigService");
     return KeywordProConfigService.getCohorts();
   },
 );

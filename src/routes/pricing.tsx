@@ -107,7 +107,9 @@ function CohortCard({
 
       <div>
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-base-content">{cohort.label}</h3>
+          <h3 className="text-lg font-bold text-base-content">
+            {cohort.label}
+          </h3>
           <span className="inline-flex items-center gap-1 text-xs text-base-content/50">
             <Users className="size-3" />
             {spotsText}
@@ -155,7 +157,9 @@ function CohortCard({
           <Link
             to="/subscribe"
             className={`btn w-full btn-md font-semibold ${
-              isCurrent ? "btn-primary" : "btn-outline border-base-300 hover:border-primary hover:bg-primary/5"
+              isCurrent
+                ? "btn-primary"
+                : "btn-outline border-base-300 hover:border-primary hover:bg-primary/5"
             }`}
           >
             Join {cohort.label}
@@ -166,7 +170,9 @@ function CohortCard({
             to="/sign-up"
             search={{ redirect: "/subscribe" }}
             className={`btn w-full btn-md font-semibold ${
-              isCurrent ? "btn-primary" : "btn-outline border-base-300 hover:border-primary hover:bg-primary/5"
+              isCurrent
+                ? "btn-primary"
+                : "btn-outline border-base-300 hover:border-primary hover:bg-primary/5"
             }`}
           >
             Join {cohort.label}
@@ -178,7 +184,13 @@ function CohortCard({
   );
 }
 
-function CohortPricing({ cohorts, signedIn }: { cohorts: EffectiveKeywordProCohort[]; signedIn: boolean }) {
+function CohortPricing({
+  cohorts,
+  signedIn,
+}: {
+  cohorts: EffectiveKeywordProCohort[];
+  signedIn: boolean;
+}) {
   const currentCohort = cohorts.find(
     (c) => c.active && (c.capacity == null || c.occupied < c.capacity),
   );

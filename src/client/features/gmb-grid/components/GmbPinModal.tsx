@@ -44,7 +44,9 @@ export function PinCompetitorsModal({
 
       <div className="flex items-center gap-4 py-2 bg-base-200/50 rounded-lg px-3">
         <div>
-          <span className="text-xs text-base-content/60 block">Target Rank</span>
+          <span className="text-xs text-base-content/60 block">
+            Target Rank
+          </span>
           <span
             className={`text-lg font-black ${
               pin.rank != null && pin.rank <= 3
@@ -70,7 +72,9 @@ export function PinCompetitorsModal({
           <>
             <div className="divider divider-horizontal my-0" />
             <div>
-              <span className="text-xs text-base-content/60 block">Position</span>
+              <span className="text-xs text-base-content/60 block">
+                Position
+              </span>
               <span className="text-xs font-mono">
                 Row {pin.gridRow + 1}, Col {pin.gridCol + 1}
               </span>

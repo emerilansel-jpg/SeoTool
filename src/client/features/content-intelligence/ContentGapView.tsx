@@ -15,7 +15,6 @@ import { getProjects } from "@/serverFunctions/projects";
 import {
   listProjectCompetitors,
   addProjectCompetitor,
-  removeProjectCompetitor,
 } from "@/serverFunctions/project-competitors";
 import {
   DifficultyPill,
@@ -148,7 +147,7 @@ export function ContentGapView({ projectId }: { projectId: string }) {
     if (saved && saved.length > 0 && !competitorsText) {
       setCompetitorsText(saved.join(", "));
     }
-  }, [savedCompetitorsQuery.data]);
+  }, [savedCompetitorsQuery.data, competitorsText]);
 
   const [formError, setFormError] = useState<string | null>(null);
 
