@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Markdown } from "@/client/components/Markdown";
 import {
   MarketingChrome,
   useMarketingSession,
@@ -7,8 +6,38 @@ import {
 
 export type ChangelogItem = {
   version: string;
-  raw: string;
+  html: string;
 };
+
+/**
+ * Minimal markdown-to-HTML for release notes. Avoids importing the heavy
+ * react-markdown + remark-gfm bundle on every changelog page load.
+ */
+function mdToHtml(md: string): string {
+  return md
+    .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+    .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+    .replace(/^# (.+)$/gm, "<h1>$1</h1>")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(
+      /`([^`]+)`/g,
+      '<code class="rounded bg-base-200 px-1 py-0.5 text-xs font-mono">$1</code>',
+    )
+    .replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noreferrer" class="link link-primary">$1</a>',
+    )
+    .replace(/^- (.+)$/gm, "<li>$1</li>")
+    .replace(/(<li>.*<\/li>\n?)+/g, (match) => {
+      return `<ul class="my-2 ml-5 list-disc space-y-1">${match}</ul>`;
+    })
+    .replace(
+      /^(?!<[hulo]|<\/|$)(.+)$/gm,
+      '<p class="my-2 leading-relaxed">$1</p>',
+    )
+    .replace(/\n{2,}/g, "\n");
+}
 
 export const Route = createFileRoute("/changelog")({
   head: () => ({
@@ -39,7 +68,7 @@ export const Route = createFileRoute("/changelog")({
       const fileName = filePath.split("/").pop() ?? "";
       const version = fileName.replace(".md", "");
 
-      logs.push({ version, raw: content });
+      logs.push({ version, html: mdToHtml(content) });
     }
 
     logs.sort((a, b) => {
@@ -94,9 +123,10 @@ function ChangelogPage() {
                     {log.version}
                   </span>
                 </div>
-                <div className="prose prose-neutral max-w-none text-base-content/80 prose-headings:text-base-content prose-headings:font-bold prose-h2:text-xl prose-h3:text-lg prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
-                  <Markdown>{log.raw}</Markdown>
-                </div>
+                <div
+                  className="changelog-content text-base-content/80 [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-sm [&_h2]:font-semibold [&_h3]:mt-4 [&_h3]:mb-1.5 [&_h3]:text-sm [&_h3]:font-semibold [&_li]:leading-relaxed [&_p]:my-2 [&_p]:leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: log.html }}
+                />
               </div>
             ))}
           </div>
