@@ -26,7 +26,9 @@ let i = 0;
 for (let y = 0; y < Math.min(height, 9000); y += step) {
   await page.evaluate((top) => window.scrollTo(0, top), y);
   await page.waitForTimeout(1200);
-  await page.screenshot({ path: `${OUT}/fc-sec-${String(i).padStart(2, "0")}.png` });
+  await page.screenshot({
+    path: `${OUT}/fc-sec-${String(i).padStart(2, "0")}.png`,
+  });
   i++;
   if (i >= 10) break;
 }

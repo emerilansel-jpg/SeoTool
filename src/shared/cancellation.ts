@@ -14,6 +14,12 @@ export const CANCELLATION_REASONS = [
 
 export type CancellationReason = (typeof CANCELLATION_REASONS)[number];
 
+export function isCancellationReason(
+  value: string,
+): value is CancellationReason {
+  return (CANCELLATION_REASONS as readonly string[]).includes(value);
+}
+
 export const CANCELLATION_REASON_LABELS: Record<CancellationReason, string> = {
   too_expensive: "It's too expensive",
   not_using: "I'm not using it enough",

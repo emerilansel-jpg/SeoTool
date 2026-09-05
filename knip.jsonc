@@ -57,6 +57,11 @@
     "src/server/billing/paypal.ts",
     "src/server/features/keyword-clustering/services/clusteringTypes.ts",
     "src/server/features/link-intersect/services/linkIntersectTypes.ts",
+    // Standalone dev/reference scripts not imported by the app
+    ".firecrawl/**",
+    // Old pricing component replaced by cohort-based pricing
+    "src/client/features/marketing/PricingSection.tsx",
+    "src/client/features/marketing/tierHighlights.ts",
   ],
   "ignoreExportsUsedInFile": true,
   // Disable Drizzle plugin - it tries to load drizzle.config.ts which imports cloudflare:workers

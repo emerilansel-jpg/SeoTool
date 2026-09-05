@@ -4,6 +4,7 @@ import { captureClientEvent } from "@/client/lib/posthog";
 import {
   CANCELLATION_REASON_LABELS,
   CANCELLATION_REASONS,
+  isCancellationReason,
   saveOfferForReason,
   type CancellationReason,
 } from "@/shared/cancellation";
@@ -187,8 +188,9 @@ export function CancelMembershipFlow({
                   captureClientEvent("billing:cancel_confirmed", {
                     reason: reason || null,
                   });
+                  if (!reason || !isCancellationReason(reason)) return;
                   onConfirmed({
-                    reason: reason as CancellationReason,
+                    reason,
                     reasonDetail: detail.trim() || undefined,
                   });
                 }}

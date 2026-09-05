@@ -56,19 +56,22 @@ function MonoLabel({
   );
 }
 
-function SectionLabel({ index, total, label }: { index: string; total: string; label: string }) {
+function SectionLabel({
+  index,
+  total,
+  label,
+}: {
+  index: string;
+  total: string;
+  label: string;
+}) {
   return (
     <div className="border-y border-base-300 bg-base-100">
       <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
         <div className="flex items-center gap-3 border-l-2 border-primary py-4 pl-4">
           <span className="font-mono text-xs uppercase tracking-widest text-base-content/40">
-            [
-            <span className="text-primary font-bold">
-              {" "}
-              {index}{" "}
-            </span>
-            / {total} ]{" "}
-            <span className="mx-2 text-base-content/20">·</span> {label}
+            [<span className="text-primary font-bold"> {index} </span>/ {total}{" "}
+            ] <span className="mx-2 text-base-content/20">·</span> {label}
           </span>
         </div>
       </div>
@@ -301,7 +304,8 @@ function BrowserMockup() {
                   <span className="mr-3 text-base-content/30">3</span>
                   {"    "}
                   <span className="text-base-content/50">"url"</span>:{" "}
-                  <span className="text-primary">"https://yourdomain.com"</span>,
+                  <span className="text-primary">"https://yourdomain.com"</span>
+                  ,
                 </p>
                 <p>
                   <span className="mr-3 text-base-content/30">4</span>
@@ -593,7 +597,11 @@ function HardStuff() {
               </span>
             </h3>
             <div className="mt-6 rounded-xl border border-base-300 p-5">
-              <svg viewBox="0 0 320 80" className="h-20 w-full" aria-hidden="true">
+              <svg
+                viewBox="0 0 320 80"
+                className="h-20 w-full"
+                aria-hidden="true"
+              >
                 <polyline
                   points="0,64 40,58 80,60 120,48 160,42 200,30 240,26 280,18 320,12"
                   fill="none"
@@ -746,8 +754,7 @@ function PricingTeaser({ signedIn }: { signedIn: boolean }) {
             <p className="mt-4 text-base leading-relaxed text-base-content/60">
               One membership unlocks the whole platform. Early cohorts lock a
               lower monthly rate forever. When a cohort fills, the price rises
-              for the next one. Your rate never increases while you stay
-              active.
+              for the next one. Your rate never increases while you stay active.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               {signedIn ? (
@@ -977,10 +984,7 @@ export function LandingPage() {
   const { signedIn } = useMarketingSession();
 
   return (
-    <MarketingChrome
-      signedIn={signedIn}
-      announcement={<AnnouncementBar />}
-    >
+    <MarketingChrome signedIn={signedIn} announcement={<AnnouncementBar />}>
       <LandingJsonLd />
       <Hero signedIn={signedIn} />
       <BrowserMockup />

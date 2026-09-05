@@ -169,10 +169,7 @@
   "metadata": {
     "twitter:title": "OpenRouter",
     "og:site_name": "OpenRouter",
-    "theme-color": [
-      "rgb(255, 255, 255)",
-      "rgb(9, 10, 11)"
-    ],
+    "theme-color": ["rgb(255, 255, 255)", "rgb(9, 10, 11)"],
     "openrouter:commit-sha": "7c2fdbb88ac28d61a4bbf22d3374da9e491f43d3",
     "ogTitle": "OpenRouter",
     "twitter:image": "https://openrouter.ai/dynamic-og?pathname=default&title=OpenRouter&description=The+unified+interface+for+every+model.+Find+the+best+models+%26+prices+for+your+prompts&v=2",
