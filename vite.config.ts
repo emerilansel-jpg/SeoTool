@@ -42,6 +42,27 @@ export default defineConfig(({ mode }) => {
     build: {
       sourcemap: emitSourcemaps,
       outDir: emitSourcemaps ? "dist-sourcemaps" : "dist",
+      // Extract recharts+d3 into its own chunk. It is client-only, imported
+      // by dashboard/report routes, and accounts for ~380KB of the entry
+      // bundle. react/tanstack stay in the main chunk: splitting them
+      // produced circular-chunk warnings (devtools/router cross-imports).
+      // Combined with immutable /assets caching this cuts repeat-visit
+      // downloads to near zero and first paint wait substantially.
+      rollupOptions: {
+        output: {
+          manualChunks(id: string) {
+            if (
+              id.includes("/recharts/") ||
+              id.includes("/d3-") ||
+              id.includes("/victory-vendor/") ||
+              id.includes("/internmap/")
+            ) {
+              return "charts-vendor";
+            }
+            return undefined;
+          },
+        },
+      },
     },
     plugins: [
       leanWorkerBundle(),
