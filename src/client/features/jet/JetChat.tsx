@@ -26,11 +26,11 @@ export function JetChat({
   const sessions = sessionsQuery.data ?? [];
 
   const goToSession = useCallback(
-    (sessionId: string) =>
+    (sessionId: string | undefined) =>
       void navigate({
         to: "/p/$projectId/jet",
         params: { projectId },
-        search: { s: sessionId },
+        search: sessionId ? { s: sessionId } : {},
         replace: true,
       }),
     [navigate, projectId],
@@ -51,9 +51,22 @@ export function JetChat({
 
   const firstSessionId = sessions[0]?.id;
   useEffect(() => {
-    if (activeSessionId || !firstSessionId) return;
-    goToSession(firstSessionId);
-  }, [activeSessionId, firstSessionId, goToSession]);
+    if (!sessionsQuery.isSuccess) return;
+    if (activeSessionId && !sessions.some((s) => s.id === activeSessionId)) {
+      // Stale or invalid session ID in URL: redirect to first valid session or clear
+      goToSession(firstSessionId);
+      return;
+    }
+    if (!activeSessionId && firstSessionId) {
+      goToSession(firstSessionId);
+    }
+  }, [
+    activeSessionId,
+    firstSessionId,
+    goToSession,
+    sessions,
+    sessionsQuery.isSuccess,
+  ]);
 
   if (access.showSetupGate) {
     return (
