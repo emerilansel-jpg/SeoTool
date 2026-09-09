@@ -338,17 +338,13 @@ describe("AdminSettingsService: editable key guard", () => {
         configured: true,
       },
     ]);
-    getRequiredEnv.mockImplementation(async (key: string) =>
-      key === "PAYPAL_MODE" ? "live" : "WH-123",
-    );
+    getRequiredEnv.mockImplementation(async (k: string) => k === "PAYPAL_WEBHOOK_ID" ? (() => { throw new Error("M"); })() : "live");
+    await expect(AdminSettingsService.testPaypalConfiguration()).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
+    getRequiredEnv.mockImplementation(async (key: string) => key === "PAYPAL_MODE" ? "live" : "WH-123");
     getPaypalPlan.mockImplementation(async (planId: string) => {
       const priceById: Record<string, string> = {
-        "lite-plan": "49.00",
-        "pro-plan": "149.00",
-        "agency-plan": "499.00",
-        "standard-plan": "9.00",
-        "byok-plan": "4.00",
-        "krp-founder-plan": "19.00",
+        "lite-plan": "49.00", "pro-plan": "149.00", "agency-plan": "499.00",
+        "standard-plan": "9.00", "byok-plan": "4.00", "krp-founder-plan": "19.00",
       };
       return {
         id: planId,

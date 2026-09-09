@@ -96,6 +96,11 @@ const projectNavItems = [
     icon: Sparkles,
   },
   {
+    to: "/p/$projectId/ai-tracking" as const,
+    label: "AI Tracking",
+    icon: Bot,
+  },
+  {
     to: "/p/$projectId/prompt-explorer" as const,
     label: "Prompt Explorer",
     icon: MessageSquare,

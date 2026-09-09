@@ -281,6 +281,13 @@
       "when": 1788456228371,
       "tag": "0039_wild_jackpot",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1788971651294,
+      "tag": "0040_nasty_dagger",
+      "breakpoints": true
     }
   ]
 }
