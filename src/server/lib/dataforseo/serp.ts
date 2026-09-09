@@ -456,7 +456,7 @@ export async function fetchLocalSerp(input: {
         search_places: input.searchPlaces,
       }),
     ]);
-    const task = assertOk(response);
+    const task = assertOk(response, { treatNoResultsAsEmpty: true });
     return {
       data: task.result?.[0]?.items ?? [],
       billing: buildTaskBilling(task),
@@ -473,7 +473,7 @@ export async function fetchLocalSerp(input: {
       depth: input.depth,
     }),
   ]);
-  const task = assertOk(response);
+  const task = assertOk(response, { treatNoResultsAsEmpty: true });
   return {
     data: task.result?.[0]?.items ?? [],
     billing: buildTaskBilling(task),
