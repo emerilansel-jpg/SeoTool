@@ -81,6 +81,11 @@ export function getEnvValueSync(
   env: object,
   name: string,
 ): string | undefined {
+  // ponytail: check cached DB overrides first so sync callers get admin settings without waiting
+  const override = settingsCache?.values.get(name);
+  if (override) {
+    return override;
+  }
   const processValue =
     typeof process !== "undefined" ? process.env?.[name] : undefined;
   if (processValue) {

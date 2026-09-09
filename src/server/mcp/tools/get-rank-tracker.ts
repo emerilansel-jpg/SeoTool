@@ -119,3 +119,133 @@ export const getRankTrackerTool = {
     });
   }),
 };
+
+// ─── get_rank_history ────────────────────────────────────────────────────────
+
+const rankHistoryInputSchema = {
+  projectId: projectIdSchema,
+  trackerId: z
+    .string()
+    .optional()
+    .describe(
+      "Rank tracker config ID. If omitted, uses the first tracker in the project.",
+    ),
+  keywordId: z
+    .string()
+    .optional()
+    .describe(
+      "Specific tracking keyword ID. When provided, returns position history for this keyword. When omitted, returns overall project rank trend.",
+    ),
+  device: z
+    .enum(["desktop", "mobile"])
+    .optional()
+    .describe("Device to filter trend by (default 'desktop')."),
+  sinceDays: z
+    .number()
+    .int()
+    .min(1)
+    .max(365)
+    .optional()
+    .describe("Days of history to fetch (default 30)."),
+} as const;
+
+type RankHistoryArgs = z.infer<z.ZodObject<typeof rankHistoryInputSchema>>;
+
+export const getRankHistoryTool = {
+  name: "get_rank_history",
+  config: {
+    title: "Get rank tracking history",
+    description:
+      "Inspect historical ranking movement over time. With `keywordId`, returns date-by-date position checks for that keyword. Without `keywordId`, returns aggregate rank trends (top 3, top 10, top 20 count over runs). Free — reads saved scan history.",
+    inputSchema: rankHistoryInputSchema,
+    outputSchema: z
+      .object({
+        history: z.array(looseObjectOutputSchema).optional(),
+        trend: z.array(looseObjectOutputSchema).optional(),
+        ...optionalMetaOutputSchema,
+      })
+      .passthrough(),
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+      destructiveHint: false,
+    },
+  },
+  handler: withMcpProjectAuth(async (args: RankHistoryArgs, context) => {
+    // ponytail: fallback to first tracker when trackerId omitted; upgrade to domain match if multi-tracker
+    let configId = args.trackerId;
+    if (!configId) {
+      const configs = await RankTrackingRepository.getConfigsForProject(
+        args.projectId,
+      );
+      if (configs.length === 0) {
+        return mcpResponse({
+          text: "No rank trackers configured for this project.",
+          meta: buildProjectMeta(
+            context,
+            args.projectId,
+            `/p/${args.projectId}/rank-tracking`,
+          ),
+        });
+      }
+      configId = configs[0].id;
+    }
+
+    const sinceDays = args.sinceDays ?? 30;
+
+    if (args.keywordId) {
+      const history = await RankTrackingRepository.getKeywordHistory(
+        configId,
+        args.keywordId,
+        sinceDays,
+      );
+      const text =
+        history.length === 0
+          ? `No history recorded for keyword ${args.keywordId} in the last ${sinceDays} days.`
+          : `Keyword ranking history (last ${sinceDays} days, ${history.length} checks):\n` +
+            history
+              .map(
+                (h) =>
+                  `- ${h.checkedAt.slice(0, 10)} [${h.device}]: ${h.position != null ? `#${h.position}` : "Not in top 100"}`,
+              )
+              .join("\n");
+      return mcpResponse({
+        text,
+        meta: buildProjectMeta(
+          context,
+          args.projectId,
+          `/p/${args.projectId}/rank-tracking/${configId}`,
+        ),
+        structuredContent: { history },
+      });
+    }
+
+    const device = args.device ?? "desktop";
+    const trend = await RankTrackingRepository.getConfigTrend(
+      configId,
+      device,
+      sinceDays,
+    );
+    const text =
+      trend.length === 0
+        ? `No rank trend data for tracker ${configId} (${device}) in the last ${sinceDays} days.`
+        : `Rank trend for tracker ${configId} (${device}, last ${sinceDays} days):\n` +
+          trend
+            .map(
+              (t) =>
+                `- ${t.checkedAt.slice(0, 10)}: Total ${t.total} | Top 3: ${t.top3} | Top 4-10: ${t.top4to10} | Top 11-20: ${t.top11to20}`,
+            )
+            .join("\n");
+
+    return mcpResponse({
+      text,
+      meta: buildProjectMeta(
+        context,
+        args.projectId,
+        `/p/${args.projectId}/rank-tracking/${configId}`,
+      ),
+      structuredContent: { trend },
+    });
+  }),
+};
+

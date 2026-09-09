@@ -44,38 +44,28 @@ export const ADMIN_SETTING_GROUPS: AdminSettingGroup[] = [
     ],
   },
   {
-    provider: "OpenAI",
-    settings: [
-      {
-        envKey: "OPENAI_API_KEY",
-        label: "API key",
-        secret: true,
-        editable: true,
-        hint: "Set to use GPT-4o directly from OpenAI instead of OpenRouter. When set, overrides the OpenRouter configuration.",
-      },
-    ],
-  },
-  {
-    provider: "OpenRouter",
+    provider: "AI Gateway (PesatRouter / OpenRouter)",
     settings: [
       {
         envKey: "OPENROUTER_API_KEY",
         label: "API key",
         secret: true,
         editable: true,
+        hint: "API key from api.pesatrouter.com or openrouter.ai.",
       },
       {
         envKey: "OPENROUTER_MODEL",
         label: "Default model",
         secret: false,
         editable: true,
+        hint: "Default model identifier, e.g. pesat-pro or pesat-flash.",
       },
       {
         envKey: "OPENROUTER_BASE_URL",
         label: "Base URL",
         secret: false,
         editable: true,
-        hint: "Custom gateway endpoint; empty uses openrouter.ai.",
+        hint: "Custom gateway endpoint, e.g. https://api.pesatrouter.com/v1.",
       },
     ],
   },

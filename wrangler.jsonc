@@ -55,11 +55,15 @@
         "name": "ONBOARDING_CHAT",
         "class_name": "OnboardingChatAgent",
       },
-      // SAM in-app agent. One instance per chat session; messages persist in the
+      // Jet in-app agent. One instance per chat session; messages persist in the
       // DO's SQLite. SQLite-backed classes must be declared in `migrations`.
       {
+        "name": "JET_CHAT",
+        "class_name": "JetChatAgent",
+      },
+      {
         "name": "SAM_CHAT",
-        "class_name": "SamChatAgent",
+        "class_name": "JetChatAgent",
       },
     ],
   },
@@ -70,7 +74,7 @@
     },
     {
       "tag": "v2",
-      "new_sqlite_classes": ["SamChatAgent"],
+      "new_sqlite_classes": ["SamChatAgent", "JetChatAgent"],
     },
   ],
   "triggers": {

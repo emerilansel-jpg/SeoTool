@@ -16,7 +16,7 @@ import {
   getProjectNavGroups,
 } from "@/client/navigation/items";
 import { ProjectSwitcher } from "@/client/features/projects/ProjectSwitcher";
-import { SamSidebarPanel } from "@/client/features/sam/SamSidebarPanel";
+import { JetSidebarPanel } from "@/client/features/jet/JetSidebarPanel";
 import { useIsPlatformAdmin } from "@/client/features/admin/useIsPlatformAdmin";
 import { NotificationCenter } from "@/client/features/notifications/NotificationCenter";
 import { ThemePreferenceMenuItems } from "@/client/components/ThemePreferenceMenuItems";
@@ -178,7 +178,7 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
       ) : null}
 
       {view === "chat" && projectId ? (
-        <SamSidebarPanel projectId={projectId} onNavigate={onNavigate} />
+        <JetSidebarPanel projectId={projectId} onNavigate={onNavigate} />
       ) : (
         <nav className="min-h-0 flex-1 overflow-y-auto px-2.5 py-2 space-y-4 [scrollbar-width:thin] [scrollbar-color:var(--color-base-300)_transparent]">
           {navGroups.map((group) => (

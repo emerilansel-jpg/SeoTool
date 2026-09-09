@@ -152,6 +152,8 @@ export const {
   auditLighthouseResults,
   samSessions,
   samProjectMemory,
+  jetSessions,
+  jetProjectMemory,
   user,
   session,
   account,

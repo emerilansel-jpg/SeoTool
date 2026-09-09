@@ -219,7 +219,7 @@ function IncludedFeatures() {
     "AI visibility monitoring (ChatGPT, Claude, Gemini, Perplexity)",
     "Content quality scoring and gap analysis",
     "White-label PDF reports with scheduling",
-    "Autonomous SAM SEO agent",
+    "Autonomous Jet SEO agent",
     "36+ native MCP tools for Claude Desktop and IDEs",
     "Google Search Console and GA4 integration",
     "Priority support",
