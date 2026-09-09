@@ -25,6 +25,8 @@ const mapsItemSchema = z
     category: z.string().nullable().optional(),
     domain: z.string().nullable().optional(),
     url: z.string().nullable().optional(),
+    latitude: z.number().nullable().optional(),
+    longitude: z.number().nullable().optional(),
     gps_coordinates: z
       .object({
         latitude: z.number().nullable().optional(),

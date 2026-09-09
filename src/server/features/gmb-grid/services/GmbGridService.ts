@@ -18,6 +18,8 @@ const profileItemSchema = z
     category: z.string().nullable().optional(),
     domain: z.string().nullable().optional(),
     url: z.string().nullable().optional(),
+    latitude: z.number().nullable().optional(),
+    longitude: z.number().nullable().optional(),
     gps_coordinates: z
       .object({
         latitude: z.number().nullable().optional(),
@@ -78,8 +80,8 @@ async function searchProfiles(input: {
     const parsed = profileItemSchema.safeParse(item);
     if (!parsed.success) return [];
     const row = parsed.data;
-    const latitude = row.gps_coordinates?.latitude;
-    const longitude = row.gps_coordinates?.longitude;
+    const latitude = row.latitude ?? row.gps_coordinates?.latitude;
+    const longitude = row.longitude ?? row.gps_coordinates?.longitude;
     if (
       row.type !== "maps_search" ||
       !row.title ||
