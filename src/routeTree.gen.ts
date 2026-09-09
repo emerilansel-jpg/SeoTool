@@ -60,6 +60,7 @@ import { Route as AppAdminPricingIndexRouteImport } from './routes/_app/admin/pr
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
 import { Route as ProjectPProjectIdIndexRouteImport } from './routes/_project/p/$projectId/index'
+import { Route as ProjectPProjectIdAiTrackingRouteImport } from './routes/_project/p/$projectId/ai-tracking'
 import { Route as ProjectPProjectIdAuditRouteImport } from './routes/_project/p/$projectId/audit'
 import { Route as ProjectPProjectIdBacklinksRouteImport } from './routes/_project/p/$projectId/backlinks'
 import { Route as ProjectPProjectIdBrandLookupRouteImport } from './routes/_project/p/$projectId/brand-lookup'
@@ -350,6 +351,12 @@ const ProjectPProjectIdIndexRoute = ProjectPProjectIdIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProjectPProjectIdRouteRoute,
 } as any)
+const ProjectPProjectIdAiTrackingRoute =
+  ProjectPProjectIdAiTrackingRouteImport.update({
+    id: '/ai-tracking',
+    path: '/ai-tracking',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
 const ProjectPProjectIdAuditRoute = ProjectPProjectIdAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
@@ -585,6 +592,7 @@ export interface FileRoutesByFullPath {
   '/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/admin/pages/new': typeof AppAdminPagesNewRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/p/$projectId/ai-tracking': typeof ProjectPProjectIdAiTrackingRoute
   '/p/$projectId/audit': typeof ProjectPProjectIdAuditRouteWithChildren
   '/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
@@ -664,6 +672,7 @@ export interface FileRoutesByTo {
   '/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/admin/pages/new': typeof AppAdminPagesNewRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/p/$projectId/ai-tracking': typeof ProjectPProjectIdAiTrackingRoute
   '/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
   '/p/$projectId/content-gap': typeof ProjectPProjectIdContentGapRoute
@@ -749,6 +758,7 @@ export interface FileRoutesById {
   '/_app/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/_app/admin/pages/new': typeof AppAdminPagesNewRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/_project/p/$projectId/ai-tracking': typeof ProjectPProjectIdAiTrackingRoute
   '/_project/p/$projectId/audit': typeof ProjectPProjectIdAuditRouteWithChildren
   '/_project/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/_project/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
@@ -833,6 +843,7 @@ export interface FileRouteTypes {
     | '/admin/pages/$postId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
+    | '/p/$projectId/ai-tracking'
     | '/p/$projectId/audit'
     | '/p/$projectId/backlinks'
     | '/p/$projectId/brand-lookup'
@@ -912,6 +923,7 @@ export interface FileRouteTypes {
     | '/admin/pages/$postId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
+    | '/p/$projectId/ai-tracking'
     | '/p/$projectId/backlinks'
     | '/p/$projectId/brand-lookup'
     | '/p/$projectId/content-gap'
@@ -996,6 +1008,7 @@ export interface FileRouteTypes {
     | '/_app/admin/pages/$postId'
     | '/_app/admin/pages/new'
     | '/_app/admin/users/$userId'
+    | '/_project/p/$projectId/ai-tracking'
     | '/_project/p/$projectId/audit'
     | '/_project/p/$projectId/backlinks'
     | '/_project/p/$projectId/brand-lookup'
@@ -1423,6 +1436,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectPProjectIdIndexRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
+    '/_project/p/$projectId/ai-tracking': {
+      id: '/_project/p/$projectId/ai-tracking'
+      path: '/ai-tracking'
+      fullPath: '/p/$projectId/ai-tracking'
+      preLoaderRoute: typeof ProjectPProjectIdAiTrackingRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
     '/_project/p/$projectId/audit': {
       id: '/_project/p/$projectId/audit'
       path: '/audit'
@@ -1771,6 +1791,7 @@ const ProjectPProjectIdRankTrackingRouteWithChildren =
 
 interface ProjectPProjectIdRouteRouteChildren {
   ProjectPProjectIdReportsRouteRoute: typeof ProjectPProjectIdReportsRouteRouteWithChildren
+  ProjectPProjectIdAiTrackingRoute: typeof ProjectPProjectIdAiTrackingRoute
   ProjectPProjectIdAuditRoute: typeof ProjectPProjectIdAuditRouteWithChildren
   ProjectPProjectIdBacklinksRoute: typeof ProjectPProjectIdBacklinksRoute
   ProjectPProjectIdBrandLookupRoute: typeof ProjectPProjectIdBrandLookupRoute
@@ -1802,6 +1823,7 @@ const ProjectPProjectIdRouteRouteChildren: ProjectPProjectIdRouteRouteChildren =
   {
     ProjectPProjectIdReportsRouteRoute:
       ProjectPProjectIdReportsRouteRouteWithChildren,
+    ProjectPProjectIdAiTrackingRoute: ProjectPProjectIdAiTrackingRoute,
     ProjectPProjectIdAuditRoute: ProjectPProjectIdAuditRouteWithChildren,
     ProjectPProjectIdBacklinksRoute: ProjectPProjectIdBacklinksRoute,
     ProjectPProjectIdBrandLookupRoute: ProjectPProjectIdBrandLookupRoute,

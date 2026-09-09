@@ -139,6 +139,75 @@ export const runSiteAuditTool = {
   }),
 };
 
+// ─── list_site_audits ────────────────────────────────────────────────────────
+
+const listAuditsInputSchema = {
+  projectId: projectIdSchema,
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(50)
+    .optional()
+    .describe("Max audits to return (default 10)."),
+} as const;
+
+type ListAuditsArgs = z.infer<z.ZodObject<typeof listAuditsInputSchema>>;
+
+export const listSiteAuditsTool = {
+  name: "list_site_audits",
+  config: {
+    title: "List site audits",
+    description:
+      "List historical site audits for the project (latest first). Returns audit ID, status, URL, page counts, and crawl dates. Free — reads SeoTool.im state.",
+    inputSchema: listAuditsInputSchema,
+    outputSchema: z
+      .object({
+        audits: z.array(looseObjectOutputSchema),
+        ...optionalMetaOutputSchema,
+      })
+      .passthrough(),
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+      destructiveHint: false,
+    },
+  },
+  handler: withMcpProjectAuth(async (args: ListAuditsArgs, context) => {
+    // ponytail: cap at 50 audits, add cursor pagination if project has hundreds of runs
+    const allAudits = await AuditRepository.getAuditsByProject(args.projectId);
+    const limit = args.limit ?? 10;
+    const audits = allAudits.slice(0, limit);
+
+    if (audits.length === 0) {
+      return mcpResponse({
+        text: "No site audits found for this project. Start one with run_site_audit.",
+        meta: buildProjectMeta(
+          context,
+          args.projectId,
+          `/p/${args.projectId}/audit`,
+        ),
+        structuredContent: { audits: [] },
+      });
+    }
+
+    const lines = audits.map((a) => {
+      const date = a.startedAt.slice(0, 10);
+      return `- ${a.id} (${date}): ${a.status} — ${a.startUrl} (${a.pagesCrawled}/${a.pagesTotal} pages)`;
+    });
+
+    return mcpResponse({
+      text: `Historical site audits (${audits.length}):\n${lines.join("\n")}`,
+      meta: buildProjectMeta(
+        context,
+        args.projectId,
+        `/p/${args.projectId}/audit`,
+      ),
+      structuredContent: { audits },
+    });
+  }),
+};
+
 // ─── get_audit_status ────────────────────────────────────────────────────────
 
 const statusInputSchema = {

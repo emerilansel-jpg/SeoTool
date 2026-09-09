@@ -4,7 +4,14 @@ import { getBacklinksOverviewTool } from "@/server/mcp/tools/get-backlinks-overv
 import { getBacklinksProfileTool } from "@/server/mcp/tools/get-backlinks-profile";
 import { getDomainKeywordSuggestionsTool } from "@/server/mcp/tools/get-domain-keyword-suggestions";
 import { getDomainOverviewTool } from "@/server/mcp/tools/get-domain-overview";
-import { getRankTrackerTool } from "@/server/mcp/tools/get-rank-tracker";
+import {
+  getRankHistoryTool,
+  getRankTrackerTool,
+} from "@/server/mcp/tools/get-rank-tracker";
+import {
+  getGmbGridConfigsTool,
+  getGmbGridRunTool,
+} from "@/server/mcp/tools/gmb-grid-tools";
 import { getSerpResultsTool } from "@/server/mcp/tools/get-serp-results";
 import { createProjectTool } from "@/server/mcp/tools/create-project";
 import { listProjectsTool } from "@/server/mcp/tools/list-projects";
@@ -28,6 +35,7 @@ import {
   getAuditIssuesTool,
   getAuditPagesTool,
   getAuditStatusTool,
+  listSiteAuditsTool,
   runSiteAuditTool,
 } from "@/server/mcp/tools/site-audit-tools";
 import {
@@ -158,6 +166,15 @@ export function registerSeoToolMcpTools(server: McpServer) {
     ),
   );
   server.registerTool(
+    getRankHistoryTool.name,
+    getRankHistoryTool.config,
+    instrumentMcpToolHandler(
+      getRankHistoryTool.name,
+      getRankHistoryTool.config.outputSchema,
+      getRankHistoryTool.handler,
+    ),
+  );
+  server.registerTool(
     getRankedKeywordsTool.name,
     getRankedKeywordsTool.config,
     instrumentMcpToolHandler(
@@ -240,6 +257,15 @@ export function registerSeoToolMcpTools(server: McpServer) {
     ),
   );
   server.registerTool(
+    listSiteAuditsTool.name,
+    listSiteAuditsTool.config,
+    instrumentMcpToolHandler(
+      listSiteAuditsTool.name,
+      listSiteAuditsTool.config.outputSchema,
+      listSiteAuditsTool.handler,
+    ),
+  );
+  server.registerTool(
     runSiteAuditTool.name,
     runSiteAuditTool.config,
     instrumentMcpToolHandler(
@@ -273,6 +299,24 @@ export function registerSeoToolMcpTools(server: McpServer) {
       getAuditPagesTool.name,
       getAuditPagesTool.config.outputSchema,
       getAuditPagesTool.handler,
+    ),
+  );
+  server.registerTool(
+    getGmbGridConfigsTool.name,
+    getGmbGridConfigsTool.config,
+    instrumentMcpToolHandler(
+      getGmbGridConfigsTool.name,
+      getGmbGridConfigsTool.config.outputSchema,
+      getGmbGridConfigsTool.handler,
+    ),
+  );
+  server.registerTool(
+    getGmbGridRunTool.name,
+    getGmbGridRunTool.config,
+    instrumentMcpToolHandler(
+      getGmbGridRunTool.name,
+      getGmbGridRunTool.config.outputSchema,
+      getGmbGridRunTool.handler,
     ),
   );
   server.registerTool(

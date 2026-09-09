@@ -43,6 +43,8 @@ import * as sqliteCancellationFeedback from "./cancellation-feedback.schema";
 import * as pgCancellationFeedback from "./pg/cancellation-feedback.schema";
 import * as sqliteProjectCompetitors from "./project-competitors.schema";
 import * as pgProjectCompetitors from "./pg/project-competitors.schema";
+import * as sqliteAiTracking from "./ai-tracking.schema";
+import * as pgAiTracking from "./pg/ai-tracking.schema";
 
 // Canonical schema barrel. Repositories import their tables from here and the
 // provider-aware `db` from "@/db", so each repository is written ONCE for both
@@ -75,7 +77,8 @@ type AppSchema = typeof sqliteApp &
   typeof sqliteAdmin &
   typeof sqliteKeywordResearchPro &
   typeof sqliteCancellationFeedback &
-  typeof sqliteProjectCompetitors;
+  typeof sqliteProjectCompetitors &
+  typeof sqliteAiTracking;
 
 const runtimeSchema =
   getDatabaseProvider() === "postgres"
@@ -102,6 +105,7 @@ const runtimeSchema =
         ...pgKeywordResearchPro,
         ...pgCancellationFeedback,
         ...pgProjectCompetitors,
+        ...pgAiTracking,
       }
     : {
         ...sqliteApp,
@@ -126,6 +130,7 @@ const runtimeSchema =
         ...sqliteKeywordResearchPro,
         ...sqliteCancellationFeedback,
         ...sqliteProjectCompetitors,
+        ...sqliteAiTracking,
       };
 
 // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- guarded by schema-parity.test.ts
@@ -152,6 +157,8 @@ export const {
   auditLighthouseResults,
   samSessions,
   samProjectMemory,
+  jetSessions,
+  jetProjectMemory,
   user,
   session,
   account,
@@ -195,4 +202,10 @@ export const {
   keywordProReferralCodes,
   keywordProReferralAttributions,
   keywordProReferralCommissions,
+  aiTrackingConfigs,
+  aiTrackingPrompts,
+  aiTrackingRuns,
+  aiTrackingObservations,
+  aiTrackingMentions,
+  aiTrackingCitations,
 } = schema;

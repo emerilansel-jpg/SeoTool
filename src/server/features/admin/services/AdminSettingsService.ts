@@ -121,14 +121,40 @@ export const AdminSettingsService = {
     mode: "live" | "sandbox";
     plans: Array<{ tier: string; planId: string; priceUsd: number }>;
   }> {
-    const mode = await getRequiredEnvValue("PAYPAL_MODE");
+    let mode: string;
+    try {
+      mode = await getRequiredEnvValue("PAYPAL_MODE");
+    } catch {
+      throw new AppError(
+        "VALIDATION_ERROR",
+        'PAYPAL_MODE is missing. Please configure PAYPAL_MODE.',
+      );
+    }
     if (mode !== "live" && mode !== "sandbox") {
       throw new AppError(
         "VALIDATION_ERROR",
         'PAYPAL_MODE must be exactly "live" or "sandbox".',
       );
     }
-    await getRequiredEnvValue("PAYPAL_WEBHOOK_ID");
+
+    try {
+      await getRequiredEnvValue("PAYPAL_CLIENT_ID");
+      await getRequiredEnvValue("PAYPAL_CLIENT_SECRET");
+    } catch {
+      throw new AppError(
+        "VALIDATION_ERROR",
+        "PAYPAL_CLIENT_ID or PAYPAL_CLIENT_SECRET is missing.",
+      );
+    }
+
+    try {
+      await getRequiredEnvValue("PAYPAL_WEBHOOK_ID");
+    } catch {
+      throw new AppError(
+        "VALIDATION_ERROR",
+        "PAYPAL_WEBHOOK_ID is missing. Register your webhook in PayPal Developer Dashboard and configure Webhook ID first.",
+      );
+    }
 
     const configs = await getEffectivePlanConfigs();
     const activePaidConfigs = Object.values(configs).filter(
@@ -141,83 +167,89 @@ export const AdminSettingsService = {
       );
     }
 
-    const basePlans = await Promise.all(
-      activePaidConfigs.map(async (config) => {
-        if (!config.paypalPlanId) {
-          throw new AppError(
-            "VALIDATION_ERROR",
-            `${config.tier} is active but has no PayPal plan ID.`,
-          );
-        }
-        const plan = await paypal.billingPlans.get(config.paypalPlanId);
-        if (plan.status !== "ACTIVE") {
-          throw new AppError(
-            "VALIDATION_ERROR",
-            `PayPal plan ${config.paypalPlanId} for ${config.tier} is not active.`,
-          );
-        }
+    try {
+      const basePlans = await Promise.all(
+        activePaidConfigs.map(async (config) => {
+          if (!config.paypalPlanId) {
+            throw new AppError(
+              "VALIDATION_ERROR",
+              `${config.tier} is active but has no PayPal plan ID.`,
+            );
+          }
+          const plan = await paypal.billingPlans.get(config.paypalPlanId);
+          if (plan.status !== "ACTIVE") {
+            throw new AppError(
+              "VALIDATION_ERROR",
+              `PayPal plan ${config.paypalPlanId} for ${config.tier} is not active.`,
+            );
+          }
 
-        const regularCycle = plan.billing_cycles?.find(
-          (cycle) => cycle.tenure_type === "REGULAR",
-        );
-        const fixedPrice = regularCycle?.pricing_scheme?.fixed_price;
-        const paypalPriceUsd = Number(fixedPrice?.value);
-        if (
-          fixedPrice?.currency_code !== "USD" ||
-          !Number.isFinite(paypalPriceUsd) ||
-          Math.round(paypalPriceUsd * 100) !== config.priceUsdCents
-        ) {
-          throw new AppError(
-            "VALIDATION_ERROR",
-            `PayPal price for ${config.tier} does not match SeoTool.im.`,
+          const regularCycle = plan.billing_cycles?.find(
+            (cycle) => cycle.tenure_type === "REGULAR",
           );
-        }
+          const fixedPrice = regularCycle?.pricing_scheme?.fixed_price;
+          const paypalPriceUsd = Number(fixedPrice?.value);
+          if (
+            fixedPrice?.currency_code !== "USD" ||
+            !Number.isFinite(paypalPriceUsd) ||
+            Math.round(paypalPriceUsd * 100) !== config.priceUsdCents
+          ) {
+            throw new AppError(
+              "VALIDATION_ERROR",
+              `PayPal price for ${config.tier} does not match SeoTool.im.`,
+            );
+          }
 
-        return {
-          tier: config.tier,
-          planId: config.paypalPlanId,
-          priceUsd: paypalPriceUsd,
-        };
-      }),
-    );
+          return {
+            tier: config.tier,
+            planId: config.paypalPlanId,
+            priceUsd: paypalPriceUsd,
+          };
+        }),
+      );
 
-    const keywordProCohorts = (
-      await KeywordProConfigService.getCohorts()
-    ).filter((cohort) => cohort.active);
-    const keywordProPlans = await Promise.all(
-      keywordProCohorts.map(async (cohort) => {
-        if (!cohort.paypalPlanId) {
-          throw new AppError(
-            "VALIDATION_ERROR",
-            `${cohort.label} is active but has no PayPal plan ID. Use Set up PayPal plans in Admin > Pricing.`,
+      const keywordProCohorts = (
+        await KeywordProConfigService.getCohorts()
+      ).filter((cohort) => cohort.active);
+      const keywordProPlans = await Promise.all(
+        keywordProCohorts.map(async (cohort) => {
+          if (!cohort.paypalPlanId) {
+            throw new AppError(
+              "VALIDATION_ERROR",
+              `${cohort.label} is active but has no PayPal plan ID. Use Set up PayPal plans in Admin > Pricing.`,
+            );
+          }
+          const plan = await paypal.billingPlans.get(cohort.paypalPlanId);
+          const regularCycle = plan.billing_cycles?.find(
+            (cycle) => cycle.tenure_type === "REGULAR",
           );
-        }
-        const plan = await paypal.billingPlans.get(cohort.paypalPlanId);
-        const regularCycle = plan.billing_cycles?.find(
-          (cycle) => cycle.tenure_type === "REGULAR",
-        );
-        const fixedPrice = regularCycle?.pricing_scheme?.fixed_price;
-        const paypalPriceUsd = Number(fixedPrice?.value);
-        if (
-          plan.status !== "ACTIVE" ||
-          fixedPrice?.currency_code !== "USD" ||
-          !Number.isFinite(paypalPriceUsd) ||
-          Math.round(paypalPriceUsd * 100) !== cohort.priceUsdCents
-        ) {
-          throw new AppError(
-            "VALIDATION_ERROR",
-            `PayPal plan for ${cohort.label} is inactive or its USD price does not match SeoTool.im.`,
-          );
-        }
-        return {
-          tier: cohort.key,
-          planId: cohort.paypalPlanId,
-          priceUsd: paypalPriceUsd,
-        };
-      }),
-    );
+          const fixedPrice = regularCycle?.pricing_scheme?.fixed_price;
+          const paypalPriceUsd = Number(fixedPrice?.value);
+          if (
+            plan.status !== "ACTIVE" ||
+            fixedPrice?.currency_code !== "USD" ||
+            !Number.isFinite(paypalPriceUsd) ||
+            Math.round(paypalPriceUsd * 100) !== cohort.priceUsdCents
+          ) {
+            throw new AppError(
+              "VALIDATION_ERROR",
+              `PayPal plan for ${cohort.label} is inactive or its USD price does not match SeoTool.im.`,
+            );
+          }
+          return {
+            tier: cohort.key,
+            planId: cohort.paypalPlanId,
+            priceUsd: paypalPriceUsd,
+          };
+        }),
+      );
 
-    return { mode, plans: [...basePlans, ...keywordProPlans] };
+      return { mode: mode as "live" | "sandbox", plans: [...basePlans, ...keywordProPlans] };
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      const message = error instanceof Error ? error.message : String(error);
+      throw new AppError("VALIDATION_ERROR", `PayPal verification failed: ${message}`);
+    }
   },
 };
 

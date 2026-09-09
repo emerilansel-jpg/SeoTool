@@ -5,7 +5,7 @@ import {
 import { routeAgentRequest } from "agents";
 import { resolveUserContextFromHeaders } from "@/middleware/ensure-user/resolve";
 import { ProjectRepository } from "@/server/features/projects/repositories/ProjectRepository";
-import { SamSessionRepository } from "@/server/features/sam/SamSessionRepository";
+import { JetSessionRepository, SamSessionRepository } from "@/server/features/jet/JetSessionRepository";
 import { runScheduledRankChecks } from "@/server/features/rank-tracking/services/scheduledRankChecks";
 import { runScheduledReports } from "@/server/features/reports/services/scheduledReports";
 import { runScheduledAlerts } from "@/server/features/alerts/services/scheduledAlerts";
@@ -54,12 +54,12 @@ async function authorizeOnboardingChat(
   return undefined;
 }
 
-// Authorize a SAM agent connection in the Worker, before it reaches the Durable
+// Authorize a Jet agent connection in the Worker, before it reaches the Durable
 // Object. The DO instance name is the sessionId (set client-side); we resolve
 // the session here and authorize the caller against the session's project via
 // the same canonical project-access check the rest of the app uses, so the DO
 // can trust its `name` and derive org/project/user from the session row.
-async function authorizeSamChat(
+async function authorizeJetChat(
   request: Request,
   sessionId: string,
 ): Promise<Response | undefined> {
@@ -69,7 +69,7 @@ async function authorizeSamChat(
   } catch {
     return new Response("Unauthorized", { status: 401 });
   }
-  const session = await SamSessionRepository.getActiveSession(
+  const session = await JetSessionRepository.getActiveSession(
     sessionId,
     context.userId,
   );
@@ -82,12 +82,12 @@ async function authorizeSamChat(
   if (!session || !project) {
     return new Response("Forbidden", { status: 403 });
   }
-  // Gate SAM agent access on plan tier (Free = blocked, Lite+ = allowed).
+  // Gate Jet agent access on plan tier (Free = blocked, Lite+ = allowed).
   try {
     await assertFeatureAccess(context.organizationId, "samAgent");
   } catch {
     return new Response(
-      "SAM agent requires a paid plan. Upgrade at /subscribe.",
+      "Jet agent requires a paid plan. Upgrade at /subscribe.",
       { status: 402 },
     );
   }
@@ -98,6 +98,8 @@ async function authorizeSamChat(
   return undefined;
 }
 
+const authorizeSamChat = authorizeJetChat;
+
 // Both chat DOs live behind /agents/*. Dispatch on the DO binding partyserver
 // resolved for the request (rather than re-parsing the path), and fail closed
 // on anything unrecognized.
@@ -106,8 +108,9 @@ function authorizeChatAgent(
   lobby: { className: string; name: string },
 ): Promise<Response | undefined> | Response {
   switch (lobby.className) {
+    case "JET_CHAT":
     case "SAM_CHAT":
-      return authorizeSamChat(request, lobby.name);
+      return authorizeJetChat(request, lobby.name);
     case "ONBOARDING_CHAT":
       return authorizeOnboardingChat(request, lobby.name);
     default:
@@ -163,8 +166,8 @@ export { AlertWorkflow } from "./server/workflows/AlertWorkflow";
 export { GmbGridWorkflow } from "./server/workflows/GmbGridWorkflow";
 // Durable Object class for the onboarding strategy chat (Agents SDK).
 export { OnboardingChatAgent } from "./server/features/onboarding/OnboardingChatAgent";
-// Durable Object class for the SAM in-app agent (Agents SDK).
-export { SamChatAgent } from "./server/features/sam/SamChatAgent";
+// Durable Object class for the Jet in-app agent (Agents SDK).
+export { JetChatAgent, SamChatAgent } from "./server/features/jet/JetChatAgent";
 
 export default {
   fetch,

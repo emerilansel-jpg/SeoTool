@@ -247,7 +247,7 @@ function SubscribePage() {
                 "Keyword Research Pro pipeline",
                 "Live backlink competition",
                 "Local Map Rank Tracker",
-                "SAM AI agent + 36 MCP tools",
+                "Jet AI agent + 36 MCP tools",
                 "Standard DataForSEO pricing +30%",
                 "Referral rewards for 12 cycles",
               ].map((feature) => (
@@ -319,7 +319,7 @@ function SubscribePage() {
                 "Every SeoTool.im feature included",
                 "Use your own DataForSEO API key",
                 "Only 10% service fee on your API calls",
-                "SAM AI agent + 36 MCP tools",
+                "Jet AI agent + 36 MCP tools",
                 "Referral rewards for 12 cycles",
               ].map((feature) => (
                 <li key={feature} className="flex gap-2">

@@ -1,25 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { SamChat } from "@/client/features/sam/SamChat";
+import { JetChat } from "@/client/features/jet/JetChat";
 
-const samSearchSchema = z.object({
+const jetSearchSchema = z.object({
   // Active session id. Omitted until a session is selected/created.
   s: z.string().optional(),
 });
 
-type Search = z.infer<typeof samSearchSchema>;
+type Search = z.infer<typeof jetSearchSchema>;
 
 export const Route = createFileRoute("/_project/p/$projectId/jet")({
-  validateSearch: samSearchSchema,
-  component: SamRoute,
+  validateSearch: jetSearchSchema,
+  component: JetRoute,
 });
 
-function SamRoute() {
+function JetRoute() {
   // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment
   const { projectId } = Route.useParams();
   const { s }: Search = Route.useSearch();
   return (
     // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment
-    <SamChat projectId={projectId} activeSessionId={s} />
+    <JetChat projectId={projectId} activeSessionId={s} />
   );
 }
