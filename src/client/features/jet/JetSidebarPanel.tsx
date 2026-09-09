@@ -2,9 +2,13 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
-import { useEffect, useState } from "react";
-import { Archive, Loader2, Plus, X } from "lucide-react";
-import { archiveJetSession, createJetSession } from "@/serverFunctions/jet";
+import { useEffect, useMemo, useState } from "react";
+import { Archive, Check, Loader2, Pencil, Pin, Plus, X } from "lucide-react";
+import {
+  archiveJetSession,
+  createJetSession,
+  renameJetSession,
+} from "@/serverFunctions/jet";
 import {
   invalidateJetSessions,
   jetSessionsQueryOptions,
@@ -72,6 +76,43 @@ export function JetSidebarPanel({
   const sessionsQuery = useQuery(jetSessionsQueryOptions(projectId));
   const sessions = sessionsQuery.data ?? [];
 
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+
+  const pinnedStorageKey = `jet-pinned-sessions-${projectId}`;
+  const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem(`jet-pinned-sessions-${projectId}`);
+      return stored ? new Set<string>(JSON.parse(stored)) : new Set<string>();
+    } catch {
+      return new Set<string>();
+    }
+  });
+
+  const togglePin = (sessionId: string) => {
+    setPinnedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(sessionId)) next.delete(sessionId);
+      else next.add(sessionId);
+      try {
+        localStorage.setItem(pinnedStorageKey, JSON.stringify([...next]));
+      } catch {
+        // ignore storage quota errors
+      }
+      return next;
+    });
+  };
+
+  const sortedSessions = useMemo(() => {
+    return [...sessions].sort((a, b) => {
+      const aPinned = pinnedIds.has(a.id);
+      const bPinned = pinnedIds.has(b.id);
+      if (aPinned && !bPinned) return -1;
+      if (!aPinned && bPinned) return 1;
+      return 0;
+    });
+  }, [sessions, pinnedIds]);
+
   const goToSession = (sessionId: string | undefined) => {
     void navigate({
       to: "/p/$projectId/jet",
@@ -94,6 +135,20 @@ export function JetSidebarPanel({
     },
   });
 
+  const renameSession = useMutation({
+    mutationFn: ({ sessionId, title }: { sessionId: string; title: string }) =>
+      renameJetSession({ data: { sessionId, title } }),
+    onSuccess: () => {
+      invalidateJetSessions(projectId);
+      setEditingSessionId(null);
+    },
+    onError: (error) => {
+      toast.error(
+        getStandardErrorMessage(error, "Failed to rename chat session"),
+      );
+    },
+  });
+
   const archiveSession = useMutation({
     mutationFn: (sessionId: string) =>
       archiveJetSession({ data: { sessionId } }),
@@ -109,6 +164,15 @@ export function JetSidebarPanel({
       );
     },
   });
+
+  const handleSaveRename = (sessionId: string) => {
+    const trimmed = editingTitle.trim();
+    if (!trimmed) {
+      setEditingSessionId(null);
+      return;
+    }
+    renameSession.mutate({ sessionId, title: trimmed });
+  };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -133,13 +197,59 @@ export function JetSidebarPanel({
           <div className="flex justify-center py-6 text-base-content/50">
             <Loader2 className="size-4 animate-spin" />
           </div>
-        ) : sessions.length === 0 ? (
+        ) : sortedSessions.length === 0 ? (
           <p className="px-2 py-6 text-center text-xs text-base-content/50">
             No chats yet. Start a new one.
           </p>
         ) : (
-          sessions.map((session) => {
+          sortedSessions.map((session) => {
             const isActive = session.id === activeSessionId;
+            const isPinned = pinnedIds.has(session.id);
+            const isEditing = editingSessionId === session.id;
+
+            if (isEditing) {
+              return (
+                <div
+                  key={session.id}
+                  className={`flex items-center gap-1 rounded-md px-1 py-0.5 ${
+                    isActive ? "bg-base-300/50" : "bg-base-300/20"
+                  }`}
+                >
+                  <input
+                    type="text"
+                    className="input input-bordered input-xs min-w-0 flex-1 text-xs"
+                    value={editingTitle}
+                    maxLength={100}
+                    autoFocus
+                    disabled={renameSession.isPending}
+                    onChange={(e) => setEditingTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSaveRename(session.id);
+                      else if (e.key === "Escape") setEditingSessionId(null);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    aria-label="Save title"
+                    className="btn btn-ghost btn-xs btn-square text-success"
+                    disabled={renameSession.isPending}
+                    onClick={() => handleSaveRename(session.id)}
+                  >
+                    <Check className="size-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Cancel rename"
+                    className="btn btn-ghost btn-xs btn-square text-base-content/50"
+                    disabled={renameSession.isPending}
+                    onClick={() => setEditingSessionId(null)}
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </div>
+              );
+            }
+
             return (
               <div
                 key={session.id}
@@ -150,21 +260,54 @@ export function JetSidebarPanel({
                 <button
                   type="button"
                   onClick={() => goToSession(session.id)}
-                  className="min-w-0 flex-1 truncate px-2 py-1.5 text-left text-sm text-base-content/80"
+                  className="min-w-0 flex-1 truncate px-2 py-1.5 text-left text-sm text-base-content/80 flex items-center gap-1.5"
                 >
-                  {session.title}
+                  {isPinned ? (
+                    <Pin className="size-3 text-primary shrink-0 fill-primary rotate-45" />
+                  ) : null}
+                  <span className="truncate">{session.title}</span>
                 </button>
                 <span className="shrink-0 text-xs text-base-content/40 group-hover:hidden">
                   {ageLabel(session.updatedAt)}
                 </span>
                 <button
                   type="button"
-                  aria-label="Archive chat"
-                  className="btn btn-ghost btn-xs btn-square hidden group-hover:inline-flex"
-                  disabled={archiveSession.isPending}
-                  onClick={() => archiveSession.mutate(session.id)}
+                  aria-label={isPinned ? "Unpin chat" : "Pin chat"}
+                  className={`btn btn-ghost btn-xs btn-square hidden group-hover:inline-flex ${
+                    isPinned ? "text-primary" : "text-base-content/50"
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePin(session.id);
+                  }}
                 >
-                  <Archive className="size-3.5 text-base-content/50" />
+                  <Pin
+                    className={`size-3.5 ${isPinned ? "fill-primary rotate-45" : ""}`}
+                  />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Rename chat"
+                  className="btn btn-ghost btn-xs btn-square hidden group-hover:inline-flex text-base-content/50"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingSessionId(session.id);
+                    setEditingTitle(session.title);
+                  }}
+                >
+                  <Pencil className="size-3.5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Archive chat"
+                  className="btn btn-ghost btn-xs btn-square hidden group-hover:inline-flex text-base-content/50"
+                  disabled={archiveSession.isPending}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    archiveSession.mutate(session.id);
+                  }}
+                >
+                  <Archive className="size-3.5" />
                 </button>
               </div>
             );

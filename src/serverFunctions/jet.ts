@@ -62,7 +62,35 @@ export const archiveJetSession = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const renameSchema = z.object({
+  sessionId: z.string().min(1),
+  title: z.string().trim().min(1).max(100),
+});
+
+// Renames a Jet chat session.
+export const renameJetSession = createServerFn({ method: "POST" })
+  .middleware([requireAuthenticatedContext])
+  .validator(renameSchema)
+  .handler(async ({ data, context }) => {
+    const session = await JetSessionRepository.getActiveSession(
+      data.sessionId,
+      context.userId,
+    );
+    const project = session
+      ? await ProjectRepository.getProjectForOrganization(
+          session.projectId,
+          context.organizationId,
+        )
+      : null;
+    if (!session || !project) {
+      throw new AppError("NOT_FOUND", "Chat session not found");
+    }
+    await JetSessionRepository.setTitle(data.sessionId, data.title);
+    return { ok: true };
+  });
+
 // Backward-compatibility aliases
 export const listSamSessions = listJetSessions;
 export const createSamSession = createJetSession;
 export const archiveSamSession = archiveJetSession;
+export const renameSamSession = renameJetSession;
