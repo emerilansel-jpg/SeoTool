@@ -223,6 +223,7 @@ export function getProjectNavGroups(projectId: string) {
       items: [
         byPath("/p/$projectId/strategy"),
         byPath("/p/$projectId/brand-lookup"),
+        byPath("/p/$projectId/ai-tracking"),
         byPath("/p/$projectId/prompt-explorer"),
         byPath("/p/$projectId/reports"),
         byPath("/p/$projectId/alerts"),
