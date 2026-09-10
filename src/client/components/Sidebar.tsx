@@ -32,13 +32,13 @@ interface SidebarProps {
 }
 
 const navItemBaseClass =
-  "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-base-content/75 transition-all duration-150";
+  "group relative flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium transition-all duration-150";
 
-const navItemClass = `${navItemBaseClass} hover:bg-base-300/60 hover:text-base-content active:scale-[0.99]`;
+const navItemClass = `${navItemBaseClass} text-base-content/75 hover:bg-base-300/50 hover:text-base-content active:scale-[0.99]`;
 
 const navItemActiveProps = {
   className:
-    "bg-primary/10 hover:bg-primary/15 font-semibold text-primary shadow-xs",
+    "bg-primary text-white font-semibold shadow-xs shadow-primary/25 hover:bg-primary/95",
 };
 
 function SidebarNavLink({
@@ -62,13 +62,15 @@ function SidebarNavLink({
     >
       {({ isActive }: { isActive: boolean }) => (
         <>
-          {isActive ? (
-            <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-primary" />
-          ) : null}
           <Icon
-            className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-base-content/60"}`}
+            className={`h-4 w-4 shrink-0 transition-colors ${
+              isActive ? "text-white" : "text-base-content/60 group-hover:text-base-content"
+            }`}
           />
           <span className="truncate">{label}</span>
+          {isActive ? (
+            <span className="ml-auto size-1.5 rounded-full bg-white/80" />
+          ) : null}
         </>
       )}
     </Link>
@@ -120,27 +122,27 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
   };
 
   return (
-    <div className="flex h-full w-64 flex-col bg-base-200 border-r border-base-300/60">
-      <div className="flex items-center justify-between px-3.5 pb-2 pt-3.5">
+    <div className="flex h-full w-64 flex-col bg-base-200 border-r border-base-300/70">
+      <div className="flex items-center justify-between px-3.5 pb-2.5 pt-3.5 border-b border-base-300/40">
         <Link
           to="/"
           onClick={onNavigate}
           className="group flex items-center gap-2.5"
         >
-          <div className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-indigo-600 to-cyan-400 text-xs font-black text-white shadow-xs shadow-primary/30 transition-transform group-hover:scale-105">
+          <div className="flex size-7 items-center justify-center rounded-xl bg-primary text-xs font-black text-white shadow-xs shadow-primary/30 transition-transform group-hover:scale-105">
             S
           </div>
           <span className="text-base font-bold tracking-tight text-base-content">
             SeoTool<span className="text-primary font-black">.im</span>
           </span>
         </Link>
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-1">
           <NotificationCenter />
           {onClose ? (
             <button
               type="button"
               onClick={onClose}
-              className="btn btn-ghost btn-xs btn-square"
+              className="btn btn-ghost btn-xs btn-square rounded-lg"
               aria-label="Close sidebar"
             >
               <X className="h-4 w-4" />
@@ -149,7 +151,7 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
         </div>
       </div>
 
-      <div className="px-3 pb-1">
+      <div className="px-3 pt-2.5 pb-1">
         <ProjectSwitcher
           activeProjectId={projectId}
           onCloseDrawer={onNavigate}
@@ -157,10 +159,8 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
       </div>
 
       {projectId ? (
-        // Same underline tab idiom as the in-page tab strips (e.g. Domain
-        // Overview's Top Keywords / Top Pages).
-        <div className="px-3 pb-1">
-          <div role="tablist" className="tabs tabs-border w-full">
+        <div className="px-3 pt-1.5 pb-1">
+          <div className="flex items-center gap-1 rounded-xl bg-base-300/50 p-1 border border-base-300/60">
             <SidebarViewTab
               icon={LayoutGrid}
               label="Browse"
@@ -180,10 +180,10 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
       {view === "chat" && projectId ? (
         <JetSidebarPanel projectId={projectId} onNavigate={onNavigate} />
       ) : (
-        <nav className="min-h-0 flex-1 overflow-y-auto px-2.5 py-2 space-y-4 [scrollbar-width:thin] [scrollbar-color:var(--color-base-300)_transparent]">
+        <nav className="min-h-0 flex-1 overflow-y-auto px-2.5 py-2 space-y-3.5 [scrollbar-width:thin] [scrollbar-color:var(--color-base-300)_transparent]">
           {navGroups.map((group) => (
-            <div key={group.label}>
-              <div className="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-base-content/45">
+            <div key={group.label} className="space-y-1">
+              <div className="px-3 pt-1 text-[10px] font-bold uppercase tracking-wider text-base-content/40">
                 {group.label}
               </div>
               <div className="space-y-0.5">
@@ -227,10 +227,14 @@ function SidebarViewTab({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`tab flex-1 gap-1.5 text-xs font-semibold ${active ? "tab-active" : ""}`}
+      className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition-all ${
+        active
+          ? "bg-base-100 text-base-content font-semibold shadow-xs border border-base-300/60"
+          : "text-base-content/60 hover:text-base-content"
+      }`}
     >
-      <Icon className="size-3.5" />
-      {label}
+      <Icon className={`size-3.5 ${active ? "text-primary" : ""}`} />
+      <span>{label}</span>
     </button>
   );
 }

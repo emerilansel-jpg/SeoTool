@@ -200,7 +200,7 @@ export function AiTrackingPage({ projectId }: Props) {
         <div className="flex items-center gap-2.5">
           <button
             type="button"
-            className="btn btn-sm btn-outline gap-1.5"
+            className="btn btn-sm btn-outline rounded-xl font-semibold border-base-300 gap-1.5 shadow-2xs"
             onClick={() => setShowSetupModal(true)}
           >
             <Settings2 className="size-4" />
@@ -209,7 +209,7 @@ export function AiTrackingPage({ projectId }: Props) {
           {isConfigured && (
             <button
               type="button"
-              className="btn btn-sm btn-primary gap-1.5"
+              className="btn btn-sm btn-primary rounded-xl font-semibold gap-1.5 shadow-xs"
               disabled={
                 runTrackingMutation.isPending || data.prompts.length === 0
               }
@@ -227,19 +227,19 @@ export function AiTrackingPage({ projectId }: Props) {
       </div>
 
       {!isConfigured || !config ? (
-        <div className="rounded-xl border border-dashed border-base-300 p-12 text-center bg-base-100 shadow-sm">
+        <div className="rounded-2xl border border-dashed border-base-300/80 p-12 text-center bg-base-100/60 shadow-2xs">
           <Bot className="mx-auto size-12 text-base-content/30 mb-3" />
-          <h2 className="text-base font-semibold text-base-content">
+          <h2 className="text-base font-bold text-base-content">
             AI Generatif is not configured yet
           </h2>
-          <p className="mx-auto mt-1.5 max-w-md text-xs text-base-content/60">
+          <p className="mx-auto mt-1.5 max-w-md text-xs text-base-content/60 leading-relaxed">
             Define your brand name, domain, aliases, and target platforms to
             begin automatic prompt discovery and visibility tracking.
           </p>
           <div className="mt-5">
             <button
               type="button"
-              className="btn btn-sm btn-primary gap-2"
+              className="btn btn-sm btn-primary rounded-xl font-semibold gap-2 shadow-xs"
               onClick={() => setShowSetupModal(true)}
             >
               <Settings2 className="size-4" />
@@ -250,8 +250,8 @@ export function AiTrackingPage({ projectId }: Props) {
       ) : (
         <>
           {/* Navigation Tabs */}
-          <div className="border-b border-base-300">
-            <div className="flex flex-wrap gap-2 -mb-px">
+          <div className="border-b border-base-300/80">
+            <div className="flex flex-wrap gap-1 -mb-px">
               {TABS.map((tab) => {
                 const Icon = tab.icon;
                 const active = activeTab === tab.id;
@@ -259,18 +259,20 @@ export function AiTrackingPage({ projectId }: Props) {
                   <button
                     key={tab.id}
                     type="button"
-                    className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors ${
+                    className={`inline-flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold border-b-2 transition-all ${
                       active
-                        ? "border-primary text-primary"
+                        ? "border-primary text-primary bg-primary/[0.04] rounded-t-lg"
                         : "border-transparent text-base-content/60 hover:text-base-content hover:border-base-300"
                     }`}
                     onClick={() => setActiveTab(tab.id)}
                   >
-                    <Icon className="size-4" />
+                    <Icon className="size-3.5" />
                     <span>{tab.label}</span>
                     {tab.badge != null && (
                       <span
-                        className={`badge badge-xs ${active ? "badge-primary" : "badge-ghost"}`}
+                        className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
+                          active ? "bg-primary/15 text-primary" : "bg-base-200 text-base-content/60"
+                        }`}
                       >
                         {tab.badge}
                       </span>

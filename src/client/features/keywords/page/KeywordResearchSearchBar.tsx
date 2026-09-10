@@ -26,8 +26,8 @@ export function KeywordResearchSearchBar({ controller }: Props) {
   const { controlsForm, handleSearchSubmit } = controller;
 
   return (
-    <div className="card border border-base-300 bg-base-100">
-      <div className="card-body gap-2">
+    <div className="overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xs">
+      <div className="p-5 gap-2">
         <form
           className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-start lg:gap-2"
           onSubmit={handleSearchSubmit}
@@ -39,7 +39,7 @@ export function KeywordResearchSearchBar({ controller }: Props) {
 
               return (
                 <label
-                  className={`flex w-full lg:flex-1 lg:min-w-0 lg:max-w-md items-start gap-2 rounded-lg border bg-base-100 px-4 py-3 transition-colors focus-within:border-primary ${
+                  className={`flex w-full lg:flex-1 lg:min-w-0 lg:max-w-md items-start gap-2 rounded-xl border bg-base-100 px-4 py-3 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 ${
                     keywordError ? "border-error" : "border-base-300"
                   }`}
                 >
@@ -114,7 +114,7 @@ export function KeywordResearchSearchBar({ controller }: Props) {
 
             <button
               type="submit"
-              className="btn btn-primary w-full px-6 lg:w-auto lg:shrink-0"
+              className="btn btn-primary rounded-xl font-semibold shadow-xs w-full px-6 lg:w-auto lg:shrink-0"
             >
               Search
             </button>

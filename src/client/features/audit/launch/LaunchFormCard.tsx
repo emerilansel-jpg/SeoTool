@@ -18,9 +18,9 @@ export function LaunchFormCard({
   maxPagesLimit,
 }: Props) {
   return (
-    <div className="card bg-base-100 border border-base-300">
-      <div className="card-body gap-4">
-        <h2 className="card-title text-base">Start New Audit</h2>
+    <div className="overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xs">
+      <div className="p-6 gap-4">
+        <h2 className="text-base font-bold tracking-tight text-base-content mb-3">Start New Audit</h2>
 
         <form
           className="grid grid-cols-1 gap-3 lg:grid-cols-12 lg:items-center"
@@ -35,7 +35,7 @@ export function LaunchFormCard({
 
               return (
                 <label
-                  className={`input input-bordered w-full lg:col-span-9 ${urlError ? "input-error" : ""}`}
+                  className={`input input-bordered rounded-xl w-full lg:col-span-9 ${urlError ? "input-error" : ""}`}
                 >
                   <input
                     placeholder="https://example.com"
@@ -56,7 +56,7 @@ export function LaunchFormCard({
             {(isSubmitting) => (
               <button
                 type="submit"
-                className="btn btn-primary btn-sm w-full lg:col-span-3"
+                className="btn btn-primary btn-sm rounded-xl font-semibold shadow-xs w-full lg:col-span-3"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (

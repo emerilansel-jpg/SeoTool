@@ -232,19 +232,19 @@ export function Ga4InsightsPage({ projectId }: { projectId: string }) {
           <>
             <TotalsCards report={report} />
 
-            <div className="rounded-xl border border-base-300 bg-base-100">
-              <div className="flex items-center justify-between border-b border-base-300 px-4 py-3">
-                <h2 className="text-sm font-semibold">Sessions over time</h2>
+            <div className="overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xs">
+              <div className="flex items-center justify-between border-b border-base-300/70 px-5 py-3.5 bg-base-200/30">
+                <h2 className="text-sm font-bold tracking-tight text-base-content">Sessions over time</h2>
                 {reportQuery.isFetching && !reportQuery.isPending ? (
                   <Loader2 className="size-4 animate-spin text-base-content/40" />
                 ) : null}
               </div>
-              <div className="p-4">
+              <div className="p-5">
                 <SessionsTrendChart trend={report.trend} />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <BreakdownCard
                 title="Traffic by channel"
                 rows={report.channels}
@@ -258,8 +258,8 @@ export function Ga4InsightsPage({ projectId }: { projectId: string }) {
               />
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-base-300 bg-base-100">
-              <div className="flex flex-col gap-3 border-b border-base-300 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xs">
+              <div className="flex flex-col gap-3 border-b border-base-300/70 px-5 py-3.5 bg-base-200/30 lg:flex-row lg:items-center lg:justify-between">
                 <div role="tablist" className="tabs tabs-border w-fit">
                   <TabButton
                     active={tab === "pages"}

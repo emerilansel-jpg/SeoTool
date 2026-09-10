@@ -25,14 +25,14 @@ export function Modal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
-        className={`card bg-base-100 border border-base-300 w-full ${maxWidth} max-h-full shadow-xl`}
+        className={`w-full ${maxWidth} max-h-[92vh] overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xl`}
       >
-        <div className="card-body gap-4 overflow-y-auto">{children}</div>
+        <div className="p-6 gap-4 overflow-y-auto max-h-[calc(92vh-2rem)]">{children}</div>
       </div>
     </div>
   );

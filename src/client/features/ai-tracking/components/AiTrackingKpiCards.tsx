@@ -27,15 +27,15 @@ export function AiTrackingKpiCards({
   const isAllSelected = selectedPlatform === "all";
 
   return (
-    <div className="flex flex-col gap-6 rounded-xl border border-base-300 bg-base-100 p-6 shadow-sm">
+    <div className="flex flex-col gap-6 rounded-2xl border border-base-300/80 bg-base-100 p-6 shadow-2xs">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Model Filter Column */}
         <div className="flex flex-col justify-between">
           <div className="mb-2 flex items-center gap-1.5">
-            <p className="text-sm font-medium tracking-tight text-base-content/70">
+            <p className="text-xs font-bold uppercase tracking-wider text-base-content/60">
               AI Models
             </p>
-            <span className="flex items-center gap-1.5 rounded-full bg-warning/15 px-3 py-1 text-[11px] font-semibold text-warning-content">
+            <span className="flex items-center gap-1.5 rounded-full bg-warning/15 px-2.5 py-0.5 text-[11px] font-semibold text-warning-content">
               <span className="size-1.5 rounded-full bg-warning animate-pulse" />
               {isAllSelected
                 ? "All Selected"
@@ -55,7 +55,7 @@ export function AiTrackingKpiCards({
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <button
               type="button"
-              className={`btn btn-xs rounded-lg ${isAllSelected ? "btn-primary" : "btn-outline"}`}
+              className={`btn btn-xs rounded-xl font-semibold shadow-2xs ${isAllSelected ? "btn-primary shadow-xs" : "btn-outline border-base-300"}`}
               onClick={() => onSelectPlatform("all")}
             >
               All
@@ -66,7 +66,7 @@ export function AiTrackingKpiCards({
                 <button
                   key={platform}
                   type="button"
-                  className={`btn btn-xs rounded-lg gap-1.5 ${active ? "btn-primary" : "btn-outline"}`}
+                  className={`btn btn-xs rounded-xl gap-1.5 font-semibold shadow-2xs ${active ? "btn-primary shadow-xs" : "btn-outline border-base-300"}`}
                   onClick={() => onSelectPlatform(active ? "all" : platform)}
                 >
                   <Bot className="size-3" />

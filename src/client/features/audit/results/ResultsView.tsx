@@ -70,8 +70,8 @@ export function ResultsView({
         lighthouseSummary={stats.lighthouseSummary}
       />
 
-      <div className="card bg-base-100 border border-base-300">
-        <div className="card-body gap-3">
+      <div className="overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xs">
+        <div className="p-5 gap-3">
           <ResultsHeader
             issueCount={issues.length}
             pageCount={pages.length}

@@ -16,8 +16,8 @@ export function CardShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-xs transition-all duration-200 hover:border-base-content/20 hover:shadow-md">
-      <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-base-300/80 bg-base-200/20">
+    <div className="overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xs transition-all duration-200 hover:border-primary/35 hover:shadow-xs">
+      <div className="flex items-center justify-between gap-4 px-5 py-3.5 border-b border-base-300/70 bg-base-200/30">
         <div className="flex items-center gap-2.5 min-w-0">
           {icon ? <div className="shrink-0">{icon}</div> : null}
           <h2 className="text-sm font-bold tracking-tight text-base-content leading-tight truncate">
@@ -29,7 +29,7 @@ export function CardShell({
       <div className="p-5">
         {children}
         {stamp ? (
-          <p className="mt-4 text-[11px] font-medium text-base-content/45">
+          <p className="mt-4 text-[11px] font-mono font-medium text-base-content/45">
             {stamp}
           </p>
         ) : null}
@@ -66,17 +66,17 @@ export function Stat({
 }) {
   const toneClass =
     tone === "success"
-      ? "text-emerald-500"
+      ? "text-emerald-600 dark:text-emerald-400"
       : tone === "error"
-        ? "text-rose-500"
+        ? "text-rose-600 dark:text-rose-400"
         : "text-base-content";
   return (
-    <div className="rounded-xl border border-base-300/60 bg-base-200/30 p-3.5 transition-colors hover:bg-base-200/50">
-      <p className="text-[11px] font-bold uppercase tracking-wider text-base-content/50">
+    <div className="rounded-xl border border-base-300/70 bg-base-200/30 p-4 transition-all hover:bg-base-200/60 hover:border-base-300">
+      <p className="text-[11px] font-bold uppercase tracking-wider text-base-content/55">
         {label}
       </p>
       <p
-        className={`mt-1 text-2xl font-bold tracking-tight tabular-nums ${toneClass}`}
+        className={`mt-1.5 text-2xl font-extrabold tracking-tight tabular-nums ${toneClass}`}
       >
         {value}
       </p>
@@ -99,13 +99,13 @@ export function PercentDelta({
   const isPositive = rounded > 0;
   const isNegative = rounded < 0;
   const tone = isPositive
-    ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
+    ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/20"
     : isNegative
-      ? "text-rose-600 dark:text-rose-400 bg-rose-500/10"
-      : "text-base-content/60 bg-base-200";
+      ? "text-rose-600 dark:text-rose-400 bg-rose-500/10 ring-1 ring-rose-500/20"
+      : "text-base-content/70 bg-base-200";
   return (
     <span
-      className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[11px] font-semibold tabular-nums ${tone}`}
+      className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${tone}`}
     >
       {isPositive ? "▲ +" : isNegative ? "▼ " : ""}
       {Math.abs(rounded)}%

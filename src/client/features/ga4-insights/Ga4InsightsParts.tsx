@@ -193,15 +193,21 @@ function TotalCard({
   deltaTitle: string;
 }) {
   return (
-    <div className="rounded-lg border border-base-300 bg-base-100 p-4">
-      <div className="text-xs uppercase tracking-wide text-base-content/60">
+    <div className="rounded-2xl border border-base-300/80 bg-base-100 p-5 shadow-2xs transition-all duration-200 hover:border-primary/30 hover:shadow-xs">
+      <div className="text-[11px] font-bold uppercase tracking-wider text-base-content/50">
         {label}
       </div>
-      <div className="mt-1 flex items-baseline gap-2">
-        <span className="text-2xl font-semibold">{value}</span>
+      <div className="mt-2 flex items-baseline justify-between gap-2 flex-wrap">
+        <span className="text-2xl font-extrabold tracking-tight tabular-nums text-base-content">{value}</span>
         {delta ? (
           <span
-            className={`text-xs ${delta.improved ? "text-success" : delta.improved === false ? "text-error" : "text-base-content/50"}`}
+            className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${
+              delta.improved
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20"
+                : delta.improved === false
+                  ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 ring-1 ring-rose-500/20"
+                  : "bg-base-200 text-base-content/60"
+            }`}
             title={deltaTitle}
           >
             {delta.text}
@@ -346,33 +352,33 @@ export function BreakdownCard({
 }) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-xl border border-base-300 bg-base-100 p-5">
-        <h3 className="mb-2 text-sm font-semibold">{title}</h3>
+      <div className="rounded-2xl border border-base-300/80 bg-base-100 p-5 shadow-2xs">
+        <h3 className="mb-2 text-sm font-bold tracking-tight text-base-content">{title}</h3>
         <p className="text-sm text-base-content/60">No data for this range.</p>
       </div>
     );
   }
   return (
-    <div className="rounded-xl border border-base-300 bg-base-100 p-5">
-      <h3 className="mb-3 text-sm font-semibold">{title}</h3>
-      <ul className="space-y-2">
+    <div className="rounded-2xl border border-base-300/80 bg-base-100 p-5 shadow-2xs">
+      <h3 className="mb-3.5 text-sm font-bold tracking-tight text-base-content">{title}</h3>
+      <ul className="space-y-3">
         {rows.map((row) => {
           const share =
             totalSessions > 0 ? row.metrics.sessions / totalSessions : 0;
           const isHighlight = highlightKey === row.key;
           return (
-            <li key={row.key} className="space-y-1">
+            <li key={row.key} className="space-y-1.5">
               <div className="flex items-center justify-between gap-2 text-sm">
                 <span className="truncate">
                   {isHighlight ? (
-                    <span className="font-medium text-success">{row.key}</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">{row.key}</span>
                   ) : (
-                    row.key
+                    <span className="font-medium text-base-content/85">{row.key}</span>
                   )}
                 </span>
-                <span className="shrink-0 tabular-nums text-base-content/60">
+                <span className="shrink-0 tabular-nums font-medium text-base-content/70">
                   {formatCount(row.metrics.sessions)}
-                  <span className="ml-1.5 text-xs">
+                  <span className="ml-1.5 text-xs text-base-content/50">
                     ({(share * 100).toFixed(1)}%)
                   </span>
                 </span>
@@ -380,7 +386,7 @@ export function BreakdownCard({
               <div className="h-1.5 overflow-hidden rounded-full bg-base-200">
                 <div
                   className={
-                    isHighlight ? "h-full bg-success" : "h-full bg-primary/60"
+                    isHighlight ? "h-full rounded-full bg-emerald-500" : "h-full rounded-full bg-primary"
                   }
                   style={{ width: `${Math.max(share * 100, 2)}%` }}
                 />

@@ -198,10 +198,10 @@ export function ProjectSwitcher({
         aria-haspopup="listbox"
         onClick={() => (open ? closePanel() : openPanel())}
         onKeyDown={handleTriggerKeyDown}
-        className="flex w-full items-center justify-between gap-2.5 rounded-xl border border-base-300 bg-base-100 px-3 py-2 text-left shadow-xs transition-all hover:border-primary/40 hover:bg-base-100"
+        className="flex w-full items-center justify-between gap-2.5 rounded-xl border border-base-300/80 bg-base-100 px-3 py-2 text-left shadow-2xs transition-all hover:border-primary/50 hover:shadow-xs"
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-xs font-black text-primary border border-primary/20">
             {activeProject?.name
               ? activeProject.name.charAt(0).toUpperCase()
               : "P"}
@@ -221,7 +221,7 @@ export function ProjectSwitcher({
       </button>
 
       {open ? (
-        <div className="absolute left-0 right-0 top-full z-30 mt-1 overflow-hidden rounded-box border border-base-300 bg-base-100 shadow-lg">
+        <div className="absolute left-0 right-0 top-full z-30 mt-1.5 overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-xl">
           {showSearch ? (
             <div className="border-b border-base-300 p-2">
               <label className="input input-sm w-full">

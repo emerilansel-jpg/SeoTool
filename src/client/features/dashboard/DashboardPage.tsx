@@ -378,18 +378,18 @@ export function DashboardPage({ projectId }: { projectId: string }) {
               </span>
             ) : null}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <Link
               to="/p/$projectId/audit"
               params={{ projectId }}
-              className="btn btn-outline btn-xs font-semibold border-base-300 hover:border-primary hover:bg-primary/5"
+              className="btn btn-outline btn-sm rounded-xl font-semibold border-base-300 hover:border-primary hover:bg-primary/5 shadow-2xs"
             >
               Run Audit
             </Link>
             <Link
               to="/p/$projectId/keywords"
               params={{ projectId }}
-              className="btn btn-primary btn-xs font-semibold shadow-2xs"
+              className="btn btn-primary btn-sm rounded-xl font-semibold shadow-xs"
             >
               Research Keywords
             </Link>

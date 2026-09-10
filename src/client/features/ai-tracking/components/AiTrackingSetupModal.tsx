@@ -78,18 +78,20 @@ export function AiTrackingSetupModal({
   return (
     <Modal maxWidth="max-w-lg" onClose={onClose} labelledBy="setup-title">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <h3 id="setup-title" className="text-lg font-bold text-base-content">
-          {initialConfig ? "Edit AI Tracking Settings" : "Setup AI Tracking"}
-        </h3>
-        <p className="text-xs text-base-content/60">
-          Configure the brand and platforms you want to monitor in AI models.
-        </p>
+        <div>
+          <h3 id="setup-title" className="text-xl font-bold tracking-tight text-base-content">
+            {initialConfig ? "Edit AI Tracking Settings" : "Setup AI Tracking"}
+          </h3>
+          <p className="mt-1 text-xs text-base-content/60">
+            Configure the brand and platforms you want to monitor in AI models.
+          </p>
+        </div>
 
         <div className="form-control">
-          <label className="label text-xs font-semibold">Brand Name</label>
+          <label className="label text-xs font-semibold text-base-content/80">Brand Name</label>
           <input
             type="text"
-            className="input input-bordered input-sm"
+            className="input input-bordered input-sm rounded-xl"
             placeholder="e.g. Zoho"
             value={brandName}
             onChange={(e) => setBrandName(e.target.value)}
@@ -98,10 +100,10 @@ export function AiTrackingSetupModal({
         </div>
 
         <div className="form-control">
-          <label className="label text-xs font-semibold">Domain</label>
+          <label className="label text-xs font-semibold text-base-content/80">Domain</label>
           <input
             type="text"
-            className="input input-bordered input-sm"
+            className="input input-bordered input-sm rounded-xl"
             placeholder="e.g. zoho.com"
             value={domain}
             onChange={(e) => setDomain(e.target.value)}
@@ -110,12 +112,12 @@ export function AiTrackingSetupModal({
         </div>
 
         <div className="form-control">
-          <label className="label text-xs font-semibold">
+          <label className="label text-xs font-semibold text-base-content/80">
             Brand Aliases (comma separated)
           </label>
           <input
             type="text"
-            className="input input-bordered input-sm"
+            className="input input-bordered input-sm rounded-xl"
             placeholder="e.g. Zoho CRM, Zoho Suite"
             value={aliases}
             onChange={(e) => setAliases(e.target.value)}
@@ -123,31 +125,38 @@ export function AiTrackingSetupModal({
         </div>
 
         <div className="form-control">
-          <label className="label text-xs font-semibold">
+          <label className="label text-xs font-semibold text-base-content/80">
             Monitored Platforms
           </label>
-          <div className="grid grid-cols-2 gap-2">
-            {ALL_PLATFORMS.map((p) => (
-              <label
-                key={p.id}
-                className="flex items-center gap-2 rounded-lg border border-base-300 p-2 text-xs cursor-pointer hover:bg-base-200/50"
-              >
-                <input
-                  type="checkbox"
-                  className="checkbox checkbox-xs checkbox-primary"
-                  checked={platforms.includes(p.id)}
-                  onChange={() => togglePlatform(p.id)}
-                />
-                <span className="font-medium text-base-content">{p.label}</span>
-              </label>
-            ))}
+          <div className="grid grid-cols-2 gap-2.5">
+            {ALL_PLATFORMS.map((p) => {
+              const checked = platforms.includes(p.id);
+              return (
+                <label
+                  key={p.id}
+                  className={`flex items-center gap-2.5 rounded-xl border p-2.5 text-xs cursor-pointer transition-all ${
+                    checked
+                      ? "border-primary/40 bg-primary/5 text-primary"
+                      : "border-base-300/80 bg-base-100 hover:bg-base-200/50 text-base-content"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-xs checkbox-primary rounded"
+                    checked={checked}
+                    onChange={() => togglePlatform(p.id)}
+                  />
+                  <span className="font-semibold">{p.label}</span>
+                </label>
+              );
+            })}
           </div>
         </div>
 
         <div className="form-control">
-          <label className="label text-xs font-semibold">Check Schedule</label>
+          <label className="label text-xs font-semibold text-base-content/80">Check Schedule</label>
           <select
-            className="select select-bordered select-sm text-xs"
+            className="select select-bordered select-sm rounded-xl text-xs"
             value={schedule}
             onChange={(e) =>
               setSchedule(
@@ -162,10 +171,10 @@ export function AiTrackingSetupModal({
           </select>
         </div>
 
-        <div className="modal-action">
+        <div className="modal-action pt-2">
           <button
             type="button"
-            className="btn btn-sm btn-ghost"
+            className="btn btn-sm btn-ghost rounded-xl"
             onClick={onClose}
             disabled={isSaving}
           >
@@ -173,7 +182,7 @@ export function AiTrackingSetupModal({
           </button>
           <button
             type="submit"
-            className="btn btn-sm btn-primary"
+            className="btn btn-sm btn-primary rounded-xl font-semibold shadow-xs"
             disabled={isSaving || !brandName.trim() || !domain.trim()}
           >
             {isSaving ? "Saving…" : "Save Configuration"}
