@@ -87,11 +87,11 @@ export function AiTrackingSetupModal({
           </p>
         </div>
 
-        <div className="form-control">
-          <label className="label text-xs font-semibold text-base-content/80">Brand Name</label>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-base-content/80">Brand Name</label>
           <input
             type="text"
-            className="input input-bordered input-sm rounded-xl"
+            className="input input-bordered input-sm rounded-xl w-full"
             placeholder="e.g. Zoho"
             value={brandName}
             onChange={(e) => setBrandName(e.target.value)}
@@ -99,11 +99,11 @@ export function AiTrackingSetupModal({
           />
         </div>
 
-        <div className="form-control">
-          <label className="label text-xs font-semibold text-base-content/80">Domain</label>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-base-content/80">Domain</label>
           <input
             type="text"
-            className="input input-bordered input-sm rounded-xl"
+            className="input input-bordered input-sm rounded-xl w-full"
             placeholder="e.g. zoho.com"
             value={domain}
             onChange={(e) => setDomain(e.target.value)}
@@ -111,21 +111,21 @@ export function AiTrackingSetupModal({
           />
         </div>
 
-        <div className="form-control">
-          <label className="label text-xs font-semibold text-base-content/80">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-base-content/80">
             Brand Aliases (comma separated)
           </label>
           <input
             type="text"
-            className="input input-bordered input-sm rounded-xl"
+            className="input input-bordered input-sm rounded-xl w-full"
             placeholder="e.g. Zoho CRM, Zoho Suite"
             value={aliases}
             onChange={(e) => setAliases(e.target.value)}
           />
         </div>
 
-        <div className="form-control">
-          <label className="label text-xs font-semibold text-base-content/80">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-base-content/80">
             Monitored Platforms
           </label>
           <div className="grid grid-cols-2 gap-2.5">
@@ -153,10 +153,10 @@ export function AiTrackingSetupModal({
           </div>
         </div>
 
-        <div className="form-control">
-          <label className="label text-xs font-semibold text-base-content/80">Check Schedule</label>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-base-content/80">Check Schedule</label>
           <select
-            className="select select-bordered select-sm rounded-xl text-xs"
+            className="select select-bordered select-sm rounded-xl text-xs w-full"
             value={schedule}
             onChange={(e) =>
               setSchedule(

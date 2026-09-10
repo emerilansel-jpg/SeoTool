@@ -134,4 +134,55 @@ test.describe("Full Dashboard UI/UX QA and Screenshot Capture", () => {
       });
     }
   });
+
+  test("QA Modals layout & form-controls (AI Tracking & Rank Tracking)", async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.addInitScript(() => {
+      (window as unknown as Record<string, boolean>).__E2E_BYPASS_AUTH = true;
+    });
+
+    const projectId = await getE2EProjectId(page);
+    expect(projectId).toBeTruthy();
+
+    // 1. AI Tracking setup modal
+    await page.goto(`/p/${projectId}/ai-tracking`, {
+      waitUntil: "domcontentloaded",
+    });
+    await page.waitForTimeout(2000);
+    const setupBtn = page
+      .getByRole("button", {
+        name: /Setup Tracking|Settings|Configure AI Generatif/i,
+      })
+      .first();
+    if ((await setupBtn.count()) > 0) {
+      await setupBtn.click({ force: true });
+      await page.waitForTimeout(600);
+      await page.screenshot({
+        path: path.join(SCREENSHOTS_DIR, "modal_ai_tracking_setup.png"),
+      });
+      const cancelBtn = page.getByRole("button", { name: "Cancel" });
+      if (await cancelBtn.isVisible()) await cancelBtn.click();
+    }
+
+    // 2. Rank Tracking modal
+    await page.goto(`/p/${projectId}/rank-tracking`, {
+      waitUntil: "domcontentloaded",
+    });
+    await page.waitForTimeout(2000);
+    const trackBtn = page
+      .getByRole("button", {
+        name: /Add Domain|Track Keywords|Add Keywords/i,
+      })
+      .first();
+    if ((await trackBtn.count()) > 0) {
+      await trackBtn.click({ force: true });
+      await page.waitForTimeout(600);
+      await page.screenshot({
+        path: path.join(SCREENSHOTS_DIR, "modal_rank_tracking_config.png"),
+      });
+    }
+  });
 });
