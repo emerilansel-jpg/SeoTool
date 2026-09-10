@@ -14,7 +14,9 @@ interface Props {
     schedule: "manual" | "daily" | "weekly";
     scheduleStatus: "idle" | "active" | "paused";
   } | null;
-  onSave: (input: Omit<SaveAiTrackingConfigInput, "projectId">) => Promise<void>;
+  onSave: (
+    input: Omit<SaveAiTrackingConfigInput, "projectId">,
+  ) => Promise<void>;
   onClose: () => void;
   isSaving: boolean;
 }
@@ -38,7 +40,9 @@ export function AiTrackingSetupModal({
     initialConfig?.brandAliases?.join(", ") ?? "",
   );
   const [platforms, setPlatforms] = useState<AiTrackingPlatform[]>(
-    initialConfig?.platforms?.length ? initialConfig.platforms : ["chat_gpt", "gemini", "perplexity"],
+    initialConfig?.platforms?.length
+      ? initialConfig.platforms
+      : ["chat_gpt", "gemini", "perplexity"],
   );
   const [schedule, setSchedule] = useState<"manual" | "daily" | "weekly">(
     initialConfig?.schedule ?? "manual",
@@ -106,7 +110,9 @@ export function AiTrackingSetupModal({
         </div>
 
         <div className="form-control">
-          <label className="label text-xs font-semibold">Brand Aliases (comma separated)</label>
+          <label className="label text-xs font-semibold">
+            Brand Aliases (comma separated)
+          </label>
           <input
             type="text"
             className="input input-bordered input-sm"
@@ -117,7 +123,9 @@ export function AiTrackingSetupModal({
         </div>
 
         <div className="form-control">
-          <label className="label text-xs font-semibold">Monitored Platforms</label>
+          <label className="label text-xs font-semibold">
+            Monitored Platforms
+          </label>
           <div className="grid grid-cols-2 gap-2">
             {ALL_PLATFORMS.map((p) => (
               <label

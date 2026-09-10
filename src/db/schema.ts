@@ -208,4 +208,7 @@ export const {
   aiTrackingObservations,
   aiTrackingMentions,
   aiTrackingCitations,
+  aiDiscoveredPrompts,
+  aiTopPages,
+  aiVisibilitySnapshots,
 } = schema;

@@ -34,7 +34,11 @@ export function extractText(response: LlmResponseResult): string {
 }
 
 export function extractCitations(response: LlmResponseResult) {
-  const citations: Array<{ url: string; domain: string; title: string | null }> = [];
+  const citations: Array<{
+    url: string;
+    domain: string;
+    title: string | null;
+  }> = [];
   const seen = new Set<string>();
 
   for (const item of response.items ?? []) {
@@ -74,7 +78,8 @@ export function aggregateDashboardMetrics(params: {
   citations: CitationRow[];
   latestRun: RunRow | null;
 }): AiTrackingDashboardData {
-  const { config, promptsList, observations, mentions, citations, latestRun } = params;
+  const { config, promptsList, observations, mentions, citations, latestRun } =
+    params;
 
   const mentionsByObs = new Map<string, MentionRow[]>();
   for (const m of mentions) {
@@ -90,7 +95,9 @@ export function aggregateDashboardMetrics(params: {
     citationsByObs.set(c.observationId, list);
   }
 
-  const successfulObservations = observations.filter((o) => o.status === "success");
+  const successfulObservations = observations.filter(
+    (o) => o.status === "success",
+  );
   const totalResponses = successfulObservations.length;
 
   let targetMentionsCount = 0;
@@ -126,7 +133,8 @@ export function aggregateDashboardMetrics(params: {
 
     if (targetMention) {
       targetMentionsCount++;
-      if (targetMention.position != null) targetPositions.push(targetMention.position);
+      if (targetMention.position != null)
+        targetPositions.push(targetMention.position);
       if (targetMention.sentiment === "positive") positiveSentiment++;
       else if (targetMention.sentiment === "mixed") mixedSentiment++;
       else if (targetMention.sentiment === "negative") negativeSentiment++;
@@ -134,7 +142,10 @@ export function aggregateDashboardMetrics(params: {
 
       if (targetMention.evidence) {
         const phrase = targetMention.evidence.slice(0, 60).trim();
-        const existing = insightMap.get(phrase) ?? { count: 0, sentiment: targetMention.sentiment };
+        const existing = insightMap.get(phrase) ?? {
+          count: 0,
+          sentiment: targetMention.sentiment,
+        };
         existing.count++;
         insightMap.set(phrase, existing);
       }
@@ -158,20 +169,40 @@ export function aggregateDashboardMetrics(params: {
     }
   }
 
-  const visibilityScore = totalResponses > 0 ? Math.round((targetMentionsCount / totalResponses) * 100) : 0;
-  const avgPosition = targetPositions.length > 0
-    ? Number((targetPositions.reduce((a, b) => a + b, 0) / targetPositions.length).toFixed(1))
-    : null;
+  const visibilityScore =
+    totalResponses > 0
+      ? Math.round((targetMentionsCount / totalResponses) * 100)
+      : 0;
+  const avgPosition =
+    targetPositions.length > 0
+      ? Number(
+          (
+            targetPositions.reduce((a, b) => a + b, 0) / targetPositions.length
+          ).toFixed(1),
+        )
+      : null;
 
-  const classifiedCount = positiveSentiment + mixedSentiment + negativeSentiment;
-  const positivePercent = classifiedCount > 0
-    ? Math.round((positiveSentiment / classifiedCount) * 100)
-    : (targetMentionsCount > 0 ? 100 : 0);
-  const brandReputationScore = classifiedCount > 0
-    ? Math.round(((positiveSentiment + 0.5 * mixedSentiment) / classifiedCount) * 100)
-    : (targetMentionsCount > 0 ? 65 : 0);
+  const classifiedCount =
+    positiveSentiment + mixedSentiment + negativeSentiment;
+  const positivePercent =
+    classifiedCount > 0
+      ? Math.round((positiveSentiment / classifiedCount) * 100)
+      : targetMentionsCount > 0
+        ? 100
+        : 0;
+  const brandReputationScore =
+    classifiedCount > 0
+      ? Math.round(
+          ((positiveSentiment + 0.5 * mixedSentiment) / classifiedCount) * 100,
+        )
+      : targetMentionsCount > 0
+        ? 65
+        : 0;
 
-  const dayMap = new Map<string, { positions: number[]; mentions: number; total: number }>();
+  const dayMap = new Map<
+    string,
+    { positions: number[]; mentions: number; total: number }
+  >();
   for (const obs of successfulObservations) {
     const dateKey = obs.observedAt.slice(0, 10);
     let dayData = dayMap.get(dateKey);
@@ -190,9 +221,14 @@ export function aggregateDashboardMetrics(params: {
   const sortedDates = Array.from(dayMap.keys()).toSorted();
   const positionTrend = sortedDates.map((date) => {
     const d = dayMap.get(date)!;
-    const pos = d.positions.length > 0
-      ? Number((d.positions.reduce((a, b) => a + b, 0) / d.positions.length).toFixed(1))
-      : null;
+    const pos =
+      d.positions.length > 0
+        ? Number(
+            (
+              d.positions.reduce((a, b) => a + b, 0) / d.positions.length
+            ).toFixed(1),
+          )
+        : null;
     return { date, position: pos };
   });
 
@@ -204,10 +240,19 @@ export function aggregateDashboardMetrics(params: {
 
   const competitorRankings = Array.from(entityStats.values())
     .map((stat) => {
-      const pos = stat.positions.length > 0
-        ? Number((stat.positions.reduce((a, b) => a + b, 0) / stat.positions.length).toFixed(1))
-        : 99;
-      const visPct = totalResponses > 0 ? Math.round((stat.mentionsCount / totalResponses) * 100) : 0;
+      const pos =
+        stat.positions.length > 0
+          ? Number(
+              (
+                stat.positions.reduce((a, b) => a + b, 0) /
+                stat.positions.length
+              ).toFixed(1),
+            )
+          : 99;
+      const visPct =
+        totalResponses > 0
+          ? Math.round((stat.mentionsCount / totalResponses) * 100)
+          : 0;
       return {
         domain: stat.domain,
         brandName: stat.brandName,
@@ -224,21 +269,27 @@ export function aggregateDashboardMetrics(params: {
     });
 
   const topInsights = Array.from(insightMap.entries())
-    .map(([text, val]) => ({ text, count: val.count, sentiment: val.sentiment }))
+    .map(([text, val]) => ({
+      text,
+      count: val.count,
+      sentiment: val.sentiment,
+    }))
     .toSorted((a, b) => b.count - a.count)
     .slice(0, 10);
 
   const promptItems = promptsList.map((p) => {
     const obsForPrompt = observations.filter((o) => o.promptId === p.id);
     const latestObs = obsForPrompt[0];
-    const tm = latestObs ? (mentionsByObs.get(latestObs.id) ?? []).find((m) => m.isTargetBrand) : null;
+    const tm = latestObs
+      ? (mentionsByObs.get(latestObs.id) ?? []).find((m) => m.isTargetBrand)
+      : null;
     return {
       id: p.id,
       prompt: p.prompt,
       active: p.active,
       createdAt: p.createdAt,
       lastPosition: tm?.position ?? null,
-      lastMentioned: tm ? true : (latestObs ? false : null),
+      lastMentioned: tm ? true : latestObs ? false : null,
       lastSentiment: tm?.sentiment ?? null,
       lastCheckedAt: latestObs?.observedAt ?? null,
     };

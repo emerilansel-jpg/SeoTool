@@ -28,10 +28,13 @@ export function AiTrackingPositionCard({
     (p): p is { date: string; position: number } => p.position != null,
   );
 
-  const chartPoints = validPoints.length > 0 ? validPoints : [
-    { date: "Day 1", position: averagePosition ?? 2.0 },
-    { date: "Day 2", position: averagePosition ?? 1.8 },
-  ];
+  const chartPoints =
+    validPoints.length > 0
+      ? validPoints
+      : [
+          { date: "Day 1", position: averagePosition ?? 2.0 },
+          { date: "Day 2", position: averagePosition ?? 1.8 },
+        ];
 
   const minPos = 1;
   const maxPos = Math.max(5, ...chartPoints.map((p) => p.position));
@@ -42,21 +45,33 @@ export function AiTrackingPositionCard({
 
   const pointsString = chartPoints
     .map((p, i) => {
-      const x = paddingX + (i / Math.max(1, chartPoints.length - 1)) * (width - 2 * paddingX);
-      const y = paddingY + ((p.position - minPos) / Math.max(0.1, maxPos - minPos)) * (height - 2 * paddingY);
+      const x =
+        paddingX +
+        (i / Math.max(1, chartPoints.length - 1)) * (width - 2 * paddingX);
+      const y =
+        paddingY +
+        ((p.position - minPos) / Math.max(0.1, maxPos - minPos)) *
+          (height - 2 * paddingY);
       return `${x},${y}`;
     })
     .join(" ");
 
-  const areaPath = chartPoints.length > 0
-    ? `M ${paddingX},${height - paddingY} L ${chartPoints
-        .map((p, i) => {
-          const x = paddingX + (i / Math.max(1, chartPoints.length - 1)) * (width - 2 * paddingX);
-          const y = paddingY + ((p.position - minPos) / Math.max(0.1, maxPos - minPos)) * (height - 2 * paddingY);
-          return `${x},${y}`;
-        })
-        .join(" L ")} L ${width - paddingX},${height - paddingY} Z`
-    : "";
+  const areaPath =
+    chartPoints.length > 0
+      ? `M ${paddingX},${height - paddingY} L ${chartPoints
+          .map((p, i) => {
+            const x =
+              paddingX +
+              (i / Math.max(1, chartPoints.length - 1)) *
+                (width - 2 * paddingX);
+            const y =
+              paddingY +
+              ((p.position - minPos) / Math.max(0.1, maxPos - minPos)) *
+                (height - 2 * paddingY);
+            return `${x},${y}`;
+          })
+          .join(" L ")} L ${width - paddingX},${height - paddingY} Z`
+      : "";
 
   return (
     <div className="flex flex-col rounded-xl border border-base-300 bg-base-100 p-6 shadow-sm">
@@ -65,8 +80,13 @@ export function AiTrackingPositionCard({
         <div className="flex flex-col justify-between border-base-300 lg:border-r lg:pr-8">
           <div>
             <div className="mb-2 flex items-center gap-2">
-              <p className="text-sm font-medium text-base-content/70">Average Position</p>
-              <div className="tooltip tooltip-right" data-tip="Average ranking of your domain when it appears in AI answers.">
+              <p className="text-sm font-medium text-base-content/70">
+                Average Position
+              </p>
+              <div
+                className="tooltip tooltip-right"
+                data-tip="Average ranking of your domain when it appears in AI answers."
+              >
                 <CircleHelp className="size-4 text-base-content/40 cursor-help" />
               </div>
             </div>
@@ -87,21 +107,56 @@ export function AiTrackingPositionCard({
           </div>
 
           <div className="h-52 w-full pt-2">
-            <svg viewBox={`0 0 ${width} ${height}`} className="size-full overflow-visible">
+            <svg
+              viewBox={`0 0 ${width} ${height}`}
+              className="size-full overflow-visible"
+            >
               <defs>
-                <linearGradient id="avgPositionGradient" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient
+                  id="avgPositionGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
                   <stop offset="0%" stopColor="#f97316" stopOpacity="0.3" />
                   <stop offset="100%" stopColor="#f97316" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
 
               {/* Background Grid Lines */}
-              <line x1={paddingX} x2={width - paddingX} y1={paddingY} y2={paddingY} stroke="currentColor" strokeOpacity="0.1" strokeDasharray="3 3" />
-              <line x1={paddingX} x2={width - paddingX} y1={height / 2} y2={height / 2} stroke="currentColor" strokeOpacity="0.1" strokeDasharray="3 3" />
-              <line x1={paddingX} x2={width - paddingX} y1={height - paddingY} y2={height - paddingY} stroke="currentColor" strokeOpacity="0.1" strokeDasharray="3 3" />
+              <line
+                x1={paddingX}
+                x2={width - paddingX}
+                y1={paddingY}
+                y2={paddingY}
+                stroke="currentColor"
+                strokeOpacity="0.1"
+                strokeDasharray="3 3"
+              />
+              <line
+                x1={paddingX}
+                x2={width - paddingX}
+                y1={height / 2}
+                y2={height / 2}
+                stroke="currentColor"
+                strokeOpacity="0.1"
+                strokeDasharray="3 3"
+              />
+              <line
+                x1={paddingX}
+                x2={width - paddingX}
+                y1={height - paddingY}
+                y2={height - paddingY}
+                stroke="currentColor"
+                strokeOpacity="0.1"
+                strokeDasharray="3 3"
+              />
 
               {/* Area & Line */}
-              {areaPath && <path d={areaPath} fill="url(#avgPositionGradient)" />}
+              {areaPath && (
+                <path d={areaPath} fill="url(#avgPositionGradient)" />
+              )}
               {pointsString && (
                 <polyline
                   points={pointsString}
@@ -115,8 +170,14 @@ export function AiTrackingPositionCard({
 
               {/* Points */}
               {chartPoints.map((p, i) => {
-                const x = paddingX + (i / Math.max(1, chartPoints.length - 1)) * (width - 2 * paddingX);
-                const y = paddingY + ((p.position - minPos) / Math.max(0.1, maxPos - minPos)) * (height - 2 * paddingY);
+                const x =
+                  paddingX +
+                  (i / Math.max(1, chartPoints.length - 1)) *
+                    (width - 2 * paddingX);
+                const y =
+                  paddingY +
+                  ((p.position - minPos) / Math.max(0.1, maxPos - minPos)) *
+                    (height - 2 * paddingY);
                 return (
                   <circle
                     key={p.date}
@@ -132,7 +193,10 @@ export function AiTrackingPositionCard({
 
               {/* Date labels */}
               {chartPoints.map((p, i) => {
-                const x = paddingX + (i / Math.max(1, chartPoints.length - 1)) * (width - 2 * paddingX);
+                const x =
+                  paddingX +
+                  (i / Math.max(1, chartPoints.length - 1)) *
+                    (width - 2 * paddingX);
                 return (
                   <text
                     key={`lbl-${p.date}`}
@@ -154,8 +218,13 @@ export function AiTrackingPositionCard({
           <div>
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <p className="text-sm font-medium text-base-content/70">Average Position Rank</p>
-                <div className="tooltip tooltip-left" data-tip="Your ranking compared to competitors across AI responses.">
+                <p className="text-sm font-medium text-base-content/70">
+                  Average Position Rank
+                </p>
+                <div
+                  className="tooltip tooltip-left"
+                  data-tip="Your ranking compared to competitors across AI responses."
+                >
                   <CircleHelp className="size-4 text-base-content/40 cursor-help" />
                 </div>
               </div>
@@ -183,7 +252,9 @@ export function AiTrackingPositionCard({
                     >
                       <td className="py-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-base-content/40">{idx + 1}.</span>
+                          <span className="text-xs text-base-content/40">
+                            {idx + 1}.
+                          </span>
                           <img
                             src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${comp.domain}&size=32`}
                             alt=""
@@ -193,22 +264,31 @@ export function AiTrackingPositionCard({
                               e.currentTarget.style.display = "none";
                             }}
                           />
-                          <span className="truncate max-w-[140px] text-xs text-base-content">{comp.domain}</span>
+                          <span className="truncate max-w-[140px] text-xs text-base-content">
+                            {comp.domain}
+                          </span>
                           {comp.isTargetBrand && (
-                            <span className="badge badge-xs badge-primary font-medium">Brand</span>
+                            <span className="badge badge-xs badge-primary font-medium">
+                              Brand
+                            </span>
                           )}
                         </div>
                       </td>
                       <td className="py-2 text-right">
                         <span className="text-xs font-semibold text-base-content">
-                          {comp.avgPosition > 0 ? comp.avgPosition.toFixed(1) : "—"}
+                          {comp.avgPosition > 0
+                            ? comp.avgPosition.toFixed(1)
+                            : "—"}
                         </span>
                       </td>
                     </tr>
                   ))}
                   {competitors.length === 0 && (
                     <tr>
-                      <td colSpan={2} className="py-4 text-center text-xs text-base-content/50">
+                      <td
+                        colSpan={2}
+                        className="py-4 text-center text-xs text-base-content/50"
+                      >
                         No competitor tracking data yet.
                       </td>
                     </tr>

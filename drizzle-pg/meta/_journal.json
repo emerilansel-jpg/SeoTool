@@ -288,6 +288,13 @@
       "when": 1788971651294,
       "tag": "0040_nasty_dagger",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1789004261666,
+      "tag": "0041_fixed_loki",
+      "breakpoints": true
     }
   ]
 }

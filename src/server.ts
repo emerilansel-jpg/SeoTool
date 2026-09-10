@@ -5,11 +5,15 @@ import {
 import { routeAgentRequest } from "agents";
 import { resolveUserContextFromHeaders } from "@/middleware/ensure-user/resolve";
 import { ProjectRepository } from "@/server/features/projects/repositories/ProjectRepository";
-import { JetSessionRepository, SamSessionRepository } from "@/server/features/jet/JetSessionRepository";
+import {
+  JetSessionRepository,
+  SamSessionRepository,
+} from "@/server/features/jet/JetSessionRepository";
 import { runScheduledRankChecks } from "@/server/features/rank-tracking/services/scheduledRankChecks";
 import { runScheduledReports } from "@/server/features/reports/services/scheduledReports";
 import { runScheduledAlerts } from "@/server/features/alerts/services/scheduledAlerts";
 import { runScheduledGmbGridScans } from "@/server/features/gmb-grid/services/scheduledGmbGridScans";
+import { runScheduledAiTracking } from "@/server/features/ai-tracking/services/scheduledAiTracking";
 import { getOrCreateOrganizationCustomer } from "@/server/billing/subscription";
 import { assertFeatureAccess } from "@/server/billing/quota-gate";
 import {
@@ -181,5 +185,6 @@ export default {
     await withPgClient(() => runScheduledReports(env));
     await withPgClient(() => runScheduledAlerts(env));
     await withPgClient(() => runScheduledGmbGridScans(env));
+    await withPgClient(() => runScheduledAiTracking(env));
   },
 };

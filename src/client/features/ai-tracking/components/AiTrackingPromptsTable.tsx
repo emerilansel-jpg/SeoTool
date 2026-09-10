@@ -135,7 +135,9 @@ Zoho alternatives for small business`}
                     </span>
                   )}
                   {p.lastMentioned == null && (
-                    <span className="text-xs text-base-content/40">Not checked</span>
+                    <span className="text-xs text-base-content/40">
+                      Not checked
+                    </span>
                   )}
                 </td>
                 <td>
@@ -169,8 +171,12 @@ Zoho alternatives for small business`}
             ))}
             {prompts.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-sm text-base-content/50">
-                  No prompts configured yet. Click &quot;Add Prompts&quot; above to start tracking.
+                <td
+                  colSpan={6}
+                  className="py-8 text-center text-sm text-base-content/50"
+                >
+                  No prompts configured yet. Click &quot;Add Prompts&quot; above
+                  to start tracking.
                 </td>
               </tr>
             )}

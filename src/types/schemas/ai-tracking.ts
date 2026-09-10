@@ -30,14 +30,24 @@ export const saveAiTrackingConfigSchema = z.object({
     .string()
     .trim()
     .min(1, "Domain is required")
-    .transform((d) => d.toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "")),
+    .transform((d) =>
+      d
+        .toLowerCase()
+        .replace(/^https?:\/\//, "")
+        .replace(/^www\./, "")
+        .replace(/\/.*$/, ""),
+    ),
   brandAliases: z.array(z.string().trim().min(1)).default([]),
-  platforms: z.array(aiTrackingPlatformSchema).min(1, "Select at least one platform"),
+  platforms: z
+    .array(aiTrackingPlatformSchema)
+    .min(1, "Select at least one platform"),
   schedule: aiTrackingScheduleSchema.default("manual"),
   scheduleStatus: aiTrackingScheduleStatusSchema.default("idle"),
 });
 
-export type SaveAiTrackingConfigInput = z.infer<typeof saveAiTrackingConfigSchema>;
+export type SaveAiTrackingConfigInput = z.infer<
+  typeof saveAiTrackingConfigSchema
+>;
 
 export const addAiTrackingPromptsSchema = z.object({
   projectId: z.string().min(1),
@@ -47,7 +57,9 @@ export const addAiTrackingPromptsSchema = z.object({
     .max(50, "Maximum 50 prompts per batch"),
 });
 
-export type AddAiTrackingPromptsInput = z.infer<typeof addAiTrackingPromptsSchema>;
+export type AddAiTrackingPromptsInput = z.infer<
+  typeof addAiTrackingPromptsSchema
+>;
 
 export const toggleAiTrackingPromptSchema = z.object({
   projectId: z.string().min(1),
@@ -168,4 +180,119 @@ export interface AiTrackingDashboardData {
     startedAt: string;
     completedAt: string | null;
   } | null;
+  discoveryStats?: {
+    totalDiscovered: number;
+    totalMentioned: number;
+    totalCited: number;
+    totalSearchVolume: number;
+    lastDiscoveryAt: string | null;
+  };
+}
+
+export const discoverAiPromptsSchema = z.object({
+  projectId: z.string().min(1),
+});
+export type DiscoverAiPromptsInput = z.infer<typeof discoverAiPromptsSchema>;
+
+export const getDiscoveredPromptsSchema = z.object({
+  projectId: z.string().min(1),
+  platform: z.string().optional().default("all"),
+  filter: z
+    .enum(["all", "mentioned", "cited", "untracked"])
+    .optional()
+    .default("all"),
+  search: z.string().optional().default(""),
+  page: z.coerce.number().int().min(1).optional().default(1),
+  pageSize: z.coerce.number().int().min(5).max(100).optional().default(20),
+});
+export type GetDiscoveredPromptsInput = z.infer<
+  typeof getDiscoveredPromptsSchema
+>;
+
+export const promoteDiscoveredPromptSchema = z.object({
+  projectId: z.string().min(1),
+  promptId: z.string().min(1),
+});
+export type PromoteDiscoveredPromptInput = z.infer<
+  typeof promoteDiscoveredPromptSchema
+>;
+
+export const getAiCitationsSchema = z.object({
+  projectId: z.string().min(1),
+});
+export type GetAiCitationsInput = z.infer<typeof getAiCitationsSchema>;
+
+export const getAiPagesSchema = z.object({
+  projectId: z.string().min(1),
+});
+export type GetAiPagesInput = z.infer<typeof getAiPagesSchema>;
+
+export const getAiCompetitorsSchema = z.object({
+  projectId: z.string().min(1),
+});
+export type GetAiCompetitorsInput = z.infer<typeof getAiCompetitorsSchema>;
+
+export const getGscAiCorrelationSchema = z.object({
+  projectId: z.string().min(1),
+  dateRange: z.string().optional().default("last_28_days"),
+});
+export type GetGscAiCorrelationInput = z.infer<
+  typeof getGscAiCorrelationSchema
+>;
+
+export interface DiscoveredPromptItem {
+  id: string;
+  prompt: string;
+  platform: string;
+  aiSearchVolume: number;
+  hasMention: boolean;
+  hasCitation: boolean;
+  citationUrl: string | null;
+  brandEntities: string[];
+  sources: Array<{
+    url?: string | null;
+    title?: string | null;
+    domain?: string | null;
+  }>;
+  isTracked: boolean;
+  firstResponseAt: string | null;
+  lastResponseAt: string | null;
+  discoveredAt: string;
+}
+
+export interface AiTopPageItem {
+  id: string;
+  url: string;
+  platform: string;
+  mentions: number;
+  aiSearchVolume: number;
+  updatedAt: string;
+}
+
+export interface AiCitationSourceItem {
+  domain: string;
+  frequency: number;
+  isTargetBrand: boolean;
+  sampleUrls: string[];
+  promptsCount: number;
+}
+
+export interface AiPromptGapItem {
+  prompt: string;
+  aiSearchVolume: number;
+  ourMention: boolean;
+  ourCitation: boolean;
+  competitorsMentioned: string[];
+}
+
+export interface AiGscCorrelationItem {
+  aiPrompt: string;
+  aiPresence: boolean;
+  aiCitation: boolean;
+  gscQuery: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+  sourceBadge: "GSC" | "DataForSEO" | "Tracked" | "Calculated";
 }

@@ -35,6 +35,9 @@ export const aiTrackingConfigs = pgTable(
     })
       .notNull()
       .default("idle"),
+    locationCode: integer("location_code").notNull().default(2840),
+    languageCode: text("language_code").notNull().default("en"),
+    lastDiscoveryAt: timestampColumn("last_discovery_at"),
     nextRunAt: timestampColumn("next_run_at"),
     lastRunAt: timestampColumn("last_run_at"),
     createdAt: timestampColumn("created_at").notNull().default(isoNow),
@@ -183,21 +186,135 @@ export const aiTrackingCitations = pgTable(
     createdAt: timestampColumn("created_at").notNull().default(isoNow),
   },
   (table) => [
-    index("ai_tracking_citations_obs_idx").on(table.observationId),
-  ],
-);
+	    index("ai_tracking_citations_obs_idx").on(table.observationId),
+	  ],
+	);
 
-export const aiTrackingConfigsRelations = relations(
-  aiTrackingConfigs,
-  ({ one, many }) => ({
-    project: one(projects, {
-      fields: [aiTrackingConfigs.projectId],
-      references: [projects.id],
-    }),
-    prompts: many(aiTrackingPrompts),
-    runs: many(aiTrackingRuns),
-  }),
-);
+	export const aiDiscoveredPrompts = pgTable(
+	  "ai_discovered_prompts",
+	  {
+	    id: text("id").primaryKey(),
+	    configId: text("config_id")
+	      .notNull()
+	      .references(() => aiTrackingConfigs.id, { onDelete: "cascade" }),
+	    prompt: text("prompt").notNull(),
+	    platform: text("platform").notNull().default("all"),
+	    aiSearchVolume: integer("ai_search_volume").notNull().default(0),
+	    hasMention: boolean("has_mention").notNull().default(false),
+	    hasCitation: boolean("has_citation").notNull().default(false),
+	    citationUrl: text("citation_url"),
+	    brandEntities: text("brand_entities").notNull().default("[]"),
+	    sources: text("sources").notNull().default("[]"),
+	    isTracked: boolean("is_tracked").notNull().default(false),
+	    firstResponseAt: timestampColumn("first_response_at"),
+	    lastResponseAt: timestampColumn("last_response_at"),
+	    discoveredAt: timestampColumn("discovered_at").notNull().default(isoNow),
+	  },
+	  (table) => [
+	    index("ai_discovered_prompts_config_idx").on(table.configId),
+	    uniqueIndex("ai_discovered_prompts_config_prompt_uniq").on(
+	      table.configId,
+	      table.prompt,
+	    ),
+	    index("ai_discovered_prompts_volume_idx").on(
+	      table.configId,
+	      table.aiSearchVolume,
+	    ),
+	  ],
+	);
+
+	export const aiTopPages = pgTable(
+	  "ai_top_pages",
+	  {
+	    id: text("id").primaryKey(),
+	    configId: text("config_id")
+	      .notNull()
+	      .references(() => aiTrackingConfigs.id, { onDelete: "cascade" }),
+	    url: text("url").notNull(),
+	    platform: text("platform").notNull().default("all"),
+	    mentions: integer("mentions").notNull().default(0),
+	    aiSearchVolume: integer("ai_search_volume").notNull().default(0),
+	    updatedAt: timestampColumn("updated_at").notNull().default(isoNow),
+	  },
+	  (table) => [
+	    index("ai_top_pages_config_idx").on(table.configId),
+	    uniqueIndex("ai_top_pages_config_url_platform_uniq").on(
+	      table.configId,
+	      table.url,
+	      table.platform,
+	    ),
+	  ],
+	);
+
+	export const aiVisibilitySnapshots = pgTable(
+	  "ai_visibility_snapshots",
+	  {
+	    id: text("id").primaryKey(),
+	    configId: text("config_id")
+	      .notNull()
+	      .references(() => aiTrackingConfigs.id, { onDelete: "cascade" }),
+	    snapshotDate: text("snapshot_date").notNull(),
+	    platform: text("platform").notNull().default("all"),
+	    visibilityScore: integer("visibility_score").notNull().default(0),
+	    mentionRate: integer("mention_rate").notNull().default(0),
+	    citationRate: integer("citation_rate").notNull().default(0),
+	    shareOfVoice: integer("share_of_voice").notNull().default(0),
+	    promptsTracked: integer("prompts_tracked").notNull().default(0),
+	    promptsMentioned: integer("prompts_mentioned").notNull().default(0),
+	    promptsCited: integer("prompts_cited").notNull().default(0),
+	    createdAt: timestampColumn("created_at").notNull().default(isoNow),
+	  },
+	  (table) => [
+	    index("ai_visibility_snapshots_config_idx").on(table.configId),
+	    uniqueIndex("ai_visibility_snapshots_config_date_plat_uniq").on(
+	      table.configId,
+	      table.snapshotDate,
+	      table.platform,
+	    ),
+	  ],
+	);
+
+	export const aiTrackingConfigsRelations = relations(
+	  aiTrackingConfigs,
+	  ({ one, many }) => ({
+	    project: one(projects, {
+	      fields: [aiTrackingConfigs.projectId],
+	      references: [projects.id],
+	    }),
+	    prompts: many(aiTrackingPrompts),
+	    runs: many(aiTrackingRuns),
+	    discoveredPrompts: many(aiDiscoveredPrompts),
+	    topPages: many(aiTopPages),
+	    visibilitySnapshots: many(aiVisibilitySnapshots),
+	  }),
+	);
+
+	export const aiDiscoveredPromptsRelations = relations(
+	  aiDiscoveredPrompts,
+	  ({ one }) => ({
+	    config: one(aiTrackingConfigs, {
+	      fields: [aiDiscoveredPrompts.configId],
+	      references: [aiTrackingConfigs.id],
+	    }),
+	  }),
+	);
+
+	export const aiTopPagesRelations = relations(aiTopPages, ({ one }) => ({
+	  config: one(aiTrackingConfigs, {
+	    fields: [aiTopPages.configId],
+	    references: [aiTrackingConfigs.id],
+	  }),
+	}));
+
+	export const aiVisibilitySnapshotsRelations = relations(
+	  aiVisibilitySnapshots,
+	  ({ one }) => ({
+	    config: one(aiTrackingConfigs, {
+	      fields: [aiVisibilitySnapshots.configId],
+	      references: [aiTrackingConfigs.id],
+	    }),
+	  }),
+	);
 
 export const aiTrackingPromptsRelations = relations(
   aiTrackingPrompts,

@@ -6,7 +6,11 @@ interface Props {
 }
 
 export function AiTrackingSentimentCard({ sentiment }: Props) {
-  const total = sentiment.positive + sentiment.mixed + sentiment.negative + sentiment.neutral;
+  const total =
+    sentiment.positive +
+    sentiment.mixed +
+    sentiment.negative +
+    sentiment.neutral;
   const posWidth = total > 0 ? (sentiment.positive / total) * 100 : 100;
   const mixWidth = total > 0 ? (sentiment.mixed / total) * 100 : 0;
   const negWidth = total > 0 ? (sentiment.negative / total) * 100 : 0;
@@ -14,7 +18,9 @@ export function AiTrackingSentimentCard({ sentiment }: Props) {
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-base-300 bg-base-100 p-6 shadow-sm">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-base-content/70">Sentiment Breakdown</p>
+        <p className="text-sm font-medium text-base-content/70">
+          Sentiment Breakdown
+        </p>
         <div
           className="tooltip tooltip-left"
           data-tip="Sentiment analysis of your brand mentions across AI assistant answers"

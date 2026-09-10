@@ -84,10 +84,14 @@ export function extractRankPosition(
   brandKeywords: string[],
 ): number | null {
   const regex = buildBrandRegex(brandKeywords);
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
 
   // Match lines like "1. Brand", "1) Brand", "**1. Brand**", "#1 Brand"
-  const numberedPattern = /^(?:(?:\*\*|#)?\s*(\d+)[.)]\s*(?:\*\*)?|#(\d+)\s+)(.+)/i;
+  const numberedPattern =
+    /^(?:(?:\*\*|#)?\s*(\d+)[.)]\s*(?:\*\*)?|#(\d+)\s+)(.+)/i;
 
   const rankedItems: Array<{ rank: number; content: string }> = [];
 
@@ -176,7 +180,9 @@ export function extractMentions(
 
     if (mentionedInText || mentionedInCitations) {
       const position = extractRankPosition(text, keywords);
-      const evidence = findEvidenceSnippet(text, regex) || (mentionedInCitations ? `Cited in ${citations[0]?.url}` : null);
+      const evidence =
+        findEvidenceSnippet(text, regex) ||
+        (mentionedInCitations ? `Cited in ${citations[0]?.url}` : null);
       const sentiment = evidence ? analyzeSentiment(evidence) : "neutral";
 
       results.push({

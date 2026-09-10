@@ -31,6 +31,9 @@ export const aiTrackingConfigs = sqliteTable(
     })
       .notNull()
       .default("idle"),
+    locationCode: integer("location_code").notNull().default(2840),
+    languageCode: text("language_code").notNull().default("en"),
+    lastDiscoveryAt: text("last_discovery_at"),
     nextRunAt: text("next_run_at"),
     lastRunAt: text("last_run_at"),
     createdAt: text("created_at")
@@ -196,8 +199,102 @@ export const aiTrackingCitations = sqliteTable(
       .notNull()
       .default(sql`(current_timestamp)`),
   },
+  (table) => [index("ai_tracking_citations_obs_idx").on(table.observationId)],
+);
+
+export const aiDiscoveredPrompts = sqliteTable(
+  "ai_discovered_prompts",
+  {
+    id: text("id").primaryKey(),
+    configId: text("config_id")
+      .notNull()
+      .references(() => aiTrackingConfigs.id, { onDelete: "cascade" }),
+    prompt: text("prompt").notNull(),
+    platform: text("platform").notNull().default("all"),
+    aiSearchVolume: integer("ai_search_volume").notNull().default(0),
+    hasMention: integer("has_mention", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    hasCitation: integer("has_citation", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    citationUrl: text("citation_url"),
+    brandEntities: text("brand_entities").notNull().default("[]"),
+    sources: text("sources").notNull().default("[]"),
+    isTracked: integer("is_tracked", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    firstResponseAt: text("first_response_at"),
+    lastResponseAt: text("last_response_at"),
+    discoveredAt: text("discovered_at")
+      .notNull()
+      .default(sql`(current_timestamp)`),
+  },
   (table) => [
-    index("ai_tracking_citations_obs_idx").on(table.observationId),
+    index("ai_discovered_prompts_config_idx").on(table.configId),
+    uniqueIndex("ai_discovered_prompts_config_prompt_uniq").on(
+      table.configId,
+      table.prompt,
+    ),
+    index("ai_discovered_prompts_volume_idx").on(
+      table.configId,
+      table.aiSearchVolume,
+    ),
+  ],
+);
+
+export const aiTopPages = sqliteTable(
+  "ai_top_pages",
+  {
+    id: text("id").primaryKey(),
+    configId: text("config_id")
+      .notNull()
+      .references(() => aiTrackingConfigs.id, { onDelete: "cascade" }),
+    url: text("url").notNull(),
+    platform: text("platform").notNull().default("all"),
+    mentions: integer("mentions").notNull().default(0),
+    aiSearchVolume: integer("ai_search_volume").notNull().default(0),
+    updatedAt: text("updated_at")
+      .notNull()
+      .default(sql`(current_timestamp)`),
+  },
+  (table) => [
+    index("ai_top_pages_config_idx").on(table.configId),
+    uniqueIndex("ai_top_pages_config_url_platform_uniq").on(
+      table.configId,
+      table.url,
+      table.platform,
+    ),
+  ],
+);
+
+export const aiVisibilitySnapshots = sqliteTable(
+  "ai_visibility_snapshots",
+  {
+    id: text("id").primaryKey(),
+    configId: text("config_id")
+      .notNull()
+      .references(() => aiTrackingConfigs.id, { onDelete: "cascade" }),
+    snapshotDate: text("snapshot_date").notNull(),
+    platform: text("platform").notNull().default("all"),
+    visibilityScore: integer("visibility_score").notNull().default(0),
+    mentionRate: integer("mention_rate").notNull().default(0),
+    citationRate: integer("citation_rate").notNull().default(0),
+    shareOfVoice: integer("share_of_voice").notNull().default(0),
+    promptsTracked: integer("prompts_tracked").notNull().default(0),
+    promptsMentioned: integer("prompts_mentioned").notNull().default(0),
+    promptsCited: integer("prompts_cited").notNull().default(0),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`(current_timestamp)`),
+  },
+  (table) => [
+    index("ai_visibility_snapshots_config_idx").on(table.configId),
+    uniqueIndex("ai_visibility_snapshots_config_date_plat_uniq").on(
+      table.configId,
+      table.snapshotDate,
+      table.platform,
+    ),
   ],
 );
 
@@ -210,6 +307,36 @@ export const aiTrackingConfigsRelations = relations(
     }),
     prompts: many(aiTrackingPrompts),
     runs: many(aiTrackingRuns),
+    discoveredPrompts: many(aiDiscoveredPrompts),
+    topPages: many(aiTopPages),
+    visibilitySnapshots: many(aiVisibilitySnapshots),
+  }),
+);
+
+export const aiDiscoveredPromptsRelations = relations(
+  aiDiscoveredPrompts,
+  ({ one }) => ({
+    config: one(aiTrackingConfigs, {
+      fields: [aiDiscoveredPrompts.configId],
+      references: [aiTrackingConfigs.id],
+    }),
+  }),
+);
+
+export const aiTopPagesRelations = relations(aiTopPages, ({ one }) => ({
+  config: one(aiTrackingConfigs, {
+    fields: [aiTopPages.configId],
+    references: [aiTrackingConfigs.id],
+  }),
+}));
+
+export const aiVisibilitySnapshotsRelations = relations(
+  aiVisibilitySnapshots,
+  ({ one }) => ({
+    config: one(aiTrackingConfigs, {
+      fields: [aiVisibilitySnapshots.configId],
+      references: [aiTrackingConfigs.id],
+    }),
   }),
 );
 
