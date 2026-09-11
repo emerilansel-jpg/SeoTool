@@ -264,14 +264,10 @@ select {
   padding-bottom: 0;
 }
 
-/* Touch device optimizations */
-@media (pointer: coarse) {
-  html {
-    touch-action: none;
-  }
-  body {
-    touch-action: pan-x pan-y;
-  }
+/* Touch device optimizations - allow fluid touch scrolling and pinch zoom on mobile */
+html,
+body {
+  touch-action: manipulation;
 }
 
 /* Dark mode: neutral interactive surfaces should lift above the panel, not
