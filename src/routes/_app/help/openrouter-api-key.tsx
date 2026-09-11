@@ -17,7 +17,7 @@ function OpenrouterApiKeyHelpPage() {
             </h1>
             <p className="text-sm text-base-content/70">
               SeoTool.im needs the <code>OPENROUTER_API_KEY</code> secret before
-              AI features like SAM, the in-app SEO agent, can run. It is
+              AI features like Jet, the in-app SEO agent, can run. It is
               optional — everything else in SeoTool.im works without it.
             </p>
           </div>

@@ -11,7 +11,7 @@ const FAQ_ITEMS = [
   {
     question: "What is All Access?",
     answer:
-      "All Access is a single membership that unlocks every SeoTool.im feature. Usage is paid from monthly credits, with transparent Standard or BYOK pricing. One subscription covers your entire account.",
+      "All Access is a single membership that unlocks every SeoTool.im feature. Usage is paid from monthly credits, with standard managed usage or heavily discounted BYOK credits. One subscription covers your entire account.",
   },
   {
     question: "How does progressive pricing work?",

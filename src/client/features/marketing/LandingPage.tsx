@@ -842,7 +842,7 @@ const FAQ_ITEMS = [
   {
     question: "Do you support AI agents?",
     answer:
-      "Run the autonomous SAM agent inside the app, or connect your own Claude Desktop and IDE via 36+ native MCP tools.",
+      "Run the autonomous Jet AI agent inside the app, or connect your own Claude Desktop and IDE via 36+ native MCP tools.",
   },
 ] as const;
 

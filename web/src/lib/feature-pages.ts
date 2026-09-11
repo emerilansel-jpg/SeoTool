@@ -112,7 +112,7 @@ export const featurePages = {
       {
         question: "Can I use SeoTool.im as a free keyword research tool?",
         answer:
-          "Not unlimited: quality keyword data costs money everywhere, which is why the big SEO suites run $100/month and up. SeoTool.im is the most affordable option; you can start for free, and paid plans start at $10/month with usage credits included. It's also open source, so you can self-host with your own DataForSEO account.",
+          "Not unlimited: quality keyword data costs money everywhere, which is why the big SEO suites run $100/month and up. SeoTool.im is the most affordable option; you can start for free, and paid plans start from $29/month with monthly usage credits included. It's also open source, so you can self-host with your own DataForSEO account.",
       },
       {
         question: "Does SeoTool.im show live search results?",
@@ -372,7 +372,7 @@ export const featurePages = {
       {
         question: "How does this compare to Semrush Domain Overview?",
         answer:
-          "SeoTool.im covers the core of the same report (estimated traffic, organic keywords, top keywords, and top pages) without a triple-digit monthly seat. SeoTool.im is open source, so you can self-host it, and the managed app is $10/month and includes usage credits.",
+          "SeoTool.im covers the core of the same report (estimated traffic, organic keywords, top keywords, and top pages) without a triple-digit monthly seat. SeoTool.im is open source, so you can self-host it, and the managed app starts from $29/month with monthly credits included.",
       },
       {
         question: "Can SeoTool.im help with competitor keyword analysis?",
@@ -537,51 +537,52 @@ export const featurePages = {
   aiBrandVisibility: {
     slug: FEATURE_PAGE_SLUGS.aiBrandVisibility,
     eyebrow: "AI Visibility",
-    navDescription: "Look up brand mentions in AI search.",
-    title: "Brand lookup for ChatGPT and Google AI Overview visibility",
+    navDescription: "Track brand mentions across ChatGPT, Claude, Gemini, and Perplexity.",
+    title: "AI brand visibility and mention tracking across major models",
     description:
-      "Look up a brand or domain and review ChatGPT and Google AI Overview mentions, cited pages, and related prompts.",
+      "Monitor brand visibility, organic prompts, citations, competitor gaps, and Search Console correlation across ChatGPT, Claude, Gemini, and Perplexity.",
     primaryKeyword: "ai visibility tool",
     secondaryKeywords: [
       "brand visibility ai search",
       "ai search visibility",
       "answer engine optimization",
+      "ai mention tracking",
     ],
     imageAlt: "SeoTool.im AI brand visibility report",
     imageSrc:
       "https://imagedelivery.net/ysLOa6bzFaM49Jxok-TAlw/cde3e4f8-079f-4890-cb17-371087107400/public",
     workflows: [
       {
-        title: "Look up a brand",
+        title: "Track brand mentions",
         description:
-          "Search for a brand or domain and inspect how ChatGPT and Google AI Overview mention or cite it in available results.",
+          "Monitor how ChatGPT, Claude, Gemini, and Perplexity mention and recommend your brand or domain.",
       },
       {
-        title: "Review citations and platforms",
+        title: "Analyze citations and sources",
         description:
-          "Review the URLs, domains, and platforms contributing to brand mentions.",
+          "Review the exact URLs, domains, and authorities cited by AI search engines in their answers.",
       },
       {
-        title: "Find visibility gaps",
+        title: "Uncover competitor gaps",
         description:
-          "Use cited pages and related prompts as clues for content, reputation, or comparison coverage to investigate.",
+          "Identify prompts and queries where competitors are recommended over your brand.",
       },
     ],
     metrics: [
+      { label: "Visibility", value: "Score %" },
       { label: "Mentions", value: "Presence" },
-      { label: "Citations", value: "Sources" },
-      { label: "Platforms", value: "Surfaces" },
-      { label: "Cited domains", value: "Sources" },
+      { label: "Reputation", value: "Sentiment" },
+      { label: "Models", value: "4 Platforms" },
     ],
     useCases: [
-      "See whether ChatGPT and Google AI Overview data mention or cite your brand or domain.",
-      "Find pages and domains cited alongside brand mentions.",
-      "Use cited sources and prompts to plan content experiments for answer-engine visibility.",
+      "Track brand appearance across ChatGPT, Claude, Gemini, and Perplexity.",
+      "Identify the top websites cited by AI search engines for your niche.",
+      "Correlate Google Search Console queries with generative AI discovery prompts.",
     ],
     differentiators: [
-      "AI visibility sits beside classic SEO research instead of replacing it.",
-      "The workflow focuses on concrete sources and mentions, not vague AI hype.",
-      "SeoTool.im helps teams connect AI mention and citation research to concrete SEO planning.",
+      "Multi-model AI tracking covering all four leading generative platforms.",
+      "Concrete citation and domain sources, not vague approximations.",
+      "Unified in the same workspace with keyword research, rank tracking, and technical audits.",
     ],
     related: [
       {
@@ -596,17 +597,17 @@ export const featurePages = {
       {
         question: "What is AI brand visibility?",
         answer:
-          "AI brand visibility is how often your brand or domain appears in available ChatGPT and Google AI Overview mention and citation data.",
+          "AI brand visibility measures how frequently your brand appears as a recommendation, answer, or citation across ChatGPT, Claude, Gemini, and Perplexity.",
       },
       {
-        question: "How is AI visibility different from traditional SEO?",
+        question: "Which AI search engines are tracked?",
         answer:
-          "Traditional SEO focuses on rankings and pages. SeoTool.im's AI visibility workflow looks at mentions, cited pages, related prompts, and platform-level metrics from supported AI-search sources.",
+          "SeoTool.im tracks brand presence across OpenAI's ChatGPT, Anthropic's Claude, Google Gemini, and Perplexity.",
       },
       {
-        question: "Should AI visibility replace keyword research?",
+        question: "How does AI tracking help my SEO strategy?",
         answer:
-          "No. It should sit beside keyword, domain, backlink, and audit data so teams can understand both search rankings and answer coverage.",
+          "Generative AI answers drive increasing referral and zero-click search influence. Tracking your brand visibility and citations shows which sources you need to target to be recommended by AI models.",
       },
     ],
   },

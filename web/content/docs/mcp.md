@@ -85,6 +85,7 @@ SeoTool.im MCP exposes tools for SEO research workflows:
 - Summarize a domain's organic footprint.
 - Find keywords a domain already ranks for.
 - Check backlink and referring-domain overview data.
+- Monitor AI brand visibility, citations, and prompts across ChatGPT, Claude, Gemini, and Perplexity.
 - Read first-party Google Search Console performance (clicks, impressions, CTR, position).
 - Inspect index status, crawl, and canonical for specific URLs (up to 10 per call).
 

@@ -1,14 +1,14 @@
 # SeoTool.im Fact Sheet
 
-This is the factual product reference for Sam, the SeoTool.im onboarding agent. If a user asks about SeoTool.im and the answer is not supported here, Sam should say it is not sure and point them to support instead of inventing details.
+This is the factual product reference for Jet, the SeoTool.im AI agent. If a user asks about SeoTool.im and the answer is not supported here, Jet should say it is not sure and point them to support instead of inventing details.
 
 ## What SeoTool.im is
 
-SeoTool.im is an open-source SEO platform for keyword research, domain research, backlinks, rank tracking, site audits, Google Search Console, and AI-agent SEO workflows.
+SeoTool.im is an AI-native SEO platform for keyword research, domain research, backlinks, rank tracking, site audits, Google Search Console, AI brand visibility tracking, and agent SEO workflows.
 
 SeoTool.im is built for people who want useful SEO data without a bloated enterprise SEO suite. It can be used as a hosted app or self-hosted from the open-source codebase.
 
-SeoTool.im is AI-native. It is designed to work with AI agents through MCP so users can ask an agent to run SEO research, inspect data, save findings, and continue work in the SeoTool.im app.
+SeoTool.im is AI-native. It is designed to work with AI agents through MCP and includes the native in-app Jet agent, so users can ask an agent to run SEO research, inspect data, save findings, and continue work in the SeoTool.im app.
 
 SeoTool.im does not claim to fully automate SEO. The product positioning is that SEO still needs strategy and judgment; SeoTool.im helps users and AI agents collaborate on that work with real data.
 
@@ -16,48 +16,50 @@ SeoTool.im does not claim to fully automate SEO. The product positioning is that
 
 SEO and marketing are intertwined. Getting more organic traffic starts with clear positioning: knowing who the product is for, what problem it solves, and which narrow topics the site can credibly own before trying to compete for broad, high-volume searches.
 
-SeoTool.im helps users turn that positioning into an SEO plan. It can surface relevant keywords, competitor gaps, Search Console opportunities, backlink context, and technical issues, but the goal is not to chase every keyword. The strongest early strategy is usually to build authority around a focused topic where the site has a real angle.
+SeoTool.im helps users turn that positioning into an SEO plan. It can surface relevant keywords, competitor gaps, Search Console opportunities, backlink context, AI brand visibility across models (ChatGPT, Claude, Gemini, Perplexity), and technical issues, but the goal is not to chase every keyword. The strongest early strategy is usually to build authority around a focused topic where the site has a real angle.
 
 As the site earns topical authority in Google and AI systems, it becomes easier to compete for broader, higher-volume searches. SeoTool.im helps users see that path: start with specific, winnable topics; publish and improve useful pages; build supporting links and internal structure; track what moves; then expand into adjacent and more competitive terms.
 
-When explaining traffic growth, Sam should frame SeoTool.im as a tool for making better SEO and marketing decisions, not as a magic traffic button. SeoTool.im provides the data, workflows, and agent access; the user's positioning, content quality, distribution, and execution still matter.
+When explaining traffic growth, Jet should frame SeoTool.im as a tool for making better SEO and marketing decisions, not as a magic traffic button. SeoTool.im provides the data, workflows, and agent access; the user's positioning, content quality, distribution, and execution still matter.
 
 ## Hosted plan and credits
 
-Hosted SeoTool.im is free to try. Signing up requires no credit card, and new accounts include $0.50 of trial credits to test credit-using features before subscribing.
+Hosted SeoTool.im is free to try. Signing up requires no credit card, and users can explore their workspace before activating a membership.
 
-The paid managed plan costs $10/month.
+The All Access membership uses progressive cohort pricing, starting from $29/month for early cohorts. Each cohort locks in a permanent monthly rate that never increases while active.
 
-The paid plan includes:
+The All Access plan includes:
 
-- Keyword research, backlinks, rank tracking, and site audits.
-- MCP server and agent skills for Claude, Cursor, ChatGPT-compatible clients, Codex, and other MCP clients.
+- All SeoTool.im features: Keyword Research Pro, Backlinks, Rank Tracking, Site Audits, GMB Local Map Rank, and AI Brand Visibility.
+- Jet autonomous in-app AI agent + 36 native MCP tools for Claude Desktop, Cursor, and IDEs.
 - Google Search Console integration that does not use credits.
-- $10.00 of usage credits each billing cycle.
+- 10,000 platform credits each month that roll over and never expire.
+- BYOK (Bring Your Own Key) option with heavily discounted credit consumption for power users.
 - A 30-day money-back guarantee for the first charge.
 
-SeoTool.im uses usage credits for features that query paid SEO data providers, especially DataForSEO. Credit-using workflows include keyword volume, competitor data, backlinks, rank tracking, and site audits. Projects, settings, and data that has already been fetched do not cost credits to view.
+SeoTool.im uses usage credits for features that query paid live data providers. Projects, settings, and data that has already been fetched do not cost credits to view.
 
-Subscribers can purchase top-up credits if monthly credits run out. Top-up credits roll over and do not expire. Monthly included credits reset each billing cycle. Top-ups are only available on the paid plan; a free-tier user who runs out of trial credits subscribes to the paid plan to continue using credit-based features.
+Subscribers can purchase top-up credits if monthly credits run out. Top-up credits roll over and do not expire.
 
-Running out of credits never creates unexpected bills. Credit-using features stop working until the user has credits again.
+Running out of credits never creates unexpected bills. Credit-using features pause until the user tops up or the monthly cycle renews.
 
 ## Why SeoTool.im for SEO consultants and agencies
 
 SeoTool.im is a strong fit for SEO consultants, freelancers, and agencies managing SEO for clients. What you get:
 
-- You only pay for what you use. Billing runs on usage credits, so you are not forced into an expensive enterprise tier or charged per seat just to unlock basic work — no arbitrary upsells or features locked behind a paywall. This keeps costs predictable when you are running lean.
-- You can run a project for every client. Set up as many projects as you need; you will not hit a per-project plan limit the way many SEO tools cap projects per tier.
-- You tune rank tracking to fit your budget. Rank tracking is the cost that scales fastest as an agency grows, since it runs on a schedule across every client's keywords — but SeoTool.im makes it fully configurable so you stay in control. You choose how many keywords and devices to track, how many SERP pages deep to check, and how often it runs (weekly or daily), and SeoTool.im shows a live cost estimate before each tracker runs. Scheduled checks run through DataForSEO's task queue, which is much cheaper than live lookups, so it stays inexpensive: as a rough guide, tracking 100 keywords on one device type, five pages deep, on the default weekly schedule costs only about $1-2/month. Searching deeper, adding the second device type, or switching to daily checks raises the cost proportionally, and the in-app estimate always shows the current number before you commit.
-- Your toolkit grows with the industry. SeoTool.im works through MCP and AI agents, so as search shifts toward AI answers and AI-assisted workflows, you can have an agent run research, pull competitor data, and save findings into the right client project — without re-tooling.
+- Predictable credit-based billing. You pay a clear monthly rate with included credits that roll over, avoiding surprise enterprise fees or per-seat upsells.
+- Multi-project workspaces. Set up projects for your clients, organize domains, and track distinct properties in one workspace.
+- Configurable rank tracking. Track keywords across devices and locations with customizable depths and schedules.
+- Multi-model AI visibility tracking. Monitor brand citations and visibility across ChatGPT, Claude, Gemini, and Perplexity to stay ahead of generative search answers.
+- AI-native workflow with Jet and MCP. Connect your IDE or Claude Desktop to 36+ tools to analyze client sites and pull data automatically.
 
-When answering this, Sam should speak directly to the user ("you" / "your clients") about what they get, not describe how SeoTool.im is "positioned." Lead with these benefits in plain language and tie them to running an SEO practice. Sam should not invent specific competitor prices or exact rank-tracking rates; if asked for exact numbers it does not have, it should say so and suggest contacting `support@seotool.im`.
+When answering this, Jet should speak directly to the user ("you" / "your clients") about what they get, not describe how SeoTool.im is "positioned." Lead with these benefits in plain language and tie them to running an SEO practice. Jet should not invent specific competitor prices; if asked for exact numbers it does not have, it should say so and suggest contacting `support@seotool.im`.
 
 ## Self-hosting
 
 SeoTool.im is open source and can be self-hosted for free.
 
-Self-hosted users bring their own provider API keys and pay providers such as DataForSEO directly. Self-hosting is appropriate for users who want more control, privacy, customization, or provider-level billing.
+Self-hosted users bring their own provider API keys and pay providers directly. Self-hosting is appropriate for users who want more control, privacy, customization, or provider-level billing.
 
 The open-source repository is at `https://github.com/emerilansel-jpg/SeoTool`.
 

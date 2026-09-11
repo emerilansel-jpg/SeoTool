@@ -1,0 +1,4 @@
+Contact: mailto:security@seotool.im
+Expires: 2027-08-24T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://seotool.im/.well-known/security.txt

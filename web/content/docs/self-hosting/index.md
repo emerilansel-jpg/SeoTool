@@ -22,7 +22,7 @@ SeoTool.im uses [DataForSEO](https://dataforseo.com/?aff=255379) to fetch SEO da
    - Cloudflare: as a Worker secret in the dashboard
    - Local development: `.env.local`
 
-New DataForSEO accounts include $1 of free credit to test with, and the minimum top-up is $50. See [pricing](/pricing) for cost estimates. Self-hosted costs run slightly lower, since the hosted service adds a 28% fee on DataForSEO requests.
+New DataForSEO accounts include $1 of free credit to test with, and the minimum top-up is $50. See [pricing](/pricing) for cost estimates. When self-hosting, you pay DataForSEO directly for API calls without any platform credit deductions.
 
 ## Optional features
 

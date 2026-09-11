@@ -1,0 +1,1016 @@
+{
+  "G:/SF Project/JetDigitalSEO/web/src/styles/app.css": {
+    "file": "assets/app-30umGnZ3.css",
+    "src": "G:/SF Project/JetDigitalSEO/web/src/styles/app.css"
+  },
+  "_blog-layout-DTIIlof6.js": {
+    "file": "assets/blog-layout-DTIIlof6.js",
+    "name": "blog-layout",
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js"
+    ]
+  },
+  "_chunk-OTD7MV33-8NxzDOm0.js": {
+    "file": "assets/chunk-OTD7MV33-8NxzDOm0.js",
+    "name": "chunk-OTD7MV33"
+  },
+  "_chunk-U67V476Y-BSLiKPOf.js": {
+    "file": "assets/chunk-U67V476Y-BSLiKPOf.js",
+    "name": "chunk-U67V476Y"
+  },
+  "_chunk-ZMWYLUDP-DsjLwjNJ.js": {
+    "file": "assets/chunk-ZMWYLUDP-DsjLwjNJ.js",
+    "name": "chunk-ZMWYLUDP"
+  },
+  "_createServerRpc-CRBGdzCW.js": {
+    "file": "assets/createServerRpc-CRBGdzCW.js",
+    "name": "createServerRpc",
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "_feature-page-D6bSR5_I.js": {
+    "file": "assets/feature-page-D6bSR5_I.js",
+    "name": "feature-page",
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "_index-Du5w5wbE.js": {
+    "file": "assets/index-Du5w5wbE.js",
+    "name": "index",
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js"
+    ]
+  },
+  "_legal-page-3aRA7iGD.js": {
+    "file": "assets/legal-page-3aRA7iGD.js",
+    "name": "legal-page",
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_site-footer-BPTj1Mzt.js"
+    ]
+  },
+  "_library-page-Dh1ViGGi.js": {
+    "file": "assets/library-page-Dh1ViGGi.js",
+    "name": "library-page",
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js"
+    ]
+  },
+  "_newsletter-signup-Ddgnzp7Q.js": {
+    "file": "assets/newsletter-signup-Ddgnzp7Q.js",
+    "name": "newsletter-signup",
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "_router-BD8vLhRN.js": {
+    "file": "assets/router-BD8vLhRN.js",
+    "name": "router",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_source.generated-eZ5GDxmY.js"
+    ],
+    "dynamicImports": [
+      "node_modules/.pnpm/fumadocs-ui@15.8.5_@tanstac_f8e96b99ebc8f46a2c7fe8ac2dc5e17d/node_modules/fumadocs-ui/dist/components/dialog/search-default.js",
+      "src/routes/terms-and-conditions.tsx?tsr-split=component",
+      "src/routes/refund-policy.tsx?tsr-split=component",
+      "src/routes/privacy.tsx?tsr-split=component",
+      "src/routes/dpa.tsx?tsr-split=component",
+      "src/routes/cookie-policy.tsx?tsr-split=component",
+      "src/routes/_marketing.tsx?tsr-split=component",
+      "src/routes/docs/index.tsx?tsr-split=component",
+      "src/routes/blogs/index.tsx?tsr-split=component",
+      "src/routes/_marketing/index.tsx?tsr-split=component",
+      "src/routes/docs/$.tsx?tsr-split=component",
+      "src/routes/blogs/$.tsx?tsr-split=component",
+      "src/routes/_marketing/pricing.tsx?tsr-split=component",
+      "src/routes/_marketing/open-source-seo.tsx?tsr-split=component",
+      "src/routes/_marketing/google-search-console-mcp.tsx?tsr-split=component",
+      "src/routes/_marketing/contact.tsx?tsr-split=component",
+      "src/routes/_marketing/changelog.tsx?tsr-split=component",
+      "src/routes/_marketing/careers.tsx?tsr-split=component",
+      "src/routes/_marketing/affiliates.tsx?tsr-split=component",
+      "src/routes/_marketing/about.tsx?tsr-split=component",
+      "src/routes/_marketing/free-tools/index.tsx?tsr-split=component",
+      "src/routes/_marketing/features/index.tsx?tsr-split=component",
+      "src/routes/_marketing/free-tools/ai-visibility-checker.tsx?tsr-split=component",
+      "src/routes/_marketing/features/site-audit.tsx?tsr-split=component",
+      "src/routes/_marketing/features/saved-keywords.tsx?tsr-split=component",
+      "src/routes/_marketing/features/rank-tracking.tsx?tsr-split=component",
+      "src/routes/_marketing/features/mcp.tsx?tsr-split=component",
+      "src/routes/_marketing/features/keyword-research.tsx?tsr-split=component",
+      "src/routes/_marketing/features/domain-overview.tsx?tsr-split=component",
+      "src/routes/_marketing/features/backlink-checker.tsx?tsr-split=component",
+      "src/routes/_marketing/features/ai-search-prompts.tsx?tsr-split=component",
+      "src/routes/_marketing/features/ai-brand-visibility.tsx?tsr-split=component",
+      "src/routes/_marketing/library/keyword-research/index.tsx?tsr-split=component",
+      "src/routes/_marketing/library/ai-search-geo/index.tsx?tsr-split=component",
+      "src/routes/_marketing/library/keyword-research/seed-from-conversation.tsx?tsr-split=component",
+      "src/routes/_marketing/library/keyword-research/search-intent-mapping.tsx?tsr-split=component",
+      "src/routes/_marketing/library/keyword-research/long-tail-question-mining.tsx?tsr-split=component",
+      "src/routes/_marketing/library/keyword-research/cluster-topical-hubs.tsx?tsr-split=component",
+      "src/routes/_marketing/library/ai-search-geo/track-ai-visibility.tsx?tsr-split=component",
+      "src/routes/_marketing/library/ai-search-geo/appear-in-chatgpt-results.tsx?tsr-split=component"
+    ],
+    "css": [
+      "assets/router-tKXv5TNR.css"
+    ],
+    "assets": [
+      "assets/seed-keyword-list-validation-seotool-BsL9tMKA.png",
+      "assets/search-intent-mapping-seotool-C0MzRcxh.png",
+      "assets/long-tail-keyword-filter-seotool-Dsg55Yza.png",
+      "assets/keyword-clustering-topical-hub-seotool-BtxQErKH.png",
+      "assets/app-30umGnZ3.css"
+    ]
+  },
+  "_router-tKXv5TNR.css": {
+    "file": "assets/router-tKXv5TNR.css",
+    "src": "_router-tKXv5TNR.css"
+  },
+  "_site-footer-BPTj1Mzt.js": {
+    "file": "assets/site-footer-BPTj1Mzt.js",
+    "name": "site-footer",
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js"
+    ]
+  },
+  "_source.generated-eZ5GDxmY.js": {
+    "file": "assets/source.generated-eZ5GDxmY.js",
+    "name": "source.generated",
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ],
+    "dynamicImports": [
+      "content/blogs/best-open-source-seo-tools.md?collection=blog",
+      "content/blogs/dark-queries.md?collection=blog",
+      "content/blogs/seo-for-startups.md?collection=blog",
+      "content/docs/mcp.md?collection=docs",
+      "content/docs/self-hosting/cloudflare.md?collection=docs",
+      "content/docs/self-hosting/docker.md?collection=docs",
+      "content/docs/self-hosting/index.md?collection=docs",
+      "content/docs/skills/competitive-landscape.mdx?collection=docs",
+      "content/docs/skills/competitor-analysis.mdx?collection=docs",
+      "content/docs/skills/index.md?collection=docs",
+      "content/docs/skills/keyword-clustering.mdx?collection=docs",
+      "content/docs/skills/keyword-research.mdx?collection=docs",
+      "content/docs/skills/link-prospecting.mdx?collection=docs",
+      "content/docs/skills/seo-audit.mdx?collection=docs",
+      "content/docs/skills/seo-coach.mdx?collection=docs",
+      "content/docs/skills/seo-project-setup.mdx?collection=docs",
+      "content/docs/skills/setup.md?collection=docs",
+      "content/docs/meta.json?collection=docsMeta",
+      "content/docs/self-hosting/meta.json?collection=docsMeta",
+      "content/docs/skills/meta.json?collection=docsMeta",
+      "content/legal/cookie-policy.md?collection=legal",
+      "content/legal/dpa.md?collection=legal",
+      "content/legal/privacy.md?collection=legal",
+      "content/legal/refund-policy.md?collection=legal",
+      "content/legal/terms-and-conditions.md?collection=legal"
+    ]
+  },
+  "_use-scroll-reveal-BgDnGqFA.js": {
+    "file": "assets/use-scroll-reveal-BgDnGqFA.js",
+    "name": "use-scroll-reveal",
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "_worker-entry-wiX-xUlP.js": {
+    "file": "assets/worker-entry-wiX-xUlP.js",
+    "name": "worker-entry",
+    "dynamicImports": [
+      "tanstack-start-manifest:v",
+      "src/lib/changelog.functions.ts?tss-serverfn-split",
+      "src/lib/content.functions.ts?tss-serverfn-split",
+      "src/lib/content.functions.ts?tss-serverfn-split",
+      "src/lib/content.functions.ts?tss-serverfn-split",
+      "src/lib/content.functions.ts?tss-serverfn-split",
+      "src/lib/content.functions.ts?tss-serverfn-split",
+      "_router-BD8vLhRN.js",
+      "node_modules/.pnpm/@tanstack+react-start@1.167_e9771e3da8ea26e47aa30706cd051d14/node_modules/@tanstack/react-start/dist/plugin/default-entry/start.ts"
+    ]
+  },
+  "content/blogs/best-open-source-seo-tools.md?collection=blog": {
+    "file": "assets/best-open-source-seo-tools--N2AVh44.js",
+    "name": "best-open-source-seo-tools",
+    "src": "content/blogs/best-open-source-seo-tools.md?collection=blog",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/blogs/dark-queries.md?collection=blog": {
+    "file": "assets/dark-queries-DviBgXb6.js",
+    "name": "dark-queries",
+    "src": "content/blogs/dark-queries.md?collection=blog",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ],
+    "assets": [
+      "assets/gsc-queries-Cd9xcfHx.png"
+    ]
+  },
+  "content/blogs/seo-for-startups.md?collection=blog": {
+    "file": "assets/seo-for-startups-Ocy8i4jV.js",
+    "name": "seo-for-startups",
+    "src": "content/blogs/seo-for-startups.md?collection=blog",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ],
+    "assets": [
+      "assets/infographic-CNpns1OD.png",
+      "assets/domain-overview-CRoDzJUq.png",
+      "assets/keyword-research-CV2uutSE.png",
+      "assets/backlink-analysis-YKazqpRU.png"
+    ]
+  },
+  "content/docs/mcp.md?collection=docs": {
+    "file": "assets/mcp-DBv3LHoM.js",
+    "name": "mcp",
+    "src": "content/docs/mcp.md?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/meta.json?collection=docsMeta": {
+    "file": "assets/meta-B9AedUf9.js",
+    "name": "meta",
+    "src": "content/docs/meta.json?collection=docsMeta",
+    "isDynamicEntry": true
+  },
+  "content/docs/self-hosting/cloudflare.md?collection=docs": {
+    "file": "assets/cloudflare-BthAoa0Q.js",
+    "name": "cloudflare",
+    "src": "content/docs/self-hosting/cloudflare.md?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/self-hosting/docker.md?collection=docs": {
+    "file": "assets/docker-HCPX_xz7.js",
+    "name": "docker",
+    "src": "content/docs/self-hosting/docker.md?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/self-hosting/index.md?collection=docs": {
+    "file": "assets/index-RBY1EgzS.js",
+    "name": "index",
+    "src": "content/docs/self-hosting/index.md?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/self-hosting/meta.json?collection=docsMeta": {
+    "file": "assets/meta-DAUk2lqW.js",
+    "name": "meta",
+    "src": "content/docs/self-hosting/meta.json?collection=docsMeta",
+    "isDynamicEntry": true
+  },
+  "content/docs/skills/competitive-landscape.mdx?collection=docs": {
+    "file": "assets/competitive-landscape-BDmokdhS.js",
+    "name": "competitive-landscape",
+    "src": "content/docs/skills/competitive-landscape.mdx?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/skills/competitor-analysis.mdx?collection=docs": {
+    "file": "assets/competitor-analysis-D_OlYkZ0.js",
+    "name": "competitor-analysis",
+    "src": "content/docs/skills/competitor-analysis.mdx?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/skills/index.md?collection=docs": {
+    "file": "assets/index-CsY2_Hcl.js",
+    "name": "index",
+    "src": "content/docs/skills/index.md?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/skills/keyword-clustering.mdx?collection=docs": {
+    "file": "assets/keyword-clustering-9f8ivWD-.js",
+    "name": "keyword-clustering",
+    "src": "content/docs/skills/keyword-clustering.mdx?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/skills/keyword-research.mdx?collection=docs": {
+    "file": "assets/keyword-research-BVWbhgNf.js",
+    "name": "keyword-research",
+    "src": "content/docs/skills/keyword-research.mdx?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/skills/link-prospecting.mdx?collection=docs": {
+    "file": "assets/link-prospecting-DRbtWoYB.js",
+    "name": "link-prospecting",
+    "src": "content/docs/skills/link-prospecting.mdx?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/skills/meta.json?collection=docsMeta": {
+    "file": "assets/meta-CBlMrVW3.js",
+    "name": "meta",
+    "src": "content/docs/skills/meta.json?collection=docsMeta",
+    "isDynamicEntry": true
+  },
+  "content/docs/skills/seo-audit.mdx?collection=docs": {
+    "file": "assets/seo-audit-DamuCt8t.js",
+    "name": "seo-audit",
+    "src": "content/docs/skills/seo-audit.mdx?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/skills/seo-coach.mdx?collection=docs": {
+    "file": "assets/seo-coach-CkvZNxBA.js",
+    "name": "seo-coach",
+    "src": "content/docs/skills/seo-coach.mdx?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/skills/seo-project-setup.mdx?collection=docs": {
+    "file": "assets/seo-project-setup-Dzyvj7dE.js",
+    "name": "seo-project-setup",
+    "src": "content/docs/skills/seo-project-setup.mdx?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/docs/skills/setup.md?collection=docs": {
+    "file": "assets/setup-BR1AHgkp.js",
+    "name": "setup",
+    "src": "content/docs/skills/setup.md?collection=docs",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/legal/cookie-policy.md?collection=legal": {
+    "file": "assets/cookie-policy-C-arKyuv.js",
+    "name": "cookie-policy",
+    "src": "content/legal/cookie-policy.md?collection=legal",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/legal/dpa.md?collection=legal": {
+    "file": "assets/dpa-dSESW3G7.js",
+    "name": "dpa",
+    "src": "content/legal/dpa.md?collection=legal",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/legal/privacy.md?collection=legal": {
+    "file": "assets/privacy-BfhjpSFY.js",
+    "name": "privacy",
+    "src": "content/legal/privacy.md?collection=legal",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/legal/refund-policy.md?collection=legal": {
+    "file": "assets/refund-policy-BItByBK3.js",
+    "name": "refund-policy",
+    "src": "content/legal/refund-policy.md?collection=legal",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "content/legal/terms-and-conditions.md?collection=legal": {
+    "file": "assets/terms-and-conditions-B8m2pLJD.js",
+    "name": "terms-and-conditions",
+    "src": "content/legal/terms-and-conditions.md?collection=legal",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "node_modules/.pnpm/@tanstack+react-start@1.167_e9771e3da8ea26e47aa30706cd051d14/node_modules/@tanstack/react-start/dist/plugin/default-entry/start.ts": {
+    "file": "assets/start-HYkvq4Ni.js",
+    "name": "start",
+    "src": "node_modules/.pnpm/@tanstack+react-start@1.167_e9771e3da8ea26e47aa30706cd051d14/node_modules/@tanstack/react-start/dist/plugin/default-entry/start.ts",
+    "isDynamicEntry": true
+  },
+  "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/algolia-IZEDLPHE.js": {
+    "file": "assets/algolia-IZEDLPHE-ChBqEtpU.js",
+    "name": "algolia-IZEDLPHE",
+    "src": "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/algolia-IZEDLPHE.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_chunk-OTD7MV33-8NxzDOm0.js"
+    ]
+  },
+  "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/fetch-2XFMBLBA.js": {
+    "file": "assets/fetch-2XFMBLBA-uKSSbneq.js",
+    "name": "fetch-2XFMBLBA",
+    "src": "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/fetch-2XFMBLBA.js",
+    "isDynamicEntry": true
+  },
+  "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/mixedbread-RAHDVXGJ.js": {
+    "file": "assets/mixedbread-RAHDVXGJ-C0pOVNHC.js",
+    "name": "mixedbread-RAHDVXGJ",
+    "src": "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/mixedbread-RAHDVXGJ.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_chunk-U67V476Y-BSLiKPOf.js"
+    ]
+  },
+  "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/orama-cloud-74FM25SB.js": {
+    "file": "assets/orama-cloud-74FM25SB-B5oqQiwM.js",
+    "name": "orama-cloud-74FM25SB",
+    "src": "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/orama-cloud-74FM25SB.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_chunk-ZMWYLUDP-DsjLwjNJ.js",
+      "_chunk-OTD7MV33-8NxzDOm0.js"
+    ]
+  },
+  "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/static-A2YJ5TXV.js": {
+    "file": "assets/static-A2YJ5TXV-8agFmRb4.js",
+    "name": "static-A2YJ5TXV",
+    "src": "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/static-A2YJ5TXV.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_chunk-ZMWYLUDP-DsjLwjNJ.js",
+      "_chunk-OTD7MV33-8NxzDOm0.js"
+    ]
+  },
+  "node_modules/.pnpm/fumadocs-ui@15.8.5_@tanstac_f8e96b99ebc8f46a2c7fe8ac2dc5e17d/node_modules/fumadocs-ui/dist/components/dialog/search-default.js": {
+    "file": "assets/search-default-CT3sojPG.js",
+    "name": "search-default",
+    "src": "node_modules/.pnpm/fumadocs-ui@15.8.5_@tanstac_f8e96b99ebc8f46a2c7fe8ac2dc5e17d/node_modules/fumadocs-ui/dist/components/dialog/search-default.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_source.generated-eZ5GDxmY.js"
+    ],
+    "dynamicImports": [
+      "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/fetch-2XFMBLBA.js",
+      "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/algolia-IZEDLPHE.js",
+      "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/orama-cloud-74FM25SB.js",
+      "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/static-A2YJ5TXV.js",
+      "node_modules/.pnpm/fumadocs-core@15.8.5_@tanst_1cf903d4dedacf4bd4eb2d1a7e2a8e17/node_modules/fumadocs-core/dist/mixedbread-RAHDVXGJ.js"
+    ]
+  },
+  "public/blog/dark-queries/gsc-queries.png": {
+    "file": "assets/gsc-queries-Cd9xcfHx.png",
+    "src": "public/blog/dark-queries/gsc-queries.png"
+  },
+  "public/blog/seo-for-startups/backlink-analysis.png": {
+    "file": "assets/backlink-analysis-YKazqpRU.png",
+    "src": "public/blog/seo-for-startups/backlink-analysis.png"
+  },
+  "public/blog/seo-for-startups/domain-overview.png": {
+    "file": "assets/domain-overview-CRoDzJUq.png",
+    "src": "public/blog/seo-for-startups/domain-overview.png"
+  },
+  "public/blog/seo-for-startups/infographic.png": {
+    "file": "assets/infographic-CNpns1OD.png",
+    "src": "public/blog/seo-for-startups/infographic.png"
+  },
+  "public/blog/seo-for-startups/keyword-research.png": {
+    "file": "assets/keyword-research-CV2uutSE.png",
+    "src": "public/blog/seo-for-startups/keyword-research.png"
+  },
+  "public/library/keyword-research/keyword-clustering-topical-hub-seotool.png": {
+    "file": "assets/keyword-clustering-topical-hub-seotool-BtxQErKH.png",
+    "src": "public/library/keyword-research/keyword-clustering-topical-hub-seotool.png"
+  },
+  "public/library/keyword-research/long-tail-keyword-filter-seotool.png": {
+    "file": "assets/long-tail-keyword-filter-seotool-Dsg55Yza.png",
+    "src": "public/library/keyword-research/long-tail-keyword-filter-seotool.png"
+  },
+  "public/library/keyword-research/search-intent-mapping-seotool.png": {
+    "file": "assets/search-intent-mapping-seotool-C0MzRcxh.png",
+    "src": "public/library/keyword-research/search-intent-mapping-seotool.png"
+  },
+  "public/library/keyword-research/seed-keyword-list-validation-seotool.png": {
+    "file": "assets/seed-keyword-list-validation-seotool-BsL9tMKA.png",
+    "src": "public/library/keyword-research/seed-keyword-list-validation-seotool.png"
+  },
+  "src/lib/changelog.functions.ts?tss-serverfn-split": {
+    "file": "assets/changelog.functions-5aCdaarJ.js",
+    "name": "changelog.functions",
+    "src": "src/lib/changelog.functions.ts?tss-serverfn-split",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_createServerRpc-CRBGdzCW.js"
+    ]
+  },
+  "src/lib/content.functions.ts?tss-serverfn-split": {
+    "file": "assets/content.functions-vDXkvszq.js",
+    "name": "content.functions",
+    "src": "src/lib/content.functions.ts?tss-serverfn-split",
+    "isDynamicEntry": true,
+    "imports": [
+      "_createServerRpc-CRBGdzCW.js",
+      "_worker-entry-wiX-xUlP.js",
+      "_chunk-U67V476Y-BSLiKPOf.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing.tsx?tsr-split=component": {
+    "file": "assets/_marketing-DC8MeHzm.js",
+    "name": "_marketing",
+    "src": "src/routes/_marketing.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_newsletter-signup-Ddgnzp7Q.js",
+      "_site-footer-BPTj1Mzt.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/about.tsx?tsr-split=component": {
+    "file": "assets/about-BwGdxtlY.js",
+    "name": "about",
+    "src": "src/routes/_marketing/about.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "src/routes/_marketing/affiliates.tsx?tsr-split=component": {
+    "file": "assets/affiliates-roXa7Any.js",
+    "name": "affiliates",
+    "src": "src/routes/_marketing/affiliates.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "src/routes/_marketing/careers.tsx?tsr-split=component": {
+    "file": "assets/careers-B4y0jIjR.js",
+    "name": "careers",
+    "src": "src/routes/_marketing/careers.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "src/routes/_marketing/changelog.tsx?tsr-split=component": {
+    "file": "assets/changelog-DNgG3QXv.js",
+    "name": "changelog",
+    "src": "src/routes/_marketing/changelog.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/contact.tsx?tsr-split=component": {
+    "file": "assets/contact-BrhYzSdC.js",
+    "name": "contact",
+    "src": "src/routes/_marketing/contact.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "src/routes/_marketing/features/ai-brand-visibility.tsx?tsr-split=component": {
+    "file": "assets/ai-brand-visibility-mCJoMsqR.js",
+    "name": "ai-brand-visibility",
+    "src": "src/routes/_marketing/features/ai-brand-visibility.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_feature-page-D6bSR5_I.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/features/ai-search-prompts.tsx?tsr-split=component": {
+    "file": "assets/ai-search-prompts-CyfB5i7t.js",
+    "name": "ai-search-prompts",
+    "src": "src/routes/_marketing/features/ai-search-prompts.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_feature-page-D6bSR5_I.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/features/backlink-checker.tsx?tsr-split=component": {
+    "file": "assets/backlink-checker-U2kYv3oo.js",
+    "name": "backlink-checker",
+    "src": "src/routes/_marketing/features/backlink-checker.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_feature-page-D6bSR5_I.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/features/domain-overview.tsx?tsr-split=component": {
+    "file": "assets/domain-overview-Kj49lybt.js",
+    "name": "domain-overview",
+    "src": "src/routes/_marketing/features/domain-overview.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_feature-page-D6bSR5_I.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/features/index.tsx?tsr-split=component": {
+    "file": "assets/index-Djc2tnz6.js",
+    "name": "index",
+    "src": "src/routes/_marketing/features/index.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/features/keyword-research.tsx?tsr-split=component": {
+    "file": "assets/keyword-research-C5bQEsz0.js",
+    "name": "keyword-research",
+    "src": "src/routes/_marketing/features/keyword-research.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_feature-page-D6bSR5_I.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/features/mcp.tsx?tsr-split=component": {
+    "file": "assets/mcp-BMyzX-Ry.js",
+    "name": "mcp",
+    "src": "src/routes/_marketing/features/mcp.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "src/routes/_marketing/features/rank-tracking.tsx?tsr-split=component": {
+    "file": "assets/rank-tracking-TEIozWWN.js",
+    "name": "rank-tracking",
+    "src": "src/routes/_marketing/features/rank-tracking.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_feature-page-D6bSR5_I.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/features/saved-keywords.tsx?tsr-split=component": {
+    "file": "assets/saved-keywords-DmPZx8VA.js",
+    "name": "saved-keywords",
+    "src": "src/routes/_marketing/features/saved-keywords.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_feature-page-D6bSR5_I.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/features/site-audit.tsx?tsr-split=component": {
+    "file": "assets/site-audit-0rrhOiZu.js",
+    "name": "site-audit",
+    "src": "src/routes/_marketing/features/site-audit.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_feature-page-D6bSR5_I.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/free-tools/ai-visibility-checker.tsx?tsr-split=component": {
+    "file": "assets/ai-visibility-checker--_K-r7mq.js",
+    "name": "ai-visibility-checker",
+    "src": "src/routes/_marketing/free-tools/ai-visibility-checker.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_use-scroll-reveal-BgDnGqFA.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/free-tools/index.tsx?tsr-split=component": {
+    "file": "assets/index-DUTf0lHL.js",
+    "name": "index",
+    "src": "src/routes/_marketing/free-tools/index.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_use-scroll-reveal-BgDnGqFA.js",
+      "_router-BD8vLhRN.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/google-search-console-mcp.tsx?tsr-split=component": {
+    "file": "assets/google-search-console-mcp-eJa6tyYa.js",
+    "name": "google-search-console-mcp",
+    "src": "src/routes/_marketing/google-search-console-mcp.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/index.tsx?tsr-split=component": {
+    "file": "assets/index-BBblesup.js",
+    "name": "index",
+    "src": "src/routes/_marketing/index.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_newsletter-signup-Ddgnzp7Q.js",
+      "_site-footer-BPTj1Mzt.js",
+      "_router-BD8vLhRN.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/library/ai-search-geo/appear-in-chatgpt-results.tsx?tsr-split=component": {
+    "file": "assets/appear-in-chatgpt-results-eFW1kEpA.js",
+    "name": "appear-in-chatgpt-results",
+    "src": "src/routes/_marketing/library/ai-search-geo/appear-in-chatgpt-results.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_library-page-Dh1ViGGi.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/library/ai-search-geo/index.tsx?tsr-split=component": {
+    "file": "assets/index-it32eMnT.js",
+    "name": "index",
+    "src": "src/routes/_marketing/library/ai-search-geo/index.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "src/routes/_marketing/library/ai-search-geo/track-ai-visibility.tsx?tsr-split=component": {
+    "file": "assets/track-ai-visibility-DhuN1C2d.js",
+    "name": "track-ai-visibility",
+    "src": "src/routes/_marketing/library/ai-search-geo/track-ai-visibility.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_library-page-Dh1ViGGi.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/library/keyword-research/cluster-topical-hubs.tsx?tsr-split=component": {
+    "file": "assets/cluster-topical-hubs-xTZUR-16.js",
+    "name": "cluster-topical-hubs",
+    "src": "src/routes/_marketing/library/keyword-research/cluster-topical-hubs.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_library-page-Dh1ViGGi.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/library/keyword-research/index.tsx?tsr-split=component": {
+    "file": "assets/index-BmVH2Rg7.js",
+    "name": "index",
+    "src": "src/routes/_marketing/library/keyword-research/index.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "src/routes/_marketing/library/keyword-research/long-tail-question-mining.tsx?tsr-split=component": {
+    "file": "assets/long-tail-question-mining-D9cy_T2G.js",
+    "name": "long-tail-question-mining",
+    "src": "src/routes/_marketing/library/keyword-research/long-tail-question-mining.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_library-page-Dh1ViGGi.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/library/keyword-research/search-intent-mapping.tsx?tsr-split=component": {
+    "file": "assets/search-intent-mapping-DipJrNvd.js",
+    "name": "search-intent-mapping",
+    "src": "src/routes/_marketing/library/keyword-research/search-intent-mapping.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_library-page-Dh1ViGGi.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/library/keyword-research/seed-from-conversation.tsx?tsr-split=component": {
+    "file": "assets/seed-from-conversation-0fPGAjvT.js",
+    "name": "seed-from-conversation",
+    "src": "src/routes/_marketing/library/keyword-research/seed-from-conversation.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_library-page-Dh1ViGGi.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/open-source-seo.tsx?tsr-split=component": {
+    "file": "assets/open-source-seo-DhFh2DoL.js",
+    "name": "open-source-seo",
+    "src": "src/routes/_marketing/open-source-seo.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/_marketing/pricing.tsx?tsr-split=component": {
+    "file": "assets/pricing-_u7ELnZN.js",
+    "name": "pricing",
+    "src": "src/routes/_marketing/pricing.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  },
+  "src/routes/blogs/$.tsx?tsr-split=component": {
+    "file": "assets/_-5Di5irLy.js",
+    "name": "_",
+    "src": "src/routes/blogs/$.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_site-footer-BPTj1Mzt.js",
+      "_blog-layout-DTIIlof6.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/blogs/index.tsx?tsr-split=component": {
+    "file": "assets/index-And4CWz5.js",
+    "name": "index",
+    "src": "src/routes/blogs/index.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_site-footer-BPTj1Mzt.js",
+      "_blog-layout-DTIIlof6.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/cookie-policy.tsx?tsr-split=component": {
+    "file": "assets/cookie-policy-CjPRfJX5.js",
+    "name": "cookie-policy",
+    "src": "src/routes/cookie-policy.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_legal-page-3aRA7iGD.js",
+      "_source.generated-eZ5GDxmY.js",
+      "_site-footer-BPTj1Mzt.js"
+    ]
+  },
+  "src/routes/docs/$.tsx?tsr-split=component": {
+    "file": "assets/_-CdrEjhuP.js",
+    "name": "_",
+    "src": "src/routes/docs/$.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_index-Du5w5wbE.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/docs/index.tsx?tsr-split=component": {
+    "file": "assets/index-C9UtZygE.js",
+    "name": "index",
+    "src": "src/routes/docs/index.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_index-Du5w5wbE.js",
+      "_source.generated-eZ5GDxmY.js"
+    ]
+  },
+  "src/routes/dpa.tsx?tsr-split=component": {
+    "file": "assets/dpa-CWsibDYc.js",
+    "name": "dpa",
+    "src": "src/routes/dpa.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_legal-page-3aRA7iGD.js",
+      "_source.generated-eZ5GDxmY.js",
+      "_site-footer-BPTj1Mzt.js"
+    ]
+  },
+  "src/routes/privacy.tsx?tsr-split=component": {
+    "file": "assets/privacy-B3CGVr4O.js",
+    "name": "privacy",
+    "src": "src/routes/privacy.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_legal-page-3aRA7iGD.js",
+      "_source.generated-eZ5GDxmY.js",
+      "_site-footer-BPTj1Mzt.js"
+    ]
+  },
+  "src/routes/refund-policy.tsx?tsr-split=component": {
+    "file": "assets/refund-policy-DCKyRZC0.js",
+    "name": "refund-policy",
+    "src": "src/routes/refund-policy.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_legal-page-3aRA7iGD.js",
+      "_source.generated-eZ5GDxmY.js",
+      "_site-footer-BPTj1Mzt.js"
+    ]
+  },
+  "src/routes/terms-and-conditions.tsx?tsr-split=component": {
+    "file": "assets/terms-and-conditions-C4YBOQ96.js",
+    "name": "terms-and-conditions",
+    "src": "src/routes/terms-and-conditions.tsx?tsr-split=component",
+    "isDynamicEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js",
+      "_router-BD8vLhRN.js",
+      "_legal-page-3aRA7iGD.js",
+      "_source.generated-eZ5GDxmY.js",
+      "_site-footer-BPTj1Mzt.js"
+    ]
+  },
+  "tanstack-start-manifest:v": {
+    "file": "assets/_tanstack-start-manifest_v-DWhQlUrD.js",
+    "name": "_tanstack-start-manifest_v",
+    "src": "tanstack-start-manifest:v",
+    "isDynamicEntry": true
+  },
+  "virtual:cloudflare/worker-entry": {
+    "file": "index.js",
+    "name": "index",
+    "src": "virtual:cloudflare/worker-entry",
+    "isEntry": true,
+    "imports": [
+      "_worker-entry-wiX-xUlP.js"
+    ]
+  }
+}
