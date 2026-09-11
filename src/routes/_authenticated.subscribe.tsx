@@ -231,7 +231,7 @@ function SubscribePage() {
                 </span>
                 <h2 className="mt-2 text-xl font-semibold">Standard</h2>
                 <p className="text-xs text-base-content/60">
-                  Platform credits + DataForSEO at +30% markup
+                  Full platform access with monthly credits included
                 </p>
               </div>
               <div className="text-right">
@@ -248,7 +248,7 @@ function SubscribePage() {
                 "Live backlink competition",
                 "Local Map Rank Tracker",
                 "Jet AI agent + 36 MCP tools",
-                "Standard DataForSEO pricing +30%",
+                "Standard credit rate for all searches",
                 "Referral rewards for 12 cycles",
               ].map((feature) => (
                 <li key={feature} className="flex gap-2">
@@ -304,7 +304,7 @@ function SubscribePage() {
                 </span>
                 <h2 className="mt-2 text-xl font-semibold">BYOK</h2>
                 <p className="text-xs text-base-content/60">
-                  Your DataForSEO key, 10% service fee
+                  Connect your own API key with discounted credits
                 </p>
               </div>
               <div className="text-right">
@@ -317,8 +317,8 @@ function SubscribePage() {
               {[
                 "500 platform credits/month (roll over)",
                 "Every SeoTool.im feature included",
-                "Use your own DataForSEO API key",
-                "Only 10% service fee on your API calls",
+                "Connect your own provider API key",
+                "Heavily discounted credits per search",
                 "Jet AI agent + 36 MCP tools",
                 "Referral rewards for 12 cycles",
               ].map((feature) => (

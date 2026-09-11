@@ -226,14 +226,14 @@ export function KeywordResearchProPage({ projectId }: Props) {
                 className={`btn btn-sm ${billingMode === "standard" ? "btn-primary" : "btn-ghost border-base-300"}`}
                 onClick={() => setBillingMode("standard")}
               >
-                Standard · provider +30%
+                Standard Credits
               </button>
               <button
                 type="button"
                 className={`btn btn-sm ${billingMode === "byok" ? "btn-primary" : "btn-ghost border-base-300"}`}
                 onClick={() => setBillingMode("byok")}
               >
-                <KeyRound className="size-4" /> BYOK · service fee 10%
+                <KeyRound className="size-4" /> BYOK (Discounted Credits)
               </button>
             </div>
             {billingMode === "byok" ? (

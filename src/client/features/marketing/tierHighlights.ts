@@ -26,14 +26,14 @@ export type TierHighlight = {
 
 export const TIER_HIGHLIGHTS: Record<PaidTier, TierHighlight> = {
   byok: {
-    blurb: "For power users with their own DataForSEO key.",
+    blurb: "For power users with their own API key.",
     bullets: [
       "5 projects",
       "100 keyword searches per day",
       "50 tracked keywords",
       "3 site audits per month",
       `${MONTHLY_CREDIT_GRANTS.byok.toLocaleString()} platform credits/month (roll over)`,
-      "Your DataForSEO key, only 10% service fee",
+      "BYOK mode: heavily discounted credits per search",
     ],
     badge: "BYOK",
     popular: false,

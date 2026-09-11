@@ -145,14 +145,14 @@ export function BacklinksSearchCard({
                 className={`btn btn-xs ${billingMode === "standard" ? "btn-primary" : "btn-ghost"}`}
                 onClick={() => onBillingModeChange("standard")}
               >
-                Standard · provider +30%
+                Standard Credits
               </button>
               <button
                 type="button"
                 className={`btn btn-xs ${billingMode === "byok" ? "btn-primary" : "btn-ghost"}`}
                 onClick={() => onBillingModeChange("byok")}
               >
-                <KeyRound className="size-3.5" /> BYOK · service fee 10%
+                <KeyRound className="size-3.5" /> BYOK (Discounted Credits)
               </button>
             </div>
             {billingMode === "byok" ? (
