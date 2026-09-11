@@ -58,10 +58,10 @@
         file_server
     }
 
-    # Docs, guides, library content. /blogs* is EXCLUDED: blog posts are
-    # served by the SaaS app from the cms_posts table (admin CMS).
+    # Marketing routes, docs, guides, library, and feature pages.
     @marketingContent {
-        path /docs* /guides* /library*
+        path /docs* /guides* /library* /features* /free-tools*
+        path /about /contact /careers /affiliates /open-source-seo /google-search-console-mcp
     }
     handle @marketingContent {
         root * /srv/marketing

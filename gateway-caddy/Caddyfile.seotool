@@ -51,9 +51,10 @@
         header Cache-Control "public, max-age=31536000, immutable"
     }
 
-    # Docs, guides, library content.
+    # Marketing routes, docs, guides, library, and feature pages.
     @marketingContent {
-        path /docs* /guides* /library*
+        path /docs* /guides* /library* /features* /free-tools*
+        path /about /contact /careers /affiliates /open-source-seo /google-search-console-mcp
     }
     handle @marketingContent {
         root * /srv/marketing
