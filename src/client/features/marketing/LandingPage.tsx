@@ -24,6 +24,7 @@ import {
   useMarketingSession,
 } from "@/client/features/marketing/MarketingChrome";
 import { Reveal } from "@/client/features/marketing/useReveal";
+import { INTEGRATION_LIST } from "@/client/features/marketing/IntegrationLogos";
 
 /* ---------------------------------- shared --------------------------------- */
 
@@ -352,19 +353,6 @@ function BrowserMockup() {
 
 /* -------------------------------- logo cells ------------------------------- */
 
-const INTEGRATIONS = [
-  "DataForSEO",
-  "Google Search Console",
-  "GA4",
-  "ChatGPT",
-  "Claude",
-  "Gemini",
-  "Perplexity",
-  "Bing",
-  "PayPal",
-  "MCP",
-] as const;
-
 function LogoCells() {
   return (
     <section className="border-b border-base-300 bg-base-200/40">
@@ -377,17 +365,21 @@ function LogoCells() {
             </p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-            {INTEGRATIONS.map((name) => (
-              <div
-                key={name}
-                className="group relative flex min-h-24 items-center justify-center border-r border-b border-base-300 p-4"
-              >
-                <span className="text-center text-sm font-semibold text-base-content/45 transition-colors group-hover:text-base-content">
-                  {name}
-                </span>
-                <ChevronRight className="absolute right-2 bottom-2 size-3 text-primary opacity-0 transition-opacity group-hover:opacity-100" />
-              </div>
-            ))}
+            {INTEGRATION_LIST.map((item) => {
+              const Logo = item.logo;
+              return (
+                <div
+                  key={item.name}
+                  className="group relative flex min-h-24 flex-col items-center justify-center gap-2 border-r border-b border-base-300 p-4 transition-all duration-150 hover:bg-base-100"
+                >
+                  <Logo className="size-6 transition-transform duration-200 group-hover:scale-110" />
+                  <span className="text-center text-xs font-semibold text-base-content/65 transition-colors group-hover:text-base-content">
+                    {item.name}
+                  </span>
+                  <ChevronRight className="absolute right-2 bottom-2 size-3 text-primary opacity-0 transition-opacity group-hover:opacity-100" />
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
