@@ -70,9 +70,9 @@ function ExistingSubscriptionNotice({
   return (
     <div className="w-full max-w-lg space-y-5 text-center">
       <img
-        src="/transparent-logo.png"
+        src="/logo-icon.png"
         alt="SeoTool.im"
-        className="mx-auto size-10 rounded-lg"
+        className="mx-auto size-12 object-contain"
       />
       <h1 className="text-xl font-semibold">
         {finalizing
@@ -176,9 +176,9 @@ function SubscribePage() {
 
       <div className="space-y-3 text-center">
         <img
-          src="/transparent-logo.png"
+          src="/logo-icon.png"
           alt="SeoTool.im"
-          className="mx-auto size-10 rounded-lg"
+          className="mx-auto size-14 object-contain"
         />
         <h1 className="text-2xl font-semibold">
           {firstName
@@ -202,7 +202,7 @@ function SubscribePage() {
         </div>
       ) : null}
 
-      <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-3">
+      <div className="mx-auto grid max-w-4xl gap-5 md:grid-cols-[0.8fr_1.2fr]">
         <section className="card border border-base-300 bg-base-100">
           <div className="card-body gap-5 p-6">
             <div>
@@ -210,7 +210,7 @@ function SubscribePage() {
               <h2 className="mt-2 text-xl font-semibold">Explore first</h2>
               <p className="mt-1 text-sm text-base-content/65">
                 Browse your workspace and set up projects. Metered SEO tools
-                unlock with a paid plan.
+                unlock with All Access.
               </p>
             </div>
             <button
@@ -227,20 +227,25 @@ function SubscribePage() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <span className="badge badge-primary badge-sm">
-                  MOST POPULAR
+                  LIFETIME PRICE LOCK
                 </span>
-                <h2 className="mt-2 text-xl font-semibold">Standard</h2>
+                <h2 className="mt-2 text-xl font-semibold">All Access</h2>
                 <p className="text-xs text-base-content/60">
-                  Full platform access with monthly credits included
+                  {cohort?.label ?? "Current cohort"}
+                  {cohort?.remaining == null
+                    ? ""
+                    : ` · ${cohort.remaining} spot${cohort.remaining === 1 ? "" : "s"} left`}
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-primary">$9</div>
+                <div className="text-3xl font-bold text-primary">
+                  ${((cohort?.priceUsdCents ?? 2_900) / 100).toFixed(0)}
+                </div>
                 <div className="text-xs text-base-content/60">USD / month</div>
               </div>
             </div>
 
-            <ul className="grid gap-2 text-sm">
+            <ul className="grid gap-2 text-sm sm:grid-cols-2">
               {[
                 "10,000 credits/month (roll over, never expire)",
                 "Every SeoTool.im feature included",
@@ -248,7 +253,7 @@ function SubscribePage() {
                 "Live backlink competition",
                 "Local Map Rank Tracker",
                 "Jet AI agent + 36 MCP tools",
-                "Standard credit rate for all searches",
+                "Standard or BYOK credit rate",
                 "Referral rewards for 12 cycles",
               ].map((feature) => (
                 <li key={feature} className="flex gap-2">
@@ -288,75 +293,11 @@ function SubscribePage() {
             </button>
             {!cohort?.configured ? (
               <p className="text-xs text-warning">
-                PayPal plans are not configured yet. An admin can initialize
-                them from Admin → Pricing.
+                Payments are being set up right now — please check back soon,
+                or email support@seotool.im and we&apos;ll let you know the
+                moment checkout is live.
               </p>
             ) : null}
-          </div>
-        </section>
-
-        <section className="card border border-base-300 bg-base-100">
-          <div className="card-body gap-5 p-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <span className="badge badge-ghost badge-sm">
-                  BRING YOUR OWN KEY
-                </span>
-                <h2 className="mt-2 text-xl font-semibold">BYOK</h2>
-                <p className="text-xs text-base-content/60">
-                  Connect your own API key with discounted credits
-                </p>
-              </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold">$4</div>
-                <div className="text-xs text-base-content/60">USD / month</div>
-              </div>
-            </div>
-
-            <ul className="grid gap-2 text-sm">
-              {[
-                "500 platform credits/month (roll over)",
-                "Every SeoTool.im feature included",
-                "Connect your own provider API key",
-                "Heavily discounted credits per search",
-                "Jet AI agent + 36 MCP tools",
-                "Referral rewards for 12 cycles",
-              ].map((feature) => (
-                <li key={feature} className="flex gap-2">
-                  <Check className="mt-0.5 size-4 shrink-0 text-success" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-
-            <label className="form-control gap-1">
-              <span className="text-xs font-medium">
-                Referral code (optional)
-              </span>
-              <input
-                className="input input-bordered input-sm"
-                value={referralCode}
-                maxLength={32}
-                onChange={(event) =>
-                  setReferralCode(event.target.value.toUpperCase())
-                }
-                placeholder="Friend's code"
-              />
-              <span className="text-xs text-base-content/50">
-                You receive 5,000 bonus credits after activation.
-              </span>
-            </label>
-
-            <button
-              className="btn btn-outline"
-              disabled={checkout.isPending || !cohort?.configured}
-              onClick={() => checkout.mutate()}
-            >
-              {checkout.isPending ? (
-                <span className="loading loading-spinner loading-xs" />
-              ) : null}
-              Continue with PayPal
-            </button>
           </div>
         </section>
       </div>

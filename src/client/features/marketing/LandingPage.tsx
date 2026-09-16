@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import {
   ArrowRight,
@@ -118,16 +118,48 @@ const DEMO_TABS = [
   { label: "Backlinks", icon: Link2 },
 ] as const;
 
-function DemoWidget() {
+function DemoWidget({ signedIn }: { signedIn: boolean }) {
   const [active, setActive] = React.useState(0);
+  const [domain, setDomain] = React.useState("");
+  const navigate = useNavigate();
+
+  const handleRunAnalysis = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const cleanDomain =
+      domain
+        .trim()
+        .replace(/^https?:\/\//i, "")
+        .replace(/\/+$/, "") || "yourdomain.com";
+    if (signedIn) {
+      void navigate({
+        to: "/projects",
+        search: { domain: cleanDomain } as never,
+      });
+    } else {
+      void navigate({
+        to: "/sign-up",
+        search: {
+          redirect: `/projects?domain=${encodeURIComponent(cleanDomain)}`,
+        } as never,
+      });
+    }
+  };
 
   return (
-    <div className="fc-shadow mx-auto mt-12 w-full max-w-xl rounded-2xl border border-base-300 bg-base-100 p-3 text-left">
+    <form
+      onSubmit={handleRunAnalysis}
+      className="fc-shadow mx-auto mt-12 w-full max-w-xl rounded-2xl border border-base-300 bg-base-100 p-3 text-left"
+    >
       <div className="flex items-center gap-2.5 px-2 py-2.5">
         <Globe className="size-4 shrink-0 text-base-content/40" />
-        <span className="flex-1 truncate text-base text-base-content/40">
-          yourdomain.com
-        </span>
+        <input
+          type="text"
+          value={domain}
+          onChange={(e) => setDomain(e.target.value)}
+          placeholder="yourdomain.com"
+          aria-label="Domain to analyze"
+          className="flex-1 bg-transparent text-base text-base-content placeholder:text-base-content/40 focus:outline-none"
+        />
       </div>
       <div className="mt-1 flex items-center gap-2 rounded-xl bg-base-200/80 p-1.5">
         <div className="flex flex-1 gap-1 overflow-x-auto">
@@ -150,14 +182,14 @@ function DemoWidget() {
           ))}
         </div>
         <button
-          type="button"
+          type="submit"
           className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-white transition-transform hover:scale-105 active:scale-95"
           aria-label="Run analysis"
         >
           <ArrowRight className="size-4" />
         </button>
       </div>
-    </div>
+    </form>
   );
 }
 
@@ -240,7 +272,7 @@ function Hero({ signedIn }: { signedIn: boolean }) {
           </div>
 
           <div className="hero-rise hero-rise-4">
-            <DemoWidget />
+            <DemoWidget signedIn={signedIn} />
           </div>
         </div>
       </div>

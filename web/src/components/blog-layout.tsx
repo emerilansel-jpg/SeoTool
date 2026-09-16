@@ -15,9 +15,18 @@ export function BlogLayout({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-5 sm:px-6">
           <Link
             to="/"
-            className="shrink-0 text-base font-semibold text-neutral-950 transition-opacity hover:opacity-80"
+            className="shrink-0 transition-opacity hover:opacity-80 inline-flex items-center"
           >
-            SeoTool.im
+            <img
+              src="/logo.png"
+              alt="SeoTool.im"
+              className="h-7 w-auto object-contain dark:hidden"
+            />
+            <img
+              src="/logo-dark.png"
+              alt="SeoTool.im"
+              className="h-7 w-auto object-contain hidden dark:block"
+            />
           </Link>
 
           <nav

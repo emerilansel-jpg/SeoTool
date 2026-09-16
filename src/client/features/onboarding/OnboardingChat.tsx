@@ -92,9 +92,9 @@ function SiteForm({ projectId }: { projectId: string }) {
       >
         <div className="space-y-3 text-center">
           <img
-            src="/transparent-logo.png"
+            src="/logo-icon.png"
             alt="SeoTool.im"
-            className="mx-auto size-10 rounded-lg"
+            className="mx-auto size-12 object-contain"
           />
           <h1 className="text-xl font-semibold">Tell us about your website.</h1>
           <p className="text-sm text-base-content/60">

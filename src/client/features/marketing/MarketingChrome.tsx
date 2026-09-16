@@ -1,13 +1,14 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { Menu, X } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 
 const NAV_LINKS = [
   { label: "Features", href: "/#features", internal: false },
   { label: "Pricing", href: "/pricing", internal: true },
-  { label: "Docs", href: "https://seotool.im/docs", internal: false },
-  { label: "Blog", href: "https://seotool.im/blogs", internal: false },
-  { label: "Changelog", href: "https://seotool.im/changelog", internal: false },
+  { label: "Docs", href: "/docs", internal: false },
+  { label: "Blog", href: "/blogs", internal: true },
+  { label: "Changelog", href: "/changelog", internal: true },
 ] as const;
 
 const FOOTER_LINKS = [
@@ -18,8 +19,8 @@ const FOOTER_LINKS = [
       { label: "Features", href: "/#features", internal: false },
       {
         label: "Changelog",
-        href: "https://seotool.im/changelog",
-        internal: false,
+        href: "/changelog",
+        internal: true,
       },
     ],
   },
@@ -28,11 +29,11 @@ const FOOTER_LINKS = [
     links: [
       {
         label: "Documentation",
-        href: "https://seotool.im/docs",
+        href: "/docs",
         internal: false,
       },
-      { label: "Blog", href: "https://seotool.im/blogs", internal: false },
-      { label: "Guides", href: "https://seotool.im/guides", internal: false },
+      { label: "Blog", href: "/blogs", internal: true },
+      { label: "Guides", href: "/guides", internal: false },
     ],
   },
   {
@@ -40,18 +41,18 @@ const FOOTER_LINKS = [
     links: [
       {
         label: "Privacy Policy",
-        href: "https://seotool.im/privacy",
-        internal: false,
+        href: "/privacy",
+        internal: true,
       },
       {
         label: "Terms of Service",
-        href: "https://seotool.im/terms-and-conditions",
-        internal: false,
+        href: "/terms-and-conditions",
+        internal: true,
       },
       {
         label: "Refund Policy",
-        href: "https://seotool.im/refund-policy",
-        internal: false,
+        href: "/refund-policy",
+        internal: true,
       },
     ],
   },
@@ -63,16 +64,22 @@ export function useMarketingSession() {
 }
 
 export function MarketingNavbar({ signedIn }: { signedIn: boolean }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-30 border-b border-base-300 bg-base-100/90 backdrop-blur-md">
       <div className="relative mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 md:px-6">
         <Link to="/" className="group flex items-center gap-2">
-          <div className="flex size-7 items-center justify-center rounded-md bg-primary text-xs font-black text-white transition-transform group-hover:scale-105">
-            S
-          </div>
-          <span className="text-base font-bold tracking-tight text-base-content">
-            SeoTool<span className="text-primary">.im</span>
-          </span>
+          <img
+            src="/logo.png"
+            alt="SeoTool.im"
+            className="h-8 w-auto object-contain transition-transform group-hover:scale-105 dark:hidden"
+          />
+          <img
+            src="/logo-dark.png"
+            alt="SeoTool.im"
+            className="h-8 w-auto object-contain transition-transform group-hover:scale-105 hidden dark:block"
+          />
         </Link>
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex">
@@ -89,8 +96,9 @@ export function MarketingNavbar({ signedIn }: { signedIn: boolean }) {
               <a
                 key={link.label}
                 href={link.href}
-                target="_blank"
-                rel="noreferrer"
+                {...(link.href.startsWith("http")
+                  ? { target: "_blank", rel: "noreferrer" }
+                  : {})}
                 className="rounded-md px-3 py-1.5 text-sm font-medium text-base-content/70 transition-colors hover:text-base-content"
               >
                 {link.label}
@@ -100,32 +108,109 @@ export function MarketingNavbar({ signedIn }: { signedIn: boolean }) {
         </nav>
 
         <div className="flex items-center gap-2">
-          {signedIn ? (
-            <Link
-              to="/projects"
-              className="btn btn-sm gap-1.5 rounded-[10px] border-0 bg-base-200 font-semibold text-base-content transition-transform hover:scale-[1.03]"
-            >
-              Dashboard
-            </Link>
-          ) : (
-            <>
+          <div className="hidden sm:flex items-center gap-2">
+            {signedIn ? (
               <Link
-                to="/sign-in"
-                className="btn btn-ghost btn-sm text-sm font-medium text-base-content/70 hover:text-base-content"
+                to="/projects"
+                className="btn btn-sm gap-1.5 rounded-[10px] border-0 bg-base-200 font-semibold text-base-content transition-transform hover:scale-[1.03]"
               >
-                Sign in
+                Dashboard
               </Link>
-              <Link
-                to="/sign-up"
-                search={{ redirect: "/subscribe" }}
-                className="btn btn-sm rounded-[10px] border-0 bg-base-200 font-semibold text-base-content transition-transform hover:scale-[1.03]"
-              >
-                Sign up
-              </Link>
-            </>
-          )}
+            ) : (
+              <>
+                <Link
+                  to="/sign-in"
+                  className="btn btn-ghost btn-sm text-sm font-medium text-base-content/70 hover:text-base-content"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  to="/sign-up"
+                  search={{ redirect: "/subscribe" }}
+                  className="btn btn-sm rounded-[10px] border-0 bg-base-200 font-semibold text-base-content transition-transform hover:scale-[1.03]"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-square md:hidden text-base-content/80 hover:text-base-content"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? (
+              <X className="size-5" />
+            ) : (
+              <Menu className="size-5" />
+            )}
+          </button>
         </div>
       </div>
+
+      {mobileMenuOpen && (
+        <div className="border-b border-base-300 bg-base-100 px-4 py-4 md:hidden">
+          <nav className="flex flex-col gap-1">
+            {NAV_LINKS.map((link) =>
+              link.internal ? (
+                <Link
+                  key={link.label}
+                  to={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-base-content/80 transition-colors hover:bg-base-200 hover:text-base-content"
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  {...(link.href.startsWith("http")
+                    ? { target: "_blank", rel: "noreferrer" }
+                    : {})}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-base-content/80 transition-colors hover:bg-base-200 hover:text-base-content"
+                >
+                  {link.label}
+                </a>
+              ),
+            )}
+
+            <div className="mt-2 flex flex-col gap-2 border-t border-base-300 pt-3 sm:hidden">
+              {signedIn ? (
+                <Link
+                  to="/projects"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="btn btn-sm w-full rounded-lg bg-base-200 font-semibold text-base-content"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/sign-in"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="btn btn-outline btn-sm w-full rounded-lg text-base-content/80"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/sign-up"
+                    search={{ redirect: "/subscribe" }}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="btn btn-primary btn-sm w-full rounded-lg font-semibold text-white"
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
@@ -135,14 +220,18 @@ export function MarketingFooter() {
     <footer className="border-t border-base-300 bg-base-200/50">
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 md:grid-cols-5 md:px-6">
         <div className="md:col-span-2 space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="flex size-6 items-center justify-center rounded-md bg-primary text-[10px] font-black text-white">
-              S
-            </div>
-            <span className="text-sm font-bold tracking-tight text-base-content">
-              SeoTool.im
-            </span>
-          </div>
+          <Link to="/" className="inline-block">
+            <img
+              src="/logo.png"
+              alt="SeoTool.im"
+              className="h-7 w-auto object-contain dark:hidden"
+            />
+            <img
+              src="/logo-dark.png"
+              alt="SeoTool.im"
+              className="h-7 w-auto object-contain hidden dark:block"
+            />
+          </Link>
           <p className="max-w-sm text-sm leading-relaxed text-base-content/60">
             The unified SEO workspace. Live SERP intelligence, technical audits,
             backlink tracking, and autonomous AI agents.
@@ -170,8 +259,9 @@ export function MarketingFooter() {
                   ) : (
                     <a
                       href={link.href}
-                      target="_blank"
-                      rel="noreferrer"
+                      {...(link.href.startsWith("http")
+                        ? { target: "_blank", rel: "noreferrer" }
+                        : {})}
                       className="text-sm text-base-content/60 transition-colors hover:text-primary"
                     >
                       {link.label}

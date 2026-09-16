@@ -21,6 +21,7 @@
         path /features /features/*
         path /free-tools /free-tools/*
         path /open-source-seo /google-search-console-mcp
+        path /privacy /terms-and-conditions /refund-policy /cookie-policy /dpa
     }
     handle @marketingRoutes {
         root * /srv/marketing
@@ -37,6 +38,8 @@
         path /demo.mp4 /demo-poster.webp
         path /favicon* /apple-touch-icon* /android-chrome*
         path /site.webmanifest /robots.txt /sitemap.xml /social-card.png /product-hunt.svg
+        path /agent-onboarding /js/*
+        path /logo* /transparent-logo*
     }
     handle @marketingAssets {
         root * /srv/marketing

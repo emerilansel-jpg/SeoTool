@@ -67,6 +67,10 @@ export function AiTrackingObservationsTable({ observations }: Props) {
                   <button
                     type="button"
                     className="btn btn-ghost btn-xs btn-circle"
+                    aria-expanded={isExpanded}
+                    aria-label={
+                      isExpanded ? "Collapse observation" : "Expand observation"
+                    }
                   >
                     {isExpanded ? (
                       <ChevronUp className="size-3.5" />

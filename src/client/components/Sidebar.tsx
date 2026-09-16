@@ -129,12 +129,16 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
           onClick={onNavigate}
           className="group flex items-center gap-2.5"
         >
-          <div className="flex size-7 items-center justify-center rounded-xl bg-primary text-xs font-black text-white shadow-xs shadow-primary/30 transition-transform group-hover:scale-105">
-            S
-          </div>
-          <span className="text-base font-bold tracking-tight text-base-content">
-            SeoTool<span className="text-primary font-black">.im</span>
-          </span>
+          <img
+            src="/logo.png"
+            alt="SeoTool.im"
+            className="h-7 w-auto object-contain transition-transform group-hover:scale-105 dark:hidden"
+          />
+          <img
+            src="/logo-dark.png"
+            alt="SeoTool.im"
+            className="h-7 w-auto object-contain transition-transform group-hover:scale-105 hidden dark:block"
+          />
         </Link>
         <div className="flex items-center gap-1">
           <NotificationCenter />

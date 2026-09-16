@@ -162,7 +162,7 @@ function CohortCard({
                 : "btn-outline border-base-300 hover:border-primary hover:bg-primary/5"
             }`}
           >
-            Join {cohort.label}
+            {isCurrent ? `Join ${cohort.label}` : "Join All Access"}
             <ArrowRight className="size-4" />
           </Link>
         ) : (
@@ -175,7 +175,7 @@ function CohortCard({
                 : "btn-outline border-base-300 hover:border-primary hover:bg-primary/5"
             }`}
           >
-            Join {cohort.label}
+            {isCurrent ? `Join ${cohort.label}` : "Join All Access"}
             <ArrowRight className="size-4" />
           </Link>
         )}

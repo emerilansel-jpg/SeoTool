@@ -183,9 +183,13 @@ function MarketingLayout() {
           <nav className="grid min-h-14 grid-cols-[1fr_auto] items-center gap-3 rounded-full border border-[var(--color-border-subtle)] bg-[#0a0b14]/80 px-4 py-2.5 shadow-lg shadow-black/20 backdrop-blur-xl md:grid-cols-[1fr_auto_1fr] md:px-5">
             <Link
               to="/"
-              className="text-sm font-semibold hover:opacity-80 transition-opacity"
+              className="hover:opacity-80 transition-opacity inline-flex items-center"
             >
-              SeoTool.im
+              <img
+                src="/logo-dark.png"
+                alt="SeoTool.im"
+                className="h-7 w-auto object-contain"
+              />
             </Link>
 
             <div className="hidden items-center justify-center gap-5 md:flex">

@@ -29,6 +29,17 @@ export const baseAuthOptions = {
     minPasswordLength: HOSTED_PASSWORD_MIN_LENGTH,
     maxPasswordLength: HOSTED_PASSWORD_MAX_LENGTH,
   },
+  // Explicit rather than relying on better-auth defaults so the limiter can't
+  // be silently lost to an upgrade. Storage stays in-memory (Workers has no
+  // shared store by default) and specialRules still tighten sign-in/sign-up
+  // (3 req/10s) and password-reset paths (3 req/60s). Edge-level coverage for
+  // cross-isolate floods is a Cloudflare WAF rate-limiting rule — see
+  // runbooks/production-runbook.md.
+  rateLimit: {
+    enabled: true,
+    window: 60,
+    max: 100,
+  },
   user: {
     additionalFields: userAdditionalFields,
   },

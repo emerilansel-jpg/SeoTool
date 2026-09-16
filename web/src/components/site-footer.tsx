@@ -11,8 +11,17 @@ const featureLinks = featureGroups.flatMap((group) =>
 export function SiteFooter({ className }: { className?: string }) {
   return (
     <div className={className}>
-      <Link to="/" className="text-sm font-semibold text-[var(--color-brand)]">
-        SeoTool.im
+      <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
+        <img
+          src="/logo.png"
+          alt="SeoTool.im"
+          className="h-6 w-auto object-contain dark:hidden"
+        />
+        <img
+          src="/logo-dark.png"
+          alt="SeoTool.im"
+          className="h-6 w-auto object-contain hidden dark:block"
+        />
       </Link>
 
       <div className="mt-6 grid grid-cols-2 gap-8 md:grid-cols-6">

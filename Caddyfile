@@ -14,6 +14,8 @@ seotool.im {
         path /demo.mp4 /demo-poster.webp
         path /favicon* /apple-touch-icon* /android-chrome*
         path /site.webmanifest /robots.txt /sitemap.xml /social-card.png /product-hunt.svg
+        path /agent-onboarding /js/*
+        path /logo* /transparent-logo*
     }
     handle @marketingAssets {
         root * /srv/marketing
@@ -50,6 +52,7 @@ seotool.im {
     # blog posts are served by the SaaS app from the cms_posts table.
     @marketingContent {
         path /docs* /guides* /library*
+        path /privacy /terms-and-conditions /refund-policy /cookie-policy /dpa
     }
     handle @marketingContent {
         root * /srv/marketing

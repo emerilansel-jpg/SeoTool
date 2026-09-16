@@ -1,0 +1,45 @@
+# SeoTool.im AI Agent Onboarding Guide
+
+Welcome to SeoTool.im. This endpoint equips autonomous agents (Claude Code, Cursor, OpenClaw, Hermes, Codex) to integrate with the SeoTool.im platform and MCP server.
+
+## 1. Quick Setup via MCP
+
+Run the initialization command in your terminal:
+```bash
+npx -y seotool-mcp init --all
+```
+
+Or configure your MCP client manually in `claude_desktop_config.json` or `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "seotool": {
+      "command": "npx",
+      "args": ["-y", "seotool-mcp"],
+      "env": {
+        "SEOTOOL_API_KEY": "your_api_key_here",
+        "SEOTOOL_BASE_URL": "https://seotool.im"
+      }
+    }
+  }
+}
+```
+
+## 2. Supported Workflows & Capabilities
+
+- **Keyword Research**: Volume, difficulty, intent clustering, SERP metrics.
+- **Rank Tracking**: Real-time positions across Google & Bing, device/location filters.
+- **Site Audit**: Full crawl analysis across 100+ technical audit factors and indexability.
+- **Backlink Intelligence**: Referring domains, anchor analysis, domain authority graph.
+- **AI Visibility**: Brand citations and prompt tracking across ChatGPT, Claude, Gemini, Perplexity.
+- **Automated Reporting**: Export white-label client-ready reports.
+
+## 3. Direct API Authentication
+
+Include your API key as a Bearer token in the HTTP Authorization header:
+```bash
+curl -H "Authorization: Bearer $SEOTOOL_API_KEY" https://seotool.im/api/health
+```
+
+For more documentation, visit https://seotool.im/docs/mcp or https://seotool.im/docs.

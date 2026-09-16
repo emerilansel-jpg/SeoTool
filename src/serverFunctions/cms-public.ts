@@ -25,11 +25,19 @@ export const listPublishedPosts = createServerFn({ method: "GET" }).handler(
 export const getPublishedPost = createServerFn({ method: "GET" })
   .validator(slugSchema)
   .handler(async ({ data }) => {
-    return CmsRepository.getPublishedPostBySlug(data.slug);
+    try {
+      return await CmsRepository.getPublishedPostBySlug(data.slug);
+    } catch {
+      return null;
+    }
   });
 
 export const getPublishedPage = createServerFn({ method: "GET" })
   .validator(slugSchema)
   .handler(async ({ data }) => {
-    return CmsRepository.getPublishedPageBySlug(data.slug);
+    try {
+      return await CmsRepository.getPublishedPageBySlug(data.slug);
+    } catch {
+      return null;
+    }
   });

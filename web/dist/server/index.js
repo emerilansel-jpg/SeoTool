@@ -1,4 +1,4 @@
-import { a4, a5 } from "./assets/worker-entry-wiX-xUlP.js";
+import { a4, a5 } from "./assets/worker-entry-1rHKkS2A.js";
 import "node:async_hooks";
 import "node:stream/web";
 import "node:stream";

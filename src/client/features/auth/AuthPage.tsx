@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Link } from "@tanstack/react-router";
 import {
   getCurrentAuthRedirect,
   getOAuthSignedQuery,
@@ -100,9 +101,13 @@ export function AuthPageCard({
   return (
     <div className="w-full max-w-md rounded-2xl border border-base-300 bg-base-100 p-8 shadow-xl shadow-base-content/5 space-y-6">
       <div className="text-center space-y-3">
-        <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-indigo-600 to-cyan-400 text-lg font-black text-white shadow-md shadow-primary/25">
-          S
-        </div>
+        <Link to="/" className="inline-block transition-transform hover:scale-105">
+          <img
+            src="/logo-icon.png"
+            alt="SeoTool.im"
+            className="mx-auto size-14 object-contain"
+          />
+        </Link>
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-base-content">
             {title}

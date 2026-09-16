@@ -32,6 +32,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Fail the PR on new high/critical advisories so vulnerable versions
+      # can never silently merge. Conscious exceptions go to
+      # auditConfig.ignoreGhsas (see pnpm-workspace.yaml) with a written
+      # rationale in docs/SECURITY_OVERRIDES.md.
+      - name: Audit dependencies
+        run: pnpm audit --prod --audit-level high
+
       - name: Run CI checks
         run: pnpm run ci:check
 

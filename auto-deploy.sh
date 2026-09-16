@@ -13,6 +13,17 @@ echo "🚀 Starting Auto-Deploy..."
 # NOT need to be preserved across git pulls.
 cp .env.hosted .env.hosted.bak 2>/dev/null || true
 
+# Deploy preflight: BYPASS_* flags are local-dev escape hatches that disable
+# authentication or email verification. Refuse to deploy with them enabled so
+# they can never silently reach production (defense-in-depth alongside the
+# runtime guard in src/lib/auth.ts).
+for flag in BYPASS_AUTH BYPASS_EMAIL_VERIFICATION; do
+  if grep -qE "^${flag}=true" .env.hosted; then
+    echo "❌ Deploy aborted: .env.hosted sets ${flag}=true. This flag is for local development only."
+    exit 1
+  fi
+done
+
 echo "📥 Pulling latest changes..."
 git fetch origin main
 git reset --hard origin/main
@@ -50,3 +61,9 @@ curl -s --max-time 10 http://127.0.0.1:3001/ | grep -aoE '/assets/[^"]+\.(js|css
 echo "--- end diagnostics ---"
 
 echo "✅ Auto-Deploy finished successfully!"
+
+# ─── Nightly database backup ────────────────────────────────────────────
+# One-time setup on the VPS (installs the daily 03:15 cron):
+#   (crontab -l 2>/dev/null; echo "15 3 * * * /home/seotool/JetDigitalSEO/scripts/backup-pg.sh >> /var/log/seotool-backup.log 2>&1") | crontab -
+# Verify any time:
+#   ls -lt /var/backups/seotool/ && bash scripts/restore-pg.sh <newest-dump> 

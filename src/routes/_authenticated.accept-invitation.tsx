@@ -75,9 +75,9 @@ function AcceptInvitationPage() {
   return (
     <div className="w-full max-w-sm space-y-4 text-center">
       <img
-        src="/transparent-logo.png"
+        src="/logo-icon.png"
         alt="SeoTool.im"
-        className="mx-auto size-10 rounded-lg"
+        className="mx-auto size-12 object-contain"
       />
 
       {status === "loading" ? (
