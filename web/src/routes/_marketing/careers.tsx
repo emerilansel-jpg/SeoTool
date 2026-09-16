@@ -37,12 +37,12 @@ const VALUES = [
 
 function CareersPage() {
   return (
-    <div className="mx-auto max-w-4xl pt-12 pb-24 md:pt-20">
+    <div className="mx-auto max-w-4xl px-4 pt-12 pb-24 text-[var(--color-brand)] md:px-6 md:pt-20">
       <div className="text-center mb-16">
-        <h1 className="text-4xl font-bold tracking-tight text-neutral-950 sm:text-6xl">
+        <h1 className="text-4xl font-extrabold tracking-tight text-[var(--color-brand)] sm:text-6xl">
           Build the future of SEO with us
         </h1>
-        <p className="mt-6 text-lg leading-8 text-neutral-600 max-w-2xl mx-auto">
+        <p className="mt-6 text-lg leading-8 text-[var(--color-brand-muted)] max-w-2xl mx-auto">
           We are a small, focused team building the open source alternative to
           expensive SEO platforms. If you love open source and data, we would
           love to hear from you.
@@ -53,30 +53,30 @@ function CareersPage() {
         {VALUES.map((value) => (
           <div
             key={value.title}
-            className="border border-[var(--color-border-subtle)] p-8 rounded-2xl bg-white"
+            className="border border-[var(--color-border-subtle)] p-8 rounded-2xl bg-[var(--color-surface-raised)]"
           >
-            <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+            <h3 className="text-lg font-bold text-[var(--color-brand)] mb-2">
               {value.title}
             </h3>
-            <p className="text-sm leading-relaxed text-neutral-600">
+            <p className="text-sm leading-relaxed text-[var(--color-brand-muted)]">
               {value.description}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="border border-[var(--color-border-subtle)] p-10 rounded-2xl bg-white text-center my-16">
-        <h2 className="text-2xl font-bold text-neutral-950 mb-4">
+      <div className="border border-[var(--color-border-subtle)] p-10 rounded-2xl bg-[var(--color-surface-raised)] text-center my-16">
+        <h2 className="text-2xl font-bold text-[var(--color-brand)] mb-4">
           Open Positions
         </h2>
-        <p className="text-neutral-600 max-w-xl mx-auto leading-relaxed">
+        <p className="text-[var(--color-brand-muted)] max-w-xl mx-auto leading-relaxed">
           We do not have any open positions right now, but we are always
           looking for talented people. Send us your resume and tell us how you
           would make SeoTool.im better.
         </p>
         <a
           href="mailto:support@seotool.im?subject=Career Inquiry"
-          className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-neutral-950 text-white rounded-full text-sm font-medium hover:bg-neutral-800 transition-colors"
+          className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-primary text-white rounded-xl text-sm font-semibold hover:brightness-110 active:scale-95 transition-all shadow-xs"
         >
           Get in touch
         </a>

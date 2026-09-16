@@ -2,10 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { createClientLoader } from "fumadocs-mdx/runtime/vite";
 import { DocsBody } from "fumadocs-ui/page";
 import defaultMdxComponents from "fumadocs-ui/mdx";
-import { SiteFooter } from "@/components/site-footer";
-import { BlogLayout } from "@/components/blog-layout";
 import type { ComponentPropsWithoutRef } from "react";
 import { Suspense } from "react";
+import { BlogLayout } from "@/components/blog-layout";
+import { SiteFooter } from "@/components/site-footer";
 import { getBlogPost } from "@/lib/content.functions";
 import { blog } from "../../../source.generated";
 import { buildPageSeo } from "@/lib/seo";
@@ -38,7 +38,7 @@ const clientMdxLoader = createClientLoader(blog, {
   id: "blog",
   component({ default: MDX }) {
     return (
-      <DocsBody className="text-neutral-800 [&_a]:!text-neutral-950 [&_a]:underline [&_a]:decoration-[var(--color-brand-accent)] [&_a]:underline-offset-4 [&_h2]:text-neutral-950 [&_h2_a]:!no-underline [&_h3]:text-neutral-950 [&_h3_a]:!no-underline [&_li]:text-neutral-700 [&_p]:text-neutral-700 [&_strong]:text-neutral-950">
+      <DocsBody className="text-[var(--color-brand)] [&_a]:text-[var(--color-brand-accent)] [&_a]:underline [&_a]:underline-offset-4 [&_h2]:text-[var(--color-brand)] [&_h2]:font-bold [&_h3]:text-[var(--color-brand)] [&_h3]:font-bold [&_li]:text-[var(--color-brand-muted)] [&_p]:text-[var(--color-brand-muted)] [&_strong]:text-[var(--color-brand)]">
         <MDX
           components={{
             ...defaultMdxComponents,
@@ -54,10 +54,10 @@ const clientMdxLoader = createClientLoader(blog, {
 
 function BlogTable(props: ComponentPropsWithoutRef<"table">) {
   return (
-    <div className="not-prose my-8 w-full max-w-full overflow-x-auto rounded-xl border border-[var(--color-border-subtle)] bg-white">
+    <div className="not-prose my-8 w-full max-w-full overflow-x-auto rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)]">
       <table
         {...props}
-        className="w-full min-w-[720px] border-collapse text-left text-sm"
+        className="w-full border-collapse text-left text-sm text-[var(--color-brand)]"
       />
     </div>
   );
@@ -67,7 +67,7 @@ function BlogTableHeader(props: ComponentPropsWithoutRef<"th">) {
   return (
     <th
       {...props}
-      className="border-b border-r border-neutral-200 bg-neutral-950 px-4 py-3 text-left text-sm font-semibold text-white last:border-r-0"
+      className="border-b border-r border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-brand)] last:border-r-0"
     />
   );
 }
@@ -76,7 +76,7 @@ function BlogTableCell(props: ComponentPropsWithoutRef<"td">) {
   return (
     <td
       {...props}
-      className="border-b border-r border-neutral-200 px-4 py-3 align-top text-sm leading-6 text-neutral-700 last:border-r-0 [&_a]:font-medium [&_a]:!text-neutral-950"
+      className="border-b border-r border-[var(--color-border-subtle)] px-4 py-3 align-top text-sm leading-6 text-[var(--color-brand-muted)] last:border-r-0 [&_a]:font-medium [&_a]:text-[var(--color-brand-accent)]"
     />
   );
 }
@@ -91,14 +91,14 @@ function BlogPost() {
 
   return (
     <BlogLayout>
-      <article className="mx-auto max-w-3xl px-6 py-12 text-neutral-950 md:py-24">
+      <article className="mx-auto max-w-3xl px-6 py-12 text-[var(--color-brand)] md:py-20">
         <BlogHeader title={data.title} description={data.description} />
         <Suspense>
           <Content />
         </Suspense>
 
         <div className="mt-16 border-t border-[var(--color-border-subtle)] pt-8">
-          <SiteFooter className="text-xs text-neutral-600 [&_a]:transition-colors [&_a]:hover:text-neutral-900" />
+          <SiteFooter className="text-xs text-[var(--color-brand-muted)] [&_a]:transition-colors [&_a]:hover:text-white" />
         </div>
       </article>
     </BlogLayout>
@@ -117,17 +117,17 @@ function BlogHeader({
       <div className="mb-4">
         <Link
           to="/blogs"
-          className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-brand-muted)] transition-colors hover:text-neutral-950"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-brand-accent)] transition-colors hover:underline"
         >
           <span aria-hidden="true">&larr;</span>
           <span>Back to Blog</span>
         </Link>
       </div>
-      <h1 className="mb-5 text-4xl font-semibold leading-tight tracking-tight text-neutral-950 md:text-6xl">
+      <h1 className="mb-5 text-4xl font-extrabold leading-tight tracking-tight text-[var(--color-brand)] md:text-5xl">
         {title}
       </h1>
       {description && (
-        <p className="max-w-2xl text-lg leading-8 text-[var(--color-brand-muted)]">
+        <p className="max-w-2xl text-lg leading-relaxed text-[var(--color-brand-muted)]">
           {description}
         </p>
       )}

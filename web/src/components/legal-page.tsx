@@ -13,9 +13,9 @@ type LegalPageProps = {
 export function LegalPage({ title, description, children }: LegalPageProps) {
   return (
     <HomeLayout {...baseOptions()}>
-      <article className="mx-auto max-w-3xl bg-[var(--color-surface)] px-6 py-12 text-neutral-950 md:py-24">
+      <article className="mx-auto max-w-3xl px-6 py-12 text-[var(--color-brand)] md:py-20">
         <header className="mb-10 border-b border-[var(--color-border-subtle)] pb-8">
-          <h1 className="mb-4 text-4xl font-semibold tracking-tight md:text-6xl">
+          <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-[var(--color-brand)] md:text-5xl">
             {title}
           </h1>
           {description ? (
@@ -25,12 +25,12 @@ export function LegalPage({ title, description, children }: LegalPageProps) {
           ) : null}
         </header>
 
-        <DocsBody className="text-neutral-800 [&_a]:!text-neutral-950 [&_a]:underline [&_a]:decoration-[var(--color-brand-accent)] [&_a]:underline-offset-4 [&_h2]:text-neutral-950 [&_h3]:text-neutral-950 [&_li]:text-neutral-700 [&_p]:text-neutral-700 [&_strong]:text-neutral-950">
+        <DocsBody className="text-[var(--color-brand)] [&_a]:text-[var(--color-brand-accent)] [&_a]:underline [&_a]:underline-offset-4 [&_h2]:text-[var(--color-brand)] [&_h2]:font-bold [&_h3]:text-[var(--color-brand)] [&_h3]:font-bold [&_li]:text-[var(--color-brand-muted)] [&_p]:text-[var(--color-brand-muted)] [&_strong]:text-[var(--color-brand)]">
           {children}
         </DocsBody>
 
         <div className="mt-16 border-t border-[var(--color-border-subtle)] pt-8">
-          <SiteFooter className="text-xs text-neutral-600 [&_a]:transition-colors [&_a]:hover:text-neutral-900" />
+          <SiteFooter className="text-xs text-[var(--color-brand-muted)] [&_a]:transition-colors [&_a]:hover:text-white" />
         </div>
       </article>
     </HomeLayout>

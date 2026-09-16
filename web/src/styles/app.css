@@ -50,3 +50,33 @@ body {
     "Segoe UI", sans-serif;
   overflow-x: clip;
 }
+
+/* ─── Global Contrast Guards for Dark Command Center ───
+ * Ensures all legacy light-mode classes automatically map to crisp,
+ * readable Dark Command Center tokens across all pages.
+ */
+.text-neutral-950,
+.text-neutral-900,
+.text-neutral-800 {
+  color: var(--color-brand) !important;
+}
+
+.text-neutral-700,
+.text-neutral-600,
+.text-neutral-500 {
+  color: var(--color-brand-muted) !important;
+}
+
+.bg-white {
+  background-color: var(--color-surface-raised) !important;
+}
+
+.bg-neutral-100 {
+  background-color: var(--color-surface) !important;
+}
+
+.border-neutral-200,
+.border-neutral-300 {
+  border-color: var(--color-border-subtle) !important;
+}
+

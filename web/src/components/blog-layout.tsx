@@ -10,7 +10,7 @@ const navLinks = [
 
 export function BlogLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="min-h-screen bg-[var(--color-surface)] text-neutral-950">
+    <main className="min-h-screen bg-[var(--color-surface)] text-[var(--color-brand)]">
       <header className="border-b border-[var(--color-border-subtle)] bg-[var(--color-surface)]">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-5 sm:px-6">
           <Link
@@ -37,12 +37,12 @@ export function BlogLayout({ children }: { children: ReactNode }) {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`shrink-0 transition-colors hover:text-neutral-950 ${
+                className={`shrink-0 transition-colors hover:text-[var(--color-brand)] ${
                   link.label === "Features" || link.label === "Pricing"
                     ? "hidden sm:inline"
                     : ""
                 }`}
-                activeProps={{ className: "text-neutral-950" }}
+                activeProps={{ className: "text-[var(--color-brand)] font-semibold" }}
               >
                 {link.label}
               </Link>
@@ -51,7 +51,7 @@ export function BlogLayout({ children }: { children: ReactNode }) {
               href="https://github.com/emerilansel-jpg/SeoTool"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden shrink-0 transition-colors hover:text-neutral-950 sm:inline"
+              className="hidden shrink-0 transition-colors hover:text-[var(--color-brand)] sm:inline"
             >
               GitHub
             </a>

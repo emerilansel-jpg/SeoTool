@@ -6,7 +6,7 @@ description: Data Processing terms for SeoTool.im B2B customers to comply with G
 Last updated: August 12, 2026
 
 ## 1. Introduction
-This Data Processing Addendum (DPA) forms part of the Terms of Service between Every App, Inc. ("SeoTool.im") and you ("Customer"). It applies when SeoTool.im processes personal data on your behalf while providing our SaaS application.
+This Data Processing Addendum (DPA) forms part of the Terms of Service between SeoTool.im ("Company") and you ("Customer"). It applies when SeoTool.im processes personal data on your behalf while providing our SaaS application.
 
 ## 2. Definitions
 * **Processing**: Any operation performed on personal data.

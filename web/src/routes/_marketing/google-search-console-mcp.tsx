@@ -19,11 +19,11 @@ const softwareApplicationLd = {
   description: frontmatter.description,
   offers: {
     "@type": "Offer",
-    price: "10.00",
+    price: "29.00",
     priceCurrency: "USD",
     priceSpecification: {
       "@type": "UnitPriceSpecification",
-      price: "10.00",
+      price: "29.00",
       priceCurrency: "USD",
       billingDuration: 1,
       unitCode: "MON",
@@ -50,12 +50,12 @@ export const Route = createFileRoute("/_marketing/google-search-console-mcp")({
 
 function GoogleSearchConsoleMcpPage() {
   return (
-    <article className="mx-auto max-w-4xl text-neutral-900">
+    <article className="mx-auto max-w-4xl px-4 py-8 text-[var(--color-brand)] md:px-6 md:py-12">
       <header className="mb-10 border-b border-[var(--color-border-subtle)] pb-8">
-        <p className="text-sm font-medium text-[var(--color-brand-accent)]">
+        <p className="text-sm font-semibold tracking-wide text-[var(--color-brand-accent)]">
           Search Console MCP
         </p>
-        <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight text-neutral-950 md:text-6xl">
+        <h1 className="mt-3 text-4xl font-extrabold leading-tight tracking-tight text-[var(--color-brand)] md:text-6xl">
           {frontmatter.title}
         </h1>
         {frontmatter.description ? (
@@ -66,7 +66,7 @@ function GoogleSearchConsoleMcpPage() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <a
             href="https://seotool.im/sign-up"
-            className="inline-flex h-10 items-center justify-center rounded-lg bg-neutral-950 px-5 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-white shadow-xs transition-all hover:brightness-110 active:scale-95"
           >
             Get started
             <span className="ml-2" aria-hidden="true">
@@ -74,13 +74,13 @@ function GoogleSearchConsoleMcpPage() {
             </span>
           </a>
         </div>
-        <p className="mt-3 text-xs text-neutral-500">
-          $10/month, 30-day money-back guarantee. Search Console tools never
+        <p className="mt-3 text-xs text-[var(--color-brand-muted)]">
+          Included with All Access membership, 30-day money-back guarantee. Search Console tools never
           use credits.
         </p>
       </header>
 
-      <DocsBody className="min-w-0 text-neutral-800 [&_a]:!text-neutral-950 [&_h2]:!text-neutral-950 [&_h2_a]:!no-underline [&_h3]:!text-neutral-950 [&_h3_a]:!no-underline [&_h4]:!text-neutral-950 [&_h4_a]:!no-underline [&_h5_a]:!no-underline [&_h6_a]:!no-underline [&_li]:!text-neutral-700 [&_li_a]:font-medium [&_li_a]:underline [&_li_a]:decoration-[var(--color-brand-accent)] [&_li_a]:underline-offset-4 [&_li_a:hover]:!text-neutral-700 [&_p]:!text-neutral-700 [&_p_a]:font-medium [&_p_a]:underline [&_p_a]:decoration-[var(--color-brand-accent)] [&_p_a]:underline-offset-4 [&_p_a:hover]:!text-neutral-700 [&_strong]:!text-neutral-950">
+      <DocsBody className="min-w-0 text-[var(--color-brand)] [&_a]:text-[var(--color-brand-accent)] [&_a]:underline [&_a]:underline-offset-4 [&_h2]:text-[var(--color-brand)] [&_h2]:font-bold [&_h3]:text-[var(--color-brand)] [&_h3]:font-bold [&_li]:text-[var(--color-brand-muted)] [&_p]:text-[var(--color-brand-muted)] [&_strong]:text-[var(--color-brand)]">
         <GoogleSearchConsoleMcpContent
           components={{ ...defaultMdxComponents, ComparisonTable }}
         />
@@ -101,18 +101,18 @@ function GoogleSearchConsoleMcpPage() {
 
 function GoogleSearchConsoleMcpCta() {
   return (
-    <section className="mt-14 rounded-xl border border-[var(--color-border-subtle)] bg-white p-6">
-      <p className="text-xl font-semibold tracking-tight text-neutral-950">
+    <section className="mt-14 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] p-8">
+      <p className="text-xl font-bold tracking-tight text-[var(--color-brand)]">
         Point your AI at your real search data
       </p>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-brand-muted)]">
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--color-brand-muted)]">
         No Google Cloud project. Zero credits to read your own data. Works with
-        Claude, Codex, OpenClaw, OpenCode, and Gemini.
+        Claude, Codex, Cursor, and other MCP clients.
       </p>
-      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <a
           href="https://seotool.im/sign-up"
-          className="inline-flex h-10 items-center justify-center rounded-lg bg-neutral-950 px-4 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+          className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-xs transition-all hover:brightness-110 active:scale-95"
         >
           Get started
           <span className="ml-2" aria-hidden="true">
@@ -123,7 +123,7 @@ function GoogleSearchConsoleMcpCta() {
           href="https://github.com/emerilansel-jpg/SeoTool"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[var(--color-border-subtle)] bg-white px-4 text-sm font-medium text-neutral-950 transition-colors hover:border-neutral-950"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-5 text-sm font-semibold text-[var(--color-brand)] transition-all hover:border-[var(--color-brand-accent)]/50"
         >
           <GitHubIcon />
           Star on GitHub
@@ -137,11 +137,12 @@ function GitHubIcon() {
   return (
     <svg
       aria-hidden="true"
-      className="h-4 w-4"
+      width={16}
+      height={16}
       viewBox="0 0 24 24"
       fill="currentColor"
     >
-      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.79-.26.79-.58v-2.23c-3.34.73-4.03-1.42-4.03-1.42-.55-1.39-1.33-1.76-1.33-1.76-1.09-.74.08-.73.08-.73 1.21.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49.99.11-.77.42-1.3.76-1.6-2.66-.31-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23.96-.27 1.98-.4 3-.4s2.05.14 3 .4c2.29-1.55 3.3-1.23 3.3-1.23.65 1.65.24 2.87.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.82 1.1.82 2.22v3.29c0 .32.19.69.8.58A12.01 12.01 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
     </svg>
   );
 }

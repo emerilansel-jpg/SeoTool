@@ -5,7 +5,7 @@ description: Terms and conditions for seotool.im.
 
 **Last revised on: 6/13/2026**
 
-The website located at https://seotool.im (the “**Site**”), including the hosted SeoTool.im services made available through the Site, is a copyrighted work belonging to Every App, Inc (“**Company**”, “**us**”, “**our**”, and “**we**”). These Terms apply to your use of the Site and the hosted SeoTool.im services made available through it. For the avoidance of doubt, these Terms do not govern any self-hosted or open-source version of SeoTool.im, which is made available separately under the MIT License. Certain features of the Site may be subject to additional guidelines, terms, or rules, which will be posted on the Site in connection with such features. All such additional terms, guidelines, and rules are incorporated by reference into these Terms.
+The website located at https://seotool.im (the “**Site**”), including the hosted SeoTool.im services made available through the Site, is a copyrighted work belonging to SeoTool.im (“**Company**”, “**us**”, “**our**”, and “**we**”). These Terms apply to your use of the Site and the hosted SeoTool.im services made available through it. For the avoidance of doubt, these Terms do not govern any self-hosted or open-source version of SeoTool.im, which is made available separately under the MIT License. Certain features of the Site may be subject to additional guidelines, terms, or rules, which will be posted on the Site in connection with such features. All such additional terms, guidelines, and rules are incorporated by reference into these Terms.
 
 THESE TERMS OF USE (THESE “**TERMS**”) SET FORTH THE LEGALLY BINDING TERMS AND CONDITIONS THAT GOVERN YOUR USE OF THE SITE. BY ACCESSING OR USING THE SITE, YOU ARE ACCEPTING THESE TERMS (ON BEHALF OF YOURSELF OR THE ENTITY THAT YOU REPRESENT), AND YOU REPRESENT AND WARRANT THAT YOU HAVE THE RIGHT, AUTHORITY, AND CAPACITY TO ENTER INTO THESE TERMS (ON BEHALF OF YOURSELF OR THE ENTITY THAT YOU REPRESENT). YOU MAY NOT ACCESS OR USE THE SITE OR ACCEPT THE TERMS IF YOU ARE NOT AT LEAST 18 YEARS OLD. IF YOU DO NOT AGREE WITH ALL OF THE PROVISIONS OF THESE TERMS, DO NOT ACCESS AND/OR USE THE SITE.
 
@@ -84,11 +84,9 @@ Company respects the intellectual property of others and asks that users of our 
 
 Please note that, pursuant to 17 U.S.C. § 512(f), any misrepresentation of material fact (falsities) in a written notification automatically subjects the complaining party to liability for any damages, costs and attorney’s fees incurred by us in connection with the written notification and allegation of copyright infringement.
 
-The designated Copyright Agent for Company is: Every App, Inc  
-Designated Agent: Benjamin Senescu  
-Address of Agent: 34 Harding Street, Cambridge, MA 02141 US  
-Telephone: 4842529019  
-Fax: n/a  
+The designated Copyright Agent for Company is: SeoTool.im  
+Designated Agent: Support Team  
+Address of Agent: https://seotool.im  
 Email: support@seotool.im
 
 10. **General**
@@ -137,18 +135,9 @@ This Batch Arbitration provision shall in no way be interpreted as authorizing a
 
    6) **Entire Terms.** These Terms constitute the entire agreement between you and us regarding the use of the Site. Our failure to exercise or enforce any right or provision of these Terms shall not operate as a waiver of such right or provision. The section titles in these Terms are for convenience only and have no legal or contractual effect. The word “including” means “including without limitation”. If any provision of these Terms is, for any reason, held to be invalid or unenforceable, the other provisions of these Terms will be unimpaired and the invalid or unenforceable provision will be deemed modified so that it is valid and enforceable to the maximum extent permitted by law. Your relationship to Company is that of an independent contractor, and neither party is an agent or partner of the other. These Terms, and your rights and obligations herein, may not be assigned, subcontracted, delegated, or otherwise transferred by you without Company’s prior written consent, and any attempted assignment, subcontract, delegation, or transfer in violation of the foregoing will be null and void. Company may freely assign these Terms. The terms and conditions set forth in these Terms shall be binding upon assignees.
 
-   7) **Copyright/Trademark Information.** Copyright © 2026 Every App, Inc. All rights reserved. All trademarks, logos and service marks (“**Marks**”) displayed on the Site are our property or the property of other third parties. You are not permitted to use these Marks without our prior written consent or the consent of such third party which may own the Marks.
+   7) **Copyright/Trademark Information.** Copyright © 2026 SeoTool.im. All rights reserved. All trademarks, logos and service marks (“**Marks**”) displayed on the Site are our property or the property of other third parties. You are not permitted to use these Marks without our prior written consent or the consent of such third party which may own the Marks.
 
    8) **Contact Information:**
 
-   Ben Senescu
-
-   Address:
-
-   34 Harding Street
-
-   Cambridge, Massachusetts 02141
-
-   Telephone: 4842529019
-
    Email: support@seotool.im
+   Website: https://seotool.im

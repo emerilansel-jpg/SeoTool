@@ -6,7 +6,7 @@ description: How SeoTool.im uses cookies and similar technologies.
 Last updated: August 12, 2026
 
 ## Overview
-This Cookie Policy explains how Every App, Inc. ("SeoTool.im", "we", "us", or "our") uses cookies and similar technologies when you visit our website (seotool.im) and use our SaaS application. 
+This Cookie Policy explains how SeoTool.im ("we", "us", or "our") uses cookies and similar technologies when you visit our website (seotool.im) and use our SaaS application. 
 
 ## What Are Cookies?
 Cookies are small data files placed on your computer or mobile device. We use them to make our application work, ensure security, and understand how people use our service.

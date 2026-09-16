@@ -105,7 +105,7 @@ function AiSearchGeoLibraryPage() {
         <p className="text-sm font-medium text-[var(--color-brand-accent)]">
           Strategy Library
         </p>
-        <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight text-neutral-950 md:text-6xl">
+        <h1 className="mt-3 text-4xl font-extrabold leading-tight tracking-tight text-[var(--color-brand)] md:text-6xl">
           The AI Search Optimization Library
         </h1>
         <p className="mt-5 text-lg leading-8 text-[var(--color-brand-muted)]">
@@ -116,7 +116,7 @@ function AiSearchGeoLibraryPage() {
       </header>
 
       <section className="mt-12">
-        <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
+        <h2 className="text-2xl font-bold tracking-tight text-[var(--color-brand)]">
           GEO plays: get cited, then get chosen
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-brand-muted)]">

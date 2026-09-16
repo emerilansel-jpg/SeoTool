@@ -6,21 +6,21 @@ type FeaturePageProps = {
 
 export function FeaturePageTemplate({ page }: FeaturePageProps) {
   return (
-    <article className="mx-auto max-w-5xl">
+    <article className="mx-auto max-w-5xl text-[var(--color-brand)]">
       <header className="max-w-3xl">
-        <p className="text-sm font-medium text-[var(--color-brand-accent)]">
+        <p className="text-sm font-semibold tracking-wide text-[var(--color-brand-accent)]">
           {page.eyebrow}
         </p>
-        <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight text-neutral-950 md:text-6xl">
+        <h1 className="mt-3 text-4xl font-extrabold leading-tight tracking-tight text-[var(--color-brand)] md:text-6xl">
           {page.title}
         </h1>
         <p className="mt-5 text-lg leading-8 text-[var(--color-brand-muted)]">
           {page.description}
         </p>
-        <div className="mt-5">
+        <div className="mt-6">
           <a
             href="https://seotool.im/sign-up"
-            className="inline-flex h-11 items-center justify-center rounded-lg bg-neutral-950 px-5 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-white shadow-xs transition-all hover:brightness-110 active:scale-95"
           >
             Try SeoTool.im
             <span aria-hidden="true" className="ml-2">
@@ -32,20 +32,20 @@ export function FeaturePageTemplate({ page }: FeaturePageProps) {
 
       <FeatureImage page={page} />
 
-      <section className="mt-12">
-        <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
+      <section className="mt-14">
+        <h2 className="text-2xl font-bold tracking-tight text-[var(--color-brand)]">
           What you can do
         </h2>
-        <ol className="mt-5 grid gap-4 md:grid-cols-3">
+        <ol className="mt-6 grid gap-4 md:grid-cols-3">
           {page.workflows.map((workflow, index) => (
             <li
               key={workflow.title}
-              className="rounded-lg border border-[var(--color-border-subtle)] bg-white p-5"
+              className="rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] p-6 transition-colors hover:border-[var(--color-brand-accent)]/40"
             >
-              <span className="font-mono text-sm tabular-nums text-[var(--color-brand-accent)]">
+              <span className="font-mono text-xs font-bold tabular-nums text-[var(--color-brand-accent)]">
                 {String(index + 1).padStart(2, "0")}
               </span>
-              <h3 className="mt-4 text-base font-semibold text-neutral-950">
+              <h3 className="mt-4 text-base font-bold text-[var(--color-brand)]">
                 {workflow.title}
               </h3>
               <p className="mt-2 text-sm leading-6 text-[var(--color-brand-muted)]">
@@ -58,23 +58,23 @@ export function FeaturePageTemplate({ page }: FeaturePageProps) {
 
       {page.showMetrics ? <MetricsSection page={page} /> : null}
 
-      <div className="mt-12 grid gap-5 md:grid-cols-2">
+      <div className="mt-14 grid gap-6 md:grid-cols-2">
         <ListSection title="Use cases" items={page.useCases} />
         <ListSection title="Why SeoTool.im" items={page.differentiators} />
       </div>
 
       {page.guides ? <GuidesSection guides={page.guides} /> : null}
 
-      <section className="mt-12">
-        <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
+      <section className="mt-14">
+        <h2 className="text-2xl font-bold tracking-tight text-[var(--color-brand)]">
           Related features
         </h2>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
           {page.related.map((item) => (
             <a
               key={item.href}
               href={item.href}
-              className="rounded-lg border border-[var(--color-border-subtle)] bg-white p-4 text-sm font-medium text-neutral-950 transition-colors hover:border-neutral-900"
+              className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] p-4 text-sm font-medium text-[var(--color-brand)] transition-all hover:border-[var(--color-brand-accent)]/50"
             >
               {item.label}
               <span
@@ -88,17 +88,17 @@ export function FeaturePageTemplate({ page }: FeaturePageProps) {
         </div>
       </section>
 
-      <section className="mt-12">
-        <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
+      <section className="mt-14">
+        <h2 className="text-2xl font-bold tracking-tight text-[var(--color-brand)]">
           FAQ
         </h2>
-        <div className="mt-5 divide-y divide-[var(--color-border-subtle)] rounded-lg border border-[var(--color-border-subtle)] bg-white">
+        <div className="mt-5 divide-y divide-[var(--color-border-subtle)] rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)]">
           {page.faqs.map((faq) => (
-            <div key={faq.question} className="p-5">
-              <h3 className="text-sm font-semibold text-neutral-900">
+            <div key={faq.question} className="p-6">
+              <h3 className="text-base font-semibold text-[var(--color-brand)]">
                 {faq.question}
               </h3>
-              <p className="mt-1.5 text-sm leading-6 text-[var(--color-brand-muted)]">
+              <p className="mt-2 text-sm leading-relaxed text-[var(--color-brand-muted)]">
                 {faq.answer}
               </p>
             </div>
@@ -106,17 +106,17 @@ export function FeaturePageTemplate({ page }: FeaturePageProps) {
         </div>
       </section>
 
-      <section className="mt-12 rounded-xl border border-[var(--color-border-subtle)] bg-white p-6 md:p-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
+      <section className="mt-14 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] p-8 md:p-10">
+        <h2 className="text-3xl font-extrabold tracking-tight text-[var(--color-brand)]">
           Try SeoTool.im
         </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-brand-muted)]">
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--color-brand-muted)]">
           The open source alternative to bloated, expensive, legacy SEO tools.
         </p>
-        <div className="mt-4">
+        <div className="mt-6">
           <a
             href="https://seotool.im/sign-up"
-            className="inline-flex h-10 items-center justify-center rounded-lg bg-neutral-950 px-4 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-white shadow-xs transition-all hover:brightness-110 active:scale-95"
           >
             Try SeoTool.im
             <span aria-hidden="true" className="ml-2">
@@ -131,7 +131,7 @@ export function FeaturePageTemplate({ page }: FeaturePageProps) {
 
 function FeatureImage({ page }: FeaturePageProps) {
   return (
-    <figure className="mt-10 rounded-xl border border-[var(--color-border-subtle)] bg-white p-3">
+    <figure className="mt-10 overflow-hidden rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] p-3">
       <img
         src={page.imageSrc}
         alt={page.imageAlt}
@@ -139,9 +139,9 @@ function FeatureImage({ page }: FeaturePageProps) {
         height={1000}
         loading="eager"
         decoding="async"
-        className="aspect-[16/10] w-full rounded-lg border border-[#ebe4da] object-cover object-top"
+        className="aspect-[16/10] w-full rounded-xl border border-[var(--color-border-subtle)] object-cover object-top"
       />
-      <figcaption className="px-1 pt-2 text-[11px] text-[var(--color-brand-muted)]">
+      <figcaption className="px-1 pt-2.5 text-xs text-[var(--color-brand-muted)]">
         {page.eyebrow} in SeoTool.im.
       </figcaption>
     </figure>
@@ -150,16 +150,16 @@ function FeatureImage({ page }: FeaturePageProps) {
 
 function MetricsSection({ page }: FeaturePageProps) {
   return (
-    <section className="mt-12">
-      <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
+    <section className="mt-14">
+      <h2 className="text-2xl font-bold tracking-tight text-[var(--color-brand)]">
         Data you can act on
       </h2>
-      <dl className="mt-5 grid overflow-hidden rounded-lg border border-[var(--color-border-subtle)] bg-white sm:grid-cols-2 md:grid-cols-4">
+      <dl className="mt-5 grid overflow-hidden rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] sm:grid-cols-2 md:grid-cols-4">
         {page.metrics.map((metric, index) => (
           <div
             key={metric.label}
             className={[
-              "p-5",
+              "p-6",
               index > 0 && "border-t border-[var(--color-border-subtle)]",
               index % 2 === 1 &&
                 "sm:border-l sm:border-[var(--color-border-subtle)]",
@@ -170,10 +170,10 @@ function MetricsSection({ page }: FeaturePageProps) {
               .filter(Boolean)
               .join(" ")}
           >
-            <dt className="text-xs text-[var(--color-brand-muted)]">
+            <dt className="text-xs font-semibold uppercase tracking-wider text-[var(--color-brand-muted)]">
               {metric.label}
             </dt>
-            <dd className="mt-1 text-sm font-semibold text-neutral-950">
+            <dd className="mt-1.5 text-base font-bold text-[var(--color-brand)]">
               {metric.value}
             </dd>
           </div>
@@ -189,11 +189,11 @@ function GuidesSection({
   guides: NonNullable<FeaturePage["guides"]>;
 }) {
   return (
-    <section className="mt-12">
-      <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
+    <section className="mt-14">
+      <h2 className="text-2xl font-bold tracking-tight text-[var(--color-brand)]">
         {guides.title}
       </h2>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-brand-muted)]">
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--color-brand-muted)]">
         {guides.description}
       </p>
       <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -201,9 +201,9 @@ function GuidesSection({
           <a
             key={item.href}
             href={item.href}
-            className="rounded-lg border border-[var(--color-border-subtle)] bg-white p-5 transition-colors hover:border-neutral-900"
+            className="rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] p-6 transition-all hover:border-[var(--color-brand-accent)]/50"
           >
-            <h3 className="text-base font-semibold text-neutral-950">
+            <h3 className="text-base font-bold text-[var(--color-brand)]">
               {item.label}
               <span
                 aria-hidden="true"
@@ -212,7 +212,7 @@ function GuidesSection({
                 &rarr;
               </span>
             </h3>
-            <p className="mt-2 text-sm leading-6 text-[var(--color-brand-muted)]">
+            <p className="mt-2 text-sm leading-relaxed text-[var(--color-brand-muted)]">
               {item.description}
             </p>
           </a>
@@ -221,7 +221,7 @@ function GuidesSection({
       <div className="mt-4">
         <a
           href={guides.cta.href}
-          className="text-sm font-medium text-neutral-950 underline decoration-[var(--color-brand-accent)] underline-offset-4"
+          className="text-sm font-semibold text-[var(--color-brand-accent)] underline underline-offset-4 transition-colors hover:text-white"
         >
           {guides.cta.label}
           <span aria-hidden="true" className="ml-1">
@@ -235,18 +235,18 @@ function GuidesSection({
 
 function ListSection({ title, items }: { title: string; items: string[] }) {
   return (
-    <section className="rounded-lg border border-[var(--color-border-subtle)] bg-white p-5">
-      <h2 className="text-xl font-semibold tracking-tight text-neutral-950">
+    <section className="rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-raised)] p-6 md:p-8">
+      <h2 className="text-xl font-bold tracking-tight text-[var(--color-brand)]">
         {title}
       </h2>
       <ul className="mt-4 space-y-3">
         {items.map((item) => (
-          <li key={item} className="flex gap-2.5 text-sm text-neutral-700">
+          <li key={item} className="flex gap-3 text-sm text-[var(--color-brand-muted)]">
             <span
               aria-hidden="true"
-              className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-brand-accent)]"
+              className="mt-2 size-1.5 shrink-0 rounded-full bg-[var(--color-brand-accent)]"
             />
-            <span className="leading-6">{item}</span>
+            <span className="leading-relaxed text-[var(--color-brand)]/90">{item}</span>
           </li>
         ))}
       </ul>
