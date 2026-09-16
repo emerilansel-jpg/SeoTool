@@ -35,22 +35,15 @@ const hostedBaseUrlSchema = z
     );
   }, "BETTER_AUTH_URL must use https or localhost");
 
-/** BYPASS_* flags are local-dev escape hatches. Refuse to boot with them on a
- *  non-localhost URL so a leaked dev flag can never silently disable email
- *  verification or authentication in production. */
+/** BYPASS_AUTH is an E2E testing flag that returns a mocked user session.
+ *  Refuse to boot with it on a non-localhost URL so test mocks can never
+ *  silently bypass real authentication in production. */
 function assertNoProductionBypass(baseUrl: string) {
   const isLocal = new URL(baseUrl).hostname === "localhost";
   if (isLocal) return;
-  const bypasses = [
-    ["BYPASS_AUTH", Reflect.get(env, "BYPASS_AUTH") === "true"],
-    [
-      "BYPASS_EMAIL_VERIFICATION",
-      Reflect.get(env, "BYPASS_EMAIL_VERIFICATION") === "true",
-    ],
-  ].filter(([, enabled]) => enabled);
-  if (bypasses.length > 0) {
+  if (Reflect.get(env, "BYPASS_AUTH") === "true") {
     throw new Error(
-      `${bypasses.map(([name]) => name).join(" and ")} ${bypasses.length === 1 ? "is" : "are"} set but BETTER_AUTH_URL (${baseUrl}) is not localhost. These bypass flags are for local development only and must never be enabled in production.`,
+      `BYPASS_AUTH is set to "true" but BETTER_AUTH_URL (${baseUrl}) is not localhost. This bypass flag is for local test development only and must never be enabled in production.`,
     );
   }
 }

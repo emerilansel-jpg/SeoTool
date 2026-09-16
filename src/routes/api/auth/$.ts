@@ -16,8 +16,21 @@ async function handleAuthRequest(request: Request) {
     });
   }
 
-  const auth = getAuth();
-  return auth.handler(request);
+  try {
+    const auth = getAuth();
+    return await auth.handler(request);
+  } catch (error) {
+    console.error("Better Auth request failed:", error);
+    const message =
+      error instanceof Error ? error.message : "Authentication error";
+    return new Response(
+      JSON.stringify({ error: message, status: 500 }),
+      {
+        status: 500,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      },
+    );
+  }
 }
 
 export const Route = createFileRoute("/api/auth/$")({

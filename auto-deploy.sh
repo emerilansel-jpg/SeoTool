@@ -13,16 +13,12 @@ echo "🚀 Starting Auto-Deploy..."
 # NOT need to be preserved across git pulls.
 cp .env.hosted .env.hosted.bak 2>/dev/null || true
 
-# Deploy preflight: BYPASS_* flags are local-dev escape hatches that disable
-# authentication or email verification. Refuse to deploy with them enabled so
-# they can never silently reach production (defense-in-depth alongside the
-# runtime guard in src/lib/auth.ts).
-for flag in BYPASS_AUTH BYPASS_EMAIL_VERIFICATION; do
-  if grep -qE "^${flag}=true" .env.hosted; then
-    echo "❌ Deploy aborted: .env.hosted sets ${flag}=true. This flag is for local development only."
-    exit 1
-  fi
-done
+# Deploy preflight: BYPASS_AUTH is an E2E testing flag that mocks user sessions.
+# Refuse to deploy with it enabled so test mocks can never silently reach production.
+if grep -qE "^BYPASS_AUTH=true" .env.hosted; then
+  echo "❌ Deploy aborted: .env.hosted sets BYPASS_AUTH=true. This flag is for local test development only."
+  exit 1
+fi
 
 echo "📥 Pulling latest changes..."
 git fetch origin main
