@@ -48,3 +48,23 @@ INSERT INTO "member" (
   'owner',
   cast(unixepoch('subsecond') * 1000 as integer)
 );
+
+DELETE FROM "projects" WHERE "id" = '00000000-0000-4000-8000-000000000001' OR "organization_id" = 'e2e-org-id';
+
+INSERT INTO "projects" (
+  "id",
+  "organization_id",
+  "name",
+  "domain",
+  "location_code",
+  "language_code",
+  "created_at"
+) VALUES (
+  '00000000-0000-4000-8000-000000000001',
+  'e2e-org-id',
+  'E2E Test Project',
+  'acmedigital.com',
+  2840,
+  'en',
+  cast(unixepoch('subsecond') * 1000 as integer)
+);
