@@ -1,0 +1,1 @@
+import{j as t,ax as o,ay as e,d as n}from"./main-uEH8CVeZ.js";import{L as r}from"./library-page-BURf2xj_.js";const i=()=>t.jsx(r,{title:o.title,description:o.description,crumb:"Seed from conversation",children:t.jsx(e,{components:{...n}})});export{i as component};

@@ -1319,7 +1319,7 @@ function Footer() {
           className="itc-caption itc-subtle"
           style={{ margin: 0, padding: "40px 0 32px" }}
         >
-          © 2026 Every App, Inc.
+          © 2026 SeoTool.im. All rights reserved.
         </p>
       </Container>
     </footer>

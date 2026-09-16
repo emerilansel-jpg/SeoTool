@@ -1,1 +1,0 @@
-import{j as o,as as t}from"./main-d_aCekaB.js";import{F as e}from"./feature-page-BoJpk8Vr.js";const s=()=>o.jsx(e,{page:t});export{s as component};

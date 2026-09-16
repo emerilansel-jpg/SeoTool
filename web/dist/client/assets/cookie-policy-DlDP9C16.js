@@ -1,1 +1,0 @@
-import{j as t,i as o,k as e,d as n}from"./main-d_aCekaB.js";import{L as i}from"./legal-page-DFm94HYJ.js";import"./site-footer-BASfX3k5.js";function m(){return t.jsx(i,{title:o.title,description:o.description,children:t.jsx(e,{components:n})})}export{m as component};
