@@ -322,6 +322,7 @@ export const AiTrackingRepository = {
         title?: string | null;
         domain?: string | null;
       }>;
+      isTracked?: boolean;
       firstResponseAt?: string | null;
       lastResponseAt?: string | null;
     }>,
@@ -351,6 +352,7 @@ export const AiTrackingRepository = {
             citationUrl: item.citationUrl ?? null,
             brandEntities: JSON.stringify(item.brandEntities ?? []),
             sources: JSON.stringify(item.sources ?? []),
+            isTracked: item.isTracked !== undefined ? item.isTracked : undefined,
             lastResponseAt: item.lastResponseAt ?? null,
           })
           .where(eq(aiDiscoveredPrompts.id, existingId));
@@ -366,7 +368,7 @@ export const AiTrackingRepository = {
           citationUrl: item.citationUrl ?? null,
           brandEntities: JSON.stringify(item.brandEntities ?? []),
           sources: JSON.stringify(item.sources ?? []),
-          isTracked: false,
+          isTracked: item.isTracked ?? false,
           firstResponseAt: item.firstResponseAt ?? null,
           lastResponseAt: item.lastResponseAt ?? null,
           discoveredAt: now,

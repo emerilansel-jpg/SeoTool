@@ -56,6 +56,31 @@ export const AiTrackingService = {
       typeof config.platforms === "string"
         ? (JSON.parse(config.platforms || "[]") as AiTrackingPlatform[])
         : (config.platforms as AiTrackingPlatform[]);
+
+    // If config has no prompts yet, auto-seed default high-intent brand prompts
+    const existingPrompts = await AiTrackingRepository.listPrompts(config.id);
+    if (existingPrompts.length === 0) {
+      const defaultPrompts = [
+        `What is ${input.brandName}?`,
+        `What services and products does ${input.brandName} offer?`,
+        `Reviews and reputation of ${input.brandName}`,
+        `Top alternatives and competitors to ${input.brandName}`,
+      ];
+      await AiTrackingRepository.addPrompts(config.id, defaultPrompts);
+      await AiTrackingRepository.upsertDiscoveredPrompts(
+        config.id,
+        defaultPrompts.map((p) => ({
+          prompt: p,
+          platform: "all",
+          aiSearchVolume: 10,
+          hasMention: true,
+          hasCitation: false,
+          brandEntities: [input.brandName],
+          isTracked: true,
+        })),
+      );
+    }
+
     return {
       ...config,
       brandAliases,
@@ -113,14 +138,18 @@ export const AiTrackingService = {
       );
     }
 
-    const activePrompts = await AiTrackingRepository.getActivePrompts(
+    let activePrompts = await AiTrackingRepository.getActivePrompts(
       config.id,
     );
     if (activePrompts.length === 0) {
-      throw new AppError(
-        "VALIDATION_ERROR",
-        "No active tracking prompts found. Add prompts first.",
-      );
+      const defaultPrompts = [
+        `What is ${config.brandName}?`,
+        `What services and products does ${config.brandName} offer?`,
+        `Reviews and reputation of ${config.brandName}`,
+        `Top alternatives and competitors to ${config.brandName}`,
+      ];
+      await AiTrackingRepository.addPrompts(config.id, defaultPrompts);
+      activePrompts = await AiTrackingRepository.getActivePrompts(config.id);
     }
 
     const competitors =
@@ -211,19 +240,35 @@ export const AiTrackingService = {
           }
 
           if (citations.length > 0) {
+            const cleanConfigDomain = config.domain
+              .toLowerCase()
+              .replace(/^https?:\/\//, "")
+              .replace(/^www\./, "")
+              .replace(/\/.*$/, "");
+
             await AiTrackingRepository.recordCitations(
-              citations.map((c) => ({
-                id: crypto.randomUUID(),
-                observationId,
-                runId,
-                url: c.url,
-                domain: c.domain,
-                title: c.title,
-                isTargetBrand: c.domain
+              citations.map((c) => {
+                const cleanCitDomain = c.domain
                   .toLowerCase()
-                  .includes(config.domain.toLowerCase()),
-                createdAt: now,
-              })),
+                  .replace(/^https?:\/\//, "")
+                  .replace(/^www\./, "")
+                  .replace(/\/.*$/, "");
+                const isTarget =
+                  cleanCitDomain.includes(cleanConfigDomain) ||
+                  cleanConfigDomain.includes(cleanCitDomain) ||
+                  c.url.toLowerCase().includes(cleanConfigDomain);
+
+                return {
+                  id: crypto.randomUUID(),
+                  observationId,
+                  runId,
+                  url: c.url,
+                  domain: c.domain,
+                  title: c.title,
+                  isTargetBrand: isTarget,
+                  createdAt: now,
+                };
+              }),
             );
           }
 

@@ -62,15 +62,40 @@ function escapeRegex(str: string): string {
 }
 
 function buildBrandRegex(names: string[]): RegExp {
-  const parts = names
-    .map((n) => n.trim())
-    .filter(Boolean)
-    .map((name) => {
-      const escaped = escapeRegex(name);
-      const leading = /^\w/.test(name) ? "\\b" : "";
-      const trailing = /\w$/.test(name) ? "\\b" : "";
-      return `${leading}${escaped}${trailing}`;
-    });
+  const allNames = new Set<string>();
+  for (const raw of names) {
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    allNames.add(trimmed);
+
+    // If name contains spaces, add joined and hyphenated versions (e.g. "Jet Digital Pro" -> "JetDigitalPro", "Jet-Digital-Pro")
+    if (trimmed.includes(" ")) {
+      allNames.add(trimmed.replace(/\s+/g, ""));
+      allNames.add(trimmed.replace(/\s+/g, "-"));
+    }
+
+    // If name is camelCase or PascalCase, split it (e.g. "JetDigitalPro" -> "Jet Digital Pro")
+    const unCamel = trimmed.replace(/([a-z])([A-Z])/g, "$1 $2");
+    if (unCamel !== trimmed) {
+      allNames.add(unCamel);
+    }
+
+    // Strip common TLDs if domain was passed e.g. "jetdigitalpro.com" -> "jetdigitalpro"
+    const withoutTld = trimmed.replace(
+      /\.(com|co|id|org|net|io|ai|im|app|biz|info|site|tech)$/i,
+      "",
+    );
+    if (withoutTld !== trimmed && withoutTld.length >= 3) {
+      allNames.add(withoutTld);
+    }
+  }
+
+  const parts = Array.from(allNames).map((name) => {
+    const escaped = escapeRegex(name);
+    const leading = /^\w/.test(name) ? "\\b" : "";
+    const trailing = /\w$/.test(name) ? "\\b" : "";
+    return `${leading}${escaped}${trailing}`;
+  });
   if (parts.length === 0) return /$^/; // matches nothing
   return new RegExp(`(?:${parts.join("|")})`, "i");
 }
@@ -171,12 +196,28 @@ export function extractMentions(
     const keywords = [entity.name, entity.domain, ...entity.aliases];
     const regex = buildBrandRegex(keywords);
 
+    const cleanEntityDomain = entity.domain
+      .toLowerCase()
+      .replace(/^https?:\/\//, "")
+      .replace(/^www\./, "")
+      .replace(/\/.*$/, "");
+
     const mentionedInText = regex.test(text);
-    const mentionedInCitations = citations.some(
-      (c) =>
-        c.domain.toLowerCase().includes(entity.domain.toLowerCase()) ||
-        regex.test(c.title ?? ""),
-    );
+    const mentionedInCitations = citations.some((c) => {
+      const cleanCitDomain = c.domain
+        .toLowerCase()
+        .replace(/^https?:\/\//, "")
+        .replace(/^www\./, "")
+        .replace(/\/.*$/, "");
+
+      return (
+        cleanCitDomain.includes(cleanEntityDomain) ||
+        cleanEntityDomain.includes(cleanCitDomain) ||
+        c.url.toLowerCase().includes(cleanEntityDomain) ||
+        regex.test(c.title ?? "") ||
+        regex.test(c.url ?? "")
+      );
+    });
 
     if (mentionedInText || mentionedInCitations) {
       const position = extractRankPosition(text, keywords);
