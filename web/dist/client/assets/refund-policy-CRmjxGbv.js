@@ -1,0 +1,1 @@
+import{j as t,a as o,b as e,d as n}from"./main-DVoDVlZN.js";import{L as r}from"./legal-page-DJnapMyi.js";import"./site-footer-DxMaPyLU.js";function m(){return t.jsx(r,{title:o.title,description:o.description,children:t.jsx(e,{components:n})})}export{m as component};

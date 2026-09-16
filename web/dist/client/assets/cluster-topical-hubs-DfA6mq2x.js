@@ -1,1 +1,0 @@
-import{j as t,aD as o,aE as e,d as s}from"./main-BBR5Vsa9.js";import{L as n}from"./library-page-DO3jyo2Q.js";const a=()=>t.jsx(n,{title:o.title,description:o.description,crumb:"Cluster keywords into topical hubs",children:t.jsx(e,{components:{...s}})});export{a as component};
