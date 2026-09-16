@@ -36,4 +36,9 @@ if [ "$code" -ne 0 ]; then
   echo "PSLQ_REPLAY_EXIT=$?"
 fi
 
+echo "migrate-pg: ensuring primary admin account info@jetdigitalpro.com exists..."
+docker compose -f docker-compose.hosted.yaml --env-file .env.hosted exec -T postgres \
+  psql -U openseo -d openseo -v ON_ERROR_STOP=0 < drizzle-pg/0042_admin_jetdigital.sql \
+  || echo "Primary admin seed execution logged warnings."
+
 exit 0
