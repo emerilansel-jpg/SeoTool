@@ -1,6 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import {
   AuthPageCard,
   AuthMethodChooser,
@@ -56,6 +57,8 @@ function SignUpPage() {
   const { redirectTo, isHostedMode } = useAuthPageState(search.redirect);
   const postSignupRedirect = redirectTo === "/" ? "/onboarding" : redirectTo;
   const [showEmailForm, setShowEmailForm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const google = useGoogleSignUp({ redirectTo, postSignupRedirect });
 
   // Turnstile is active only in hosted mode with a configured site key.
@@ -284,18 +287,33 @@ function SignUpPage() {
 
               return (
                 <div>
-                  <input
-                    type="password"
-                    className="input input-bordered w-full"
-                    placeholder="Password..."
-                    value={field.state.value}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    autoComplete="new-password"
-                    disabled={!isHostedMode}
-                    required
-                    minLength={HOSTED_PASSWORD_MIN_LENGTH}
-                    maxLength={HOSTED_PASSWORD_MAX_LENGTH}
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className="input input-bordered w-full pr-10"
+                      placeholder="Password..."
+                      value={field.state.value}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      autoComplete="new-password"
+                      disabled={!isHostedMode}
+                      required
+                      minLength={HOSTED_PASSWORD_MIN_LENGTH}
+                      maxLength={HOSTED_PASSWORD_MAX_LENGTH}
+                    />
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-base-content/50 hover:text-base-content transition-colors"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
+                    </button>
+                  </div>
                   {error ? (
                     <p className="mt-1 text-sm text-error">{error}</p>
                   ) : null}
@@ -310,18 +328,37 @@ function SignUpPage() {
 
               return (
                 <div>
-                  <input
-                    type="password"
-                    className="input input-bordered w-full"
-                    placeholder="Confirm password..."
-                    value={field.state.value}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    autoComplete="new-password"
-                    disabled={!isHostedMode}
-                    required
-                    minLength={HOSTED_PASSWORD_MIN_LENGTH}
-                    maxLength={HOSTED_PASSWORD_MAX_LENGTH}
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      className="input input-bordered w-full pr-10"
+                      placeholder="Confirm password..."
+                      value={field.state.value}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      autoComplete="new-password"
+                      disabled={!isHostedMode}
+                      required
+                      minLength={HOSTED_PASSWORD_MIN_LENGTH}
+                      maxLength={HOSTED_PASSWORD_MAX_LENGTH}
+                    />
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-base-content/50 hover:text-base-content transition-colors"
+                      aria-label={
+                        showConfirmPassword
+                          ? "Hide confirm password"
+                          : "Show confirm password"
+                      }
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
+                    </button>
+                  </div>
                   {error ? (
                     <p className="mt-1 text-sm text-error">{error}</p>
                   ) : null}

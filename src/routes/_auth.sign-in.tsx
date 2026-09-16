@@ -1,6 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import {
   AuthPageCard,
   AuthMethodChooser,
@@ -33,6 +34,7 @@ function SignInPage() {
   );
   const authCallbackURL = redirectTo;
   const [showEmailForm, setShowEmailForm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [isStartingGoogle, setIsStartingGoogle] = useState(false);
   const [socialError, setSocialError] = useState<string | null>(null);
 
@@ -209,16 +211,31 @@ function SignInPage() {
 
               return (
                 <div>
-                  <input
-                    type="password"
-                    className="input input-bordered w-full"
-                    placeholder="Password..."
-                    value={field.state.value}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    autoComplete="current-password"
-                    disabled={!isHostedMode}
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className="input input-bordered w-full pr-10"
+                      placeholder="Password..."
+                      value={field.state.value}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      autoComplete="current-password"
+                      disabled={!isHostedMode}
+                      required
+                    />
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-base-content/50 hover:text-base-content transition-colors"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
+                    </button>
+                  </div>
                   {error ? (
                     <p className="mt-1 text-sm text-error">{error}</p>
                   ) : null}

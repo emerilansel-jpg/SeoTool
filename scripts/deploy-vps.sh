@@ -84,6 +84,10 @@ if [ "$HEALTH" != "healthy" ]; then
   exit 1
 fi
 
+# ─── Apply Database Migrations & Seeds ──────────────────────────────────
+echo "🗄️  Applying database migrations & seeds..."
+bash "$SCRIPT_DIR/migrate-pg.sh" || echo "⚠️  Migration step logged warnings."
+
 # ─── Reload Caddy ───────────────────────────────────────────────────────
 if [ -f "gateway-caddy/docker-compose.yml" ]; then
   echo "🔄 Reloading seotool-caddy..."
