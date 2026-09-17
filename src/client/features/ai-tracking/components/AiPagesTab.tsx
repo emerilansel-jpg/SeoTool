@@ -12,7 +12,7 @@ export function AiPagesTab({ projectId, domain }: Props) {
   const getPagesFn = useServerFn(getAiPages);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["ai-pages", projectId],
+    queryKey: ["ai-tracking", projectId, "pages"],
     queryFn: () => getPagesFn({ data: { projectId } }),
   });
 

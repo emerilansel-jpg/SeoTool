@@ -12,7 +12,7 @@ export function AiCitationsTab({ projectId, domain }: Props) {
   const getCitationsFn = useServerFn(getAiCitations);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["ai-citations", projectId],
+    queryKey: ["ai-tracking", projectId, "citations"],
     queryFn: () => getCitationsFn({ data: { projectId } }),
   });
 

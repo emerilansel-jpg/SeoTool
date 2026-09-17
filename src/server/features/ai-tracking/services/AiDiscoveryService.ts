@@ -7,6 +7,88 @@ import { AiTrackingRepository } from "../repositories/AiTrackingRepository";
 import type { LlmPlatform, LlmTarget } from "@/server/lib/dataforseo/shared";
 
 const DISCOVERY_PLATFORMS: LlmPlatform[] = ["chat_gpt", "google"];
+const MIN_STRONG_ALIAS_LENGTH = 5;
+
+function normalize(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function normalizedDomain(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/.*$/, "")
+    .trim();
+}
+
+function strongAliases(brandName: string, aliases: string[]): string[] {
+  const brandNorm = normalize(brandName);
+  return aliases
+    .map((alias) => alias.trim())
+    .filter((alias) => {
+      const value = normalize(alias);
+      return (
+        value.length >= MIN_STRONG_ALIAS_LENGTH &&
+        value !== brandNorm &&
+        (value.includes(" ") || value.length >= 7)
+      );
+    });
+}
+
+function discoveryRelevance(input: {
+  prompt: string;
+  brandName: string;
+  aliases: string[];
+  domain: string;
+  brandEntities: string[];
+  sources: Array<{
+    url?: string | null;
+    title?: string | null;
+    domain?: string | null;
+  }>;
+}): { relevant: boolean; hasMention: boolean; matchedTarget: string | null } {
+  const brand = normalize(input.brandName);
+  const aliases = strongAliases(input.brandName, input.aliases).map(normalize);
+  const domain = normalizedDomain(input.domain);
+  const haystacks = [
+    normalize(input.prompt),
+    ...input.brandEntities.map(normalize),
+    ...input.sources.flatMap((source) => [
+      normalize(source.title ?? ""),
+      normalize(source.domain ?? ""),
+      normalize(source.url ?? ""),
+    ]),
+  ];
+  const domainMatch = input.sources.some((source) => {
+    const sourceDomain = normalizedDomain(source.domain ?? source.url ?? "");
+    return sourceDomain === domain || sourceDomain.endsWith(`.${domain}`);
+  });
+  const brandMatch =
+    brand.length >= 3 && haystacks.some((text) => text.includes(brand));
+  const aliasMatch = aliases.find((alias) =>
+    haystacks.some((text) => text.includes(alias)),
+  );
+  const matchedTarget = domainMatch
+    ? domain
+    : brandMatch
+      ? input.brandName
+      : (aliasMatch ?? null);
+  return {
+    relevant: Boolean(matchedTarget),
+    hasMention: brandMatch || Boolean(aliasMatch) || domainMatch,
+    matchedTarget,
+  };
+}
+
+export const AiTrackingDiscoveryInternals = {
+  discoveryRelevance,
+  strongAliases,
+};
 
 export const AiDiscoveryService = {
   async discoverPrompts(
@@ -40,17 +122,14 @@ export const AiDiscoveryService = {
       });
     }
 
-    for (const alias of brandAliases.slice(0, 2)) {
-      const trimmed = alias.trim();
-      if (
-        trimmed.length >= 2 &&
-        trimmed.toLowerCase() !== config.brandName.toLowerCase()
-      ) {
-        targetsToSearch.push({
-          keyword: trimmed,
-          match_type: "word_match",
-        });
-      }
+    for (const alias of strongAliases(config.brandName, brandAliases).slice(
+      0,
+      2,
+    )) {
+      targetsToSearch.push({
+        keyword: alias,
+        match_type: "word_match",
+      });
     }
 
     const seenPrompts = new Set<string>();
@@ -112,19 +191,33 @@ export const AiDiscoveryService = {
 
             const matchedCitation = sources.find(
               (s: { url: string | null; domain: string | null }) =>
-                (s.domain && s.domain.toLowerCase().includes(domainLower)) ||
-                (s.url && s.url.toLowerCase().includes(domainLower)),
+                normalizedDomain(s.domain ?? s.url ?? "") ===
+                  normalizedDomain(domainLower) ||
+                normalizedDomain(s.domain ?? s.url ?? "").endsWith(
+                  `.${normalizedDomain(domainLower)}`,
+                ),
             );
 
             const brandEntities = (item.brand_entities ?? [])
               .map((b: { title?: string | null }) => b.title)
-              .filter((t: string | null | undefined): t is string => Boolean(t));
+              .filter((t: string | null | undefined): t is string =>
+                Boolean(t),
+              );
+            const relevance = discoveryRelevance({
+              prompt: promptTrimmed,
+              brandName: config.brandName,
+              aliases: brandAliases,
+              domain: config.domain,
+              brandEntities,
+              sources,
+            });
+            if (!relevance.relevant) continue;
 
             allDiscoveredItems.push({
               prompt: promptTrimmed,
               platform,
               aiSearchVolume: item.ai_search_volume ?? 0,
-              hasMention: true,
+              hasMention: relevance.hasMention,
               hasCitation: Boolean(matchedCitation),
               citationUrl: matchedCitation?.url ?? null,
               brandEntities,
@@ -224,8 +317,8 @@ Return ONLY a valid JSON array of strings, e.g. ["Prompt 1", "Prompt 2"]. Do not
         allDiscoveredItems.push({
           prompt: trimmed,
           platform: "all",
-          aiSearchVolume: 10,
-          hasMention: true,
+          aiSearchVolume: 0,
+          hasMention: false,
           hasCitation: false,
           citationUrl: null,
           brandEntities: [config.brandName],

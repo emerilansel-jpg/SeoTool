@@ -22,8 +22,9 @@ function parseRecipients(recipients: string | undefined): string | null {
 
 async function getReportWithSections(
   reportId: string,
+  projectId?: string,
 ): Promise<ReportWithSections> {
-  const report = await ReportsRepository.getById(reportId);
+  const report = await ReportsRepository.getById(reportId, projectId);
   if (!report) throw new AppError("NOT_FOUND", "Report not found");
   const sections = await ReportsRepository.listSections(reportId);
   return { ...report, sections };
@@ -91,26 +92,31 @@ async function createReport(input: CreateInput): Promise<ReportWithSections> {
 async function updateReport(
   reportId: string,
   input: Omit<CreateInput, "projectId" | "organizationId" | "userId">,
+  projectId?: string,
 ): Promise<ReportWithSections> {
-  const existing = await ReportsRepository.getById(reportId);
+  const existing = await ReportsRepository.getById(reportId, projectId);
   if (!existing) throw new AppError("NOT_FOUND", "Report not found");
   const nextRunAt = computeNextRunAt(
     input.schedule,
     input.dayOfWeek ?? null,
     input.dayOfMonth ?? null,
   );
-  await ReportsRepository.updateReport(reportId, {
-    name: input.name,
-    schedule: input.schedule,
-    dayOfWeek: input.dayOfWeek ?? null,
-    dayOfMonth: input.dayOfMonth ?? null,
-    nextRunAt,
-    clientName: input.clientName ?? null,
-    logoUrl: input.logoUrl ?? null,
-    brandColor: input.brandColor ?? null,
-    accentColor: input.accentColor ?? null,
-    recipients: parseRecipients(input.recipients),
-  });
+  await ReportsRepository.updateReport(
+    reportId,
+    {
+      name: input.name,
+      schedule: input.schedule,
+      dayOfWeek: input.dayOfWeek ?? null,
+      dayOfMonth: input.dayOfMonth ?? null,
+      nextRunAt,
+      clientName: input.clientName ?? null,
+      logoUrl: input.logoUrl ?? null,
+      brandColor: input.brandColor ?? null,
+      accentColor: input.accentColor ?? null,
+      recipients: parseRecipients(input.recipients),
+    },
+    projectId,
+  );
   await ReportsRepository.replaceSections(
     reportId,
     input.sections.map((s, i) => ({
@@ -119,22 +125,33 @@ async function updateReport(
       sortOrder: i,
     })),
   );
-  return getReportWithSections(reportId);
+  return getReportWithSections(reportId, projectId);
 }
 
-async function deleteReport(reportId: string): Promise<void> {
-  await ReportsRepository.deleteReport(reportId);
+async function deleteReport(
+  reportId: string,
+  projectId?: string,
+): Promise<void> {
+  if (projectId) {
+    const existing = await ReportsRepository.getById(reportId, projectId);
+    if (!existing) throw new AppError("NOT_FOUND", "Report not found");
+  }
+  await ReportsRepository.deleteReport(reportId, projectId);
 }
 
 async function listSnapshots(
   reportId: string,
   limit: number,
+  projectId?: string,
 ): Promise<ReportSnapshot[]> {
-  return ReportsRepository.listSnapshots(reportId, limit);
+  return ReportsRepository.listSnapshots(reportId, limit, projectId);
 }
 
-async function getSnapshot(snapshotId: string): Promise<ReportSnapshot | null> {
-  return ReportsRepository.getSnapshot(snapshotId);
+async function getSnapshot(
+  snapshotId: string,
+  projectId?: string,
+): Promise<ReportSnapshot | null> {
+  return ReportsRepository.getSnapshot(snapshotId, projectId);
 }
 
 /** Advance a report's nextRunAt after a scheduled run completes. */

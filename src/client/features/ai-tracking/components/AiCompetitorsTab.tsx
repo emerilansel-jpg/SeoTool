@@ -13,7 +13,7 @@ export function AiCompetitorsTab({ projectId, brandName, domain }: Props) {
   const getCompetitorsFn = useServerFn(getAiCompetitors);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["ai-competitors", projectId],
+    queryKey: ["ai-tracking", projectId, "competitors"],
     queryFn: () => getCompetitorsFn({ data: { projectId } }),
   });
 

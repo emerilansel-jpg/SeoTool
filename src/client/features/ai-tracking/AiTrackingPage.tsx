@@ -64,7 +64,7 @@ export function AiTrackingPage({ projectId }: Props) {
   const runTrackingFn = useServerFn(runAiTracking);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["ai-tracking-dashboard", projectId, selectedPlatform],
+    queryKey: ["ai-tracking", projectId, "dashboard", selectedPlatform],
     queryFn: () =>
       getDashboardFn({
         data: { projectId, platform: selectedPlatform, days: 30 },
@@ -73,7 +73,7 @@ export function AiTrackingPage({ projectId }: Props) {
 
   const invalidate = () =>
     queryClient.invalidateQueries({
-      queryKey: ["ai-tracking-dashboard", projectId],
+      queryKey: ["ai-tracking", projectId],
     });
 
   const saveConfigMutation = useMutation({
@@ -271,7 +271,9 @@ export function AiTrackingPage({ projectId }: Props) {
                     {tab.badge != null && (
                       <span
                         className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
-                          active ? "bg-primary/15 text-primary" : "bg-base-200 text-base-content/60"
+                          active
+                            ? "bg-primary/15 text-primary"
+                            : "bg-base-200 text-base-content/60"
                         }`}
                       >
                         {tab.badge}

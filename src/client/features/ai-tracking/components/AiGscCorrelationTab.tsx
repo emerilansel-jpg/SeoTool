@@ -12,7 +12,7 @@ export function AiGscCorrelationTab({ projectId }: Props) {
   const getGscCorrelationFn = useServerFn(getGscAiCorrelation);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["ai-gsc-correlation", projectId],
+    queryKey: ["ai-tracking", projectId, "gsc-correlation"],
     queryFn: () => getGscCorrelationFn({ data: { projectId } }),
   });
 

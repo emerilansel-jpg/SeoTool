@@ -37,8 +37,9 @@ export function AiDiscoveredPromptsTab({ projectId, domain }: Props) {
 
   const { data, isLoading } = useQuery({
     queryKey: [
-      "ai-discovered-prompts",
+      "ai-tracking",
       projectId,
+      "discovered",
       filter,
       platform,
       search,
@@ -52,10 +53,7 @@ export function AiDiscoveredPromptsTab({ projectId, domain }: Props) {
 
   const invalidate = () => {
     void queryClient.invalidateQueries({
-      queryKey: ["ai-discovered-prompts", projectId],
-    });
-    void queryClient.invalidateQueries({
-      queryKey: ["ai-tracking-dashboard", projectId],
+      queryKey: ["ai-tracking", projectId],
     });
   };
 

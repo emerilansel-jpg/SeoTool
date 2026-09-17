@@ -27,6 +27,62 @@ const MODEL_NAMES: Record<AiTrackingPlatform, string> = {
   perplexity: "sonar-reasoning-pro",
 };
 
+function normalizeQueryTokens(value: string): string[] {
+  return value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9\s]+/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length >= 3);
+}
+
+function findBestGscMatch(
+  prompt: string,
+  gscMap: Map<
+    string,
+    {
+      query: string;
+      clicks: number;
+      impressions: number;
+      ctr: number;
+      position: number;
+    }
+  >,
+) {
+  const normPrompt = prompt.toLowerCase().trim();
+  const exact = gscMap.get(normPrompt);
+  if (exact) return exact;
+
+  const promptTokens = new Set(normalizeQueryTokens(prompt));
+  if (promptTokens.size === 0) return null;
+
+  let bestMatch: {
+    query: string;
+    clicks: number;
+    impressions: number;
+    ctr: number;
+    position: number;
+  } | null = null;
+  let bestScore = 0;
+
+  for (const [gscKey, val] of gscMap.entries()) {
+    const gscTokens = normalizeQueryTokens(gscKey);
+    if (gscTokens.length === 0) continue;
+    let shared = 0;
+    for (const t of gscTokens) {
+      if (promptTokens.has(t)) shared++;
+    }
+    const overlap = shared / Math.min(promptTokens.size, gscTokens.length);
+    const minTokensRequired = Math.min(2, promptTokens.size);
+    if (shared >= minTokensRequired && overlap >= 0.75 && overlap > bestScore) {
+      bestScore = overlap;
+      bestMatch = val;
+    }
+  }
+
+  return bestMatch;
+}
+
 export const AiTrackingService = {
   async getConfig(projectId: string) {
     const config = await AiTrackingRepository.getConfig(projectId);
@@ -47,6 +103,18 @@ export const AiTrackingService = {
   },
 
   async saveConfig(projectId: string, input: SaveAiTrackingConfigInput) {
+    const existing = await AiTrackingRepository.getConfig(projectId);
+    const identityChanged =
+      existing &&
+      (existing.brandName.trim().toLowerCase() !==
+        input.brandName.trim().toLowerCase() ||
+        existing.domain.trim().toLowerCase() !==
+          input.domain.trim().toLowerCase());
+
+    if (identityChanged) {
+      await AiTrackingRepository.resetIdentityDerivedData(existing.id);
+    }
+
     const config = await AiTrackingRepository.upsertConfig(projectId, input);
     const brandAliases =
       typeof config.brandAliases === "string"
@@ -72,8 +140,8 @@ export const AiTrackingService = {
         defaultPrompts.map((p) => ({
           prompt: p,
           platform: "all",
-          aiSearchVolume: 10,
-          hasMention: true,
+          aiSearchVolume: 0,
+          hasMention: false,
           hasCitation: false,
           brandEntities: [input.brandName],
           isTracked: true,
@@ -107,14 +175,31 @@ export const AiTrackingService = {
 
   async togglePrompt(projectId: string, promptId: string, active: boolean) {
     const config = await AiTrackingRepository.getConfig(projectId);
-    if (!config) return;
-    await AiTrackingRepository.togglePrompt(config.id, promptId, active);
+    if (!config) {
+      throw new AppError("NOT_FOUND", "AI tracking config not found");
+    }
+    const updated = await AiTrackingRepository.togglePrompt(
+      config.id,
+      promptId,
+      active,
+    );
+    if (!updated) {
+      throw new AppError("NOT_FOUND", "Prompt not found");
+    }
   },
 
   async removePrompt(projectId: string, promptId: string) {
     const config = await AiTrackingRepository.getConfig(projectId);
-    if (!config) return;
-    await AiTrackingRepository.removePrompt(config.id, promptId);
+    if (!config) {
+      throw new AppError("NOT_FOUND", "AI tracking config not found");
+    }
+    const removed = await AiTrackingRepository.removePrompt(
+      config.id,
+      promptId,
+    );
+    if (!removed) {
+      throw new AppError("NOT_FOUND", "Prompt not found");
+    }
   },
 
   async runTracking(
@@ -138,9 +223,7 @@ export const AiTrackingService = {
       );
     }
 
-    let activePrompts = await AiTrackingRepository.getActivePrompts(
-      config.id,
-    );
+    let activePrompts = await AiTrackingRepository.getActivePrompts(config.id);
     if (activePrompts.length === 0) {
       const defaultPrompts = [
         `What is ${config.brandName}?`,
@@ -293,7 +376,7 @@ export const AiTrackingService = {
         }
 
         completedCount++;
-        await AiTrackingRepository.updateRun(runId, {
+        await AiTrackingRepository.updateRun(config.id, runId, {
           status: "running",
           promptsCompleted: completedCount,
         });
@@ -302,7 +385,7 @@ export const AiTrackingService = {
 
     const finalStatus = anySuccess ? "completed" : "failed";
     const completedAt = new Date().toISOString();
-    await AiTrackingRepository.updateRun(runId, {
+    await AiTrackingRepository.updateRun(config.id, runId, {
       status: finalStatus,
       promptsCompleted: completedCount,
       completedAt,
@@ -321,8 +404,8 @@ export const AiTrackingService = {
         );
         const obsIds = obs.map((o) => o.id);
         const [mList, cList] = await Promise.all([
-          AiTrackingRepository.getMentionsForObservations(obsIds),
-          AiTrackingRepository.getCitationsForObservations(obsIds),
+          AiTrackingRepository.getMentionsForObservations(config.id, obsIds),
+          AiTrackingRepository.getCitationsForObservations(config.id, obsIds),
         ]);
         const targetMentions = mList.filter((m) => m.isTargetBrand).length;
         const targetCitations = cList.filter((c) => c.isTargetBrand).length;
@@ -429,8 +512,14 @@ export const AiTrackingService = {
 
     const observationIds = observations.map((o) => o.id);
     const [mentions, citations] = await Promise.all([
-      AiTrackingRepository.getMentionsForObservations(observationIds),
-      AiTrackingRepository.getCitationsForObservations(observationIds),
+      AiTrackingRepository.getMentionsForObservations(
+        config.id,
+        observationIds,
+      ),
+      AiTrackingRepository.getCitationsForObservations(
+        config.id,
+        observationIds,
+      ),
     ]);
 
     const dashboard = aggregateDashboardMetrics({
@@ -476,8 +565,17 @@ export const AiTrackingService = {
 
   async promoteDiscoveredPrompt(projectId: string, promptId: string) {
     const config = await this.getConfig(projectId);
-    if (!config) return null;
-    return AiTrackingRepository.promoteDiscoveredPrompt(config.id, promptId);
+    if (!config) {
+      throw new AppError("NOT_FOUND", "AI tracking config not found");
+    }
+    const promoted = await AiTrackingRepository.promoteDiscoveredPrompt(
+      config.id,
+      promptId,
+    );
+    if (!promoted) {
+      throw new AppError("NOT_FOUND", "Discovered prompt not found");
+    }
+    return promoted;
   },
 
   async getPages(projectId: string) {
@@ -513,8 +611,10 @@ export const AiTrackingService = {
       {},
     );
     const obsIds = observations.map((o) => o.id);
-    const mentions =
-      await AiTrackingRepository.getMentionsForObservations(obsIds);
+    const mentions = await AiTrackingRepository.getMentionsForObservations(
+      config.id,
+      obsIds,
+    );
 
     // Group mentions by domain
     const mentionCounts = new Map<
@@ -640,7 +740,7 @@ export const AiTrackingService = {
 
   async getGscCorrelation(
     projectId: string,
-    _options: { dateRange?: string } = {},
+    options: { dateRange?: string } = {},
   ) {
     const config = await this.getConfig(projectId);
     if (!config) {
@@ -677,7 +777,7 @@ export const AiTrackingService = {
       const existing = allPromptsMap.get(key);
       allPromptsMap.set(key, {
         prompt: t.prompt,
-        hasMention: existing ? existing.hasMention : true,
+        hasMention: existing ? existing.hasMention : false,
         hasCitation: existing ? existing.hasCitation : false,
         isTracked: true,
       });
@@ -685,10 +785,19 @@ export const AiTrackingService = {
 
     // 2. Fetch GSC Queries
     try {
+      const days =
+        options.dateRange === "7d" ? 7 : options.dateRange === "3m" ? 90 : 28;
+      const end = new Date();
+      const start = new Date(Date.now() - days * 86400000);
+      const startDate = start.toISOString().slice(0, 10);
+      const endDate = end.toISOString().slice(0, 10);
+
       const gscResult = await GscService.getPerformance({
         projectId,
         dimensions: ["query"],
         rowLimit: 500,
+        startDate,
+        endDate,
       });
 
       const gscRows = gscResult.rows ?? [];
@@ -728,18 +837,7 @@ export const AiTrackingService = {
       }> = [];
 
       for (const item of allPromptsMap.values()) {
-        const key = item.prompt.toLowerCase().trim();
-        // Exact match or contains match
-        let gscMatch = gscMap.get(key);
-        if (!gscMatch) {
-          for (const [gscKey, val] of gscMap.entries()) {
-            if (key.includes(gscKey) || gscKey.includes(key)) {
-              gscMatch = val;
-              break;
-            }
-          }
-        }
-
+        const gscMatch = findBestGscMatch(item.prompt, gscMap);
         items.push({
           aiPrompt: item.prompt,
           aiPresence: item.hasMention,
@@ -757,10 +855,14 @@ export const AiTrackingService = {
         });
       }
 
-      // Sort by impressions descending, then clicks
-      items.sort(
-        (a, b) => b.impressions - a.impressions || b.clicks - a.clicks,
-      );
+      // Sort: items with real GSC match first (by impressions/clicks descending), then others
+      items.sort((a, b) => {
+        const aHasMatch = a.gscQuery !== "-";
+        const bHasMatch = b.gscQuery !== "-";
+        if (aHasMatch && !bHasMatch) return -1;
+        if (!aHasMatch && bHasMatch) return 1;
+        return b.impressions - a.impressions || b.clicks - a.clicks;
+      });
 
       return {
         connected: true,
@@ -770,17 +872,7 @@ export const AiTrackingService = {
       if (err instanceof GscNotConnectedError) {
         return {
           connected: false,
-          items: Array.from(allPromptsMap.values()).map((item) => ({
-            aiPrompt: item.prompt,
-            aiPresence: item.hasMention,
-            aiCitation: item.hasCitation,
-            gscQuery: "-",
-            clicks: 0,
-            impressions: 0,
-            ctr: 0,
-            position: 0,
-            sourceBadge: item.isTracked ? "Tracked" : "DataForSEO",
-          })),
+          items: [],
         };
       }
       throw err;

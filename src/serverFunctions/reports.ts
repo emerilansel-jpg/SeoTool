@@ -35,8 +35,13 @@ export const listReports = createServerFn({ method: "GET" })
 export const getReport = createServerFn({ method: "POST" })
   .middleware([requireProjectContext])
   .validator(reportIdInputSchema)
-  .handler(async ({ data }) => {
-    return { report: await ReportService.getReportWithSections(data.reportId) };
+  .handler(async ({ data, context }) => {
+    return {
+      report: await ReportService.getReportWithSections(
+        data.reportId,
+        context.projectId,
+      ),
+    };
   });
 
 /** Create a report (manager+ only). */
@@ -69,19 +74,23 @@ export const createReport = createServerFn({ method: "POST" })
 export const updateReport = createServerFn({ method: "POST" })
   .middleware([requireProjectContext, requireProjectRole("manager")])
   .validator(updateReportInputSchema)
-  .handler(async ({ data }) => {
-    const report = await ReportService.updateReport(data.reportId, {
-      name: data.name,
-      schedule: data.schedule,
-      dayOfWeek: data.dayOfWeek,
-      dayOfMonth: data.dayOfMonth,
-      clientName: data.clientName,
-      logoUrl: data.logoUrl,
-      brandColor: data.brandColor,
-      accentColor: data.accentColor,
-      recipients: data.recipients,
-      sections: data.sections,
-    });
+  .handler(async ({ data, context }) => {
+    const report = await ReportService.updateReport(
+      data.reportId,
+      {
+        name: data.name,
+        schedule: data.schedule,
+        dayOfWeek: data.dayOfWeek,
+        dayOfMonth: data.dayOfMonth,
+        clientName: data.clientName,
+        logoUrl: data.logoUrl,
+        brandColor: data.brandColor,
+        accentColor: data.accentColor,
+        recipients: data.recipients,
+        sections: data.sections,
+      },
+      context.projectId,
+    );
     return { report };
   });
 
@@ -89,8 +98,8 @@ export const updateReport = createServerFn({ method: "POST" })
 export const deleteReport = createServerFn({ method: "POST" })
   .middleware([requireProjectContext, requireProjectRole("manager")])
   .validator(reportIdInputSchema)
-  .handler(async ({ data, context: _context }) => {
-    await ReportService.deleteReport(data.reportId);
+  .handler(async ({ data, context }) => {
+    await ReportService.deleteReport(data.reportId, context.projectId);
     return { ok: true };
   });
 
@@ -98,9 +107,13 @@ export const deleteReport = createServerFn({ method: "POST" })
 export const listReportSnapshots = createServerFn({ method: "POST" })
   .middleware([requireProjectContext])
   .validator(listSnapshotsInputSchema)
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     return {
-      snapshots: await ReportService.listSnapshots(data.reportId, data.limit),
+      snapshots: await ReportService.listSnapshots(
+        data.reportId,
+        data.limit,
+        context.projectId,
+      ),
     };
   });
 
@@ -108,8 +121,13 @@ export const listReportSnapshots = createServerFn({ method: "POST" })
 export const getReportSnapshot = createServerFn({ method: "POST" })
   .middleware([requireProjectContext])
   .validator(snapshotIdInputSchema)
-  .handler(async ({ data }) => {
-    return { snapshot: await ReportService.getSnapshot(data.snapshotId) };
+  .handler(async ({ data, context }) => {
+    return {
+      snapshot: await ReportService.getSnapshot(
+        data.snapshotId,
+        context.projectId,
+      ),
+    };
   });
 
 /** Generate a snapshot for a report config and persist it (manager+ only). */
@@ -117,7 +135,10 @@ const _generateReportSnapshot = createServerFn({ method: "POST" })
   .middleware([requireProjectContext, requireProjectRole("manager")])
   .validator(generateSnapshotInput)
   .handler(async ({ data, context }) => {
-    const report = await ReportService.getReportWithSections(data.reportId);
+    const report = await ReportService.getReportWithSections(
+      data.reportId,
+      context.projectId,
+    );
     if (!report) return { error: "Report not found" as const };
     const payload = await buildSnapshot({
       projectId: context.projectId,

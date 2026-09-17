@@ -13,11 +13,18 @@ export type ReportSnapshot = typeof reportSnapshots.$inferSelect;
 
 // --- Reports ---------------------------------------------------------------
 
-async function getById(reportId: string): Promise<Report | null> {
+async function getById(
+  reportId: string,
+  projectId?: string,
+): Promise<Report | null> {
+  const conditions = [eq(reports.id, reportId)];
+  if (projectId) {
+    conditions.push(eq(reports.projectId, projectId));
+  }
   const rows = await db
     .select()
     .from(reports)
-    .where(eq(reports.id, reportId))
+    .where(and(...conditions))
     .limit(1);
   return rows[0] ?? null;
 }
@@ -65,15 +72,27 @@ async function updateReport(
     accentColor: string | null;
     recipients: string | null;
   }>,
+  projectId?: string,
 ): Promise<void> {
+  const conditions = [eq(reports.id, reportId)];
+  if (projectId) {
+    conditions.push(eq(reports.projectId, projectId));
+  }
   await db
     .update(reports)
     .set({ ...set, updatedAt: sql`(current_timestamp)` })
-    .where(eq(reports.id, reportId));
+    .where(and(...conditions));
 }
 
-async function deleteReport(reportId: string): Promise<void> {
-  await db.delete(reports).where(eq(reports.id, reportId));
+async function deleteReport(
+  reportId: string,
+  projectId?: string,
+): Promise<void> {
+  const conditions = [eq(reports.id, reportId)];
+  if (projectId) {
+    conditions.push(eq(reports.projectId, projectId));
+  }
+  await db.delete(reports).where(and(...conditions));
 }
 
 /** Reports whose next scheduled run is due. Used by the cron dispatcher. */
@@ -129,7 +148,31 @@ async function insertSnapshot(input: {
   return row;
 }
 
-async function getSnapshot(snapshotId: string): Promise<ReportSnapshot | null> {
+async function getSnapshot(
+  snapshotId: string,
+  projectId?: string,
+): Promise<ReportSnapshot | null> {
+  if (projectId) {
+    const rows = await db
+      .select({
+        id: reportSnapshots.id,
+        reportId: reportSnapshots.reportId,
+        rangeStart: reportSnapshots.rangeStart,
+        rangeEnd: reportSnapshots.rangeEnd,
+        data: reportSnapshots.data,
+        createdAt: reportSnapshots.createdAt,
+      })
+      .from(reportSnapshots)
+      .innerJoin(reports, eq(reports.id, reportSnapshots.reportId))
+      .where(
+        and(
+          eq(reportSnapshots.id, snapshotId),
+          eq(reports.projectId, projectId),
+        ),
+      )
+      .limit(1);
+    return rows[0] ?? null;
+  }
   const rows = await db
     .select()
     .from(reportSnapshots)
@@ -141,7 +184,12 @@ async function getSnapshot(snapshotId: string): Promise<ReportSnapshot | null> {
 async function listSnapshots(
   reportId: string,
   limit: number,
+  projectId?: string,
 ): Promise<ReportSnapshot[]> {
+  if (projectId) {
+    const report = await getById(reportId, projectId);
+    if (!report) return [];
+  }
   return db
     .select()
     .from(reportSnapshots)

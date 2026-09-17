@@ -11,7 +11,7 @@ import {
   aiTopPages,
   aiVisibilitySnapshots,
 } from "@/db/schema";
-import { executeInBatches } from "@/db/runBatch";
+import { executeInBatches, runBatch } from "@/db/runBatch";
 import type {
   AiTrackingPlatform,
   SaveAiTrackingConfigInput,
@@ -45,7 +45,12 @@ export const AiTrackingRepository = {
           scheduleStatus: input.scheduleStatus,
           updatedAt: now,
         })
-        .where(eq(aiTrackingConfigs.id, existing.id));
+        .where(
+          and(
+            eq(aiTrackingConfigs.id, existing.id),
+            eq(aiTrackingConfigs.projectId, projectId),
+          ),
+        );
       return { ...existing, ...input, updatedAt: now };
     }
 
@@ -66,6 +71,51 @@ export const AiTrackingRepository = {
 
     await db.insert(aiTrackingConfigs).values(newConfig);
     return newConfig;
+  },
+
+  async resetIdentityDerivedData(configId: string) {
+    const obs = await db
+      .select({ id: aiTrackingObservations.id })
+      .from(aiTrackingObservations)
+      .where(eq(aiTrackingObservations.configId, configId));
+    const obsIds = obs.map((o) => o.id);
+
+    if (obsIds.length > 0) {
+      await executeInBatches(obsIds, (tx, obsId) =>
+        tx
+          .delete(aiTrackingCitations)
+          .where(eq(aiTrackingCitations.observationId, obsId)),
+      );
+    }
+
+    await runBatch((tx) => [
+      tx
+        .delete(aiTrackingMentions)
+        .where(eq(aiTrackingMentions.configId, configId)),
+      tx
+        .delete(aiTrackingObservations)
+        .where(eq(aiTrackingObservations.configId, configId)),
+      tx.delete(aiTrackingRuns).where(eq(aiTrackingRuns.configId, configId)),
+      tx
+        .delete(aiTrackingPrompts)
+        .where(eq(aiTrackingPrompts.configId, configId)),
+      tx
+        .delete(aiDiscoveredPrompts)
+        .where(eq(aiDiscoveredPrompts.configId, configId)),
+      tx.delete(aiTopPages).where(eq(aiTopPages.configId, configId)),
+      tx
+        .delete(aiVisibilitySnapshots)
+        .where(eq(aiVisibilitySnapshots.configId, configId)),
+      tx
+        .update(aiTrackingConfigs)
+        .set({
+          lastDiscoveryAt: null,
+          lastRunAt: null,
+          nextRunAt: null,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(aiTrackingConfigs.id, configId)),
+    ]);
   },
 
   async listPrompts(configId: string) {
@@ -108,7 +158,7 @@ export const AiTrackingRepository = {
   },
 
   async togglePrompt(configId: string, promptId: string, active: boolean) {
-    await db
+    const rows = await db
       .update(aiTrackingPrompts)
       .set({ active })
       .where(
@@ -116,18 +166,22 @@ export const AiTrackingRepository = {
           eq(aiTrackingPrompts.configId, configId),
           eq(aiTrackingPrompts.id, promptId),
         ),
-      );
+      )
+      .returning({ id: aiTrackingPrompts.id });
+    return rows.length > 0;
   },
 
   async removePrompt(configId: string, promptId: string) {
-    await db
+    const rows = await db
       .delete(aiTrackingPrompts)
       .where(
         and(
           eq(aiTrackingPrompts.configId, configId),
           eq(aiTrackingPrompts.id, promptId),
         ),
-      );
+      )
+      .returning({ id: aiTrackingPrompts.id });
+    return rows.length > 0;
   },
 
   async getActiveRun(configId: string) {
@@ -177,6 +231,7 @@ export const AiTrackingRepository = {
   },
 
   async updateRun(
+    configId: string,
     runId: string,
     data: {
       status: "pending" | "running" | "completed" | "failed";
@@ -188,7 +243,12 @@ export const AiTrackingRepository = {
     await db
       .update(aiTrackingRuns)
       .set(data)
-      .where(eq(aiTrackingRuns.id, runId));
+      .where(
+        and(
+          eq(aiTrackingRuns.id, runId),
+          eq(aiTrackingRuns.configId, configId),
+        ),
+      );
   },
 
   async updateConfigLastRun(configId: string, lastRunAt: string) {
@@ -284,20 +344,46 @@ export const AiTrackingRepository = {
       .orderBy(desc(aiTrackingObservations.observedAt));
   },
 
-  async getMentionsForObservations(observationIds: string[]) {
+  async getMentionsForObservations(configId: string, observationIds: string[]) {
     if (observationIds.length === 0) return [];
     return db
       .select()
       .from(aiTrackingMentions)
-      .where(inArray(aiTrackingMentions.observationId, observationIds));
+      .where(
+        and(
+          eq(aiTrackingMentions.configId, configId),
+          inArray(aiTrackingMentions.observationId, observationIds),
+        ),
+      );
   },
 
-  async getCitationsForObservations(observationIds: string[]) {
+  async getCitationsForObservations(
+    configId: string,
+    observationIds: string[],
+  ) {
     if (observationIds.length === 0) return [];
     return db
-      .select()
+      .select({
+        id: aiTrackingCitations.id,
+        observationId: aiTrackingCitations.observationId,
+        runId: aiTrackingCitations.runId,
+        url: aiTrackingCitations.url,
+        domain: aiTrackingCitations.domain,
+        title: aiTrackingCitations.title,
+        isTargetBrand: aiTrackingCitations.isTargetBrand,
+        createdAt: aiTrackingCitations.createdAt,
+      })
       .from(aiTrackingCitations)
-      .where(inArray(aiTrackingCitations.observationId, observationIds));
+      .innerJoin(
+        aiTrackingObservations,
+        eq(aiTrackingObservations.id, aiTrackingCitations.observationId),
+      )
+      .where(
+        and(
+          eq(aiTrackingObservations.configId, configId),
+          inArray(aiTrackingCitations.observationId, observationIds),
+        ),
+      );
   },
 
   async updateConfigDiscoveryDate(configId: string, timestamp: string) {
@@ -352,7 +438,8 @@ export const AiTrackingRepository = {
             citationUrl: item.citationUrl ?? null,
             brandEntities: JSON.stringify(item.brandEntities ?? []),
             sources: JSON.stringify(item.sources ?? []),
-            isTracked: item.isTracked !== undefined ? item.isTracked : undefined,
+            isTracked:
+              item.isTracked !== undefined ? item.isTracked : undefined,
             lastResponseAt: item.lastResponseAt ?? null,
           })
           .where(eq(aiDiscoveredPrompts.id, existingId));
@@ -452,7 +539,12 @@ export const AiTrackingRepository = {
     await db
       .update(aiDiscoveredPrompts)
       .set({ isTracked: true })
-      .where(eq(aiDiscoveredPrompts.id, promptId));
+      .where(
+        and(
+          eq(aiDiscoveredPrompts.id, promptId),
+          eq(aiDiscoveredPrompts.configId, configId),
+        ),
+      );
     return discovered;
   },
 

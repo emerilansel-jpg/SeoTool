@@ -21,7 +21,10 @@ export function AiTrackingPositionCard({
   competitors,
 }: Props) {
   const targetRankIndex = competitors.findIndex((c) => c.isTargetBrand);
-  const targetRank = targetRankIndex >= 0 ? `#${targetRankIndex + 1}` : "#1";
+  const targetRank =
+    averagePosition != null && targetRankIndex >= 0
+      ? `#${targetRankIndex + 1}`
+      : "—";
 
   // Build points for SVG line chart
   const validPoints = positionTrend.filter(
@@ -31,10 +34,9 @@ export function AiTrackingPositionCard({
   const chartPoints =
     validPoints.length > 0
       ? validPoints
-      : [
-          { date: "Day 1", position: averagePosition ?? 2.0 },
-          { date: "Day 2", position: averagePosition ?? 1.8 },
-        ];
+      : averagePosition != null
+        ? [{ date: "Current", position: averagePosition }]
+        : [];
 
   const minPos = 1;
   const maxPos = Math.max(5, ...chartPoints.map((p) => p.position));
@@ -43,21 +45,25 @@ export function AiTrackingPositionCard({
   const paddingX = 40;
   const paddingY = 20;
 
-  const pointsString = chartPoints
-    .map((p, i) => {
-      const x =
-        paddingX +
-        (i / Math.max(1, chartPoints.length - 1)) * (width - 2 * paddingX);
-      const y =
-        paddingY +
-        ((p.position - minPos) / Math.max(0.1, maxPos - minPos)) *
-          (height - 2 * paddingY);
-      return `${x},${y}`;
-    })
-    .join(" ");
+  const pointsString =
+    chartPoints.length > 1
+      ? chartPoints
+          .map((p, i) => {
+            const x =
+              paddingX +
+              (i / Math.max(1, chartPoints.length - 1)) *
+                (width - 2 * paddingX);
+            const y =
+              paddingY +
+              ((p.position - minPos) / Math.max(0.1, maxPos - minPos)) *
+                (height - 2 * paddingY);
+            return `${x},${y}`;
+          })
+          .join(" ")
+      : "";
 
   const areaPath =
-    chartPoints.length > 0
+    chartPoints.length > 1
       ? `M ${paddingX},${height - paddingY} L ${chartPoints
           .map((p, i) => {
             const x =
@@ -106,111 +112,118 @@ export function AiTrackingPositionCard({
             </p>
           </div>
 
-          <div className="h-52 w-full pt-2">
-            <svg
-              viewBox={`0 0 ${width} ${height}`}
-              className="size-full overflow-visible"
-            >
-              <defs>
-                <linearGradient
-                  id="avgPositionGradient"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop offset="0%" stopColor="#f97316" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#f97316" stopOpacity="0.0" />
-                </linearGradient>
-              </defs>
-
-              {/* Background Grid Lines */}
-              <line
-                x1={paddingX}
-                x2={width - paddingX}
-                y1={paddingY}
-                y2={paddingY}
-                stroke="currentColor"
-                strokeOpacity="0.1"
-                strokeDasharray="3 3"
-              />
-              <line
-                x1={paddingX}
-                x2={width - paddingX}
-                y1={height / 2}
-                y2={height / 2}
-                stroke="currentColor"
-                strokeOpacity="0.1"
-                strokeDasharray="3 3"
-              />
-              <line
-                x1={paddingX}
-                x2={width - paddingX}
-                y1={height - paddingY}
-                y2={height - paddingY}
-                stroke="currentColor"
-                strokeOpacity="0.1"
-                strokeDasharray="3 3"
-              />
-
-              {/* Area & Line */}
-              {areaPath && (
-                <path d={areaPath} fill="url(#avgPositionGradient)" />
-              )}
-              {pointsString && (
-                <polyline
-                  points={pointsString}
-                  fill="none"
-                  stroke="#f97316"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              )}
-
-              {/* Points */}
-              {chartPoints.map((p, i) => {
-                const x =
-                  paddingX +
-                  (i / Math.max(1, chartPoints.length - 1)) *
-                    (width - 2 * paddingX);
-                const y =
-                  paddingY +
-                  ((p.position - minPos) / Math.max(0.1, maxPos - minPos)) *
-                    (height - 2 * paddingY);
-                return (
-                  <circle
-                    key={p.date}
-                    cx={x}
-                    cy={y}
-                    r="4"
-                    fill="#ffffff"
-                    stroke="#f97316"
-                    strokeWidth="2"
-                  />
-                );
-              })}
-
-              {/* Date labels */}
-              {chartPoints.map((p, i) => {
-                const x =
-                  paddingX +
-                  (i / Math.max(1, chartPoints.length - 1)) *
-                    (width - 2 * paddingX);
-                return (
-                  <text
-                    key={`lbl-${p.date}`}
-                    x={x}
-                    y={height - 4}
-                    textAnchor="middle"
-                    className="text-[10px] fill-base-content/50"
+          {chartPoints.length === 0 ? (
+            <div className="flex h-52 w-full items-center justify-center rounded-lg border border-dashed border-base-300 text-xs text-base-content/50">
+              No position history recorded yet. Run tracking to measure AI rank
+              position.
+            </div>
+          ) : (
+            <div className="h-52 w-full pt-2">
+              <svg
+                viewBox={`0 0 ${width} ${height}`}
+                className="size-full overflow-visible"
+              >
+                <defs>
+                  <linearGradient
+                    id="avgPositionGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
                   >
-                    {p.date.length > 5 ? p.date.slice(5) : p.date}
-                  </text>
-                );
-              })}
-            </svg>
-          </div>
+                    <stop offset="0%" stopColor="#f97316" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#f97316" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+
+                {/* Background Grid Lines */}
+                <line
+                  x1={paddingX}
+                  x2={width - paddingX}
+                  y1={paddingY}
+                  y2={paddingY}
+                  stroke="currentColor"
+                  strokeOpacity="0.1"
+                  strokeDasharray="3 3"
+                />
+                <line
+                  x1={paddingX}
+                  x2={width - paddingX}
+                  y1={height / 2}
+                  y2={height / 2}
+                  stroke="currentColor"
+                  strokeOpacity="0.1"
+                  strokeDasharray="3 3"
+                />
+                <line
+                  x1={paddingX}
+                  x2={width - paddingX}
+                  y1={height - paddingY}
+                  y2={height - paddingY}
+                  stroke="currentColor"
+                  strokeOpacity="0.1"
+                  strokeDasharray="3 3"
+                />
+
+                {/* Area & Line */}
+                {areaPath && (
+                  <path d={areaPath} fill="url(#avgPositionGradient)" />
+                )}
+                {pointsString && (
+                  <polyline
+                    points={pointsString}
+                    fill="none"
+                    stroke="#f97316"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                )}
+
+                {/* Points */}
+                {chartPoints.map((p, i) => {
+                  const x =
+                    paddingX +
+                    (i / Math.max(1, chartPoints.length - 1)) *
+                      (width - 2 * paddingX);
+                  const y =
+                    paddingY +
+                    ((p.position - minPos) / Math.max(0.1, maxPos - minPos)) *
+                      (height - 2 * paddingY);
+                  return (
+                    <circle
+                      key={p.date}
+                      cx={x}
+                      cy={y}
+                      r="4"
+                      fill="#ffffff"
+                      stroke="#f97316"
+                      strokeWidth="2"
+                    />
+                  );
+                })}
+
+                {/* Date labels */}
+                {chartPoints.map((p, i) => {
+                  const x =
+                    paddingX +
+                    (i / Math.max(1, chartPoints.length - 1)) *
+                      (width - 2 * paddingX);
+                  return (
+                    <text
+                      key={`lbl-${p.date}`}
+                      x={x}
+                      y={height - 4}
+                      textAnchor="middle"
+                      className="text-[10px] fill-base-content/50"
+                    >
+                      {p.date.length > 5 ? p.date.slice(5) : p.date}
+                    </text>
+                  );
+                })}
+              </svg>
+            </div>
+          )}
         </div>
 
         {/* Right: Leaderboard */}

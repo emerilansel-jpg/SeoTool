@@ -45,6 +45,10 @@ export const aiTrackingConfigs = sqliteTable(
   },
   (table) => [
     uniqueIndex("ai_tracking_configs_project_id_uniq").on(table.projectId),
+    uniqueIndex("ai_tracking_configs_id_project_id_uniq").on(
+      table.id,
+      table.projectId,
+    ),
   ],
 );
 
@@ -99,6 +103,10 @@ export const aiTrackingRuns = sqliteTable(
   (table) => [
     index("ai_tracking_runs_config_idx").on(table.configId, table.startedAt),
     index("ai_tracking_runs_project_idx").on(table.projectId, table.startedAt),
+    uniqueIndex("ai_tracking_runs_id_config_id_uniq").on(
+      table.id,
+      table.configId,
+    ),
     uniqueIndex("ai_tracking_runs_one_active_per_config_idx")
       .on(table.configId)
       .where(sql`${table.status} IN ('pending', 'running')`),
@@ -132,6 +140,12 @@ export const aiTrackingObservations = sqliteTable(
     index("ai_tracking_obs_config_date_idx").on(
       table.configId,
       table.observedAt,
+    ),
+    uniqueIndex("ai_tracking_obs_id_run_uniq").on(table.id, table.runId),
+    uniqueIndex("ai_tracking_obs_id_run_config_uniq").on(
+      table.id,
+      table.runId,
+      table.configId,
     ),
     uniqueIndex("ai_tracking_obs_run_prompt_platform_uniq").on(
       table.runId,
