@@ -868,6 +868,11 @@ const FAQ_ITEMS = [
     answer:
       "Run the autonomous Jet AI agent inside the app, or connect your own Claude Desktop and IDE via 36+ native MCP tools.",
   },
+  {
+    question: "How does the $1 Credit Retainer work?",
+    answer:
+      "If you prefer a smaller commitment, you can start with a micro-retainer from $1/month. 100% of your payment is converted into permanent usage credits (1,000 credits per dollar) that roll over and never expire, remaining yours even if you cancel.",
+  },
 ] as const;
 
 function FaqSection() {

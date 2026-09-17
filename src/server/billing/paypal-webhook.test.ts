@@ -176,7 +176,11 @@ describe("handlePaypalWebhookRequest", () => {
     );
 
     expect(addCredits).not.toHaveBeenCalled();
-    expect(syncCustomer).toHaveBeenCalledWith("org-1", undefined);
+    expect(syncCustomer).toHaveBeenCalledWith(
+      "org-1",
+      undefined,
+      "PAYMENT.CAPTURE.COMPLETED",
+    );
   });
 
   it("routes Keyword Research Pro subscription events away from the main plan sync", async () => {

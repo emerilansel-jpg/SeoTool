@@ -52,6 +52,7 @@ beforeEach(() => {
   query.where.mockReturnValue({ groupBy: query.groupBy });
   getPrices.mockResolvedValue({
     free: 0,
+    starter: 1,
     lite: 49,
     pro: 149,
     agency: 499,

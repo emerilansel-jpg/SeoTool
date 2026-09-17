@@ -343,8 +343,13 @@ describe("AdminSettingsService: editable key guard", () => {
     getRequiredEnv.mockImplementation(async (key: string) => key === "PAYPAL_MODE" ? "live" : "WH-123");
     getPaypalPlan.mockImplementation(async (planId: string) => {
       const priceById: Record<string, string> = {
-        "lite-plan": "49.00", "pro-plan": "149.00", "agency-plan": "499.00",
-        "standard-plan": "9.00", "byok-plan": "4.00", "krp-founder-plan": "19.00",
+        "starter-plan": "1.00",
+        "lite-plan": "49.00",
+        "pro-plan": "149.00",
+        "agency-plan": "499.00",
+        "standard-plan": "9.00",
+        "byok-plan": "4.00",
+        "krp-founder-plan": "19.00",
       };
       return {
         id: planId,
@@ -368,13 +373,13 @@ describe("AdminSettingsService: editable key guard", () => {
 
     const result = await AdminSettingsService.testPaypalConfiguration();
     expect(result.mode).toBe("live");
-    expect(result.plans).toHaveLength(6);
-    expect(result.plans[0]).toMatchObject({ tier: "lite", priceUsd: 49 });
-    expect(result.plans[5]).toMatchObject({
+    expect(result.plans).toHaveLength(7);
+    expect(result.plans[0]).toMatchObject({ tier: "starter", priceUsd: 1 });
+    expect(result.plans[6]).toMatchObject({
       tier: "krp_founder_10",
       priceUsd: 19,
     });
-    expect(getPaypalPlan).toHaveBeenCalledTimes(6);
+    expect(getPaypalPlan).toHaveBeenCalledTimes(7);
   });
 });
 

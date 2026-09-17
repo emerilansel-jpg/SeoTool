@@ -20,6 +20,7 @@ describe("plans: tier definitions", () => {
   it("defines the plan tiers", () => {
     expect(PLAN_TIERS).toEqual([
       "free",
+      "starter",
       "lite",
       "pro",
       "agency",

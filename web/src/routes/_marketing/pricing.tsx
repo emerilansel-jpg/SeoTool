@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_marketing/pricing")({
  * page. Keep consistent with src/shared/plans.ts (app).
  * ------------------------------------------------------------------ */
 
-type PlanTierKey = "free" | "lite" | "pro" | "agency";
+type PlanTierKey = "free" | "starter" | "lite" | "pro" | "agency";
 
 type PlanRow = {
   tier: PlanTierKey;
@@ -37,6 +37,13 @@ const PLANS: PlanRow[] = [
     price: 0,
     blurb: "Test the waters with one project.",
     cta: "Get Started",
+  },
+  {
+    tier: "starter",
+    name: "Starter Retainer",
+    price: 1,
+    blurb: "From $1/mo. 100% becomes credits that never expire.",
+    cta: "Start with $1",
   },
   {
     tier: "lite",
@@ -79,6 +86,7 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
         label: "Projects",
         values: {
           free: "1",
+          starter: "2",
           lite: "5",
           pro: "25",
           agency: "unlimited",
@@ -88,6 +96,7 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
         label: "Keyword research searches / day",
         values: {
           free: "10",
+          starter: "25",
           lite: "100",
           pro: "500",
           agency: "unlimited",
@@ -97,6 +106,7 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
         label: "Saved keywords",
         values: {
           free: "50",
+          starter: "100",
           lite: "500",
           pro: "5,000",
           agency: "unlimited",
@@ -106,6 +116,7 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
         label: "Tracked keywords",
         values: {
           free: "—",
+          starter: "10",
           lite: "50",
           pro: "500",
           agency: "5,000",
@@ -118,12 +129,13 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
     rows: [
       {
         label: "Site audits / month",
-        values: { free: "1", lite: "3", pro: "10", agency: "50" },
+        values: { free: "1", starter: "2", lite: "3", pro: "10", agency: "50" },
       },
       {
         label: "Max pages per audit",
         values: {
           free: "50",
+          starter: "100",
           lite: "500",
           pro: "5,000",
           agency: "10,000",
@@ -131,7 +143,7 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
       },
       {
         label: "Backlink checks / day",
-        values: { free: "—", lite: "10", pro: "100", agency: "500" },
+        values: { free: "—", starter: "3", lite: "10", pro: "100", agency: "500" },
       },
     ],
   },
@@ -140,15 +152,15 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
     rows: [
       {
         label: "AI brand citation / month",
-        values: { free: "—", lite: "10", pro: "50", agency: "200" },
+        values: { free: "—", starter: "5", lite: "10", pro: "50", agency: "200" },
       },
       {
         label: "AI prompt explorer / month",
-        values: { free: "—", lite: "20", pro: "100", agency: "500" },
+        values: { free: "—", starter: "10", lite: "20", pro: "100", agency: "500" },
       },
       {
         label: "Content intelligence / month",
-        values: { free: "—", lite: "20", pro: "100", agency: "500" },
+        values: { free: "—", starter: "5", lite: "20", pro: "100", agency: "500" },
       },
     ],
   },
@@ -159,6 +171,7 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
         label: "Google Search Console",
         values: {
           free: true,
+          starter: true,
           lite: true,
           pro: true,
           agency: true,
@@ -168,6 +181,7 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
         label: "Google Analytics 4",
         values: {
           free: true,
+          starter: true,
           lite: true,
           pro: true,
           agency: true,
@@ -177,6 +191,7 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
         label: "Jet AI agent",
         values: {
           free: false,
+          starter: true,
           lite: true,
           pro: true,
           agency: true,
@@ -186,6 +201,7 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
         label: "MCP server & agent skills",
         values: {
           free: false,
+          starter: true,
           lite: true,
           pro: true,
           agency: true,
@@ -195,6 +211,7 @@ const FEATURE_GROUPS: { group: string; rows: FeatureRow[] }[] = [
         label: "White-label reports",
         values: {
           free: "—",
+          starter: "1",
           lite: "5",
           pro: "25",
           agency: "unlimited",
@@ -274,7 +291,7 @@ function Pricing() {
       </div>
 
       {/* Plan cards */}
-      <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {PLANS.map((plan) => {
           const monthlyPrice = annual
             ? Math.round(plan.price * ANNUAL_DISCOUNT)

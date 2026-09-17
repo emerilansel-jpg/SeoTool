@@ -15,6 +15,7 @@
 
 export const PLAN_TIERS = [
   "free",
+  "starter",
   "lite",
   "pro",
   "agency",
@@ -27,6 +28,7 @@ export type PlanTier = (typeof PLAN_TIERS)[number];
  *  PayPal dashboard. The free tier has no subscription plan id. */
 export const PAYPAL_PLAN_IDS: Record<PlanTier, string | null> = {
   free: null,
+  starter: "starter-plan",
   lite: "lite-plan",
   pro: "pro-plan",
   agency: "agency-plan",
@@ -37,7 +39,7 @@ export const PAYPAL_PLAN_IDS: Record<PlanTier, string | null> = {
 /** Reverse lookup: PayPal plan id → our tier. Used by the webhook handler to
  *  resolve a subscription update to a tier. */
 const PAYPAL_PLAN_ID_TO_TIER = new Map<string, PlanTier>(
-  (["lite", "pro", "agency"] as const).map((tier) => [
+  (["starter", "lite", "pro", "agency"] as const).map((tier) => [
     PAYPAL_PLAN_IDS[tier]!,
     tier,
   ]),
@@ -57,6 +59,7 @@ export const planTierFromAutumnPlanId = planTierFromPaypalPlanId;
 /** Display price in USD per month. Free is $0. */
 export const PLAN_PRICES_USD: Record<PlanTier, number> = {
   free: 0,
+  starter: 1,
   lite: 49,
   pro: 149,
   agency: 499,
@@ -67,6 +70,7 @@ export const PLAN_PRICES_USD: Record<PlanTier, number> = {
 /** Human-readable tier names for UI. */
 export const PLAN_TIER_LABELS: Record<PlanTier, string> = {
   free: "Free",
+  starter: "Starter",
   lite: "Lite",
   pro: "Pro",
   agency: "Agency",
@@ -131,6 +135,20 @@ export const PLAN_LIMITS: Record<PlanTier, Record<QuotaFeature, number>> = {
     ai_prompt: 0,
     content_intelligence: 0,
     reports: 0,
+  },
+  starter: {
+    projects: 2,
+    keyword_search: 25,
+    saved_keywords: 100,
+    rank_tracking: 10,
+    local_map_points: 25,
+    backlink_check: 3,
+    site_audit: 2,
+    audit_pages: 100,
+    ai_brand_lookup: 5,
+    ai_prompt: 10,
+    content_intelligence: 5,
+    reports: 1,
   },
   lite: {
     projects: 5,
@@ -207,6 +225,7 @@ export const PLAN_LIMITS: Record<PlanTier, Record<QuotaFeature, number>> = {
 /** Max concurrent running audits per tier. Abuse control on our compute. */
 export const PLAN_AUDIT_CONCURRENCY: Record<PlanTier, number> = {
   free: 1,
+  starter: 1,
   lite: 3,
   pro: 10,
   agency: 50,
@@ -220,6 +239,7 @@ export const PLAN_FEATURE_ACCESS: Record<
   { samAgent: boolean; mcpTools: boolean; ga4: boolean; gsc: boolean }
 > = {
   free: { samAgent: false, mcpTools: false, ga4: true, gsc: true },
+  starter: { samAgent: true, mcpTools: true, ga4: true, gsc: true },
   lite: { samAgent: true, mcpTools: true, ga4: true, gsc: true },
   pro: { samAgent: true, mcpTools: true, ga4: true, gsc: true },
   agency: { samAgent: true, mcpTools: true, ga4: true, gsc: true },

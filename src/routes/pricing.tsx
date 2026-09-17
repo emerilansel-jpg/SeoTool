@@ -38,6 +38,11 @@ const FAQ_ITEMS = [
     answer:
       "Yes. Every membership is covered by a 30-day money-back guarantee. If SeoTool.im is not the right fit, request a full refund within 30 days of your first charge.",
   },
+  {
+    question: "How does the $1 Credit Retainer work?",
+    answer:
+      "If you want to start small, you can join our Credit Retainer from $1/month. 100% of your payment is converted into permanent usage credits (1,000 credits per dollar) that roll over forever and never expire, even if you cancel.",
+  },
 ] as const;
 
 type LoaderData = {
@@ -320,6 +325,30 @@ function PricingPage() {
 
         <div className="mt-14">
           <CohortPricing cohorts={cohorts} signedIn={signedIn} />
+        </div>
+
+        {/* Credit Retainer micro-tier */}
+        <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-primary/30 bg-primary/[0.03] p-6 text-center shadow-xs">
+          <span className="badge badge-primary badge-sm font-semibold">
+            MICRO RETAINER
+          </span>
+          <h3 className="mt-2 text-xl font-bold tracking-tight text-base-content">
+            Looking for a lighter commitment? Start from $1/month
+          </h3>
+          <p className="mt-2 text-sm text-base-content/70">
+            Every dollar is 100% converted into permanent credits (1,000 credits per dollar)
+            that roll over and never expire. Even if you cancel, your credit balance stays yours.
+          </p>
+          <div className="mt-4">
+            <Link
+              to="/subscribe"
+              search={{ plan: "starter" }}
+              className="btn btn-primary btn-sm rounded-xl font-semibold shadow-xs"
+            >
+              Start $1 Credit Retainer
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
         </div>
 
         <IncludedFeatures />

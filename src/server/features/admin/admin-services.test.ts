@@ -87,6 +87,18 @@ const configs = {
     paypalPlanIdSource: "default" as const,
     updatedAt: null,
   },
+  starter: {
+    tier: "starter" as const,
+    priceUsdCents: 100,
+    monthlyCredits: 1000,
+    paypalPlanId: "P-STARTER",
+    syncStatus: "synced",
+    active: true,
+    priceSource: "default" as const,
+    creditsSource: "default" as const,
+    paypalPlanIdSource: "default" as const,
+    updatedAt: null,
+  },
   lite: {
     tier: "lite" as const,
     priceUsdCents: 4900,

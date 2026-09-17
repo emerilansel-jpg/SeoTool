@@ -12,6 +12,7 @@ import {
   getMembershipStatus,
   verifyMembershipCheckout,
 } from "@/serverFunctions/membership";
+import { createPaypalSubscription } from "@/serverFunctions/paypal-checkout";
 
 type Search = {
   checkout?: "success" | "cancelled";
@@ -20,7 +21,7 @@ type Search = {
   ref?: string;
   upgrade?: true;
   /** Legacy deep links are accepted; All Access is the only new paid offer. */
-  plan?: "free" | "lite" | "pro" | "agency" | "standard" | "byok";
+  plan?: "free" | "starter" | "lite" | "pro" | "agency" | "standard" | "byok";
 };
 
 export const Route = createFileRoute("/_authenticated/subscribe")({
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/_authenticated/subscribe")({
       search.upgrade === true || search.upgrade === "true" ? true : undefined,
     plan:
       search.plan === "free" ||
+      search.plan === "starter" ||
       search.plan === "lite" ||
       search.plan === "pro" ||
       search.plan === "agency"
@@ -117,6 +119,17 @@ function SubscribePage() {
     onSuccess: (result) => window.location.assign(result.approveUrl),
     onError: (error) =>
       toast.error(getStandardErrorMessage(error, "Could not start checkout")),
+  });
+  const starterCheckout = useMutation({
+    mutationFn: () => createPaypalSubscription({ data: { tier: "starter" } }),
+    onSuccess: (result) => window.location.assign(result.approveUrl),
+    onError: (error) =>
+      toast.error(
+        getStandardErrorMessage(
+          error,
+          "Credit Retainer checkout is not set up yet",
+        ),
+      ),
   });
   const verify = useMutation({
     mutationFn: (subscriptionId: string) =>
@@ -298,6 +311,54 @@ function SubscribePage() {
                 moment checkout is live.
               </p>
             ) : null}
+          </div>
+        </section>
+
+        <section className="card border border-base-300 bg-base-100">
+          <div className="card-body gap-5 p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <span className="badge badge-ghost badge-sm">
+                  CREDIT RETAINER
+                </span>
+                <h2 className="mt-2 text-xl font-semibold">
+                  Starter Retainer
+                </h2>
+                <p className="text-xs text-base-content/60">
+                  From $1/month — 100% becomes credit that never expires
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold">$1</div>
+                <div className="text-xs text-base-content/60">USD / month</div>
+              </div>
+            </div>
+
+            <ul className="grid gap-2 text-sm">
+              {[
+                "1,000 permanent credits every month",
+                "Credits roll over and never expire — ever",
+                "Every SeoTool.im metered tool included",
+                "Cancel anytime; your credit balance stays yours",
+                "Referral rewards for 12 cycles",
+              ].map((feature) => (
+                <li key={feature} className="flex gap-2">
+                  <Check className="mt-0.5 size-4 shrink-0 text-success" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <button
+              className="btn btn-outline"
+              disabled={starterCheckout.isPending}
+              onClick={() => starterCheckout.mutate()}
+            >
+              {starterCheckout.isPending ? (
+                <span className="loading loading-spinner loading-xs" />
+              ) : null}
+              Start with $1
+            </button>
           </div>
         </section>
       </div>

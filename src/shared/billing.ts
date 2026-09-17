@@ -22,12 +22,39 @@ export const LOW_CREDITS_THRESHOLD_USD = 0.25;
  *  it lives here rather than in the server-only credits service. */
 export const MONTHLY_CREDIT_GRANTS: Record<PlanTier, number> = {
   free: 100,
+  starter: 1_000,
   lite: 5_000,
   pro: 25_000,
   agency: 100_000,
   standard: 10_000,
   byok: 500,
 };
+
+/** Retainer tiers: subscription payments convert 100% into the permanent
+ *  `topup_credits` pool (never expire, roll over forever) instead of the
+ *  windowed monthly pool. This is the "small retainer even $1" model. */
+export const RETAINER_TIERS: readonly PlanTier[] = ["starter"];
+
+export function isRetainerTier(tier: PlanTier): boolean {
+  return (RETAINER_TIERS as readonly string[]).includes(tier);
+}
+
+/** Bonus percent applied to retainer payments above the $1 base. Keys are
+ *  USD amounts; $1 has no bonus. Used by the pricing UI and by the webhook
+ *  grant when higher-amount retainer plans are added via plan_config. */
+export const RETAINER_BONUS_PERCENT: Readonly<Record<number, number>> = {
+  1: 0,
+  5: 5,
+  10: 10,
+  25: 20,
+};
+
+/** Credits granted for a retainer payment of `amountUsd`, including the
+ *  volume bonus. `CREDITS_PER_USD` keeps $1 = 1,000 credits. */
+export function retainerCreditsForUsd(amountUsd: number): number {
+  const bonusPercent = RETAINER_BONUS_PERCENT[amountUsd] ?? 0;
+  return Math.round(amountUsd * CREDITS_PER_USD * (1 + bonusPercent / 100));
+}
 
 export function roundUsdForBilling(value: number) {
   return Math.round(value * 100000) / 100000;

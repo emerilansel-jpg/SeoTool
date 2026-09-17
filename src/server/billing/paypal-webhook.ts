@@ -145,6 +145,7 @@ export async function handlePaypalWebhookRequest(request: Request) {
         await syncPaypalCustomerStatus(
           orgId,
           isSubscriptionEvent ? payload : undefined,
+          payload.event_type,
         );
       }
 

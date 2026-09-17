@@ -9,8 +9,9 @@ import {
 } from "./customer-status-model";
 import { syncBillingStatusToLoops } from "./loops-sync";
 import { QuotaRepository } from "@/server/features/billing/repositories/QuotaRepository";
-import { grantMonthlyCredits } from "@/server/billing/credits";
+import { addTopupCredits, grantMonthlyCredits } from "@/server/billing/credits";
 import { PLAN_TIERS, type PlanTier } from "@/shared/plans";
+import { isRetainerTier, retainerCreditsForUsd } from "@/shared/billing";
 
 /** PayPal plan id → tier, from the effective plan config so admin-configured
  *  plan ids resolve too. */
@@ -26,10 +27,13 @@ async function buildPlanIdToTierMap(): Promise<Map<string, PlanTier>> {
 
 /** Sync the customer's billing status from PayPal to the local DB.
  *  Called by the webhook handler after verifying the event signature.
- *  Idempotent: re-syncing the same state is a no-op. */
+ *  Idempotent: re-syncing the same state is a no-op. `eventType` lets the
+ *  retainer grant distinguish a completed sale (each sale converts 100% into
+ *  permanent credits) from a status-only subscription update. */
 export async function syncPaypalCustomerStatus(
   organizationId: string,
   webhookPayload?: Record<string, unknown>,
+  eventType?: string,
 ): Promise<BillingCustomerStatusSnapshot> {
   // If we have a webhook payload with subscription resource, use it directly
   // instead of making an API call. This avoids a PayPal round-trip.
@@ -66,9 +70,15 @@ export async function syncPaypalCustomerStatus(
   // fresh on the new tier's limits.
   if (previousTier !== snapshot.planTier) {
     await QuotaRepository.resetUsageQuotaForOrg(organizationId);
-
-    // Grant monthly credits for the new tier
-    await grantMonthlyCredits(organizationId, snapshot.planTier);
+    await grantTierCredits(organizationId, snapshot.planTier);
+  } else if (
+    eventType === "PAYMENT.SALE.COMPLETED" &&
+    isRetainerTier(snapshot.planTier)
+  ) {
+    // Retainer renewal on the same tier: each completed sale converts 100%
+    // into the permanent topup pool. Webhook event-id dedup upstream prevents
+    // a PayPal retry from granting twice for the same sale.
+    await grantTierCredits(organizationId, snapshot.planTier);
   }
 
   await syncBillingStatusToLoops(snapshot);
@@ -97,6 +107,22 @@ async function getSubscriptionForOrg(
     // paying organization to the free tier.
     throw error;
   }
+}
+
+/** Grant the credit allowance for a tier. Retainer tiers convert every
+ *  payment into the permanent topup pool (never expire); regular tiers grant
+ *  into the monthly pool as before. */
+async function grantTierCredits(
+  organizationId: string,
+  tier: PlanTier,
+): Promise<void> {
+  if (isRetainerTier(tier)) {
+    const configs = await getEffectivePlanConfigs();
+    const priceUsd = configs[tier].priceUsdCents / 100;
+    await addTopupCredits(organizationId, retainerCreditsForUsd(priceUsd));
+    return;
+  }
+  await grantMonthlyCredits(organizationId, tier);
 }
 
 /** Sync a free-tier status (no PayPal subscription). */

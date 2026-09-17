@@ -66,9 +66,9 @@ export const subscription = sqliteTable(
     organizationId: text("organization_id")
       .primaryKey()
       .references(() => organization.id, { onDelete: "cascade" }),
-    // PlanTier: "free" | "lite" | "pro" | "agency" | "standard" | "byok"
+    // PlanTier: "free" | "starter" | "lite" | "pro" | "agency" | "standard" | "byok"
     planTier: text("plan_tier", {
-      enum: ["free", "lite", "pro", "agency", "standard", "byok"],
+      enum: ["free", "starter", "lite", "pro", "agency", "standard", "byok"],
     })
       .notNull()
       .default("free"),

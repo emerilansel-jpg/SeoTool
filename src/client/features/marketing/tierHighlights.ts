@@ -4,6 +4,7 @@ import { MONTHLY_CREDIT_GRANTS } from "@/shared/billing";
 export type PaidTier = Exclude<PlanTier, "free">;
 
 export const PAID_TIERS: PaidTier[] = [
+  "starter",
   "byok",
   "standard",
   "lite",
@@ -25,6 +26,18 @@ export type TierHighlight = {
 };
 
 export const TIER_HIGHLIGHTS: Record<PaidTier, TierHighlight> = {
+  starter: {
+    blurb: "Micro-retainer: from $1/month, credits never expire.",
+    bullets: [
+      "2 projects",
+      "25 keyword searches per day",
+      "10 tracked keywords",
+      "2 site audits per month",
+      `${MONTHLY_CREDIT_GRANTS.starter.toLocaleString()} permanent credits/month — every payment becomes credit that never expires`,
+    ],
+    badge: "Retainer",
+    popular: false,
+  },
   byok: {
     blurb: "For power users with their own API key.",
     bullets: [
