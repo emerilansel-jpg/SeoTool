@@ -74,7 +74,7 @@ export function JetSidebarPanel({
   const activeSessionId = (location.search as { s?: string }).s;
 
   const sessionsQuery = useQuery(jetSessionsQueryOptions(projectId));
-  const sessions = sessionsQuery.data ?? [];
+  const sessions = sessionsQuery.data;
 
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
@@ -83,7 +83,12 @@ export function JetSidebarPanel({
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => {
     try {
       const stored = localStorage.getItem(`jet-pinned-sessions-${projectId}`);
-      return stored ? new Set<string>(JSON.parse(stored)) : new Set<string>();
+      const parsed: unknown = stored ? JSON.parse(stored) : null;
+      return Array.isArray(parsed)
+        ? new Set<string>(
+            parsed.filter((item): item is string => typeof item === "string"),
+          )
+        : new Set<string>();
     } catch {
       return new Set<string>();
     }
@@ -104,7 +109,8 @@ export function JetSidebarPanel({
   };
 
   const sortedSessions = useMemo(() => {
-    return [...sessions].sort((a, b) => {
+    if (!sessions) return [];
+    return [...sessions].toSorted((a, b) => {
       const aPinned = pinnedIds.has(a.id);
       const bPinned = pinnedIds.has(b.id);
       if (aPinned && !bPinned) return -1;
@@ -155,7 +161,7 @@ export function JetSidebarPanel({
     onSuccess: (_result, sessionId) => {
       invalidateJetSessions(projectId);
       if (sessionId === activeSessionId) {
-        goToSession(sessions.find((s) => s.id !== sessionId)?.id);
+        goToSession(sessions?.find((s) => s.id !== sessionId)?.id);
       }
     },
     onError: (error) => {

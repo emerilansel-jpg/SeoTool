@@ -98,7 +98,7 @@ export function estimateDataforseoRawCostCeilingUsd(
       return 0.02 * pages;
     }
     case "serp-task-batch": {
-      const taskCount = clampRows(tasks, 1, 100);
+      const taskCount = clampRows(tasks, 1, 300);
       const pagesPerTask = clampRows(Math.ceil(depth / 100), 1, 10);
       return 0.001_2 * taskCount * pagesPerTask;
     }

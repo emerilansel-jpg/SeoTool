@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Swords, TrendingUp, Users, AlertTriangle } from "lucide-react";
+import { Swords, Users } from "lucide-react";
 import { getAiCompetitors } from "@/serverFunctions/ai-tracking";
 
 interface Props {
   projectId: string;
   brandName: string;
-  domain: string;
+  domain?: string;
 }
 
-export function AiCompetitorsTab({ projectId, brandName, domain }: Props) {
+export function AiCompetitorsTab({ projectId, brandName }: Props) {
   const getCompetitorsFn = useServerFn(getAiCompetitors);
 
   const { data, isLoading } = useQuery({

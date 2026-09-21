@@ -23,7 +23,7 @@ export function JetChat({
   const navigate = useNavigate();
   const access = useJetAccess(projectId);
   const sessionsQuery = useQuery(jetSessionsQueryOptions(projectId));
-  const sessions = sessionsQuery.data ?? [];
+  const sessions = sessionsQuery.data;
 
   const goToSession = useCallback(
     (sessionId: string | undefined) =>
@@ -49,9 +49,9 @@ export function JetChat({
     },
   });
 
-  const firstSessionId = sessions[0]?.id;
+  const firstSessionId = sessions?.[0]?.id;
   useEffect(() => {
-    if (!sessionsQuery.isSuccess) return;
+    if (!sessionsQuery.isSuccess || !sessions) return;
     if (activeSessionId && !sessions.some((s) => s.id === activeSessionId)) {
       // Stale or invalid session ID in URL: redirect to first valid session or clear
       goToSession(firstSessionId);

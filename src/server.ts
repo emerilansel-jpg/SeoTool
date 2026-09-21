@@ -7,7 +7,6 @@ import { resolveUserContextFromHeaders } from "@/middleware/ensure-user/resolve"
 import { ProjectRepository } from "@/server/features/projects/repositories/ProjectRepository";
 import {
   JetSessionRepository,
-  SamSessionRepository,
 } from "@/server/features/jet/JetSessionRepository";
 import { runScheduledRankChecks } from "@/server/features/rank-tracking/services/scheduledRankChecks";
 import { runScheduledReports } from "@/server/features/reports/services/scheduledReports";
@@ -101,8 +100,6 @@ async function authorizeJetChat(
   await getOrCreateOrganizationCustomer(context);
   return undefined;
 }
-
-const authorizeSamChat = authorizeJetChat;
 
 // Both chat DOs live behind /agents/*. Dispatch on the DO binding partyserver
 // resolved for the request (rather than re-parsing the path), and fail closed

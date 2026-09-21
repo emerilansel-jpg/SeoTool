@@ -62,37 +62,10 @@ export async function postMapsTasks(input: {
 }): Promise<
   DataforseoApiResponse<{ tasks: PostedMapsTask[]; costUsd: number }>
 > {
-  if (input.tasks.length === 0 || input.tasks.length > MAX_TASKS_PER_POST) {
+  if (input.tasks.length === 0) {
     throw new AppError(
       "INTERNAL_ERROR",
-      `Maps task_post accepts 1-${MAX_TASKS_PER_POST} tasks, got ${input.tasks.length}`,
-    );
-  }
-
-  const response = await serpApi().googleMapsTaskPost(
-    input.tasks.map(
-      (task) =>
-        new SerpGoogleMapsTaskPostRequestInfo({
-          keyword: task.keyword,
-          location_coordinate: formatMapsCoordinate(
-            task.lat,
-            task.lng,
-            input.zoom,
-          ),
-          language_code: input.languageCode,
-          device: input.device,
-          os: input.device === "desktop" ? "windows" : "android",
-          depth: clampMapsDepth(input.depth),
-          search_places: false,
-          tag: task.snapshotId,
-        }),
-    ),
-  );
-
-  if (!response || response.status_code !== 20000) {
-    throw new AppError(
-      "INTERNAL_ERROR",
-      response?.status_message || "DataForSEO Maps task_post failed",
+      "Maps task_post accepts at least 1 task",
     );
   }
 
@@ -101,17 +74,48 @@ export async function postMapsTasks(input: {
   );
   const posted: PostedMapsTask[] = [];
   let costUsd = 0;
-  for (const entry of response.tasks ?? []) {
-    costUsd += entry.cost ?? 0;
-    const tag: unknown = entry.data?.tag;
-    const task = typeof tag === "string" ? bySnapshotId.get(tag) : undefined;
-    if (entry.status_code !== 20100 || !entry.id || !task) {
-      console.warn(
-        `dataforseo.maps.task_post.rejected-entry (${entry.status_code}): ${entry.status_message}`,
+
+  for (let i = 0; i < input.tasks.length; i += MAX_TASKS_PER_POST) {
+    const chunk = input.tasks.slice(i, i + MAX_TASKS_PER_POST);
+    const response = await serpApi().googleMapsTaskPost(
+      chunk.map(
+        (task) =>
+          new SerpGoogleMapsTaskPostRequestInfo({
+            keyword: task.keyword,
+            location_coordinate: formatMapsCoordinate(
+              task.lat,
+              task.lng,
+              input.zoom,
+            ),
+            language_code: input.languageCode,
+            device: input.device,
+            os: input.device === "desktop" ? "windows" : "android",
+            depth: clampMapsDepth(input.depth),
+            search_places: false,
+            tag: task.snapshotId,
+          }),
+      ),
+    );
+
+    if (!response || response.status_code !== 20000) {
+      throw new AppError(
+        "INTERNAL_ERROR",
+        response?.status_message || "DataForSEO Maps task_post failed",
       );
-      continue;
     }
-    posted.push({ ...task, taskId: entry.id });
+
+    for (const entry of response.tasks ?? []) {
+      costUsd += entry.cost ?? 0;
+      const tag: unknown = entry.data?.tag;
+      const task = typeof tag === "string" ? bySnapshotId.get(tag) : undefined;
+      if (entry.status_code !== 20100 || !entry.id || !task) {
+        console.warn(
+          `dataforseo.maps.task_post.rejected-entry (${entry.status_code}): ${entry.status_message}`,
+        );
+        continue;
+      }
+      posted.push({ ...task, taskId: entry.id });
+    }
   }
 
   return {
@@ -145,6 +149,7 @@ export async function fetchMapsTaskResult(input: {
   taskId: string;
   placeId: string;
   businessName: string;
+  cid?: string | null;
 }): Promise<MapsTaskOutcome> {
   const response = await serpApi().googleMapsTaskGetAdvanced(input.taskId);
   const task = response?.tasks?.[0];
@@ -198,6 +203,7 @@ export async function fetchMapsTaskResult(input: {
     rank: findGmbRank(items, {
       placeId: input.placeId,
       businessName: input.businessName,
+      cid: input.cid,
     }),
     items: topCompetitors,
   };

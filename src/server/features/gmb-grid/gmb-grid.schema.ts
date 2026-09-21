@@ -28,6 +28,7 @@ export type CreateGmbGridInput = z.infer<typeof CreateGmbGridSchema>;
 export const SearchGmbProfilesSchema = z.object({
   projectId: z.string().min(1),
   query: z.string().trim().min(3).max(120),
+  locationCode: z.number().int().positive().optional(),
 });
 
 export const GetGmbGridConfigsSchema = z.object({

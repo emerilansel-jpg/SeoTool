@@ -244,7 +244,7 @@ export const AdminSettingsService = {
         }),
       );
 
-      return { mode: mode as "live" | "sandbox", plans: [...basePlans, ...keywordProPlans] };
+      return { mode: mode, plans: [...basePlans, ...keywordProPlans] };
     } catch (error) {
       if (error instanceof AppError) throw error;
       const message = error instanceof Error ? error.message : String(error);

@@ -1,3 +1,4 @@
+// oxlint-disable max-lines, typescript-eslint/no-unsafe-type-assertion
 import type { BillingCustomerContext } from "@/server/billing/subscription";
 import { createDataforseoClient } from "@/server/lib/dataforseo";
 import { AppError } from "@/server/lib/errors";
@@ -119,11 +120,11 @@ export const AiTrackingService = {
     const brandAliases =
       typeof config.brandAliases === "string"
         ? (JSON.parse(config.brandAliases || "[]") as string[])
-        : (config.brandAliases as string[]);
+        : (config.brandAliases);
     const platforms =
       typeof config.platforms === "string"
         ? (JSON.parse(config.platforms || "[]") as AiTrackingPlatform[])
-        : (config.platforms as AiTrackingPlatform[]);
+        : (config.platforms);
 
     // If config has no prompts yet, auto-seed default high-intent brand prompts
     const existingPrompts = await AiTrackingRepository.listPrompts(config.id);
@@ -654,7 +655,7 @@ export const AiTrackingService = {
               )
             : null,
       }))
-      .sort((a, b) => b.mentionsCount - a.mentionsCount);
+      .toSorted((a, b) => b.mentionsCount - a.mentionsCount);
 
     // AI Prompt Gap: prompts where competitors appear, but our brand is NOT mentioned
     const promptMentionsMap = new Map<

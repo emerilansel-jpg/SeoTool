@@ -1,3 +1,4 @@
+// oxlint-disable typescript-eslint/no-unsafe-type-assertion
 /* eslint-disable max-lines */
 import { Link, useNavigate } from "@tanstack/react-router";
 import * as React from "react";

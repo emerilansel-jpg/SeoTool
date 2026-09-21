@@ -1,3 +1,4 @@
+// oxlint-disable max-lines, typescript-eslint/no-unsafe-type-assertion
 import { and, desc, eq, inArray, gte } from "drizzle-orm";
 import { db } from "@/db";
 import {
@@ -749,7 +750,7 @@ export const AiTrackingRepository = {
         sampleUrls: Array.from(entry.sampleUrls).slice(0, 3),
         promptsCount: entry.frequency,
       }))
-      .sort((a, b) => b.frequency - a.frequency);
+      .toSorted((a, b) => b.frequency - a.frequency);
   },
 
   async getDiscoveryStats(configId: string) {

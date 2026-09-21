@@ -1,3 +1,4 @@
+// oxlint-disable complexity, max-depth, typescript-eslint/no-unsafe-type-assertion, typescript-eslint/no-unsafe-assignment
 import { generateText } from "ai";
 import type { BillingCustomerContext } from "@/server/billing/subscription";
 import { createDataforseoClient } from "@/server/lib/dataforseo";

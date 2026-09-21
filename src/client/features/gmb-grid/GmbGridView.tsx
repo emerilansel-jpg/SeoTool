@@ -1,7 +1,8 @@
 // oxlint-disable max-lines, max-lines-per-function
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Clock3, Loader2, MapPinned, Play, Zap } from "lucide-react";
 import { Modal } from "@/client/components/Modal";
 import {
@@ -11,6 +12,12 @@ import {
 } from "@/serverFunctions/gmb-grid";
 import type { CreateGmbGridInput } from "@/server/features/gmb-grid/gmb-grid.schema";
 import { estimateGmbGridCost } from "@/server/features/gmb-grid/gmb-grid";
+import {
+  DEFAULT_LOCATION_CODE,
+  getDefaultLocationCoordinates,
+  getLanguageCode,
+} from "@/shared/keyword-locations";
+import { useProjectMarket } from "@/client/features/projects/useProjectMarket";
 import {
   GmbProfileSearch,
   type GmbProfileSelection,
@@ -22,17 +29,19 @@ import { PinCompetitorsModal } from "./components/GmbPinModal";
 type PendingScan = Omit<CreateGmbGridInput, "costConfirmed">;
 
 export function GmbGridView({ projectId }: { projectId: string }) {
+  const projectMarket = useProjectMarket(projectId);
   const getConfigs = useServerFn(getGmbGridConfigs);
   const getRun = useServerFn(getGmbGridRun);
   const createRun = useServerFn(createGmbGridRun);
   const queryClient = useQueryClient();
 
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
+  const [locationCode, setLocationCode] = useState<number | undefined>(undefined);
   const [selectedProfile, setSelectedProfile] =
     useState<GmbProfileSelection | null>(null);
   const [keyword, setKeyword] = useState("");
   const [gridSize, setGridSize] = useState(7);
-  const [radiusMeters, setRadiusMeters] = useState(5000);
+  const [radiusMeters, setRadiusMeters] = useState(4828);
   const [device, setDevice] = useState<"desktop" | "mobile">("mobile");
   const [scheduleInterval, setScheduleInterval] = useState<
     "weekly" | "monthly" | "manual"
@@ -60,12 +69,32 @@ export function GmbGridView({ projectId }: { projectId: string }) {
         : false,
   });
 
+  const runStatus = runData?.run.status;
+  useEffect(() => {
+    if (
+      runStatus === "completed" ||
+      runStatus === "failed" ||
+      runStatus === "partial"
+    ) {
+      void queryClient.invalidateQueries({
+        queryKey: ["gmb-configs", projectId],
+      });
+    }
+  }, [runStatus, projectId, queryClient]);
+
   const createRunMutation = useMutation({
     mutationFn: (data: PendingScan) =>
       createRun({ data: { ...data, costConfirmed: true } }),
     onSuccess: (result) => {
       setPendingScan(null);
       if (result.runId) setActiveRunId(result.runId);
+      if (!result.ok && result.reason === "already_running") {
+        toast.info(
+          "A scan is already in progress for this configuration. Viewing active scan.",
+        );
+      } else {
+        toast.success("Local map scan started.");
+      }
       void queryClient.invalidateQueries({
         queryKey: ["gmb-configs", projectId],
       });
@@ -83,6 +112,10 @@ export function GmbGridView({ projectId }: { projectId: string }) {
       setScanError("Select the exact Google Business Profile before scanning.");
       return;
     }
+    const activeLocation = locationCode ?? projectMarket?.locationCode ?? 2840;
+    const activeLanguage =
+      getLanguageCode(activeLocation) || projectMarket?.languageCode || "en";
+
     setPendingScan({
       projectId,
       businessName: selectedProfile.businessName,
@@ -94,26 +127,37 @@ export function GmbGridView({ projectId }: { projectId: string }) {
       centerLng: selectedProfile.lng,
       gridSize,
       radiusMeters,
-      languageCode: "en",
+      languageCode: activeLanguage,
       device,
       mapZoom: 15,
       scheduleInterval,
     });
   };
 
+  const activeLocation =
+    locationCode ?? projectMarket?.locationCode ?? DEFAULT_LOCATION_CODE;
+  const defaultCoords = getDefaultLocationCoordinates(activeLocation);
+
   const centerSource =
     runData?.config ?? selectedProfile ?? configs?.[0] ?? null;
+  const hasSelection = Boolean(centerSource);
+
   const mapCenterLat = centerSource
     ? "centerLat" in centerSource
       ? centerSource.centerLat
       : centerSource.lat
-    : 0;
+    : defaultCoords.lat;
   const mapCenterLng = centerSource
     ? "centerLng" in centerSource
       ? centerSource.centerLng
       : centerSource.lng
-    : 0;
+    : defaultCoords.lng;
   const mapRadius = runData?.config.radiusMeters ?? radiusMeters;
+  const businessName = centerSource
+    ? "businessName" in centerSource
+      ? centerSource.businessName
+      : ""
+    : "";
   return (
     <>
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -126,6 +170,8 @@ export function GmbGridView({ projectId }: { projectId: string }) {
           <form onSubmit={handleSubmit} className="space-y-5">
             <GmbProfileSearch
               projectId={projectId}
+              locationCode={locationCode}
+              onLocationCodeChange={setLocationCode}
               selected={selectedProfile}
               onSelect={(profile) => {
                 setSelectedProfile(profile);
@@ -176,14 +222,20 @@ export function GmbGridView({ projectId }: { projectId: string }) {
                     <button
                       type="button"
                       className={`join-item btn btn-xs px-2 ${distanceUnit === "mi" ? "btn-primary font-bold" : "btn-ghost text-base-content/60"}`}
-                      onClick={() => setDistanceUnit("mi")}
+                      onClick={() => {
+                        setDistanceUnit("mi");
+                        setRadiusMeters(4828);
+                      }}
                     >
                       mi
                     </button>
                     <button
                       type="button"
                       className={`join-item btn btn-xs px-2 ${distanceUnit === "km" ? "btn-primary font-bold" : "btn-ghost text-base-content/60"}`}
-                      onClick={() => setDistanceUnit("km")}
+                      onClick={() => {
+                        setDistanceUnit("km");
+                        setRadiusMeters(5000);
+                      }}
                     >
                       km
                     </button>
@@ -330,6 +382,9 @@ export function GmbGridView({ projectId }: { projectId: string }) {
             centerLat={mapCenterLat}
             centerLng={mapCenterLng}
             radiusMeters={mapRadius}
+            hasSelection={hasSelection}
+            defaultZoom={defaultCoords.zoom}
+            businessName={businessName}
             snapshots={runData?.snapshots}
             onSelectSnapshot={(pin) => setSelectedPin(pin)}
           />

@@ -29,7 +29,7 @@ const POLL_INTERVALS = [
   "3 minutes",
   "5 minutes",
 ] as const;
-const TASK_GETS_PER_STEP = 25;
+const TASK_GETS_PER_STEP = 100;
 
 export interface GmbGridWorkflowParams {
   runId: string;
@@ -43,6 +43,7 @@ async function collectTasks(input: {
   tasks: PostedMapsTask[];
   placeId: string;
   businessName: string;
+  cid?: string | null;
 }) {
   const checkedAt = new Date().toISOString();
   const outcomes = await Promise.all(
@@ -54,6 +55,7 @@ async function collectTasks(input: {
             taskId: task.taskId,
             placeId: input.placeId,
             businessName: input.businessName,
+            cid: input.cid,
           }),
         };
       } catch (error) {
@@ -230,6 +232,7 @@ export class GmbGridWorkflow extends WorkflowEntrypoint<
               tasks: batch,
               placeId: prepared.config.placeId,
               businessName: prepared.config.businessName,
+              cid: prepared.config.cid,
             }),
         );
         pending = [...overflow, ...result.stillPending];

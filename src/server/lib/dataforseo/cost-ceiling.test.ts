@@ -38,8 +38,13 @@ describe("DataForSEO cost ceilings", () => {
       tasks: Array.from({ length: 49 }, () => ({})),
       depth: 20,
     });
+    const largeGrid = estimateDataforseoRawCostCeilingUsd("serp-task-batch", {
+      tasks: Array.from({ length: 225 }, () => ({})),
+      depth: 20,
+    });
 
     expect(grid).toBeCloseTo(single * 49, 10);
+    expect(largeGrid).toBeCloseTo(single * 225, 10);
   });
 
   it("holds a conservative live SERP ceiling before provider dispatch", () => {

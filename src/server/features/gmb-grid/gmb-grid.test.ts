@@ -51,6 +51,23 @@ describe("GMB grid helpers", () => {
     ).toBeNull();
   });
 
+  it("matches by CID when place id differs or is absent", () => {
+    expect(
+      findGmbRank(
+        [
+          {
+            type: "maps_search",
+            title: "Acme Dental",
+            place_id: "other_place_id",
+            cid: "1234567890",
+            rank_group: 2,
+          },
+        ],
+        { placeId: "target_place_id", businessName: "Acme Dental", cid: "1234567890" },
+      ),
+    ).toBe(2);
+  });
+
   it("calculates SoLV over every grid point and average rank over found points", () => {
     expect(
       calculateGmbMetrics([
@@ -66,6 +83,33 @@ describe("GMB grid helpers", () => {
       foundPoints: 2,
       solv: 25,
       averageRank: 2.5,
+    });
+  });
+
+  it("falls back to normalized business name when neither placeId nor cid are present", () => {
+    expect(
+      findGmbRank(
+        [
+          {
+            type: "maps_search",
+            title: "Pakuwon Mall Surabaya!",
+            place_id: "random_place_id",
+            rank_group: 3,
+          },
+        ],
+        { placeId: "", businessName: "pakuwon mall surabaya" },
+      ),
+    ).toBe(3);
+  });
+
+  it("handles empty snapshots safely in calculateGmbMetrics", () => {
+    expect(calculateGmbMetrics([])).toEqual({
+      totalPoints: 0,
+      completedPoints: 0,
+      failedPoints: 0,
+      foundPoints: 0,
+      solv: null,
+      averageRank: null,
     });
   });
 

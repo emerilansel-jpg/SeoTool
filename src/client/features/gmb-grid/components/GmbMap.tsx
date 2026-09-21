@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   MapContainer,
   TileLayer,
+  Circle,
   CircleMarker,
   Tooltip,
   useMap,
@@ -23,20 +24,44 @@ function MapBoundsUpdater({
   centerLat,
   centerLng,
   radiusMeters,
+  hasSelection,
+  defaultZoom = 11,
 }: {
   centerLat: number;
   centerLng: number;
   radiusMeters: number;
+  hasSelection: boolean;
+  defaultZoom?: number;
 }) {
   const map = useMap();
-  const latDelta = radiusMeters / 111320;
-  const lngDelta =
-    radiusMeters / ((40075000 * Math.cos((centerLat * Math.PI) / 180)) / 360);
 
-  map.fitBounds([
-    [centerLat - latDelta, centerLng - lngDelta],
-    [centerLat + latDelta, centerLng + lngDelta],
-  ]);
+  useEffect(() => {
+    map.invalidateSize();
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [map]);
+
+  useEffect(() => {
+    if (!hasSelection) {
+      if (centerLat !== 0 || centerLng !== 0) {
+        map.setView([centerLat, centerLng], defaultZoom);
+      }
+      return;
+    }
+    const latDelta = radiusMeters / 111320;
+    const lngDelta =
+      radiusMeters / ((40075000 * Math.cos((centerLat * Math.PI) / 180)) / 360);
+
+    map.fitBounds(
+      [
+        [centerLat - latDelta, centerLng - lngDelta],
+        [centerLat + latDelta, centerLng + lngDelta],
+      ],
+      { padding: [25, 25] },
+    );
+  }, [map, centerLat, centerLng, radiusMeters, hasSelection, defaultZoom]);
 
   return null;
 }
@@ -80,12 +105,18 @@ export function GmbMap({
   centerLat,
   centerLng,
   radiusMeters,
+  hasSelection = false,
+  defaultZoom = 11,
+  businessName,
   snapshots,
   onSelectSnapshot,
 }: {
   centerLat: number;
   centerLng: number;
   radiusMeters: number;
+  hasSelection?: boolean;
+  defaultZoom?: number;
+  businessName?: string;
   snapshots?: GmbSnapshotMarker[];
   onSelectSnapshot?: (snapshot: GmbSnapshotMarker) => void;
 }) {
@@ -97,7 +128,7 @@ export function GmbMap({
       {mounted ? (
         <MapContainer
           center={[centerLat, centerLng]}
-          zoom={13}
+          zoom={defaultZoom}
           style={{ height: "100%", width: "100%" }}
         >
           <TileLayer
@@ -108,7 +139,41 @@ export function GmbMap({
             centerLat={centerLat}
             centerLng={centerLng}
             radiusMeters={radiusMeters}
+            hasSelection={hasSelection}
+            defaultZoom={defaultZoom}
           />
+
+          {hasSelection && (
+            <>
+              <Circle
+                center={[centerLat, centerLng]}
+                radius={radiusMeters}
+                pathOptions={{
+                  color: "#3b82f6",
+                  fillColor: "#3b82f6",
+                  fillOpacity: 0.08,
+                  weight: 1.5,
+                  dashArray: "5 5",
+                }}
+              />
+              <CircleMarker
+                center={[centerLat, centerLng]}
+                radius={7}
+                pathOptions={{
+                  color: "#ffffff",
+                  fillColor: "#2563eb",
+                  fillOpacity: 1,
+                  weight: 2.5,
+                }}
+              >
+                <Tooltip direction="top" offset={[0, -8]} permanent={false}>
+                  <span className="font-semibold text-xs">
+                    {businessName || "Target Business"}
+                  </span>
+                </Tooltip>
+              </CircleMarker>
+            </>
+          )}
 
           {snapshots?.map((snap) => (
             <CircleMarker
@@ -144,6 +209,12 @@ export function GmbMap({
       ) : (
         <div className="w-full h-full flex items-center justify-center text-base-content/50 text-sm">
           Loading map…
+        </div>
+      )}
+
+      {!hasSelection && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-base-100/90 backdrop-blur-xs border border-base-300 rounded-full px-4 py-1.5 shadow-sm text-xs font-medium text-base-content/80 pointer-events-none">
+          Search or enter your Google Business Profile to view grid ranking
         </div>
       )}
 

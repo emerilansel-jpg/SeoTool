@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ExternalLink, Link2, Sparkles, AlertCircle } from "lucide-react";
+import { ExternalLink, Link2, Sparkles } from "lucide-react";
 import { getAiCitations } from "@/serverFunctions/ai-tracking";
 
 interface Props {

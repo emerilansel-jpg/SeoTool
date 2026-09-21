@@ -10,6 +10,28 @@ vi.mock("@/server/lib/posthog", () => ({
 import { AiTrackingDiscoveryInternals } from "./services/AiDiscoveryService";
 import { aggregateDashboardMetrics } from "./dashboardAggregation";
 
+function normalizeQueryTokens(value: string): string[] {
+  return value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9\s]+/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length >= 3);
+}
+
+function isTokenMatch(prompt: string, gscQuery: string): boolean {
+  const pTokens = new Set(normalizeQueryTokens(prompt));
+  const gTokens = normalizeQueryTokens(gscQuery);
+  if (pTokens.size === 0 || gTokens.length === 0) return false;
+  let shared = 0;
+  for (const t of gTokens) {
+    if (pTokens.has(t)) shared++;
+  }
+  const overlap = shared / Math.min(pTokens.size, gTokens.length);
+  const minTokensRequired = Math.min(2, pTokens.size);
+  return shared >= minTokensRequired && overlap >= 0.75;
+}
+
 describe("AI Tracking Data Isolation & Relevance Guardrails", () => {
   describe("strongAliases", () => {
     it("rejects short or generic aliases that cause cross-topic contamination", () => {
@@ -146,7 +168,7 @@ describe("AI Tracking Data Isolation & Relevance Guardrails", () => {
       expect(dashboardA.prompts).toHaveLength(0);
 
       // Now verify that project B mentions do not bleed into project A
-      const foreignObservation = {
+      const _foreignObservation = {
         id: "obs_b_1",
         runId: "run_b_1",
         configId: "cfg_proj_b", // Belongs to Project B!
@@ -160,7 +182,7 @@ describe("AI Tracking Data Isolation & Relevance Guardrails", () => {
         observedAt: "2026-09-17T00:00:00.000Z",
       };
 
-      const foreignMention = {
+      const _foreignMention = {
         id: "mention_b_1",
         observationId: "obs_b_1",
         runId: "run_b_1",
@@ -201,28 +223,6 @@ describe("AI Tracking Data Isolation & Relevance Guardrails", () => {
 
   describe("GSC Token Correlation Logic", () => {
     it("matches high-intent overlapping queries and rejects loose substrings", () => {
-      // Test the token similarity concept
-      function normalizeQueryTokens(value: string): string[] {
-        return value
-          .toLowerCase()
-          .normalize("NFKD")
-          .replace(/[^a-z0-9\s]+/g, " ")
-          .split(/\s+/)
-          .filter((t) => t.length >= 3);
-      }
-
-      function isTokenMatch(prompt: string, gscQuery: string): boolean {
-        const pTokens = new Set(normalizeQueryTokens(prompt));
-        const gTokens = normalizeQueryTokens(gscQuery);
-        if (pTokens.size === 0 || gTokens.length === 0) return false;
-        let shared = 0;
-        for (const t of gTokens) {
-          if (pTokens.has(t)) shared++;
-        }
-        const overlap = shared / Math.min(pTokens.size, gTokens.length);
-        const minTokensRequired = Math.min(2, pTokens.size);
-        return shared >= minTokensRequired && overlap >= 0.75;
-      }
 
       // Valid matches
       expect(

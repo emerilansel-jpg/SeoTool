@@ -40,10 +40,10 @@ test.describe("GMB Grid (Local Map Rank)", () => {
     await expect(page.getByText("49 queued Google Maps checks")).toBeVisible();
     await page.getByRole("button", { name: "Confirm & start" }).click();
 
-    await expect(page.getByText("Scan complete", { exact: true })).toBeVisible({
+    await expect(page.getByText(/Scan Completed/i)).toBeVisible({
       timeout: 20_000,
     });
-    await expect(page.getByText("SoLV (top 3)")).toBeVisible();
+    await expect(page.getByText(/SoLV \(Top 3\)/i)).toBeVisible();
 
     // Hydration problems always surface as console errors.
     expect(consoleErrors.filter((e) => !e.includes("favicon"))).toEqual([]);

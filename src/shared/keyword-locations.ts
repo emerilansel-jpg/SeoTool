@@ -832,3 +832,45 @@ export function getKeywordDataProvider(
     ? "google_ads"
     : "labs";
 }
+
+export const LOCATION_COORDINATES: Record<
+  number,
+  { lat: number; lng: number; zoom: number }
+> = {
+  2360: { lat: -6.2088, lng: 106.8456, zoom: 11 }, // Indonesia (Jakarta)
+  2840: { lat: 40.7128, lng: -74.006, zoom: 11 }, // United States (New York)
+  2826: { lat: 51.5074, lng: -0.1278, zoom: 11 }, // United Kingdom (London)
+  2036: { lat: -33.8688, lng: 151.2093, zoom: 11 }, // Australia (Sydney)
+  2124: { lat: 43.6532, lng: -79.3832, zoom: 11 }, // Canada (Toronto)
+  2702: { lat: 1.3521, lng: 103.8198, zoom: 12 }, // Singapore
+  2458: { lat: 3.139, lng: 101.6869, zoom: 11 }, // Malaysia (Kuala Lumpur)
+  2356: { lat: 28.6139, lng: 77.209, zoom: 11 }, // India (New Delhi)
+  2704: { lat: 10.8231, lng: 106.6297, zoom: 11 }, // Vietnam (Ho Chi Minh)
+  2608: { lat: 14.5995, lng: 120.9842, zoom: 11 }, // Philippines (Manila)
+  2764: { lat: 13.7563, lng: 100.5018, zoom: 11 }, // Thailand (Bangkok)
+  2276: { lat: 52.52, lng: 13.405, zoom: 11 }, // Germany (Berlin)
+  2250: { lat: 48.8566, lng: 2.3522, zoom: 11 }, // France (Paris)
+  2392: { lat: 35.6762, lng: 139.6503, zoom: 11 }, // Japan (Tokyo)
+  2528: { lat: 52.3676, lng: 4.9041, zoom: 11 }, // Netherlands (Amsterdam)
+  2724: { lat: 40.4168, lng: -3.7038, zoom: 11 }, // Spain (Madrid)
+  2380: { lat: 41.9028, lng: 12.4964, zoom: 11 }, // Italy (Rome)
+  2076: { lat: -23.5505, lng: -46.6333, zoom: 11 }, // Brazil (São Paulo)
+  2784: { lat: 25.2048, lng: 55.2708, zoom: 11 }, // UAE (Dubai)
+};
+
+export function getDefaultLocationCoordinates(locationCode?: number): {
+  lat: number;
+  lng: number;
+  zoom: number;
+} {
+  if (locationCode && LOCATION_COORDINATES[locationCode]) {
+    return LOCATION_COORDINATES[locationCode];
+  }
+  return (
+    LOCATION_COORDINATES[DEFAULT_LOCATION_CODE] ?? {
+      lat: 40.7128,
+      lng: -74.006,
+      zoom: 11,
+    }
+  );
+}

@@ -7,8 +7,6 @@ import {
   Plus,
   RefreshCw,
   Search,
-  Sparkles,
-  ExternalLink,
 } from "lucide-react";
 import {
   discoverAiPrompts,

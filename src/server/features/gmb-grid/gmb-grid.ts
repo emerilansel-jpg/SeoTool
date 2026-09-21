@@ -23,6 +23,7 @@ export function normalizeBusinessName(value: string): string {
 export interface GmbMapItem {
   type?: string | null;
   place_id?: string | null;
+  cid?: string | null;
   title?: string | null;
   rank_group?: number | null;
   rank_absolute?: number | null;
@@ -30,16 +31,19 @@ export interface GmbMapItem {
 
 export function findGmbRank(
   items: GmbMapItem[],
-  target: { placeId: string; businessName: string },
+  target: { placeId: string; businessName: string; cid?: string | null },
 ): number | null {
   const exact = items.find(
-    (item) => item.type === "maps_search" && item.place_id === target.placeId,
+    (item) =>
+      item.type === "maps_search" &&
+      ((Boolean(target.placeId) && item.place_id === target.placeId) ||
+        (Boolean(target.cid) && item.cid === target.cid)),
   );
   if (exact) return exact.rank_group ?? exact.rank_absolute ?? null;
 
-  // Place ID is the stable identity. Name matching is intentionally limited
+  // Place ID or CID is the stable identity. Name matching is intentionally limited
   // to legacy configurations that were created before place_id was required.
-  if (target.placeId) return null;
+  if (target.placeId || target.cid) return null;
   const normalizedTarget = normalizeBusinessName(target.businessName);
   const titleMatch = items.find(
     (item) =>

@@ -1,3 +1,4 @@
+// oxlint-disable max-lines, max-lines-per-function
 import { useForm } from "@tanstack/react-form";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";

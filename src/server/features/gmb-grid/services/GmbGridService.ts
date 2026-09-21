@@ -1,8 +1,10 @@
 import { env } from "cloudflare:workers";
 import { z } from "zod";
-import type { BillingCustomerContext } from "@/server/billing/subscription";
+import { customerHasPaidPlan, type BillingCustomerContext } from "@/server/billing/subscription";
+import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import { createDataforseoClient } from "@/server/lib/dataforseo";
 import { AppError } from "@/server/lib/errors";
+import { resolveMarket } from "@/shared/keyword-locations";
 import { generateGridNodes } from "@/server/utils/geo-grid";
 import type { CreateGmbGridInput } from "../gmb-grid.schema";
 import { calculateGmbMetrics, estimateGmbGridCost } from "../gmb-grid";
@@ -45,6 +47,7 @@ function computeNextCheckAt(interval: "weekly" | "monthly" | "manual") {
 async function searchProfiles(input: {
   projectId: string;
   query: string;
+  locationCode?: number;
   billingCustomer: BillingCustomerContext;
 }) {
   if (useE2eFixtures) {
@@ -65,10 +68,12 @@ async function searchProfiles(input: {
   const market = await GmbGridRepository.getProjectMarket(input.projectId);
   if (!market) throw new AppError("NOT_FOUND", "Project not found");
 
+  const resolved = resolveMarket({ locationCode: input.locationCode }, market);
+
   const items = await createDataforseoClient(input.billingCustomer).serp.local({
     keyword: input.query,
-    locationCode: market.locationCode,
-    languageCode: market.languageCode,
+    locationCode: resolved.locationCode,
+    languageCode: resolved.languageCode,
     searchType: "maps",
     device: "mobile",
     depth: 20,
@@ -119,9 +124,19 @@ async function startScan(input: {
       configId: E2E_CONFIG_ID,
     };
   }
+  const isHosted = await isHostedServerAuthMode();
+  if (
+    isHosted &&
+    !(await customerHasPaidPlan(input.billingCustomer.organizationId))
+  ) {
+    throw new AppError(
+      "PAYMENT_REQUIRED",
+      "Upgrade to a paid plan to run local map scans",
+    );
+  }
   const market = await GmbGridRepository.getProjectMarket(data.projectId);
   if (!market) throw new AppError("NOT_FOUND", "Project not found");
-  const languageCode = market.languageCode;
+  const languageCode = data.languageCode || market.languageCode || "en";
   const normalizedKeyword = data.keyword.trim().toLocaleLowerCase();
   const nowIso = new Date().toISOString();
   const nextCheckAt = computeNextCheckAt(data.scheduleInterval);

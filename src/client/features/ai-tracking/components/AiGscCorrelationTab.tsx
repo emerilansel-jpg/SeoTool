@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { BarChart2, Info, AlertCircle, ExternalLink } from "lucide-react";
+import { Info, AlertCircle } from "lucide-react";
 import { getGscAiCorrelation } from "@/serverFunctions/ai-tracking";
 
 interface Props {
