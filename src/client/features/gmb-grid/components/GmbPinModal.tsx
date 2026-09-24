@@ -1,4 +1,4 @@
-import { ExternalLink, MapPin, X } from "lucide-react";
+import { AlertCircle, ExternalLink, MapPin, X } from "lucide-react";
 import { Modal } from "@/client/components/Modal";
 import type { GmbPinCompetitor, GmbSnapshotMarker } from "./GmbMap";
 
@@ -82,6 +82,26 @@ export function PinCompetitorsModal({
           </>
         )}
       </div>
+
+      {pin.status === "failed" && (
+        <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-xs">
+          <div className="flex items-center gap-1.5 font-semibold text-warning">
+            <AlertCircle className="size-4 shrink-0" />
+            <span>Google Maps provider did not return results for this pin</span>
+          </div>
+          <p className="mt-1 text-base-content/80">
+            {pin.errorMessage ||
+              "The provider encountered a temporary timeout or rejected this coordinate."}
+          </p>
+          {pin.errorCode && (
+            <div className="mt-1.5">
+              <span className="badge badge-xs badge-outline font-mono text-[10px]">
+                Reason: {pin.errorCode}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="mt-1">
         <h4 className="text-xs font-bold uppercase tracking-wider text-base-content/60 mb-2">

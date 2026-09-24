@@ -59,14 +59,15 @@ async function collectTasks(input: {
           }),
         };
       } catch (error) {
+        // Transient error during poll (e.g. temporary network glitch or 5xx from provider).
+        // Keep it pending so the next poll interval retries it instead of prematurely failing the pin.
+        console.warn(
+          `[gmb-grid] task ${task.taskId} poll error, will retry in next interval:`,
+          error instanceof Error ? error.message : error,
+        );
         return {
           task,
-          outcome: {
-            status: "failed" as const,
-            code: "TASK_GET_FAILED",
-            message:
-              error instanceof Error ? error.message : "Task collection failed",
-          },
+          outcome: { status: "pending" as const },
         };
       }
     }),

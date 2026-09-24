@@ -94,6 +94,8 @@ export interface GmbSnapshotMarker {
   gridRow?: number;
   gridCol?: number;
   itemsJson?: string | null;
+  errorCode?: string | null;
+  errorMessage?: string | null;
 }
 
 /**
