@@ -162,8 +162,8 @@ describe("AI Tracking Data Isolation & Relevance Guardrails", () => {
         latestRun: null,
       });
 
-      expect(dashboardA.kpi.visibilityScore).toBe(0);
-      expect(dashboardA.kpi.averagePosition).toBeNull();
+      expect(dashboardA.kpi.mentionCoveragePercent).toBe(0);
+      expect(dashboardA.kpi.averageListPosition).toBeNull();
       expect(dashboardA.kpi.brandMentions).toBe(0);
       expect(dashboardA.prompts).toHaveLength(0);
 
@@ -217,13 +217,12 @@ describe("AI Tracking Data Isolation & Relevance Guardrails", () => {
       expect(safeDashboardA.config?.domain).toBe("jetdigitalpro.com");
       expect(safeDashboardA.prompts).toHaveLength(1);
       expect(safeDashboardA.prompts[0].prompt).toBe("What is Jet Digital Pro?");
-      expect(safeDashboardA.kpi.averagePosition).toBeNull();
+      expect(safeDashboardA.kpi.averageListPosition).toBeNull();
     });
   });
 
   describe("GSC Token Correlation Logic", () => {
     it("matches high-intent overlapping queries and rejects loose substrings", () => {
-
       // Valid matches
       expect(
         isTokenMatch(

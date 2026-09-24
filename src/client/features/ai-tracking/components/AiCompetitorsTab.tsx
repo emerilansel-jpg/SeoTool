@@ -21,10 +21,10 @@ export function AiCompetitorsTab({ projectId, brandName }: Props) {
   const promptGaps = data?.promptGaps ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Competitor Share of Voice */}
-      <div className="rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="rounded-xl border border-base-300 bg-base-100 p-4 sm:p-5 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
           <div>
             <h3 className="text-sm font-semibold text-base-content flex items-center gap-2">
               <Users className="size-4 text-primary" />
@@ -35,7 +35,7 @@ export function AiCompetitorsTab({ projectId, brandName }: Props) {
               ) and discovered competitors.
             </p>
           </div>
-          <span className="badge badge-sm badge-outline">
+          <span className="badge badge-sm badge-outline self-start sm:self-auto shrink-0">
             {shareOfVoice.length} Brands Tracked
           </span>
         </div>
@@ -47,7 +47,7 @@ export function AiCompetitorsTab({ projectId, brandName }: Props) {
                 <th>Brand / Domain</th>
                 <th>Status</th>
                 <th>Total Mentions</th>
-                <th>Avg Position</th>
+                <th>Avg List Position</th>
                 <th className="w-1/3">Share of Voice</th>
               </tr>
             </thead>

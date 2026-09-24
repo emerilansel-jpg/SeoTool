@@ -1,4 +1,4 @@
-import { Bot, Sparkles, X } from "lucide-react";
+import { Bot, ThumbsUp, X } from "lucide-react";
 import type {
   AiTrackingKpi,
   AiTrackingPlatform,
@@ -27,8 +27,8 @@ export function AiTrackingKpiCards({
   const isAllSelected = selectedPlatform === "all";
 
   return (
-    <div className="flex flex-col gap-6 rounded-2xl border border-base-300/80 bg-base-100 p-6 shadow-2xs">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div className="flex flex-col gap-4 sm:gap-6 rounded-2xl border border-base-300/80 bg-base-100 p-4 sm:p-6 shadow-2xs">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Model Filter Column */}
         <div className="flex flex-col justify-between">
           <div className="mb-2 flex items-center gap-1.5">
@@ -36,7 +36,7 @@ export function AiTrackingKpiCards({
               AI Models
             </p>
             <span className="flex items-center gap-1.5 rounded-full bg-warning/15 px-2.5 py-0.5 text-[11px] font-semibold text-warning-content">
-              <span className="size-1.5 rounded-full bg-warning animate-pulse" />
+              <span className="size-1.5 animate-pulse rounded-full bg-warning" />
               {isAllSelected
                 ? "All Selected"
                 : PLATFORM_LABELS[selectedPlatform] || selectedPlatform}
@@ -52,10 +52,10 @@ export function AiTrackingKpiCards({
               </button>
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-2 pt-1">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1">
             <button
               type="button"
-              className={`btn btn-xs rounded-xl font-semibold shadow-2xs ${isAllSelected ? "btn-primary shadow-xs" : "btn-outline border-base-300"}`}
+              className={`btn btn-sm sm:btn-xs min-h-[32px] sm:min-h-[28px] rounded-xl font-semibold shadow-2xs px-3 sm:px-2.5 ${isAllSelected ? "btn-primary shadow-xs" : "btn-outline border-base-300"}`}
               onClick={() => onSelectPlatform("all")}
             >
               All
@@ -66,10 +66,10 @@ export function AiTrackingKpiCards({
                 <button
                   key={platform}
                   type="button"
-                  className={`btn btn-xs rounded-xl gap-1.5 font-semibold shadow-2xs ${active ? "btn-primary shadow-xs" : "btn-outline border-base-300"}`}
+                  className={`btn btn-sm sm:btn-xs min-h-[32px] sm:min-h-[28px] gap-1.5 rounded-xl font-semibold shadow-2xs px-3 sm:px-2.5 ${active ? "btn-primary shadow-xs" : "btn-outline border-base-300"}`}
                   onClick={() => onSelectPlatform(active ? "all" : platform)}
                 >
-                  <Bot className="size-3" />
+                  <Bot className="size-3.5 sm:size-3" />
                   {PLATFORM_LABELS[platform] ?? platform}
                 </button>
               );
@@ -77,112 +77,47 @@ export function AiTrackingKpiCards({
           </div>
         </div>
 
-        {/* Visibility Score Column */}
-        <div className="flex flex-col justify-between border-base-300 lg:border-l lg:pl-6">
-          <div className="mb-1 flex items-center justify-between">
+        {/* Mention Coverage Column */}
+        <div className="flex flex-col justify-between border-t border-base-200/80 pt-4 lg:border-t-0 lg:pt-0 lg:border-l lg:pl-6">
+          <div className="mb-1 sm:mb-2 flex items-center justify-between gap-3">
             <p className="text-sm font-medium tracking-tight text-base-content/70">
-              Visibility Score
+              Mention Coverage
             </p>
             <span className="text-xs text-base-content/50">
-              brand appearance %
+              tracked responses
             </span>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="text-3xl font-bold tracking-tight text-base-content">
-                {kpi.visibilityScore}%
-              </div>
-              <span className="badge badge-success badge-sm font-semibold">
-                {kpi.brandMentions} mentions
-              </span>
+          <div>
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-base-content">
+              {kpi.mentionCoveragePercent}%
             </div>
-            <div className="h-8 w-16">
-              <svg viewBox="0 0 64 32" className="size-full overflow-visible">
-                <defs>
-                  <linearGradient
-                    id="gradient-emerald"
-                    x1="0%"
-                    y1="0%"
-                    x2="0%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
-                    <stop
-                      offset="100%"
-                      stopColor="#10b981"
-                      stopOpacity="0.05"
-                    />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M 0 16 L 16 12 L 32 18 L 48 8 L 64 4 L 64 32 L 0 32 Z"
-                  fill="url(#gradient-emerald)"
-                />
-                <path
-                  d="M 0 16 L 16 12 L 32 18 L 48 8 L 64 4"
-                  stroke="#10b981"
-                  strokeWidth="2.5"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
+            <p className="mt-1 text-xs text-base-content/60 leading-relaxed">
+              <span className="font-semibold text-base-content">
+                {kpi.brandMentions} of {kpi.totalResponses}
+              </span>{" "}
+              tracked responses mention your brand.
+            </p>
           </div>
         </div>
 
-        {/* Brand Reputation Column */}
-        <div className="flex flex-col justify-between border-base-300 lg:border-l lg:pl-6">
-          <div className="mb-1 flex items-center justify-between">
+        {/* Positive Mentions Column */}
+        <div className="flex flex-col justify-between border-t border-base-200/80 pt-4 lg:border-t-0 lg:pt-0 lg:border-l lg:pl-6">
+          <div className="mb-1 sm:mb-2 flex items-center justify-between gap-3">
             <p className="text-sm font-medium tracking-tight text-base-content/70">
-              Brand Reputation
+              Positive Mentions
             </p>
-            <span className="text-xs text-base-content/50">
-              sentiment health
-            </span>
+            <ThumbsUp className="size-4 text-emerald-500" />
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="text-3xl font-bold tracking-tight text-base-content">
-                {kpi.brandReputationScore}
-              </div>
-              <span className="badge badge-primary badge-sm font-semibold inline-flex items-center gap-1">
-                <Sparkles className="size-3" />
-                Index
-              </span>
+          <div>
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-base-content">
+              {kpi.positiveMentionPercent}%
             </div>
-            <div className="h-8 w-16">
-              <svg viewBox="0 0 64 32" className="size-full overflow-visible">
-                <defs>
-                  <linearGradient
-                    id="gradient-blue"
-                    x1="0%"
-                    y1="0%"
-                    x2="0%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
-                    <stop
-                      offset="100%"
-                      stopColor="#3b82f6"
-                      stopOpacity="0.05"
-                    />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M 0 20 L 16 14 L 32 16 L 48 10 L 64 6 L 64 32 L 0 32 Z"
-                  fill="url(#gradient-blue)"
-                />
-                <path
-                  d="M 0 20 L 16 14 L 32 16 L 48 10 L 64 6"
-                  stroke="#3b82f6"
-                  strokeWidth="2.5"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
+            <p className="mt-1 text-xs text-base-content/60 leading-relaxed">
+              <span className="font-semibold text-base-content">
+                {kpi.positiveMentions} of {kpi.brandMentions}
+              </span>{" "}
+              tracked mentions classified positive.
+            </p>
           </div>
         </div>
       </div>

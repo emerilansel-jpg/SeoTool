@@ -106,7 +106,10 @@ export function aggregateDashboardMetrics(params: {
   let mixedSentiment = 0;
   let negativeSentiment = 0;
   let neutralSentiment = 0;
-  const insightMap = new Map<string, { count: number; sentiment: string }>();
+  const insightMap = new Map<
+    string,
+    { count: number; sentiment: MentionRow["sentiment"] }
+  >();
 
   const entityStats = new Map<
     string,
@@ -169,11 +172,11 @@ export function aggregateDashboardMetrics(params: {
     }
   }
 
-  const visibilityScore =
+  const mentionCoveragePercent =
     totalResponses > 0
       ? Math.round((targetMentionsCount / totalResponses) * 100)
       : 0;
-  const avgPosition =
+  const averageListPosition =
     targetPositions.length > 0
       ? Number(
           (
@@ -182,22 +185,14 @@ export function aggregateDashboardMetrics(params: {
         )
       : null;
 
-  const classifiedCount =
-    positiveSentiment + mixedSentiment + negativeSentiment;
-  const positivePercent =
-    classifiedCount > 0
-      ? Math.round((positiveSentiment / classifiedCount) * 100)
-      : targetMentionsCount > 0
-        ? 100
-        : 0;
-  const brandReputationScore =
-    classifiedCount > 0
-      ? Math.round(
-          ((positiveSentiment + 0.5 * mixedSentiment) / classifiedCount) * 100,
-        )
-      : targetMentionsCount > 0
-        ? 65
-        : 0;
+  const sentimentPercent = (count: number) =>
+    targetMentionsCount > 0
+      ? Math.round((count / targetMentionsCount) * 100)
+      : 0;
+  const positivePercent = sentimentPercent(positiveSentiment);
+  const mixedPercent = sentimentPercent(mixedSentiment);
+  const neutralPercent = sentimentPercent(neutralSentiment);
+  const negativePercent = sentimentPercent(negativeSentiment);
 
   const dayMap = new Map<
     string,
@@ -240,7 +235,7 @@ export function aggregateDashboardMetrics(params: {
 
   const competitorRankings = Array.from(entityStats.values())
     .map((stat) => {
-      const pos =
+      const avgPosition =
         stat.positions.length > 0
           ? Number(
               (
@@ -248,8 +243,8 @@ export function aggregateDashboardMetrics(params: {
                 stat.positions.length
               ).toFixed(1),
             )
-          : 99;
-      const visPct =
+          : 0;
+      const visibilityPct =
         totalResponses > 0
           ? Math.round((stat.mentionsCount / totalResponses) * 100)
           : 0;
@@ -257,16 +252,17 @@ export function aggregateDashboardMetrics(params: {
         domain: stat.domain,
         brandName: stat.brandName,
         isTargetBrand: stat.isTargetBrand,
-        avgPosition: pos === 99 ? 0 : pos,
+        avgPosition,
         mentionsCount: stat.mentionsCount,
-        visibilityPct: visPct,
+        visibilityPct,
       };
     })
-    .toSorted((a, b) => {
-      if (a.isTargetBrand) return -1;
-      if (b.isTargetBrand) return 1;
-      return (a.avgPosition || 99) - (b.avgPosition || 99);
-    });
+    .toSorted(
+      (a, b) =>
+        b.mentionsCount - a.mentionsCount ||
+        b.visibilityPct - a.visibilityPct ||
+        a.domain.localeCompare(b.domain),
+    );
 
   const topInsights = Array.from(insightMap.entries())
     .map(([text, val]) => ({
@@ -323,21 +319,24 @@ export function aggregateDashboardMetrics(params: {
     config,
     prompts: promptItems,
     kpi: {
-      visibilityScore,
-      visibilityDelta: 0,
-      brandReputationScore,
-      brandReputationDelta: 0,
-      averagePosition: avgPosition,
-      averagePositionDelta: null,
+      mentionCoveragePercent,
+      positiveMentions: positiveSentiment,
+      positiveMentionPercent: positivePercent,
+      averageListPosition,
+      listPositionSamples: targetPositions.length,
       totalResponses,
       brandMentions: targetMentionsCount,
     },
     sentiment: {
       positive: positiveSentiment,
       mixed: mixedSentiment,
-      negative: negativeSentiment,
       neutral: neutralSentiment,
+      negative: negativeSentiment,
+      total: targetMentionsCount,
       positivePercent,
+      mixedPercent,
+      neutralPercent,
+      negativePercent,
       topInsights,
     },
     positionTrend,

@@ -32,8 +32,8 @@ export function AiTrackingPromptsTable({
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-base-300 bg-base-100 p-6 shadow-sm">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-4 rounded-xl border border-base-300 bg-base-100 p-4 sm:p-6 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="font-semibold text-base text-base-content">
             Tracked AI Prompts
@@ -44,7 +44,7 @@ export function AiTrackingPromptsTable({
         </div>
         <button
           type="button"
-          className="btn btn-sm btn-outline gap-1.5"
+          className="btn btn-sm btn-outline gap-1.5 w-full sm:w-auto justify-center"
           onClick={() => setShowAddForm(!showAddForm)}
         >
           <Plus className="size-4" />
@@ -92,7 +92,7 @@ Zoho alternatives for small business`}
             <tr className="bg-base-200/50 text-base-content/60">
               <th>Active</th>
               <th>Prompt</th>
-              <th>Last Position</th>
+              <th>List Position</th>
               <th>Mentioned</th>
               <th>Sentiment</th>
               <th className="text-right">Actions</th>

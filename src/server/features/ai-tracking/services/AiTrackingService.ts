@@ -120,11 +120,11 @@ export const AiTrackingService = {
     const brandAliases =
       typeof config.brandAliases === "string"
         ? (JSON.parse(config.brandAliases || "[]") as string[])
-        : (config.brandAliases);
+        : config.brandAliases;
     const platforms =
       typeof config.platforms === "string"
         ? (JSON.parse(config.platforms || "[]") as AiTrackingPlatform[])
-        : (config.platforms);
+        : config.platforms;
 
     // If config has no prompts yet, auto-seed default high-intent brand prompts
     const existingPrompts = await AiTrackingRepository.listPrompts(config.id);
@@ -472,21 +472,24 @@ export const AiTrackingService = {
         config: null,
         prompts: [],
         kpi: {
-          visibilityScore: 0,
-          visibilityDelta: 0,
-          brandReputationScore: 0,
-          brandReputationDelta: 0,
-          averagePosition: null,
-          averagePositionDelta: null,
+          mentionCoveragePercent: 0,
+          positiveMentions: 0,
+          positiveMentionPercent: 0,
+          averageListPosition: null,
+          listPositionSamples: 0,
           totalResponses: 0,
           brandMentions: 0,
         },
         sentiment: {
           positive: 0,
           mixed: 0,
-          negative: 0,
           neutral: 0,
+          negative: 0,
+          total: 0,
           positivePercent: 0,
+          mixedPercent: 0,
+          neutralPercent: 0,
+          negativePercent: 0,
           topInsights: [],
         },
         positionTrend: [],
@@ -502,13 +505,12 @@ export const AiTrackingService = {
       Date.now() - days * 24 * 60 * 60 * 1000,
     ).toISOString();
 
-    const [observations, discoveryStats, snapshots] = await Promise.all([
+    const [observations, discoveryStats] = await Promise.all([
       AiTrackingRepository.getObservationsForDashboard(config.id, {
         platform: options.platform,
         sinceDate,
       }),
       AiTrackingRepository.getDiscoveryStats(config.id),
-      AiTrackingRepository.listVisibilitySnapshots(config.id, days),
     ]);
 
     const observationIds = observations.map((o) => o.id);
@@ -531,20 +533,6 @@ export const AiTrackingService = {
       citations,
       latestRun,
     });
-
-    // If historical snapshots exist, enrich visibilityTrend and deltas
-    if (snapshots.length > 0) {
-      dashboard.visibilityTrend = snapshots.map((s) => ({
-        date: s.snapshotDate,
-        visibility: s.visibilityScore,
-      }));
-      if (snapshots.length > 1) {
-        const latest = snapshots[snapshots.length - 1];
-        const prev = snapshots[0];
-        dashboard.kpi.visibilityDelta =
-          latest.visibilityScore - prev.visibilityScore;
-      }
-    }
 
     dashboard.discoveryStats = {
       ...discoveryStats,

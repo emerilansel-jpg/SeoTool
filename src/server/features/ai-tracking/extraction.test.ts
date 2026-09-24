@@ -103,4 +103,26 @@ describe("extractMentions", () => {
     expect(salesforce?.position).toBe(2);
     expect(salesforce?.sentiment).toBe("mixed");
   });
+
+  it("counts a prose brand mention without inventing a list position", () => {
+    const mentions = extractMentions(
+      "Zoho is an Indian multinational software company.",
+      [],
+      [
+        {
+          name: "Zoho",
+          domain: "zoho.com",
+          aliases: ["Zoho CRM"],
+          isTargetBrand: true,
+        },
+      ],
+    );
+
+    expect(mentions).toHaveLength(1);
+    expect(mentions[0]).toMatchObject({
+      brandName: "Zoho",
+      position: null,
+      sentiment: "neutral",
+    });
+  });
 });

@@ -179,29 +179,29 @@ export function AiTrackingPage({ projectId }: Props) {
   ];
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <Bot className="size-6 text-primary" />
-            <h1 className="text-xl font-bold tracking-tight text-base-content">
+          <div className="flex flex-wrap items-center gap-2">
+            <Bot className="size-5 sm:size-6 text-primary shrink-0" />
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-base-content">
               AI Generatif
             </h1>
             <span className="badge badge-primary badge-sm font-semibold">
               AI Visibility &amp; Mention Tracking
             </span>
           </div>
-          <p className="mt-1 text-xs text-base-content/60">
+          <p className="mt-1 text-xs text-base-content/60 leading-relaxed max-w-2xl">
             Monitor brand visibility, organic prompts, citations, competitor
             gaps, and Search Console correlation across AI search engines.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:items-center sm:gap-2.5">
           <button
             type="button"
-            className="btn btn-sm btn-outline rounded-xl font-semibold border-base-300 gap-1.5 shadow-2xs"
+            className="btn btn-sm btn-outline rounded-xl font-semibold border-base-300 gap-1.5 shadow-2xs w-full sm:w-auto justify-center"
             onClick={() => setShowSetupModal(true)}
           >
             <Settings2 className="size-4" />
@@ -210,7 +210,7 @@ export function AiTrackingPage({ projectId }: Props) {
           {isConfigured && (
             <button
               type="button"
-              className="btn btn-sm btn-primary rounded-xl font-semibold gap-1.5 shadow-xs"
+              className="btn btn-sm btn-primary rounded-xl font-semibold gap-1.5 shadow-xs w-full sm:w-auto justify-center"
               disabled={
                 runTrackingMutation.isPending || data.prompts.length === 0
               }
@@ -228,7 +228,7 @@ export function AiTrackingPage({ projectId }: Props) {
       </div>
 
       {!isConfigured || !config ? (
-        <div className="rounded-2xl border border-dashed border-base-300/80 p-12 text-center bg-base-100/60 shadow-2xs">
+        <div className="rounded-2xl border border-dashed border-base-300/80 p-8 sm:p-12 text-center bg-base-100/60 shadow-2xs">
           <Bot className="mx-auto size-12 text-base-content/30 mb-3" />
           <h2 className="text-base font-bold text-base-content">
             AI Generatif is not configured yet
@@ -250,9 +250,9 @@ export function AiTrackingPage({ projectId }: Props) {
         </div>
       ) : (
         <>
-          {/* Navigation Tabs */}
-          <div className="border-b border-base-300/80">
-            <div className="flex flex-wrap gap-1 -mb-px">
+          {/* Navigation Tabs (Smooth horizontal scroll on mobile) */}
+          <div className="border-b border-base-300/80 -mx-3.5 px-3.5 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar">
+            <div className="flex flex-nowrap gap-1 -mb-px min-w-max pb-0.5">
               {TABS.map((tab) => {
                 const Icon = tab.icon;
                 const active = activeTab === tab.id;
@@ -260,7 +260,7 @@ export function AiTrackingPage({ projectId }: Props) {
                   <button
                     key={tab.id}
                     type="button"
-                    className={`inline-flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+                    className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 text-xs font-semibold border-b-2 transition-all shrink-0 whitespace-nowrap ${
                       active
                         ? "border-primary text-primary bg-primary/[0.04] rounded-t-lg"
                         : "border-transparent text-base-content/60 hover:text-base-content hover:border-base-300"
@@ -288,20 +288,21 @@ export function AiTrackingPage({ projectId }: Props) {
 
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Discovery Summary Card */}
               {data.discoveryStats && (
-                <div className="rounded-xl border border-base-300 bg-gradient-to-r from-base-100 to-base-200/50 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
-                      <Sparkles className="size-5" />
+                <div className="rounded-xl border border-base-300 bg-gradient-to-r from-base-100 to-base-200/50 p-3.5 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                  <div className="flex items-start gap-2.5 sm:gap-3 min-w-0">
+                    <div className="rounded-lg bg-primary/10 p-2 text-primary shrink-0 mt-0.5 sm:mt-0">
+                      <Sparkles className="size-4 sm:size-5" />
                     </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-base-content">
+                    <div className="min-w-0">
+                      <h3 className="text-xs sm:text-sm font-semibold text-base-content truncate">
                         {data.discoveryStats.totalDiscovered} AI Prompts
                         Discovered for {config.domain}
                       </h3>
-                      <p className="text-xs text-base-content/60">
+                      <p className="text-[11px] sm:text-xs text-base-content/60 mt-0.5 leading-relaxed">
+                        DataForSEO discovery:{" "}
                         {data.discoveryStats.totalMentioned} mentioned •{" "}
                         {data.discoveryStats.totalCited} cited •{" "}
                         {data.discoveryStats.totalSearchVolume.toLocaleString()}{" "}
@@ -311,7 +312,7 @@ export function AiTrackingPage({ projectId }: Props) {
                   </div>
                   <button
                     type="button"
-                    className="btn btn-xs btn-outline btn-primary shrink-0"
+                    className="btn btn-sm sm:btn-xs btn-outline btn-primary shrink-0 w-full sm:w-auto justify-center"
                     onClick={() => setActiveTab("ai_prompts")}
                   >
                     View All AI Prompts →
@@ -327,12 +328,13 @@ export function AiTrackingPage({ projectId }: Props) {
                 availablePlatforms={config.platforms}
               />
 
-              {/* Average Position Rank & Competitor Leaderboard */}
+              {/* List Position & Tracked Mention Leaderboard */}
               <AiTrackingPositionCard
                 brandName={config.brandName}
                 domain={config.domain}
-                averagePosition={data.kpi.averagePosition}
-                averagePositionDelta={data.kpi.averagePositionDelta}
+                averageListPosition={data.kpi.averageListPosition}
+                listPositionSamples={data.kpi.listPositionSamples}
+                brandMentions={data.kpi.brandMentions}
                 positionTrend={data.positionTrend}
                 competitors={data.competitorRankings}
               />

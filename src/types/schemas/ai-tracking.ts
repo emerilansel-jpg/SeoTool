@@ -87,23 +87,32 @@ export type GetAiTrackingDashboardInput = z.infer<
 >;
 
 export interface AiTrackingKpi {
-  visibilityScore: number;
-  visibilityDelta: number;
-  brandReputationScore: number;
-  brandReputationDelta: number;
-  averagePosition: number | null;
-  averagePositionDelta: number | null;
+  mentionCoveragePercent: number;
+  positiveMentions: number;
+  positiveMentionPercent: number;
+  averageListPosition: number | null;
+  listPositionSamples: number;
   totalResponses: number;
   brandMentions: number;
 }
 
+export type AiTrackingSentiment = "positive" | "mixed" | "neutral" | "negative";
+
 export interface AiTrackingSentimentBreakdown {
   positive: number;
   mixed: number;
-  negative: number;
   neutral: number;
+  negative: number;
+  total: number;
   positivePercent: number;
-  topInsights: Array<{ text: string; count: number; sentiment: string }>;
+  mixedPercent: number;
+  neutralPercent: number;
+  negativePercent: number;
+  topInsights: Array<{
+    text: string;
+    count: number;
+    sentiment: AiTrackingSentiment;
+  }>;
 }
 
 export interface AiTrackingTrendPoint {
