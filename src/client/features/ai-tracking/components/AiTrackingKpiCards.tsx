@@ -35,8 +35,8 @@ export function AiTrackingKpiCards({
             <p className="text-xs font-bold uppercase tracking-wider text-base-content/60">
               AI Models
             </p>
-            <span className="flex items-center gap-1.5 rounded-full bg-warning/15 px-2.5 py-0.5 text-[11px] font-semibold text-warning-content">
-              <span className="size-1.5 animate-pulse rounded-full bg-warning" />
+            <span className="flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning/15 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+              <span className="size-1.5 animate-pulse rounded-full bg-amber-500" />
               {isAllSelected
                 ? "All Selected"
                 : PLATFORM_LABELS[selectedPlatform] || selectedPlatform}

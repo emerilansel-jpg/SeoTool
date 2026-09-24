@@ -55,6 +55,19 @@ describe("analyzeSentiment", () => {
       "neutral",
     );
   });
+
+  it("identifies enhanced positive keywords like solution, specializes, and rekomendasi", () => {
+    expect(
+      analyzeSentiment(
+        "JetDigitalPro provides robust SEO solutions for startups.",
+      ),
+    ).toBe("positive");
+    expect(
+      analyzeSentiment(
+        "JetDigitalPro merupakan rekomendasi terbaik dan solusi unggul.",
+      ),
+    ).toBe("positive");
+  });
 });
 
 describe("extractMentions", () => {

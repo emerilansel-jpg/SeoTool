@@ -60,6 +60,22 @@ export function extractCitations(response: LlmResponseResult) {
   return citations;
 }
 
+function cleanSentenceSnippet(raw: string, maxLen = 120): string {
+  // Strip leading list punctuation e.g. "- ", "* ", "# ", ": "
+  let cleaned = raw.replace(/^[\s\-*#:>•]+/, "").trim();
+  if (cleaned.length <= maxLen) return cleaned;
+
+  // Truncate at word boundary to avoid chopped words
+  const truncated = cleaned.slice(0, maxLen);
+  const lastSpace = truncated.lastIndexOf(" ");
+  if (lastSpace > 40) {
+    cleaned = truncated.slice(0, lastSpace).trim();
+  } else {
+    cleaned = truncated.trim();
+  }
+  return `${cleaned}…`;
+}
+
 export function aggregateDashboardMetrics(params: {
   config: {
     id: string;
@@ -144,13 +160,15 @@ export function aggregateDashboardMetrics(params: {
       else neutralSentiment++;
 
       if (targetMention.evidence) {
-        const phrase = targetMention.evidence.slice(0, 60).trim();
-        const existing = insightMap.get(phrase) ?? {
-          count: 0,
-          sentiment: targetMention.sentiment,
-        };
-        existing.count++;
-        insightMap.set(phrase, existing);
+        const phrase = cleanSentenceSnippet(targetMention.evidence, 120);
+        if (phrase) {
+          const existing = insightMap.get(phrase) ?? {
+            count: 0,
+            sentiment: targetMention.sentiment,
+          };
+          existing.count++;
+          insightMap.set(phrase, existing);
+        }
       }
     }
 

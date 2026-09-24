@@ -108,9 +108,10 @@ export function AiTrackingSentimentCard({ sentiment }: Props) {
               {SENTIMENT_META[dominant.key].label}
             </span>
           </div>
-          <p className="mt-0.5 text-xs text-base-content/50">
-            Largest group across {sentiment.total} tracked mention
-            {sentiment.total === 1 ? "" : "s"}.
+          <p className="mt-0.5 text-xs text-base-content/60">
+            {dominant.key === "neutral"
+              ? `Factual brand mentions (${dominant.percent}%) without strong positive/negative bias across ${sentiment.total} tracked response${sentiment.total === 1 ? "" : "s"}.`
+              : `Largest group across ${sentiment.total} tracked mention${sentiment.total === 1 ? "" : "s"}.`}
           </p>
         </div>
       ) : (
@@ -172,20 +173,22 @@ export function AiTrackingSentimentCard({ sentiment }: Props) {
               return (
                 <div
                   key={`${insight.sentiment}-${insight.text}`}
-                  className="flex items-start gap-2 rounded-lg bg-base-200/50 p-2.5 text-xs"
+                  className="flex items-start gap-2.5 rounded-lg border border-base-200/80 bg-base-200/40 p-2.5 sm:p-3 text-xs shadow-2xs"
                 >
                   <Icon
                     className={`mt-0.5 size-3.5 shrink-0 ${meta.iconClass}`}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="line-clamp-2 leading-relaxed text-base-content/80">
-                      {insight.text}
+                    <p className="leading-relaxed text-base-content/90 font-normal">
+                      “{insight.text}”
                     </p>
-                    <div className="mt-1.5 flex items-center gap-2">
-                      <span className={`badge badge-xs ${meta.badgeClass}`}>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span
+                        className={`badge badge-xs font-semibold ${meta.badgeClass}`}
+                      >
                         {meta.label}
                       </span>
-                      <span className="text-[11px] text-base-content/50">
+                      <span className="text-[11px] font-medium text-base-content/60">
                         {insight.count} occurrence
                         {insight.count === 1 ? "" : "s"}
                       </span>
