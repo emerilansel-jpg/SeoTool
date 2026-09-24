@@ -177,8 +177,14 @@ export class GmbGridWorkflow extends WorkflowEntrypoint<
         "post-maps-tasks",
         SINGLE_ATTEMPT,
         async () => {
+          const pendingSnapshots = prepared.snapshots.filter(
+            (snapshot) => snapshot.status === "pending" || !snapshot.taskId,
+          );
+          if (pendingSnapshots.length === 0) {
+            return [];
+          }
           const result = await client.serp.mapsTaskPost({
-            tasks: prepared.snapshots.map((snapshot) => ({
+            tasks: pendingSnapshots.map((snapshot) => ({
               snapshotId: snapshot.id,
               keyword: prepared.config.keyword,
               lat: snapshot.lat,
@@ -188,7 +194,7 @@ export class GmbGridWorkflow extends WorkflowEntrypoint<
             device: prepared.config.device,
             zoom: prepared.config.mapZoom,
             depth: 20,
-            quotaUnits: prepared.snapshots.length,
+            quotaUnits: pendingSnapshots.length,
           });
           const acceptedIds = new Set(
             result.tasks.map((task) => task.snapshotId),
@@ -198,7 +204,7 @@ export class GmbGridWorkflow extends WorkflowEntrypoint<
               id: task.snapshotId,
               data: { taskId: task.taskId },
             })),
-            ...prepared.snapshots
+            ...pendingSnapshots
               .filter((snapshot) => !acceptedIds.has(snapshot.id))
               .map((snapshot) => ({
                 id: snapshot.id,

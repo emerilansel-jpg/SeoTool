@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2, RotateCcw, XCircle } from "lucide-react";
 
 interface RunLike {
   status: "pending" | "running" | "completed" | "partial" | "failed";
@@ -21,9 +21,13 @@ interface SnapshotLike {
 export function GmbScanPipeline({
   run,
   snapshots,
+  onRetryFailed,
+  isRetrying,
 }: {
   run: RunLike;
   snapshots: SnapshotLike[];
+  onRetryFailed?: () => void;
+  isRetrying?: boolean;
 }) {
   const settled = snapshots.filter(
     (snapshot) => snapshot.status !== "pending",
@@ -94,19 +98,37 @@ export function GmbScanPipeline({
             : "border-success/30 bg-success/10"
         }`}
       >
-        <div className="flex items-center gap-2">
-          {partial ? (
-            <AlertTriangle className="size-4 shrink-0 text-warning" />
-          ) : (
-            <CheckCircle2 className="size-4 shrink-0 text-success" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            {partial ? (
+              <AlertTriangle className="size-4 shrink-0 text-warning" />
+            ) : (
+              <CheckCircle2 className="size-4 shrink-0 text-success" />
+            )}
+            <span className="font-semibold">
+              {partial ? "Scan Completed with Errors" : "Scan Completed"}
+            </span>
+            <span className="text-base-content/60 text-xs">
+              {run.foundPoints} of {total} found
+              {run.failedPoints > 0 ? ` · ${run.failedPoints} failed` : ""}
+            </span>
+          </div>
+
+          {partial && onRetryFailed && (
+            <button
+              type="button"
+              disabled={isRetrying}
+              onClick={onRetryFailed}
+              className="btn btn-xs btn-warning font-medium gap-1 self-start sm:self-auto"
+            >
+              {isRetrying ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : (
+                <RotateCcw className="size-3" />
+              )}
+              Retry {run.failedPoints} Failed Pins
+            </button>
           )}
-          <span className="font-semibold">
-            {partial ? "Scan Completed with Errors" : "Scan Completed"}
-          </span>
-          <span className="text-base-content/60 text-xs ml-auto">
-            {run.foundPoints} of {total} found
-            {run.failedPoints > 0 ? ` · ${run.failedPoints} failed` : ""}
-          </span>
         </div>
       </div>
 

@@ -198,6 +198,23 @@ async function updateSnapshots(
   );
 }
 
+async function resetFailedSnapshotsForRun(runId: string) {
+  await db
+    .update(gmbGridSnapshots)
+    .set({
+      status: "pending",
+      taskId: null,
+      errorCode: null,
+      errorMessage: null,
+    })
+    .where(
+      and(
+        eq(gmbGridSnapshots.runId, runId),
+        eq(gmbGridSnapshots.status, "failed"),
+      ),
+    );
+}
+
 async function getProjectMarket(projectId: string) {
   const rows = await db
     .select({
@@ -243,6 +260,7 @@ export const GmbGridRepository = {
   getSnapshotsForRun,
   updateSnapshot,
   updateSnapshots,
+  resetFailedSnapshotsForRun,
   getProjectMarket,
   getDueConfigsWithOrganization,
 };

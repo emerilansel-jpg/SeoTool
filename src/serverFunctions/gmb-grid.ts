@@ -4,6 +4,7 @@ import {
   CreateGmbGridSchema,
   GetGmbGridConfigsSchema,
   GetGmbGridRunSchema,
+  RetryGmbGridPinsSchema,
   SearchGmbProfilesSchema,
 } from "@/server/features/gmb-grid/gmb-grid.schema";
 import { GmbGridService } from "@/server/features/gmb-grid/services/GmbGridService";
@@ -65,3 +66,21 @@ export const createGmbGridRun = createServerFn({ method: "POST" })
       },
     });
   });
+
+export const retryGmbGridFailedPins = createServerFn({ method: "POST" })
+  .middleware([requireProjectContext, requireProjectRole("member")])
+  .validator(RetryGmbGridPinsSchema)
+  .handler(async ({ data, context }) => {
+    assertRequestedProject(data.projectId, context.projectId);
+    return GmbGridService.retryFailedPins({
+      projectId: data.projectId,
+      runId: data.runId,
+      billingCustomer: {
+        organizationId: context.organizationId,
+        userId: context.userId,
+        userEmail: context.userEmail,
+        projectId: data.projectId,
+      },
+    });
+  });
+

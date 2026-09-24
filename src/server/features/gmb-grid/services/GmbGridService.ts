@@ -314,9 +314,91 @@ async function getRun(projectId: string, runId: string) {
   return { ...result, snapshots };
 }
 
+async function retryFailedPins(input: {
+  projectId: string;
+  runId: string;
+  billingCustomer: BillingCustomerContext;
+}) {
+  if (useE2eFixtures) {
+    return { ok: true as const, runId: input.runId };
+  }
+  const isHosted = await isHostedServerAuthMode();
+  if (
+    isHosted &&
+    !(await customerHasPaidPlan(input.billingCustomer.organizationId))
+  ) {
+    throw new AppError(
+      "PAYMENT_REQUIRED",
+      "Upgrade to a paid plan to run local map scans",
+    );
+  }
+
+  const runWithConfig = await GmbGridRepository.getRunForProject(
+    input.runId,
+    input.projectId,
+  );
+  if (!runWithConfig) {
+    throw new AppError("NOT_FOUND", "Grid scan not found");
+  }
+
+  const { run, config } = runWithConfig;
+  if (run.status === "running" || run.status === "pending") {
+    return {
+      ok: false as const,
+      reason: "already_running" as const,
+      runId: run.id,
+    };
+  }
+
+  const snapshots = await GmbGridRepository.getSnapshotsForRun(run.id);
+  const failedSnapshots = snapshots.filter((s) => s.status === "failed");
+  if (failedSnapshots.length === 0) {
+    return {
+      ok: false as const,
+      reason: "no_failed_pins" as const,
+      runId: run.id,
+    };
+  }
+
+  await GmbGridRepository.resetFailedSnapshotsForRun(run.id);
+  await GmbGridRepository.updateRun(run.id, {
+    status: "running",
+    completedAt: null,
+  });
+
+  const retryInstanceId = `${run.id}-retry-${Date.now()}`;
+  try {
+    await env.GMB_GRID_WORKFLOW.create({
+      id: retryInstanceId,
+      params: {
+        runId: run.id,
+        configId: config.id,
+        projectId: input.projectId,
+        billingCustomer: input.billingCustomer,
+        trigger: "manual" as const,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to start retry workflow:", error);
+    await GmbGridRepository.updateRun(run.id, {
+      status: "partial",
+      errorMessage:
+        error instanceof Error ? error.message : "Failed to restart workflow",
+    });
+    throw new AppError("INTERNAL_ERROR", "Failed to dispatch retry workflow");
+  }
+
+  return {
+    ok: true as const,
+    runId: run.id,
+    retriedCount: failedSnapshots.length,
+  };
+}
+
 export const GmbGridService = {
   searchProfiles,
   startScan,
+  retryFailedPins,
   getRun,
   listConfigs: GmbGridRepository.listConfigsForProject,
   estimateCost: estimateGmbGridCost,

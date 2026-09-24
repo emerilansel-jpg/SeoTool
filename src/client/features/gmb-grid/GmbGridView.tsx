@@ -9,6 +9,7 @@ import {
   createGmbGridRun,
   getGmbGridConfigs,
   getGmbGridRun,
+  retryGmbGridFailedPins,
 } from "@/serverFunctions/gmb-grid";
 import type { CreateGmbGridInput } from "@/server/features/gmb-grid/gmb-grid.schema";
 import { estimateGmbGridCost } from "@/server/features/gmb-grid/gmb-grid";
@@ -33,6 +34,7 @@ export function GmbGridView({ projectId }: { projectId: string }) {
   const getConfigs = useServerFn(getGmbGridConfigs);
   const getRun = useServerFn(getGmbGridRun);
   const createRun = useServerFn(createGmbGridRun);
+  const retryFailed = useServerFn(retryGmbGridFailedPins);
   const queryClient = useQueryClient();
 
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
@@ -102,6 +104,28 @@ export function GmbGridView({ projectId }: { projectId: string }) {
     onError: (error: Error) => {
       setPendingScan(null);
       setScanError(error.message || "Could not start the grid scan.");
+    },
+  });
+
+  const retryMutation = useMutation({
+    mutationFn: (runId: string) => retryFailed({ data: { projectId, runId } }),
+    onSuccess: (result) => {
+      if (result.ok) {
+        toast.success(`Retrying ${result.retriedCount} failed pins.`);
+        void queryClient.invalidateQueries({
+          queryKey: ["gmb-run", projectId, activeRunId],
+        });
+        void queryClient.invalidateQueries({
+          queryKey: ["gmb-configs", projectId],
+        });
+      } else if (result.reason === "already_running") {
+        toast.info("A scan or retry is already in progress.");
+      } else {
+        toast.info("No failed pins to retry.");
+      }
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to retry pins.");
     },
   });
 
@@ -376,7 +400,12 @@ export function GmbGridView({ projectId }: { projectId: string }) {
 
         <section className="flex min-h-[560px] flex-col gap-4 xl:col-span-2 xl:h-[820px] relative">
           {runData && (
-            <GmbScanPipeline run={runData.run} snapshots={runData.snapshots} />
+            <GmbScanPipeline
+              run={runData.run}
+              snapshots={runData.snapshots}
+              onRetryFailed={() => retryMutation.mutate(runData.run.id)}
+              isRetrying={retryMutation.isPending}
+            />
           )}
           <GmbMap
             centerLat={mapCenterLat}
