@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { FileText } from "lucide-react";
+import { FeatureHeader } from "@/client/components/FeatureHeader";
 import { Modal } from "@/client/components/Modal";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import {
@@ -35,25 +37,24 @@ export function ReportsListPage({ projectId }: { projectId: string }) {
   return (
     <div className="px-4 py-4 pb-24 md:px-6 md:py-6 md:pb-8">
       <div className="mx-auto max-w-7xl space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">Reports</h1>
-            <p className="text-sm text-base-content/70">
-              Create white-label SEO reports for your clients and schedule
-              delivery.
-            </p>
-          </div>
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={() => {
-              setEditing(null);
-              setShowModal(true);
-            }}
-          >
-            New report
-          </button>
-        </div>
+        <FeatureHeader
+          icon={FileText}
+          title="Reports"
+          badge="Automated & Scheduled Exports"
+          description="Create white-label SEO reports for your clients and schedule recurring delivery."
+          actions={
+            <button
+              type="button"
+              className="btn btn-sm btn-primary rounded-xl font-semibold shadow-xs"
+              onClick={() => {
+                setEditing(null);
+                setShowModal(true);
+              }}
+            >
+              New report
+            </button>
+          }
+        />
 
         {reportsQuery.isPending ? (
           <div className="space-y-3">

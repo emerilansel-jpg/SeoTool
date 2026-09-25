@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Bell, Plus, Trash2, Power } from "lucide-react";
+import { FeatureHeader } from "@/client/components/FeatureHeader";
 import { Modal } from "@/client/components/Modal";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import {
@@ -95,24 +96,24 @@ export function AlertsPageView({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-semibold">Alerts</h1>
-          <p className="text-sm text-base-content/70">
-            Get notified when rankings drop or audit issues are found.
-          </p>
-        </div>
-        <button
-          className="btn btn-primary"
-          onClick={() => {
-            setEditingRule(null);
-            setIsModalOpen(true);
-          }}
-        >
-          <Plus className="size-4" /> New Alert
-        </button>
-      </div>
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+      <FeatureHeader
+        icon={Bell}
+        title="Alerts"
+        badge="Real-Time Ranking & Audit Alerts"
+        description="Get notified when rankings drop, site health changes, or new opportunities are detected."
+        actions={
+          <button
+            className="btn btn-sm btn-primary rounded-xl font-semibold gap-1.5 shadow-xs"
+            onClick={() => {
+              setEditingRule(null);
+              setIsModalOpen(true);
+            }}
+          >
+            <Plus className="size-4" /> New Alert
+          </button>
+        }
+      />
 
       {rules.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-base-300 rounded-box">

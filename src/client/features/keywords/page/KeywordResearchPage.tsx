@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo } from "react";
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import { AlertCircle, ArrowLeft, Search } from "lucide-react";
+import { FeatureHeader } from "@/client/components/FeatureHeader";
 import { Modal } from "@/client/components/Modal";
 import { getErrorCode } from "@/client/lib/error-messages";
 import { BILLING_ROUTE } from "@/shared/billing";
@@ -223,12 +224,12 @@ export function KeywordResearchPage(input: Props) {
   return (
     <div className="px-4 py-4 md:px-6 md:py-6 pb-24 md:pb-8 overflow-auto">
       <div className="mx-auto flex max-w-7xl flex-col gap-5">
-        <div>
-          <h1 className="text-2xl font-semibold">Keyword Research</h1>
-          <p className="text-sm text-base-content/70">
-            Discover keyword ideas, search demand, and ranking opportunities.
-          </p>
-        </div>
+        <FeatureHeader
+          icon={Search}
+          title="Keyword Research"
+          badge="Search Volume & Keyword Ideas"
+          description="Discover keyword ideas, search demand, intent analysis, and ranking opportunities."
+        />
         <KeywordResearchViewTabs projectId={projectId} active="discover" />
 
         <KeywordResearchSearchBar controller={controller} />

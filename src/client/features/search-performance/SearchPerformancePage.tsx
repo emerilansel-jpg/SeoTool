@@ -6,7 +6,8 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Download, Loader2, Sheet } from "lucide-react";
+import { BarChart3, Download, Loader2, Sheet } from "lucide-react";
+import { FeatureHeader } from "@/client/components/FeatureHeader";
 import { toast } from "sonner";
 import { TableExportMenu } from "@/client/components/table/TableBulkActionBar";
 import { TablePagination } from "@/client/components/table/TablePagination";
@@ -191,25 +192,24 @@ export function SearchPerformancePage({ projectId }: { projectId: string }) {
   return (
     <div className="px-4 py-4 pb-24 overflow-auto md:px-6 md:py-6 md:pb-8">
       <div className="mx-auto max-w-7xl space-y-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">Search Performance</h1>
-            <p className="text-sm text-base-content/70">
-              See your site&apos;s clicks, impressions, CTR, and position from
-              Google Search Console.
-            </p>
-          </div>
-          {report?.connected ? (
-            <Link
-              to="/p/$projectId/settings"
-              params={{ projectId }}
-              hash="search-console"
-              className="link link-hover shrink-0 self-start text-sm font-medium text-base-content/60 transition-colors hover:text-base-content sm:mt-1"
-            >
-              Change property
-            </Link>
-          ) : null}
-        </div>
+        <FeatureHeader
+          icon={BarChart3}
+          title="GSC Insights"
+          badge="Google Search Console Performance"
+          description="See your site's clicks, impressions, CTR, and average position from Google Search Console."
+          actions={
+            report?.connected ? (
+              <Link
+                to="/p/$projectId/settings"
+                params={{ projectId }}
+                hash="search-console"
+                className="link link-hover shrink-0 text-xs font-medium text-base-content/60 transition-colors hover:text-base-content"
+              >
+                Change property
+              </Link>
+            ) : null
+          }
+        />
 
         {reportQuery.isPending ? (
           <SearchPerformanceLoadingState />

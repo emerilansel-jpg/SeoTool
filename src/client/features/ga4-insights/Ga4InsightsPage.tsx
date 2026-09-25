@@ -5,7 +5,8 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Download, Loader2, Sheet } from "lucide-react";
+import { BarChart3, Download, Loader2, Sheet } from "lucide-react";
+import { FeatureHeader } from "@/client/components/FeatureHeader";
 import { toast } from "sonner";
 import { TableExportMenu } from "@/client/components/table/TableBulkActionBar";
 import { TablePagination } from "@/client/components/table/TablePagination";
@@ -186,24 +187,23 @@ export function Ga4InsightsPage({ projectId }: { projectId: string }) {
   return (
     <div className="overflow-auto px-4 py-4 pb-24 md:px-6 md:py-6 md:pb-8">
       <div className="mx-auto max-w-7xl space-y-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">GA4 Insights</h1>
-            <p className="text-sm text-base-content/70">
-              See this site&apos;s traffic, sessions, users, and engagement from
-              Google Analytics 4.
-            </p>
-          </div>
-          {report?.connected ? (
-            <button
-              type="button"
-              onClick={() => setIsChangingProperty(true)}
-              className="link link-hover shrink-0 self-start text-sm font-medium text-base-content/60 transition-colors hover:text-base-content sm:mt-1"
-            >
-              Change property
-            </button>
-          ) : null}
-        </div>
+        <FeatureHeader
+          icon={BarChart3}
+          title="GA4 Insights"
+          badge="Traffic & Engagement Analytics"
+          description="See this site's traffic, sessions, active users, and engagement metrics from Google Analytics 4."
+          actions={
+            report?.connected ? (
+              <button
+                type="button"
+                onClick={() => setIsChangingProperty(true)}
+                className="link link-hover shrink-0 text-xs font-medium text-base-content/60 transition-colors hover:text-base-content"
+              >
+                Change property
+              </button>
+            ) : null
+          }
+        />
 
         {reportQuery.isPending ? (
           <Ga4InsightsLoadingState />
@@ -234,7 +234,9 @@ export function Ga4InsightsPage({ projectId }: { projectId: string }) {
 
             <div className="overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xs">
               <div className="flex items-center justify-between border-b border-base-300/70 px-5 py-3.5 bg-base-200/30">
-                <h2 className="text-sm font-bold tracking-tight text-base-content">Sessions over time</h2>
+                <h2 className="text-sm font-bold tracking-tight text-base-content">
+                  Sessions over time
+                </h2>
                 {reportQuery.isFetching && !reportQuery.isPending ? (
                   <Loader2 className="size-4 animate-spin text-base-content/40" />
                 ) : null}

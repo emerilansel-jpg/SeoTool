@@ -1,4 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { Search } from "lucide-react";
+import { FeatureHeader } from "@/client/components/FeatureHeader";
 import { KeywordResearchPage } from "@/client/features/keywords/page/KeywordResearchPage";
 import {
   isResultLimit,
@@ -46,16 +48,12 @@ function KeywordResearchPageRoute() {
     return (
       <div className="overflow-auto px-4 py-4 pb-24 md:px-6 md:py-6 md:pb-8">
         <div className="mx-auto max-w-7xl space-y-5">
-          <div>
-            <div className="mb-1 flex items-center gap-2">
-              <h1 className="text-2xl font-semibold">Keyword Research</h1>
-              <span className="badge badge-primary badge-sm">PRO</span>
-            </div>
-            <p className="max-w-3xl text-sm text-base-content/70">
-              Combine KGR, weak page-one signals and optional live backlink
-              competition in one opportunity report.
-            </p>
-          </div>
+          <FeatureHeader
+            icon={Search}
+            title="Keyword Research"
+            badge="Keyword Golden Ratio & Deep SERP"
+            description="Combine KGR, weak page-one signals and optional live backlink competition in one opportunity report."
+          />
           <KeywordResearchViewTabs projectId={projectId} active="pro" />
           <KeywordResearchProPage projectId={projectId} />
         </div>

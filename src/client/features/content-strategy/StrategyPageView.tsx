@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, Target } from "lucide-react";
+import { FeatureHeader } from "@/client/components/FeatureHeader";
 import {
   listTopicClusters,
   listContentBriefs,
@@ -97,21 +98,22 @@ export function StrategyPageView({ projectId }: { projectId: string }) {
   );
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-semibold">Content Strategy</h1>
-          <p className="text-sm text-base-content/70">
-            Plan topic clusters and manage targeted content briefs.
-          </p>
-        </div>
-        <button
-          className="btn btn-primary"
-          onClick={() => setClusterModal({ open: true })}
-        >
-          <Plus className="size-4" /> New Cluster
-        </button>
-      </div>
+    <div className="p-4 sm:p-6">
+      <FeatureHeader
+        icon={Target}
+        title="Content Strategy"
+        badge="Topic Clusters & Content Plans"
+        description="Plan topic clusters, prioritize high-value content opportunities, and manage targeted briefs."
+        className="mb-6 sm:mb-8"
+        actions={
+          <button
+            className="btn btn-sm btn-primary rounded-xl font-semibold gap-1.5 shadow-xs"
+            onClick={() => setClusterModal({ open: true })}
+          >
+            <Plus className="size-4" /> New Cluster
+          </button>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {clusters.map((cluster) => (

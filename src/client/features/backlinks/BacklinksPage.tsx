@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import type { SortingState, Updater } from "@tanstack/react-table";
+import { Link2 } from "lucide-react";
+import { FeatureHeader } from "@/client/components/FeatureHeader";
 import { BacklinksSearchCard } from "./BacklinksSearchCard";
 import { BacklinksBody } from "./BacklinksPageContent";
 import type { BacklinksPageProps } from "./backlinksPageTypes";
@@ -191,13 +193,12 @@ export function BacklinksPage({
   return (
     <div className="px-4 py-4 pb-24 overflow-auto md:px-6 md:py-6 md:pb-8">
       <div className="mx-auto max-w-7xl space-y-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Backlinks</h1>
-          <p className="text-sm text-base-content/70">
-            Understand who links to a site, what changed recently, and which
-            pages attract links.
-          </p>
-        </div>
+        <FeatureHeader
+          icon={Link2}
+          title="Backlinks"
+          badge="Referring Domains & Link Profile"
+          description="Monitor inbound links, anchor distribution, referring domains, and link quality."
+        />
 
         <BacklinksSearchCard
           provider={searchState.provider}

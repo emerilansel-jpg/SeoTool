@@ -1,7 +1,8 @@
 /* eslint-disable max-lines, max-lines-per-function -- Domain Overview keeps page-only orchestration colocated to avoid fake indirection. */
 import { useCallback, useEffect, useMemo, useRef, type FormEvent } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Globe } from "lucide-react";
+import { FeatureHeader } from "@/client/components/FeatureHeader";
 import { toast } from "sonner";
 import {
   DEFAULT_DOMAIN_KEYWORDS_PAGE_SIZE,
@@ -544,13 +545,12 @@ export function DomainOverviewPage({
   return (
     <div className="px-4 py-4 md:px-6 md:py-6 pb-24 md:pb-8 overflow-auto">
       <div className="mx-auto max-w-7xl space-y-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Domain Overview</h1>
-          <p className="text-sm text-base-content/70">
-            Analyze any domain&apos;s SEO profile: traffic, keywords, and
-            backlinks.
-          </p>
-        </div>
+        <FeatureHeader
+          icon={Globe}
+          title="Domain Overview"
+          badge="Authority, Traffic & Metrics"
+          description="Analyze search traffic, authority metrics, and top-performing organic pages for any domain."
+        />
 
         <DomainSearchCard
           controlsForm={state.controlsForm}

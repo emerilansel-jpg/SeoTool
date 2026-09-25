@@ -6,8 +6,10 @@ import {
   ArrowLeft,
   BarChart3,
   Quote,
+  Sparkles,
   TrendingUp,
 } from "lucide-react";
+import { FeatureHeader } from "@/client/components/FeatureHeader";
 import { lookupBrand } from "@/serverFunctions/ai-search";
 import {
   HostedPlanGate,
@@ -201,12 +203,12 @@ function BrandLookupPageInner({
   return (
     <div className="px-4 py-4 pb-24 overflow-auto md:px-6 md:py-6 md:pb-8">
       <div className="mx-auto max-w-7xl space-y-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Brand Lookup</h1>
-          <p className="text-sm text-base-content/70">
-            See how AI search cites any brand name or domain.
-          </p>
-        </div>
+        <FeatureHeader
+          icon={Sparkles}
+          title="Brand Lookup"
+          badge="Entity & Knowledge Graph"
+          description="See how AI search engines cite any brand name or domain in their generative responses."
+        />
 
         {planGate.isFreePlan ? (
           <AiSearchPaidPlanGate
