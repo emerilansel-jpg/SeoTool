@@ -223,7 +223,7 @@ export function KeywordResearchPage(input: Props) {
 
   return (
     <div className="px-4 py-4 md:px-6 md:py-6 pb-24 md:pb-8 overflow-auto">
-      <div className="mx-auto flex max-w-7xl flex-col gap-5">
+      <div className="mx-auto flex max-w-7xl flex-col gap-5 sm:gap-6">
         <FeatureHeader
           icon={Search}
           title="Keyword Research"

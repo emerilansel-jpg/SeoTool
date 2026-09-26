@@ -98,13 +98,12 @@ export function StrategyPageView({ projectId }: { projectId: string }) {
   );
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-5 sm:space-y-6">
       <FeatureHeader
         icon={Target}
         title="Content Strategy"
         badge="Topic Clusters & Content Plans"
         description="Plan topic clusters, prioritize high-value content opportunities, and manage targeted briefs."
-        className="mb-6 sm:mb-8"
         actions={
           <button
             className="btn btn-sm btn-primary rounded-xl font-semibold gap-1.5 shadow-xs"

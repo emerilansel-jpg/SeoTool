@@ -31,7 +31,7 @@ export function FeatureHeader({
             {badge}
           </span>
         </div>
-        <p className="mt-1 text-xs text-base-content/60 leading-relaxed max-w-2xl">
+        <p className="mt-1.5 text-xs text-base-content/60 leading-relaxed max-w-2xl">
           {description}
         </p>
       </div>

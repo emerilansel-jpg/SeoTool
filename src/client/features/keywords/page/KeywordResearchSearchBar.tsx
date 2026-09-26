@@ -27,9 +27,9 @@ export function KeywordResearchSearchBar({ controller }: Props) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xs">
-      <div className="p-5 gap-2">
+      <div className="p-4 sm:p-5 md:p-6 space-y-4">
         <form
-          className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-start lg:gap-2"
+          className="flex flex-col gap-3 lg:flex-row lg:items-start lg:gap-3"
           onSubmit={handleSearchSubmit}
         >
           <controlsForm.Field name="keyword">
@@ -39,11 +39,11 @@ export function KeywordResearchSearchBar({ controller }: Props) {
 
               return (
                 <label
-                  className={`flex w-full lg:flex-1 lg:min-w-0 lg:max-w-md items-start gap-2 rounded-xl border bg-base-100 px-4 py-3 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 ${
+                  className={`flex w-full lg:flex-1 lg:min-w-[260px] items-start gap-2.5 rounded-xl border bg-base-100 px-3.5 py-2.5 sm:px-4 sm:py-3 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 ${
                     keywordError ? "border-error" : "border-base-300"
                   }`}
                 >
-                  <Search className="mt-0.5 size-4 shrink-0 text-base-content/60" />
+                  <Search className="mt-0.5 sm:mt-1 size-4 shrink-0 text-base-content/60" />
                   <textarea
                     className="grow min-w-0 resize-none bg-transparent text-sm leading-6 outline-none placeholder:text-base-content/40"
                     rows={rows}
@@ -51,9 +51,6 @@ export function KeywordResearchSearchBar({ controller }: Props) {
                     value={field.state.value}
                     onChange={(event) => field.handleChange(event.target.value)}
                     onKeyDown={(event) => {
-                      // Enter submits. Shift+Enter inserts a newline, so
-                      // researching several keywords at once means adding a
-                      // line per keyword (or pasting newline-separated ones).
                       if (event.key === "Enter" && !event.shiftKey) {
                         event.preventDefault();
                         void controlsForm.handleSubmit();
@@ -65,13 +62,13 @@ export function KeywordResearchSearchBar({ controller }: Props) {
             }}
           </controlsForm.Field>
 
-          <div className="grid grid-cols-2 gap-2 lg:contents">
+          <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2.5 shrink-0">
             <controlsForm.Field name="locationCode">
               {(field) => (
                 <LocationSelect
                   value={field.state.value}
                   onChange={(code) => field.handleChange(code)}
-                  className="w-full lg:w-44 lg:shrink-0"
+                  className="w-full sm:w-44 shrink-0"
                 />
               )}
             </controlsForm.Field>
@@ -79,7 +76,7 @@ export function KeywordResearchSearchBar({ controller }: Props) {
             <controlsForm.Field name="resultLimit">
               {(field) => (
                 <select
-                  className="select select-bordered w-full lg:w-auto lg:shrink-0"
+                  className="select select-bordered w-full sm:w-auto shrink-0 rounded-xl font-medium text-xs sm:text-sm"
                   value={field.state.value}
                   onChange={(event) => {
                     const next = Number(event.target.value);
@@ -98,7 +95,7 @@ export function KeywordResearchSearchBar({ controller }: Props) {
             <controlsForm.Field name="mode">
               {(field) => (
                 <select
-                  className="select select-bordered w-full lg:w-auto lg:shrink-0"
+                  className="select select-bordered w-full sm:w-auto shrink-0 rounded-xl font-medium text-xs sm:text-sm"
                   value={field.state.value}
                   onChange={(event) =>
                     field.handleChange(normalizeKeywordMode(event.target.value))
@@ -114,28 +111,30 @@ export function KeywordResearchSearchBar({ controller }: Props) {
 
             <button
               type="submit"
-              className="btn btn-primary rounded-xl font-semibold shadow-xs w-full px-6 lg:w-auto lg:shrink-0"
+              className="btn btn-primary rounded-xl font-semibold shadow-xs w-full px-6 sm:w-auto shrink-0 col-span-2 sm:col-span-1"
             >
               Search
             </button>
           </div>
         </form>
+
         <controlsForm.Field name="keyword">
           {(field) => {
             const keywordError = getFieldError(field.state.meta.errors);
 
             return keywordError ? (
-              <p className="text-sm text-error">{keywordError}</p>
+              <p className="text-xs sm:text-sm text-error">{keywordError}</p>
             ) : null;
           }}
         </controlsForm.Field>
+
         <controlsForm.Field name="locationCode">
           {(locationField) =>
             isLabsLocationCode(locationField.state.value) ? (
               <controlsForm.Field name="clickstream">
                 {(field) => (
-                  <div className="flex items-center gap-2">
-                    <label className="label cursor-pointer justify-start gap-2 p-0">
+                  <div className="pt-3.5 border-t border-base-200/80 flex items-center justify-between">
+                    <label className="label cursor-pointer justify-start gap-2.5 p-0">
                       <input
                         type="checkbox"
                         className="toggle toggle-sm toggle-primary"
@@ -144,22 +143,22 @@ export function KeywordResearchSearchBar({ controller }: Props) {
                           field.handleChange(event.target.checked)
                         }
                       />
-                      <span className="text-sm font-medium text-base-content/80">
+                      <span className="text-xs sm:text-sm font-medium text-base-content/80">
                         Clickstream-refined volumes
                       </span>
                     </label>
                     <div
-                      className="tooltip tooltip-right"
+                      className="tooltip tooltip-left"
                       data-tip="Google reports one combined search volume for similar keywords (e.g. 'seo tool' and 'seo tools'). Turn this on to estimate each keyword's own volume. Costs 2x the credits."
                     >
-                      <Info className="size-3.5 text-base-content/50" />
+                      <Info className="size-3.5 text-base-content/40 cursor-help" />
                     </div>
                   </div>
                 )}
               </controlsForm.Field>
             ) : (
               <div
-                className="flex items-start gap-2 rounded-lg border border-info/30 bg-info/10 px-3 py-2 text-sm text-base-content/80"
+                className="mt-3.5 flex items-start gap-2 rounded-xl border border-info/30 bg-info/10 p-3 text-xs text-base-content/80"
                 role="status"
               >
                 <Info className="mt-0.5 size-4 shrink-0 text-info" />

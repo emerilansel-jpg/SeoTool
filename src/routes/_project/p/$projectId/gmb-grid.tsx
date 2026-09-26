@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_project/p/$projectId/gmb-grid")({
 function GmbGridPage() {
   const { projectId } = Route.useParams();
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-4 pb-24 sm:px-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 sm:gap-6 px-4 py-4 pb-24 sm:px-6">
       <FeatureHeader
         icon={MapPin}
         title="Local Map Rank"
