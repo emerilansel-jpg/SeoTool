@@ -31,7 +31,7 @@ const FAQ_ITEMS = [
   {
     question: "Can I cancel anytime?",
     answer:
-      "Yes. Cancel from your billing page at any time. Your access continues through the end of the current billing period. Note: cancelling means you lose your locked-in cohort rate. If you rejoin later, you will pay the current cohort price.",
+      "Yes. Cancel from your billing page at any time. Your access continues through the end of the current billing period. Note: canceling means you lose your locked-in cohort rate. If you rejoin later, you will pay the current cohort price.",
   },
   {
     question: "Is there a money-back guarantee?",

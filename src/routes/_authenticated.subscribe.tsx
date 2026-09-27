@@ -207,7 +207,7 @@ function SubscribePage() {
 
       {search.checkout === "cancelled" ? (
         <div className="alert alert-warning mx-auto max-w-3xl text-sm">
-          Checkout was cancelled. No membership charge was created.
+          Checkout was canceled. No membership charge was created.
         </div>
       ) : null}
       {search.checkout === "success" ? (

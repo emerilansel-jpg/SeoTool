@@ -87,7 +87,7 @@ function BillingPage() {
         },
       }),
     onSuccess: () => {
-      toast.success("All Access membership cancelled.");
+      toast.success("All Access membership canceled.");
       void queryClient.invalidateQueries({ queryKey: ["membership-status"] });
       void queryClient.invalidateQueries({
         queryKey: ["billing", "plan-tier"],
@@ -312,7 +312,7 @@ function BillingPage() {
           ) : topupStatus === "completed" ? (
             "Payment completed. Your credits will appear as soon as PayPal confirms the webhook."
           ) : topupStatus === "cancelled" ? (
-            "Top-up cancelled. You were not charged."
+            "Top-up canceled. You were not charged."
           ) : (
             "We could not confirm this top-up. Do not start another payment; refresh to retry confirmation or contact support."
           )}

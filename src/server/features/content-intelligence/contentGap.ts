@@ -271,7 +271,7 @@ export function clusterGapTopics(
   return topics.slice(0, maxTopics);
 }
 
-/** Summarise a merged gap list + its topic clusters. */
+/** Summarize a merged gap list + its topic clusters. */
 export function summarizeGap(
   keywords: GapKeyword[],
   topics: GapTopic[],

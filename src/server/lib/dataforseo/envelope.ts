@@ -124,7 +124,7 @@ export function isNoResultsTask(task: DataforseoTaskLike): boolean {
 }
 
 type AssertOkOptions = {
-  /** Maps a recognised access / billing failure to a product error. */
+  /** Maps a recognized access / billing failure to a product error. */
   classify?: DataforseoErrorClassifier;
   /** Request path string handed to the classifier (e.g. "/v3/backlinks/summary/live"). */
   classifyPath?: string;

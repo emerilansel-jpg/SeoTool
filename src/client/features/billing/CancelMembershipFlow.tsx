@@ -61,7 +61,7 @@ export function CancelMembershipFlow({
                 We're sorry to see you go
               </h2>
               <p className="mt-1 text-sm text-base-content/70">
-                What's the main reason you're cancelling? It helps us decide
+                What's the main reason you're canceling? It helps us decide
                 what to fix next.
               </p>
             </div>
@@ -147,7 +147,7 @@ export function CancelMembershipFlow({
                 className="btn btn-ghost btn-sm text-error"
                 onClick={() => setStep("confirm")}
               >
-                No thanks, continue cancelling
+                No thanks, continue canceling
               </button>
             </div>
           </>

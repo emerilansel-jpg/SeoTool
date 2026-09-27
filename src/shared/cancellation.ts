@@ -87,7 +87,7 @@ export function saveOfferForReason(
       };
     case "temporary":
       return {
-        title: "Cancelling ends your lifetime price lock",
+        title: "Canceling ends your lifetime price lock",
         body: `If you pause today and come back later, you'll pay the public price at that time, not your locked $${priceUsd.toFixed(0)}/month. Staying subscribed even while idle keeps your rate and your saved projects, keywords, and reports intact.`,
         ctaLabel: "Keep my price",
         ctaHref: SUPPORT_MAILTO,

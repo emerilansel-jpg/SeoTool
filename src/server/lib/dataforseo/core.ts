@@ -24,7 +24,7 @@ const DATAFORSEO_RETRY_BACKOFF_MS = 250;
 /**
  * Translates a DataForSEO HTTP/task failure into a product-specific AppError
  * (e.g. "billing issue"). Returns null when the failure isn't one this
- * classifier recognises, so the caller can fall back to a generic error. See
+ * classifier recognizes, so the caller can fall back to a generic error. See
  * {@link createDataforseoBillingClassifier}.
  */
 export type DataforseoErrorClassifier = (
@@ -63,7 +63,7 @@ function formatDataforseoRequestPath(url: RequestInfo): string {
  * The single authenticated `fetch` used by every DataForSEO SDK call. Throws on
  * non-2xx so the SDK's own `ApiException` path never fires; task-level failures
  * (which return HTTP 200) are handled downstream by {@link assertOk}. An
- * optional classifier maps recognised HTTP failures to product errors.
+ * optional classifier maps recognized HTTP failures to product errors.
  */
 function createAuthenticatedFetch(
   classify?: DataforseoErrorClassifier,

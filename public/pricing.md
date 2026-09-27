@@ -50,4 +50,4 @@ Every All Access membership includes:
 - Your monthly price never increases while your membership stays active
 - Cancel anytime from your billing page
 - Access continues through the end of the current billing period
-- Cancelling means you lose your locked-in cohort rate
+- Canceling means you lose your locked-in cohort rate
