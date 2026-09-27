@@ -18,6 +18,9 @@ export const listPublishedPosts = createServerFn({ method: "GET" }).handler(
       title: post.title,
       description: post.description,
       publishedAt: post.publishedAt,
+      featuredImage: post.featuredImage,
+      metaTitle: post.metaTitle,
+      metaDescription: post.metaDescription,
     }));
   },
 );

@@ -193,6 +193,7 @@ export const {
   planConfig,
   cmsPosts,
   cmsPages,
+  cmsImages,
   paypalWebhookEvents,
   gmbGridConfigs,
   gmbGridRuns,

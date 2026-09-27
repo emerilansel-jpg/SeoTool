@@ -44,10 +44,26 @@ export const cmsPosts = sqliteTable("cms_posts", {
   status: text("status").notNull().default("draft"),
   publishedAt: text("published_at"),
   authorUserId: text("author_user_id"),
+  featuredImage: text("featured_image"),
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  schemaJson: text("schema_json"),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(current_timestamp)`),
   updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(current_timestamp)`),
+});
+
+/** CMS uploaded images and media. */
+export const cmsImages = sqliteTable("cms_images", {
+  id: text("id").primaryKey(),
+  filename: text("filename").notNull(),
+  mimeType: text("mime_type").notNull(),
+  dataBase64: text("data_base64").notNull(),
+  sizeBytes: integer("size_bytes").notNull(),
+  createdAt: text("created_at")
     .notNull()
     .default(sql`(current_timestamp)`),
 });

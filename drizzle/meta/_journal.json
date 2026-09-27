@@ -463,6 +463,13 @@
       "when": 1789651163768,
       "tag": "0065_fantastic_apocalypse",
       "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "6",
+      "when": 1789700000000,
+      "tag": "0066_cms_post_seo_and_images",
+      "breakpoints": true
     }
   ]
 }

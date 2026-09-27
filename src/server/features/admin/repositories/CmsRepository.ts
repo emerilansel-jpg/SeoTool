@@ -1,6 +1,6 @@
 import { desc, eq, ne, and } from "drizzle-orm";
 import { db } from "@/db";
-import { cmsPages, cmsPosts } from "@/db/schema";
+import { cmsImages, cmsPages, cmsPosts } from "@/db/schema";
 
 // ---------------------------------------------------------------------------
 // CMS storage for blog posts and pages. Admin-facing methods see drafts;
@@ -16,8 +16,21 @@ export interface CmsPostRow {
   status: string;
   publishedAt: string | null;
   authorUserId: string | null;
+  featuredImage?: string | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  schemaJson?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CmsImageRow {
+  id: string;
+  filename: string;
+  mimeType: string;
+  dataBase64: string;
+  sizeBytes: number;
+  createdAt: string;
 }
 
 export interface CmsPageRow {
@@ -69,6 +82,10 @@ export const CmsRepository = {
     status: string;
     publishedAt: string | null;
     authorUserId: string;
+    featuredImage?: string | null;
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    schemaJson?: string | null;
   }): Promise<CmsPostRow> {
     const [row] = await db.insert(cmsPosts).values(values).returning();
     return row;
@@ -83,6 +100,10 @@ export const CmsRepository = {
       contentMd: string;
       status: string;
       publishedAt: string | null;
+      featuredImage: string | null;
+      metaTitle: string | null;
+      metaDescription: string | null;
+      schemaJson: string | null;
     }>,
   ): Promise<CmsPostRow | null> {
     const [row] = await db
@@ -95,6 +116,20 @@ export const CmsRepository = {
 
   async deletePost(id: string): Promise<void> {
     await db.delete(cmsPosts).where(eq(cmsPosts.id, id));
+  },
+
+  async createImage(values: CmsImageRow): Promise<CmsImageRow> {
+    const [row] = await db.insert(cmsImages).values(values).returning();
+    return row;
+  },
+
+  async getImageById(id: string): Promise<CmsImageRow | null> {
+    const rows = await db
+      .select()
+      .from(cmsImages)
+      .where(eq(cmsImages.id, id))
+      .limit(1);
+    return rows[0] ?? null;
   },
 
   async postSlugTaken(slug: string, excludeId?: string): Promise<boolean> {

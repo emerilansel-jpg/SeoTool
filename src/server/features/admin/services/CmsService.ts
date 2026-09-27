@@ -43,6 +43,10 @@ export const CmsService = {
       description?: string;
       contentMd: string;
       published: boolean;
+      featuredImage?: string;
+      metaTitle?: string;
+      metaDescription?: string;
+      schemaJson?: string;
     },
     authorUserId: string,
   ) {
@@ -59,6 +63,10 @@ export const CmsService = {
       status: input.published ? "published" : "draft",
       publishedAt: input.published ? todayIso() : null,
       authorUserId,
+      featuredImage: input.featuredImage ?? null,
+      metaTitle: input.metaTitle ?? null,
+      metaDescription: input.metaDescription ?? null,
+      schemaJson: input.schemaJson ?? null,
     });
   },
 
@@ -69,6 +77,10 @@ export const CmsService = {
     description?: string;
     contentMd: string;
     published: boolean;
+    featuredImage?: string;
+    metaTitle?: string;
+    metaDescription?: string;
+    schemaJson?: string;
   }) {
     const existing = await CmsRepository.getPostById(input.id);
     if (!existing) throw new AppError("NOT_FOUND", "Post not found.");
@@ -95,9 +107,47 @@ export const CmsService = {
         : unpublished
           ? existing.publishedAt
           : existing.publishedAt,
+      featuredImage:
+        input.featuredImage !== undefined
+          ? input.featuredImage || null
+          : existing.featuredImage,
+      metaTitle:
+        input.metaTitle !== undefined
+          ? input.metaTitle || null
+          : existing.metaTitle,
+      metaDescription:
+        input.metaDescription !== undefined
+          ? input.metaDescription || null
+          : existing.metaDescription,
+      schemaJson:
+        input.schemaJson !== undefined
+          ? input.schemaJson || null
+          : existing.schemaJson,
     });
     if (!updated) throw new AppError("NOT_FOUND", "Post not found.");
     return updated;
+  },
+
+  async uploadImage(input: {
+    filename: string;
+    mimeType: string;
+    base64: string;
+  }) {
+    const id = `img_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+    const sizeBytes = Math.ceil((input.base64.length * 3) / 4);
+    const row = await CmsRepository.createImage({
+      id,
+      filename: input.filename,
+      mimeType: input.mimeType,
+      dataBase64: input.base64,
+      sizeBytes,
+      createdAt: todayIso(),
+    });
+    return {
+      id: row.id,
+      filename: row.filename,
+      url: `/api/cms/images/${row.id}`,
+    };
   },
 
   async deletePost(input: { id: string }) {

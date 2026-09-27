@@ -96,10 +96,25 @@ export const createCmsPostSchema = z.object({
   description: z.string().trim().max(500).optional(),
   contentMd: z.string().min(1).max(500000),
   published: z.boolean(),
+  featuredImage: z.string().trim().max(2000).optional(),
+  metaTitle: z.string().trim().max(300).optional(),
+  metaDescription: z.string().trim().max(500).optional(),
+  schemaJson: z.string().trim().max(50000).optional(),
 });
 
 export const updateCmsPostSchema = createCmsPostSchema.extend({
   id: z.string().min(1),
+});
+
+export const uploadCmsImageSchema = z.object({
+  filename: z.string().trim().min(1).max(255),
+  mimeType: z
+    .string()
+    .trim()
+    .regex(/^image\/(png|jpeg|jpg|webp|gif|svg\+xml)$/i, {
+      message: "Unsupported image format.",
+    }),
+  base64: z.string().min(1).max(10_000_000), // ~7.5MB raw image cap
 });
 
 export const deleteCmsItemSchema = z.object({

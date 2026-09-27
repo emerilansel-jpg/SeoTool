@@ -9,6 +9,7 @@ import {
   deleteCmsItemSchema,
   updateCmsPageSchema,
   updateCmsPostSchema,
+  uploadCmsImageSchema,
 } from "@/types/schemas/admin";
 import { CmsService } from "@/server/features/admin/services/CmsService";
 
@@ -46,6 +47,13 @@ export const deleteAdminPost = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await CmsService.deletePost(data);
     return { ok: true };
+  });
+
+export const uploadCmsImage = createServerFn({ method: "POST" })
+  .middleware([requireAuthenticatedContext, requirePlatformAdmin])
+  .validator(uploadCmsImageSchema)
+  .handler(async ({ data }) => {
+    return CmsService.uploadImage(data);
   });
 
 // Pages

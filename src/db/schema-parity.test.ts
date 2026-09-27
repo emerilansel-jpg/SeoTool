@@ -46,6 +46,8 @@ import * as sqliteProjectCompetitors from "./project-competitors.schema";
 import * as pgProjectCompetitors from "./pg/project-competitors.schema";
 import * as sqliteAiTracking from "./ai-tracking.schema";
 import * as pgAiTracking from "./pg/ai-tracking.schema";
+import * as sqliteAdmin from "./admin.schema";
+import * as pgAdmin from "./pg/admin.schema";
 
 // Guards the ONE structural artifact `db:generate` does not regenerate: the
 // hand-written Postgres schema. The provider-aware `db`/`@/db/schema` barrel
@@ -182,6 +184,7 @@ const sqliteAppTables = tablesFrom(
   sqliteCancellationFeedback,
   sqliteProjectCompetitors,
   sqliteAiTracking,
+  sqliteAdmin,
 );
 const pgAppTables = tablesFrom(
   pgApp,
@@ -204,6 +207,7 @@ const pgAppTables = tablesFrom(
   pgCancellationFeedback,
   pgProjectCompetitors,
   pgAiTracking,
+  pgAdmin,
 );
 const sqliteAuthTables = tablesFrom(sqliteAuth);
 const pgAuthTables = tablesFrom(pgAuth);

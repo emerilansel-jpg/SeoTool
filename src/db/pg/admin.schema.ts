@@ -42,8 +42,22 @@ export const cmsPosts = pgTable("cms_posts", {
   status: text("status").notNull().default("draft"),
   publishedAt: text("published_at"),
   authorUserId: text("author_user_id"),
+  featuredImage: text("featured_image"),
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  schemaJson: text("schema_json"),
   createdAt: text("created_at").notNull().default(isoNow),
   updatedAt: text("updated_at").notNull().default(isoNow),
+});
+
+/** CMS uploaded images and media. */
+export const cmsImages = pgTable("cms_images", {
+  id: text("id").primaryKey(),
+  filename: text("filename").notNull(),
+  mimeType: text("mime_type").notNull(),
+  dataBase64: text("data_base64").notNull(),
+  sizeBytes: integer("size_bytes").notNull(),
+  createdAt: text("created_at").notNull().default(isoNow),
 });
 
 /** CMS pages: the legal pages (privacy, terms, ...) plus arbitrary custom

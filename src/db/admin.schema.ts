@@ -2,6 +2,7 @@
 // (./schema.ts) can import it alongside the other top-level SQLite schemas.
 export {
   appSettings,
+  cmsImages,
   cmsPages,
   cmsPosts,
   paypalWebhookEvents,

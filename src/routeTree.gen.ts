@@ -83,6 +83,7 @@ import { Route as ProjectPProjectIdSearchPerformanceRouteImport } from './routes
 import { Route as ProjectPProjectIdSerpVolatilityRouteImport } from './routes/_project/p/$projectId/serp-volatility'
 import { Route as ProjectPProjectIdSettingsRouteImport } from './routes/_project/p/$projectId/settings'
 import { Route as ProjectPProjectIdSitemapValidatorRouteImport } from './routes/_project/p/$projectId/sitemap-validator'
+import { Route as ApiCmsImagesIdRouteImport } from './routes/api/cms/images/$id'
 import { Route as ApiGa4OauthCallbackRouteImport } from './routes/api/ga4/oauth/callback'
 import { Route as ApiGscOauthCallbackRouteImport } from './routes/api/gsc/oauth/callback'
 import { Route as ProjectPProjectIdAlertsIndexRouteImport } from './routes/_project/p/$projectId/alerts/index'
@@ -485,6 +486,11 @@ const ProjectPProjectIdSitemapValidatorRoute =
     path: '/sitemap-validator',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
+const ApiCmsImagesIdRoute = ApiCmsImagesIdRouteImport.update({
+  id: '/api/cms/images/$id',
+  path: '/api/cms/images/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiGa4OauthCallbackRoute = ApiGa4OauthCallbackRouteImport.update({
   id: '/api/ga4/oauth/callback',
   path: '/api/ga4/oauth/callback',
@@ -614,6 +620,7 @@ export interface FileRoutesByFullPath {
   '/p/$projectId/serp-volatility': typeof ProjectPProjectIdSerpVolatilityRoute
   '/p/$projectId/settings': typeof ProjectPProjectIdSettingsRoute
   '/p/$projectId/sitemap-validator': typeof ProjectPProjectIdSitemapValidatorRoute
+  '/api/cms/images/$id': typeof ApiCmsImagesIdRoute
   '/api/ga4/oauth/callback': typeof ApiGa4OauthCallbackRoute
   '/api/gsc/oauth/callback': typeof ApiGscOauthCallbackRoute
   '/admin/api-keys/': typeof AppAdminApiKeysIndexRoute
@@ -692,6 +699,7 @@ export interface FileRoutesByTo {
   '/p/$projectId/serp-volatility': typeof ProjectPProjectIdSerpVolatilityRoute
   '/p/$projectId/settings': typeof ProjectPProjectIdSettingsRoute
   '/p/$projectId/sitemap-validator': typeof ProjectPProjectIdSitemapValidatorRoute
+  '/api/cms/images/$id': typeof ApiCmsImagesIdRoute
   '/api/ga4/oauth/callback': typeof ApiGa4OauthCallbackRoute
   '/api/gsc/oauth/callback': typeof ApiGscOauthCallbackRoute
   '/admin/api-keys': typeof AppAdminApiKeysIndexRoute
@@ -780,6 +788,7 @@ export interface FileRoutesById {
   '/_project/p/$projectId/serp-volatility': typeof ProjectPProjectIdSerpVolatilityRoute
   '/_project/p/$projectId/settings': typeof ProjectPProjectIdSettingsRoute
   '/_project/p/$projectId/sitemap-validator': typeof ProjectPProjectIdSitemapValidatorRoute
+  '/api/cms/images/$id': typeof ApiCmsImagesIdRoute
   '/api/ga4/oauth/callback': typeof ApiGa4OauthCallbackRoute
   '/api/gsc/oauth/callback': typeof ApiGscOauthCallbackRoute
   '/_app/admin/api-keys/': typeof AppAdminApiKeysIndexRoute
@@ -865,6 +874,7 @@ export interface FileRouteTypes {
     | '/p/$projectId/serp-volatility'
     | '/p/$projectId/settings'
     | '/p/$projectId/sitemap-validator'
+    | '/api/cms/images/$id'
     | '/api/ga4/oauth/callback'
     | '/api/gsc/oauth/callback'
     | '/admin/api-keys/'
@@ -943,6 +953,7 @@ export interface FileRouteTypes {
     | '/p/$projectId/serp-volatility'
     | '/p/$projectId/settings'
     | '/p/$projectId/sitemap-validator'
+    | '/api/cms/images/$id'
     | '/api/ga4/oauth/callback'
     | '/api/gsc/oauth/callback'
     | '/admin/api-keys'
@@ -1030,6 +1041,7 @@ export interface FileRouteTypes {
     | '/_project/p/$projectId/serp-volatility'
     | '/_project/p/$projectId/settings'
     | '/_project/p/$projectId/sitemap-validator'
+    | '/api/cms/images/$id'
     | '/api/ga4/oauth/callback'
     | '/api/gsc/oauth/callback'
     | '/_app/admin/api-keys/'
@@ -1073,6 +1085,7 @@ export interface RootRouteChildren {
   PagesSlugRoute: typeof PagesSlugRoute
   BlogsIndexRoute: typeof BlogsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiCmsImagesIdRoute: typeof ApiCmsImagesIdRoute
   ApiGa4OauthCallbackRoute: typeof ApiGa4OauthCallbackRoute
   ApiGscOauthCallbackRoute: typeof ApiGscOauthCallbackRoute
 }
@@ -1597,6 +1610,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectPProjectIdSitemapValidatorRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
+    '/api/cms/images/$id': {
+      id: '/api/cms/images/$id'
+      path: '/api/cms/images/$id'
+      fullPath: '/api/cms/images/$id'
+      preLoaderRoute: typeof ApiCmsImagesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ga4/oauth/callback': {
       id: '/api/ga4/oauth/callback'
       path: '/api/ga4/oauth/callback'
@@ -1930,6 +1950,7 @@ const rootRouteChildren: RootRouteChildren = {
   PagesSlugRoute: PagesSlugRoute,
   BlogsIndexRoute: BlogsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiCmsImagesIdRoute: ApiCmsImagesIdRoute,
   ApiGa4OauthCallbackRoute: ApiGa4OauthCallbackRoute,
   ApiGscOauthCallbackRoute: ApiGscOauthCallbackRoute,
 }

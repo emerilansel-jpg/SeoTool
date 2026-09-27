@@ -3,15 +3,40 @@ import {
   MarketingChrome,
   useMarketingSession,
 } from "@/client/features/marketing/MarketingChrome";
-import { Markdown } from "@/client/components/Markdown";
-import { getPublishedPost } from "@/serverFunctions/cms-public";
+import {
+  getPublishedPost,
+  listPublishedPosts,
+} from "@/serverFunctions/cms-public";
+import {
+  getPostMetadata,
+  calculateReadTime,
+  extractHeadings,
+} from "@/client/features/blog/blogMetadata";
+import { BlogHeroHeader } from "@/client/features/blog/BlogHeroHeader";
+import { BlogSocialRail } from "@/client/features/blog/BlogSocialRail";
+import { BlogSidebar } from "@/client/features/blog/BlogSidebar";
+import { EditorialMarkdown } from "@/client/features/blog/EditorialMarkdown";
+import { BlogTopicsList } from "@/client/features/blog/BlogTopicsList";
+import { BlogAuthorBio } from "@/client/features/blog/BlogAuthorBio";
+import {
+  BlogRelatedPosts,
+  type RelatedPostItem,
+} from "@/client/features/blog/BlogRelatedPosts";
 
 export const Route = createFileRoute("/blogs/$slug")({
-  // Public read path via server fn (a direct repository import would drag
-  // cloudflare:workers into the client bundle).
   loader: async ({ params }) => {
     const post = await getPublishedPost({ data: { slug: params.slug } });
     if (!post) throw notFound();
+
+    const allPostsRaw = await listPublishedPosts({ data: undefined });
+    const allPosts = allPostsRaw as RelatedPostItem[];
+    const relatedPosts = allPosts
+      .filter((p) => p.slug !== post.slug)
+      .slice(0, 3);
+
+    const readTimeMinutes = calculateReadTime(post.contentMd);
+    const headings = extractHeadings(post.contentMd);
+
     return {
       post: {
         slug: post.slug,
@@ -19,49 +44,149 @@ export const Route = createFileRoute("/blogs/$slug")({
         description: post.description,
         contentMd: post.contentMd,
         publishedAt: post.publishedAt,
+        featuredImage: post.featuredImage,
+        metaTitle: post.metaTitle,
+        metaDescription: post.metaDescription,
+        schemaJson: post.schemaJson,
       },
+      relatedPosts,
+      readTimeMinutes,
+      headings,
     };
   },
-  head: ({ loaderData }) => ({
-    meta: [
-      {
-        title: loaderData
-          ? `${loaderData.post.title} - SeoTool.im Blog`
-          : "Blog - SeoTool.im",
+  head: ({ loaderData }) => {
+    if (!loaderData) {
+      return { meta: [{ title: "Blog - SeoTool.im" }] };
+    }
+
+    const { post, readTimeMinutes } = loaderData;
+    const meta = getPostMetadata(post.slug, post.title);
+    const canonicalUrl = `https://seotool.im/blogs/${post.slug}`;
+
+    const effectiveTitle = post.metaTitle?.trim()
+      ? `${post.metaTitle} - SeoTool.im Blog`
+      : `${post.title} - SeoTool.im Blog`;
+    const effectiveDescription =
+      post.metaDescription?.trim() || post.description;
+    const effectiveImage =
+      post.featuredImage?.trim() ||
+      meta.heroImage ||
+      "https://seotool.im/logo.png";
+
+    let customSchema: Record<string, unknown> | null = null;
+    if (post.schemaJson?.trim()) {
+      try {
+        customSchema = JSON.parse(post.schemaJson);
+      } catch {
+        customSchema = null;
+      }
+    }
+
+    const defaultSchema = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: post.metaTitle?.trim() || post.title,
+      description: effectiveDescription,
+      image: effectiveImage,
+      datePublished: post.publishedAt,
+      author: {
+        "@type": "Person",
+        name: meta.author.name,
+        jobTitle: meta.author.role,
       },
-      ...(loaderData?.post.description
-        ? [{ name: "description", content: loaderData.post.description }]
-        : []),
-    ],
-  }),
+      publisher: {
+        "@type": "Organization",
+        name: "SeoTool.im",
+        url: "https://seotool.im",
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonicalUrl,
+      },
+    };
+
+    const finalSchema = customSchema ?? defaultSchema;
+
+    return {
+      meta: [
+        { title: effectiveTitle },
+        ...(effectiveDescription
+          ? [
+              { name: "description", content: effectiveDescription },
+              { property: "og:description", content: effectiveDescription },
+              { name: "twitter:description", content: effectiveDescription },
+            ]
+          : []),
+        { property: "og:title", content: post.metaTitle || post.title },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: canonicalUrl },
+        { property: "og:image", content: effectiveImage },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: post.metaTitle || post.title },
+        { name: "twitter:image", content: effectiveImage },
+        ...(post.publishedAt
+          ? [{ property: "article:published_time", content: post.publishedAt }]
+          : []),
+        { property: "article:author", content: meta.author.name },
+        { property: "article:section", content: meta.category },
+        { name: "twitter:label1", content: "Reading time" },
+        { name: "twitter:data1", content: `${readTimeMinutes} min read` },
+      ],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(finalSchema),
+        },
+      ],
+    };
+  },
   component: BlogPostPage,
 });
 
 function BlogPostPage() {
   const { signedIn } = useMarketingSession();
-  const { post } = Route.useLoaderData();
+  const { post, relatedPosts, readTimeMinutes, headings } =
+    Route.useLoaderData();
+  const meta = getPostMetadata(post.slug, post.title);
+  const currentUrl = `https://seotool.im/blogs/${post.slug}`;
+  const displayHeroImage = post.featuredImage || meta.heroImage;
 
   return (
     <MarketingChrome signedIn={signedIn}>
-      <article className="mx-auto w-full max-w-3xl px-4 py-16 md:px-6 md:py-20">
-        <header className="border-b border-base-300 pb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">
-            {post.title}
-          </h1>
-          {post.publishedAt ? (
-            <p className="mt-3 text-sm text-base-content/50">
-              {new Date(post.publishedAt).toLocaleDateString(undefined, {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </p>
-          ) : null}
-        </header>
-        <div className="mt-8">
-          <Markdown>{post.contentMd}</Markdown>
+      {/* Search Engine Land / SEJ Style Editorial Header */}
+      <BlogHeroHeader
+        title={post.title}
+        description={post.description}
+        category={meta.category}
+        publishedAt={post.publishedAt}
+        readTimeMinutes={readTimeMinutes}
+        featuredImage={displayHeroImage}
+      />
+
+      {/* 3-Column Editorial Body Layout */}
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-12">
+          {/* Left Column: Author Byline & Social Share Rail */}
+          <BlogSocialRail
+            author={meta.author}
+            url={currentUrl}
+            title={post.title}
+          />
+
+          {/* Center Column: Editorial Article Body */}
+          <article className="min-w-0 flex-1 max-w-3xl">
+            <EditorialMarkdown>{post.contentMd}</EditorialMarkdown>
+            <BlogTopicsList topics={meta.topics} />
+            <BlogAuthorBio author={meta.author} />
+          </article>
+
+          {/* Right Column: Sticky Sidebar with Newsletter, Audit, & TOC */}
+          <BlogSidebar headings={headings} />
         </div>
-      </article>
+      </div>
+
+      {/* Bottom Section: Related Articles Grid */}
+      <BlogRelatedPosts posts={relatedPosts} />
     </MarketingChrome>
   );
 }
