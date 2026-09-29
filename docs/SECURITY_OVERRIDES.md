@@ -28,7 +28,7 @@ pinned at 0.35.2 despite an override).
 | `sharp`         | `^0.35.4`  | GHSA-rgj7-g3m4-5g8c (libheif) — was pinned `0.35.2` by `miniflare` alpha                            | `@cloudflare/vite-plugin` → `miniflare`                                         | `miniflare` stable pins `>=0.35.4` |
 | `smol-toml`     | `^1.7.1`   | GHSA-v3rj-xjv7-4jmq (DoS via malformed TOML, patched `>=1.7.1`)                                     | `knip`                                                                          | `knip` bumps past floor            |
 | `toml`          | `^4.2.0`   | GHSA-82x6-q7mm-w9cf (uncontrolled recursion)                                                        | `effect` (`effect@4.0.0-beta.93` pins `toml@4.1.2`)                             | `effect` beta bumps past floor     |
-| `undici`        | `>=7.29.0` | 7 advisories incl. GHSA-vmh5-mc38-953g                                                              | `cheerio` + `miniflare`                                                         | parents bump past floor            |
+| `undici`        | `>=7.29.1` | 9 advisories incl. GHSA-vmh5-mc38-953g + GHSA-8436-99hf-9mmv (DoS) + TLS validation bypass          | `cheerio` + `miniflare`                                                         | parents bump past floor            |
 
 Ranges are **major-bounded (`^`) on purpose**: an override REPLACES the
 parent's range, so an open-ended `>=` floor would let a future major (e.g.

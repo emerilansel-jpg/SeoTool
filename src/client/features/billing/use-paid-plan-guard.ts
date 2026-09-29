@@ -34,13 +34,17 @@ export function usePaidPlanGuard(onboardingIncomplete: boolean = false) {
     }
 
     // Platform admins keep admin-area access even on a free org; the admin
-    // server functions enforce requirePlatformAdmin independently.
+    // server functions enforce requirePlatformAdmin independently. /projects
+    // stays reachable for free users: the FREE tier on /subscribe promises
+    // "browse your workspace and set up projects" (metered tools stay gated
+    // by the project-layout guard and the paidPlanGate server middleware).
     const isExemptPath =
       typeof window !== "undefined" &&
       (window.location.pathname.startsWith("/admin") ||
         window.location.pathname.startsWith("/help") ||
         window.location.pathname.startsWith("/support") ||
         window.location.pathname.startsWith("/settings") ||
+        window.location.pathname === "/projects" ||
         window.location.pathname.startsWith("/billing"));
     const isKeywordProPath =
       typeof window !== "undefined" &&
@@ -69,6 +73,7 @@ export function usePaidPlanGuard(onboardingIncomplete: boolean = false) {
       window.location.pathname.startsWith("/help") ||
       window.location.pathname.startsWith("/support") ||
       window.location.pathname.startsWith("/settings") ||
+      window.location.pathname === "/projects" ||
       window.location.pathname.startsWith("/billing"));
   const isKeywordProPath =
     typeof window !== "undefined" &&
