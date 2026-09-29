@@ -41,5 +41,3 @@ export const JetProjectMemoryRepository = {
   getBlock,
   setBlock,
 } as const;
-
-export const SamProjectMemoryRepository = JetProjectMemoryRepository;

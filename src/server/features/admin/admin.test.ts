@@ -1,4 +1,5 @@
 // oxlint-disable typescript-eslint/unbound-method -- expect() needs direct references to mocked repository methods
+// oxlint-disable max-lines -- PayPal config coverage pushes the suite past the 400-line limit
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Repository mocks keep these service tests off the database entirely.
@@ -338,9 +339,19 @@ describe("AdminSettingsService: editable key guard", () => {
         configured: true,
       },
     ]);
-    getRequiredEnv.mockImplementation(async (k: string) => k === "PAYPAL_WEBHOOK_ID" ? (() => { throw new Error("M"); })() : "live");
-    await expect(AdminSettingsService.testPaypalConfiguration()).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
-    getRequiredEnv.mockImplementation(async (key: string) => key === "PAYPAL_MODE" ? "live" : "WH-123");
+    getRequiredEnv.mockImplementation(async (k: string) =>
+      k === "PAYPAL_WEBHOOK_ID"
+        ? (() => {
+            throw new Error("M");
+          })()
+        : "live",
+    );
+    await expect(
+      AdminSettingsService.testPaypalConfiguration(),
+    ).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
+    getRequiredEnv.mockImplementation(async (key: string) =>
+      key === "PAYPAL_MODE" ? "live" : "WH-123",
+    );
     getPaypalPlan.mockImplementation(async (planId: string) => {
       const priceById: Record<string, string> = {
         "starter-plan": "1.00",

@@ -8,7 +8,9 @@ import type { Page } from "@playwright/test";
  */
 export async function getE2EProjectId(page: Page): Promise<string> {
   await page.goto("/projects");
-  const projectLink = page.locator('main a[href^="/p/"], a[href^="/p/"]:visible').first();
+  const projectLink = page
+    .locator('main a[href^="/p/"], a[href^="/p/"]:visible')
+    .first();
   await projectLink.waitFor({ state: "visible", timeout: 30_000 });
   const href = await projectLink.getAttribute("href");
   const match = href?.match(/\/p\/([^/]+)/);

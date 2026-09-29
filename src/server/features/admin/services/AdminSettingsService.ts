@@ -127,7 +127,7 @@ export const AdminSettingsService = {
     } catch {
       throw new AppError(
         "VALIDATION_ERROR",
-        'PAYPAL_MODE is missing. Please configure PAYPAL_MODE.',
+        "PAYPAL_MODE is missing. Please configure PAYPAL_MODE.",
       );
     }
     if (mode !== "live" && mode !== "sandbox") {
@@ -248,7 +248,10 @@ export const AdminSettingsService = {
     } catch (error) {
       if (error instanceof AppError) throw error;
       const message = error instanceof Error ? error.message : String(error);
-      throw new AppError("VALIDATION_ERROR", `PayPal verification failed: ${message}`);
+      throw new AppError(
+        "VALIDATION_ERROR",
+        `PayPal verification failed: ${message}`,
+      );
     }
   },
 };

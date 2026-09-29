@@ -34,7 +34,10 @@ export const AUTHORS: Record<string, AuthorInfo> = {
   },
 };
 
-export const POST_METADATA_REGISTRY: Record<string, Partial<PostExtraMetadata>> = {
+export const POST_METADATA_REGISTRY: Record<
+  string,
+  Partial<PostExtraMetadata>
+> = {
   "dark-queries": {
     category: "Google Search Console",
     author: AUTHORS["jeremy-rivera"],
@@ -89,7 +92,12 @@ export function getPostMetadata(
   fallbackTitle = "",
 ): PostExtraMetadata {
   const configured = POST_METADATA_REGISTRY[slug];
-  if (configured && configured.category && configured.author && configured.topics) {
+  if (
+    configured &&
+    configured.category &&
+    configured.author &&
+    configured.topics
+  ) {
     return {
       category: configured.category,
       author: configured.author,
@@ -99,7 +107,9 @@ export function getPostMetadata(
   }
 
   // Derive sensible fallback
-  const defaultCategory = slug.includes("seo") ? "SEO Strategy" : "Search Intelligence";
+  const defaultCategory = slug.includes("seo")
+    ? "SEO Strategy"
+    : "Search Intelligence";
   const defaultTopics = fallbackTitle
     ? [defaultCategory, ...fallbackTitle.split(" ").slice(0, 3)]
     : [defaultCategory, "SEO", "Search"];

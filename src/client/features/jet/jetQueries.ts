@@ -11,6 +11,3 @@ export const jetSessionsQueryOptions = (projectId: string) =>
 export function invalidateJetSessions(projectId: string) {
   void queryClient.invalidateQueries({ queryKey: ["jetSessions", projectId] });
 }
-
-export const samSessionsQueryOptions = jetSessionsQueryOptions;
-export const invalidateSamSessions = invalidateJetSessions;

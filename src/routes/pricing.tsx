@@ -336,8 +336,9 @@ function PricingPage() {
             Looking for a lighter commitment? Start from $1/month
           </h3>
           <p className="mt-2 text-sm text-base-content/70">
-            Every dollar is 100% converted into permanent credits (1,000 credits per dollar)
-            that roll over and never expire. Even if you cancel, your credit balance stays yours.
+            Every dollar is 100% converted into permanent credits (1,000 credits
+            per dollar) that roll over and never expire. Even if you cancel,
+            your credit balance stays yours.
           </p>
           <div className="mt-4">
             <Link

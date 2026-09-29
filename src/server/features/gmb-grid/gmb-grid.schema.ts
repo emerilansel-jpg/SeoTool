@@ -44,4 +44,3 @@ export const RetryGmbGridPinsSchema = z.object({
   projectId: z.string().min(1),
   runId: z.string().uuid(),
 });
-

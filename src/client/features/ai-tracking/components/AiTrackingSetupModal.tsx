@@ -79,7 +79,10 @@ export function AiTrackingSetupModal({
     <Modal maxWidth="max-w-lg" onClose={onClose} labelledBy="setup-title">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <h3 id="setup-title" className="text-xl font-bold tracking-tight text-base-content">
+          <h3
+            id="setup-title"
+            className="text-xl font-bold tracking-tight text-base-content"
+          >
             {initialConfig ? "Edit AI Tracking Settings" : "Setup AI Tracking"}
           </h3>
           <p className="mt-1 text-xs text-base-content/60">
@@ -88,7 +91,9 @@ export function AiTrackingSetupModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-base-content/80">Brand Name</label>
+          <label className="text-xs font-semibold text-base-content/80">
+            Brand Name
+          </label>
           <input
             type="text"
             className="input input-bordered input-sm rounded-xl w-full"
@@ -100,7 +105,9 @@ export function AiTrackingSetupModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-base-content/80">Domain</label>
+          <label className="text-xs font-semibold text-base-content/80">
+            Domain
+          </label>
           <input
             type="text"
             className="input input-bordered input-sm rounded-xl w-full"
@@ -154,7 +161,9 @@ export function AiTrackingSetupModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-base-content/80">Check Schedule</label>
+          <label className="text-xs font-semibold text-base-content/80">
+            Check Schedule
+          </label>
           <select
             className="select select-bordered select-sm rounded-xl text-xs w-full"
             value={schedule}

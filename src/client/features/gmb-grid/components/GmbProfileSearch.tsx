@@ -37,7 +37,8 @@ export function GmbProfileSearch({
 }) {
   const projectMarket = useProjectMarket(projectId);
   const defaultLocation = projectMarket?.locationCode ?? DEFAULT_LOCATION_CODE;
-  const [internalLocationCode, setInternalLocationCode] = useState(defaultLocation);
+  const [internalLocationCode, setInternalLocationCode] =
+    useState(defaultLocation);
 
   useEffect(() => {
     if (projectMarket?.locationCode && !externalLocationCode) {
@@ -82,7 +83,12 @@ export function GmbProfileSearch({
   const handleManualSubmit = () => {
     const lat = parseFloat(manualLat);
     const lng = parseFloat(manualLng);
-    if (!manualName.trim() || !manualPlaceId.trim() || isNaN(lat) || isNaN(lng)) {
+    if (
+      !manualName.trim() ||
+      !manualPlaceId.trim() ||
+      isNaN(lat) ||
+      isNaN(lng)
+    ) {
       return;
     }
     onSelect({
@@ -116,7 +122,8 @@ export function GmbProfileSearch({
       {showManual ? (
         <div className="space-y-3 rounded-lg border border-base-300 bg-base-200/40 p-3 text-sm">
           <p className="text-xs text-base-content/70">
-            Specify business details and coordinates directly if not found via search.
+            Specify business details and coordinates directly if not found via
+            search.
           </p>
           <label className="form-control gap-1">
             <span className="text-xs font-medium">Business Name</span>
@@ -229,8 +236,8 @@ export function GmbProfileSearch({
             </button>
           </div>
           <p className="text-xs text-base-content/60">
-            Select the exact listing. Ranking is matched by Google Place ID, not by
-            a similar business name.
+            Select the exact listing. Ranking is matched by Google Place ID, not
+            by a similar business name.
           </p>
 
           {search.isError && (
@@ -245,8 +252,9 @@ export function GmbProfileSearch({
                 No matching listings found in {activeCountry}.
               </p>
               <p className="text-xs text-base-content/70">
-                Make sure the Target Country above matches where the business is located,
-                or append the city name (e.g. &ldquo;Pakuwon Mall Surabaya&rdquo;).
+                Make sure the Target Country above matches where the business is
+                located, or append the city name (e.g. &ldquo;Pakuwon Mall
+                Surabaya&rdquo;).
               </p>
             </div>
           )}

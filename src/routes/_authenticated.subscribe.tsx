@@ -307,9 +307,9 @@ function SubscribePage() {
             </button>
             {!cohort?.configured ? (
               <p className="text-xs text-warning">
-                Payments are being set up right now — please check back soon,
-                or email support@seotool.im and we&apos;ll let you know the
-                moment checkout is live.
+                Payments are being set up right now — please check back soon, or
+                email support@seotool.im and we&apos;ll let you know the moment
+                checkout is live.
               </p>
             ) : null}
           </div>
@@ -322,9 +322,7 @@ function SubscribePage() {
                 <span className="badge badge-ghost badge-sm">
                   CREDIT RETAINER
                 </span>
-                <h2 className="mt-2 text-xl font-semibold">
-                  Starter Retainer
-                </h2>
+                <h2 className="mt-2 text-xl font-semibold">Starter Retainer</h2>
                 <p className="text-xs text-base-content/60">
                   From $1/month — 100% becomes credit that never expires
                 </p>

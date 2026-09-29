@@ -90,7 +90,3 @@ export const renameJetSession = createServerFn({ method: "POST" })
   });
 
 // Backward-compatibility aliases
-export const listSamSessions = listJetSessions;
-export const createSamSession = createJetSession;
-export const archiveSamSession = archiveJetSession;
-export const renameSamSession = renameJetSession;

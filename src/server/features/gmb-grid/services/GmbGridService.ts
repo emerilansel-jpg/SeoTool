@@ -1,6 +1,9 @@
 import { env } from "cloudflare:workers";
 import { z } from "zod";
-import { customerHasPaidPlan, type BillingCustomerContext } from "@/server/billing/subscription";
+import {
+  customerHasPaidPlan,
+  type BillingCustomerContext,
+} from "@/server/billing/subscription";
 import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import { createDataforseoClient } from "@/server/lib/dataforseo";
 import { AppError } from "@/server/lib/errors";

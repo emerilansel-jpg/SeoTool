@@ -52,5 +52,3 @@ export const jetProjectMemory = sqliteTable(
 );
 
 // Backward-compatibility aliases
-export const samSessions = jetSessions;
-export const samProjectMemory = jetProjectMemory;

@@ -1,4 +1,5 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { z } from "zod";
 import {
   MarketingChrome,
   useMarketingSession,
@@ -22,6 +23,8 @@ import {
   BlogRelatedPosts,
   type RelatedPostItem,
 } from "@/client/features/blog/BlogRelatedPosts";
+
+const schemaObject = z.record(z.string(), z.unknown());
 
 export const Route = createFileRoute("/blogs/$slug")({
   loader: async ({ params }) => {
@@ -76,7 +79,8 @@ export const Route = createFileRoute("/blogs/$slug")({
     let customSchema: Record<string, unknown> | null = null;
     if (post.schemaJson?.trim()) {
       try {
-        customSchema = JSON.parse(post.schemaJson);
+        const parsed = schemaObject.safeParse(JSON.parse(post.schemaJson));
+        customSchema = parsed.success ? parsed.data : null;
       } catch {
         customSchema = null;
       }

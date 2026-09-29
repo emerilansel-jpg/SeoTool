@@ -34,10 +34,7 @@ export function BlogHeroHeader({
           aria-label="Breadcrumb"
           className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-base-content/60"
         >
-          <Link
-            to="/blogs"
-            className="transition-colors hover:text-primary"
-          >
+          <Link to="/blogs" className="transition-colors hover:text-primary">
             Blogs
           </Link>
           <ChevronRight className="size-3 text-base-content/40" />

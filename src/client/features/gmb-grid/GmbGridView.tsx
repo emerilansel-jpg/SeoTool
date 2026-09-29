@@ -38,7 +38,9 @@ export function GmbGridView({ projectId }: { projectId: string }) {
   const queryClient = useQueryClient();
 
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
-  const [locationCode, setLocationCode] = useState<number | undefined>(undefined);
+  const [locationCode, setLocationCode] = useState<number | undefined>(
+    undefined,
+  );
   const [selectedProfile, setSelectedProfile] =
     useState<GmbProfileSelection | null>(null);
   const [keyword, setKeyword] = useState("");

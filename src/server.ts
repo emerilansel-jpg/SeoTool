@@ -5,9 +5,7 @@ import {
 import { routeAgentRequest } from "agents";
 import { resolveUserContextFromHeaders } from "@/middleware/ensure-user/resolve";
 import { ProjectRepository } from "@/server/features/projects/repositories/ProjectRepository";
-import {
-  JetSessionRepository,
-} from "@/server/features/jet/JetSessionRepository";
+import { JetSessionRepository } from "@/server/features/jet/JetSessionRepository";
 import { runScheduledRankChecks } from "@/server/features/rank-tracking/services/scheduledRankChecks";
 import { runScheduledReports } from "@/server/features/reports/services/scheduledReports";
 import { runScheduledAlerts } from "@/server/features/alerts/services/scheduledAlerts";
@@ -168,7 +166,7 @@ export { GmbGridWorkflow } from "./server/workflows/GmbGridWorkflow";
 // Durable Object class for the onboarding strategy chat (Agents SDK).
 export { OnboardingChatAgent } from "./server/features/onboarding/OnboardingChatAgent";
 // Durable Object class for the Jet in-app agent (Agents SDK).
-export { JetChatAgent, SamChatAgent } from "./server/features/jet/JetChatAgent";
+export { JetChatAgent } from "./server/features/jet/JetChatAgent";
 
 export default {
   fetch,

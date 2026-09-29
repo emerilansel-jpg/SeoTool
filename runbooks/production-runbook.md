@@ -43,13 +43,13 @@ Stack lives at `/home/seotool/JetDigitalSEO` on the VPS. Deploy = push to
 
 ## Logs, backups, monitoring
 
-| What | Where |
-| --- | --- |
-| App logs | `docker compose -f docker-compose.hosted.yaml logs -f open-seo` |
-| Caddy logs | `docker compose -f gateway-caddy/docker-compose.yml logs seotool-caddy` |
-| Errors (granular) | PostHog dashboard → Exceptions (client + server capture already wired) |
-| Uptime alerts | External monitor on `https://seotool.im/api/health` (60s interval) — see "Uptime monitor setup" below |
-| DB backups | `/var/backups/seotool/openseo-*.dump.gz` (nightly 03:15, kept 14 days), log: `/var/log/seotool-backup.log` |
+| What              | Where                                                                                                      |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| App logs          | `docker compose -f docker-compose.hosted.yaml logs -f open-seo`                                            |
+| Caddy logs        | `docker compose -f gateway-caddy/docker-compose.yml logs seotool-caddy`                                    |
+| Errors (granular) | PostHog dashboard → Exceptions (client + server capture already wired)                                     |
+| Uptime alerts     | External monitor on `https://seotool.im/api/health` (60s interval) — see "Uptime monitor setup" below      |
+| DB backups        | `/var/backups/seotool/openseo-*.dump.gz` (nightly 03:15, kept 14 days), log: `/var/log/seotool-backup.log` |
 
 ### Uptime monitor setup (one-time, ~5 min)
 
@@ -99,12 +99,12 @@ Cloudflare dashboard → Security → WAF → **Rate limiting rules**: match
 
 ## Third-party quotas — check weekly
 
-| Service | Where to look | Alarm sign |
-| --- | --- | --- |
-| DataForSEO | dashboard → account usage (or `pnpm billing:usage`) | balance < 1 week of run-rate |
-| Loops email | app.loops.so → usage | bounced/limited transactional sends |
-| Postgres disk | `df -h` on VPS | > 80% used |
-| Cloudflare | zone analytics | 4xx/5xx spike, WAF blocks on real users |
+| Service       | Where to look                                       | Alarm sign                              |
+| ------------- | --------------------------------------------------- | --------------------------------------- |
+| DataForSEO    | dashboard → account usage (or `pnpm billing:usage`) | balance < 1 week of run-rate            |
+| Loops email   | app.loops.so → usage                                | bounced/limited transactional sends     |
+| Postgres disk | `df -h` on VPS                                      | > 80% used                              |
+| Cloudflare    | zone analytics                                      | 4xx/5xx spike, WAF blocks on real users |
 
 ## Env vars that require a redeploy when changed
 

@@ -66,8 +66,6 @@ export type JetContext = {
   userEmail: string;
 };
 
-export type SamContext = JetContext;
-
 /**
  * Durable Object backing the Jet in-app agent, built on Think. One DO per chat
  * session; the DO instance name IS the session id.
@@ -333,5 +331,3 @@ export class JetChatAgent extends Think {
     return super.onRequest(request);
   }
 }
-
-export const SamChatAgent = JetChatAgent;

@@ -21,7 +21,9 @@ export function generateGridNodes(
   // Protect against division by zero near poles
   const safeCosLat = Math.max(
     0.0001,
-    Math.cos((Math.PI * Math.min(89.9999, Math.max(-89.9999, centerLat))) / 180),
+    Math.cos(
+      (Math.PI * Math.min(89.9999, Math.max(-89.9999, centerLat))) / 180,
+    ),
   );
 
   for (let row = 0; row < gridSize; row++) {

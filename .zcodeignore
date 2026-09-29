@@ -1,0 +1,84 @@
+.codex/
+node_modules
+package-lock.json
+yarn.lock
+.dev.vars
+dist/
+!web/dist/
+dist-sourcemaps/
+.wrangler
+/tmp
+
+.output/
+.tanstack/
+.DS_Store
+.cache
+.env
+.env.
+.env.*
+!.env.example
+!.env.preview.example
+!.env.production.example
+!.env.selfhost.example
+.vercel
+.output
+.nitro
+/build/
+/api/
+/server/build
+/public/build# Sentry Config File
+.env.sentry-build-plugin
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+.tanstack
+.logs/
+**/.pnpm-store/
+
+# Localflare generated files
+.localflare/
+
+# Local Claude config (skills are shared)
+.claude/*
+!.claude/skills/
+
+# Alchemy local state + bundle artifacts (SaaS deploys)
+.alchemy/
+.zcode/plans/
+patch_ga4.cjs
+
+# TestSprite runs & local plans (contain sensitive trace artifacts)
+.testsprite/
+.playwright-mcp/
+
+# ===== ↑ 以上同步自 .gitignore（「从 .gitignore 同步」只重写以上部分）=====
+.git/
+.hg/
+.svn/
+bower_components/
+jspm_packages/
+__pycache__/
+site-packages/
+venv/
+coverage/
+htmlcov/
+lcov-report/
+cmakefiles/
+cmake-build-*/
+bazel-*/
+pods/
+deriveddata/
+storybook-static/
+playwright-report/
+test-results/
+allure-results/
+allure-report/
+cdk.out/
+*.egg-info/
+*.dist-info/
+eggs/
+pip-wheel-metadata/
+wheels/
+# ----- ↑ 以上为 ZCode 默认排除规则（自定义规则请写在本行下方，不会被同步/恢复改动）-----
+# 自定义规则写在下方（本行提示可删除）

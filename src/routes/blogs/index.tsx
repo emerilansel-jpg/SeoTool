@@ -73,7 +73,9 @@ function BlogIndexPage() {
       : secondaryPosts.filter((p) => {
           const meta = getPostMetadata(p.slug, p.title);
           return (
-            meta.category.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+            meta.category
+              .toLowerCase()
+              .includes(selectedCategory.toLowerCase()) ||
             selectedCategory.toLowerCase().includes(meta.category.toLowerCase())
           );
         });
@@ -139,7 +141,8 @@ function BlogIndexPage() {
                     : selectedCategory}
                 </h2>
                 <span className="text-xs font-medium text-base-content/50">
-                  {filteredSecondary.length} {filteredSecondary.length === 1 ? "article" : "articles"}
+                  {filteredSecondary.length}{" "}
+                  {filteredSecondary.length === 1 ? "article" : "articles"}
                 </span>
               </div>
 
@@ -232,8 +235,7 @@ function FeaturedHeroCard({ post }: { post: PostItem }) {
                 {formattedDate ? <span>{formattedDate}</span> : null}
                 <span>•</span>
                 <span className="flex items-center gap-1">
-                  <Clock className="size-3" />
-                  4 min read
+                  <Clock className="size-3" />4 min read
                 </span>
               </div>
             </div>

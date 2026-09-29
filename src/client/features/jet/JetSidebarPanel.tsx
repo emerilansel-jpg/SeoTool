@@ -325,5 +325,3 @@ export function JetSidebarPanel({
     </div>
   );
 }
-
-export const SamSidebarPanel = JetSidebarPanel;

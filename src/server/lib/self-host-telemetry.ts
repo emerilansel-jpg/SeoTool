@@ -8,7 +8,7 @@ import {
   gscConnections,
   projects,
   rankTrackingKeywords,
-  samSessions,
+  jetSessions,
   savedKeywords,
   telemetryState,
   user,
@@ -207,7 +207,7 @@ async function collectCounts(): Promise<HeartbeatCounts> {
     db.select({ value: count() }).from(rankTrackingKeywords),
     db.select({ value: count() }).from(savedKeywords),
     db.select({ value: count() }).from(gscConnections),
-    db.select({ value: count() }).from(samSessions),
+    db.select({ value: count() }).from(jetSessions),
   ]);
 
   return {

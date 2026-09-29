@@ -20,7 +20,9 @@ export function LaunchFormCard({
   return (
     <div className="overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xs">
       <div className="p-6 gap-4">
-        <h2 className="text-base font-bold tracking-tight text-base-content mb-3">Start New Audit</h2>
+        <h2 className="text-base font-bold tracking-tight text-base-content mb-3">
+          Start New Audit
+        </h2>
 
         <form
           className="grid grid-cols-1 gap-3 lg:grid-cols-12 lg:items-center"

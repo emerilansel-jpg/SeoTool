@@ -8,8 +8,6 @@ export type JetProjectContext = {
   languageCode: string;
 };
 
-export type SamProjectContext = JetProjectContext;
-
 /**
  * Jet's "soul" — the read-only identity block of the system prompt.
  */
@@ -56,5 +54,3 @@ export function buildJetSystemPrompt(
 
   return sections.join("\n\n");
 }
-
-export const buildSamSystemPrompt = buildJetSystemPrompt;

@@ -104,5 +104,3 @@ export const JetSessionRepository = {
   touch,
   archiveSession,
 } as const;
-
-export const SamSessionRepository = JetSessionRepository;

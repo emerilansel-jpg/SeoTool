@@ -20,8 +20,7 @@ export function JetSetupGate({
           <div className="max-w-3xl space-y-1.5">
             <h2 className="text-xl font-semibold">Enable AI Features</h2>
             <div className="text-sm text-base-content/68">
-              Jet, SeoTool.im's in-app AI agent, needs an API key.
-              Set it as the{" "}
+              Jet, SeoTool.im's in-app AI agent, needs an API key. Set it as the{" "}
               <code>OPENROUTER_API_KEY</code> in Admin Settings or environment,
               then confirm here.
             </div>
@@ -58,5 +57,3 @@ export function JetSetupGate({
     </section>
   );
 }
-
-export const SamSetupGate = JetSetupGate;

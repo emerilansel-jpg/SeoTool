@@ -23,13 +23,10 @@ async function handleAuthRequest(request: Request) {
     console.error("Better Auth request failed:", error);
     const message =
       error instanceof Error ? error.message : "Authentication error";
-    return new Response(
-      JSON.stringify({ error: message, status: 500 }),
-      {
-        status: 500,
-        headers: { "content-type": "application/json; charset=utf-8" },
-      },
-    );
+    return new Response(JSON.stringify({ error: message, status: 500 }), {
+      status: 500,
+      headers: { "content-type": "application/json; charset=utf-8" },
+    });
   }
 }
 

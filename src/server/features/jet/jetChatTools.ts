@@ -216,11 +216,7 @@ export function buildJetMcpTools(
     get_audit_status: adaptMcpTool(getAuditStatusTool, extra, projectId),
     get_audit_issues: adaptMcpTool(getAuditIssuesTool, extra, projectId),
     get_audit_pages: adaptMcpTool(getAuditPagesTool, extra, projectId),
-    get_gmb_grid_configs: adaptMcpTool(
-      getGmbGridConfigsTool,
-      extra,
-      projectId,
-    ),
+    get_gmb_grid_configs: adaptMcpTool(getGmbGridConfigsTool, extra, projectId),
     get_gmb_grid_run: adaptMcpTool(getGmbGridRunTool, extra, projectId),
     get_ranked_keywords: adaptMcpTool(getRankedKeywordsTool, extra, projectId),
     find_serp_competitors: adaptMcpTool(
@@ -252,5 +248,3 @@ export function buildJetMcpTools(
     inspect_urls: adaptMcpTool(inspectUrlsTool, extra, projectId),
   };
 }
-
-export const buildSamMcpTools = buildJetMcpTools;

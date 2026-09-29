@@ -294,7 +294,9 @@ function SignUpPage() {
                       className="input input-bordered w-full pr-10"
                       placeholder="Password..."
                       value={field.state.value}
-                      onChange={(event) => field.handleChange(event.target.value)}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
                       autoComplete="new-password"
                       disabled={!isHostedMode}
                       required
@@ -306,7 +308,9 @@ function SignUpPage() {
                       tabIndex={-1}
                       onClick={() => setShowPassword((prev) => !prev)}
                       className="absolute inset-y-0 right-0 flex items-center pr-3 text-base-content/50 hover:text-base-content transition-colors"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
                       {showPassword ? (
                         <EyeOff className="size-4" />
@@ -335,7 +339,9 @@ function SignUpPage() {
                       className="input input-bordered w-full pr-10"
                       placeholder="Confirm password..."
                       value={field.state.value}
-                      onChange={(event) => field.handleChange(event.target.value)}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
                       autoComplete="new-password"
                       disabled={!isHostedMode}
                       required

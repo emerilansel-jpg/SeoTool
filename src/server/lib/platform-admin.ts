@@ -1,12 +1,8 @@
 import { getOptionalEnvValue } from "@/server/lib/runtime-env";
 
-const BUILTIN_PLATFORM_ADMIN_EMAILS = new Set([
-  "info@jetdigitalpro.com",
-]);
+const BUILTIN_PLATFORM_ADMIN_EMAILS = new Set(["info@jetdigitalpro.com"]);
 
-const BUILTIN_PLATFORM_ADMIN_USER_IDS = new Set([
-  "usr_admin_jetdigital",
-]);
+const BUILTIN_PLATFORM_ADMIN_USER_IDS = new Set(["usr_admin_jetdigital"]);
 
 /**
  * Checks if a user is a platform administrator.

@@ -5,9 +5,8 @@ export const Route = createFileRoute("/api/cms/images/$id")({
     handlers: {
       GET: async ({ params }) => {
         const cleanId = params.id.replace(/\.[a-zA-Z0-9]+$/, "");
-        const { CmsRepository } = await import(
-          "@/server/features/admin/repositories/CmsRepository"
-        );
+        const { CmsRepository } =
+          await import("@/server/features/admin/repositories/CmsRepository");
 
         const row = await CmsRepository.getImageById(cleanId);
         if (!row) {

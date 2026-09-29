@@ -44,5 +44,3 @@ export const jetProjectMemory = pgTable(
 );
 
 // Backward-compatibility aliases
-export const samSessions = jetSessions;
-export const samProjectMemory = jetProjectMemory;

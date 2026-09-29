@@ -101,7 +101,10 @@ export function AuthPageCard({
   return (
     <div className="w-full max-w-md rounded-2xl border border-base-300 bg-base-100 p-8 shadow-xl shadow-base-content/5 space-y-6">
       <div className="text-center space-y-3">
-        <Link to="/" className="inline-block transition-transform hover:scale-105">
+        <Link
+          to="/"
+          className="inline-block transition-transform hover:scale-105"
+        >
           <img
             src="/logo-icon.png"
             alt="SeoTool.im"

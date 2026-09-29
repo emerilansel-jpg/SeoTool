@@ -63,7 +63,11 @@ describe("GMB grid helpers", () => {
             rank_group: 2,
           },
         ],
-        { placeId: "target_place_id", businessName: "Acme Dental", cid: "1234567890" },
+        {
+          placeId: "target_place_id",
+          businessName: "Acme Dental",
+          cid: "1234567890",
+        },
       ),
     ).toBe(2);
   });

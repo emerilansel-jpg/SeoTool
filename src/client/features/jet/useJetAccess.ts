@@ -11,8 +11,6 @@ export type JetAccess = {
   onRetry: () => void;
 };
 
-export type SamAccess = JetAccess;
-
 export function useJetAccess(projectId: string): JetAccess {
   const isHosted = isHostedClientAuthMode();
 
@@ -52,5 +50,3 @@ export function useJetAccess(projectId: string): JetAccess {
     onRetry,
   };
 }
-
-export const useSamAccess = useJetAccess;

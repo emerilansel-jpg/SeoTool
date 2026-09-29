@@ -61,8 +61,8 @@ export function CancelMembershipFlow({
                 We're sorry to see you go
               </h2>
               <p className="mt-1 text-sm text-base-content/70">
-                What's the main reason you're canceling? It helps us decide
-                what to fix next.
+                What's the main reason you're canceling? It helps us decide what
+                to fix next.
               </p>
             </div>
             <div className="space-y-1.5">

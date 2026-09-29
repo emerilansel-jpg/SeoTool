@@ -1,4 +1,10 @@
-import { AlertTriangle, CheckCircle2, Loader2, RotateCcw, XCircle } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Loader2,
+  RotateCcw,
+  XCircle,
+} from "lucide-react";
 
 interface RunLike {
   status: "pending" | "running" | "completed" | "partial" | "failed";

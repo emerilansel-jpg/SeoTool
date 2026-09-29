@@ -8,13 +8,18 @@ type Props = {
   className?: string;
 };
 
+type ElementLike = { props?: { children?: ReactNode } };
+
+function hasProps(node: object): node is ElementLike {
+  return "props" in node;
+}
+
 function getNodeText(node: ReactNode): string {
   if (typeof node === "string") return node;
   if (typeof node === "number") return String(node);
   if (Array.isArray(node)) return node.map(getNodeText).join("");
-  if (node && typeof node === "object" && "props" in node) {
-    const props = (node as { props?: { children?: ReactNode } }).props;
-    if (props?.children) return getNodeText(props.children);
+  if (node && typeof node === "object" && hasProps(node)) {
+    if (node.props?.children) return getNodeText(node.props.children);
   }
   return "";
 }
@@ -109,7 +114,9 @@ export const EDITORIAL_MARKDOWN_COMPONENTS = {
     );
   },
   h4: ({ children }: { children?: ReactNode }) => (
-    <h4 className="mt-6 mb-2 text-lg font-bold text-base-content">{children}</h4>
+    <h4 className="mt-6 mb-2 text-lg font-bold text-base-content">
+      {children}
+    </h4>
   ),
   p: ({ children }: { children?: ReactNode }) => (
     <p className="my-5 text-[17px] font-normal leading-[1.8] text-base-content/85 sm:text-[18px]">
@@ -144,12 +151,7 @@ export const EDITORIAL_MARKDOWN_COMPONENTS = {
   hr: () => <hr className="my-10 border-base-300" />,
   img: ({ src, alt }: { src?: string; alt?: string }) => (
     <figure className="my-8 overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
-      <img
-        src={src}
-        alt={alt}
-        className="w-full object-cover"
-        loading="lazy"
-      />
+      <img src={src} alt={alt} className="w-full object-cover" loading="lazy" />
       {alt ? (
         <figcaption className="border-t border-base-200 bg-base-200/50 px-4 py-2.5 text-center text-xs italic text-base-content/70">
           {alt}

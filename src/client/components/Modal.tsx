@@ -32,7 +32,9 @@ export function Modal({
         aria-labelledby={labelledBy}
         className={`w-full ${maxWidth} max-h-[92vh] overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xl`}
       >
-        <div className="p-6 gap-4 overflow-y-auto max-h-[calc(92vh-2rem)]">{children}</div>
+        <div className="p-6 gap-4 overflow-y-auto max-h-[calc(92vh-2rem)]">
+          {children}
+        </div>
       </div>
     </div>
   );

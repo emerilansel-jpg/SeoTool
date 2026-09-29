@@ -1,6 +1,6 @@
 export * from "./app.schema";
 export * from "./audit.schema";
-export * from "./sam.schema";
+export * from "./jet.schema";
 export * from "./better-auth-schema";
 export * from "./billing.schema";
 export * from "./quota.schema";

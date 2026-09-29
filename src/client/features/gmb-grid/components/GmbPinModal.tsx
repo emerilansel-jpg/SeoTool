@@ -87,7 +87,9 @@ export function PinCompetitorsModal({
         <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-warning">
             <AlertCircle className="size-4 shrink-0" />
-            <span>Google Maps provider did not return results for this pin</span>
+            <span>
+              Google Maps provider did not return results for this pin
+            </span>
           </div>
           <p className="mt-1 text-base-content/80">
             {pin.errorMessage ||

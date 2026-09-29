@@ -16,8 +16,6 @@ export type JetAccessStatus = {
   errorMessage: string | null;
 };
 
-export type SamAccessStatus = JetAccessStatus;
-
 // Gates the in-app AI agent (Jet) on an API key being configured.
 export const getJetAccessSetupStatus = createServerFn({ method: "GET" })
   .middleware([requireProjectContext])
@@ -33,5 +31,3 @@ export const getJetAccessSetupStatus = createServerFn({ method: "GET" })
       errorMessage: enabled ? null : OPENROUTER_KEY_MISSING_MESSAGE,
     };
   });
-
-export const getSamAccessSetupStatus = getJetAccessSetupStatus;

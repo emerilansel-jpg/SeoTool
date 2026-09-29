@@ -198,7 +198,9 @@ function TotalCard({
         {label}
       </div>
       <div className="mt-2 flex items-baseline justify-between gap-2 flex-wrap">
-        <span className="text-2xl font-extrabold tracking-tight tabular-nums text-base-content">{value}</span>
+        <span className="text-2xl font-extrabold tracking-tight tabular-nums text-base-content">
+          {value}
+        </span>
         {delta ? (
           <span
             className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${
@@ -353,14 +355,18 @@ export function BreakdownCard({
   if (rows.length === 0) {
     return (
       <div className="rounded-2xl border border-base-300/80 bg-base-100 p-5 shadow-2xs">
-        <h3 className="mb-2 text-sm font-bold tracking-tight text-base-content">{title}</h3>
+        <h3 className="mb-2 text-sm font-bold tracking-tight text-base-content">
+          {title}
+        </h3>
         <p className="text-sm text-base-content/60">No data for this range.</p>
       </div>
     );
   }
   return (
     <div className="rounded-2xl border border-base-300/80 bg-base-100 p-5 shadow-2xs">
-      <h3 className="mb-3.5 text-sm font-bold tracking-tight text-base-content">{title}</h3>
+      <h3 className="mb-3.5 text-sm font-bold tracking-tight text-base-content">
+        {title}
+      </h3>
       <ul className="space-y-3">
         {rows.map((row) => {
           const share =
@@ -371,9 +377,13 @@ export function BreakdownCard({
               <div className="flex items-center justify-between gap-2 text-sm">
                 <span className="truncate">
                   {isHighlight ? (
-                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">{row.key}</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                      {row.key}
+                    </span>
                   ) : (
-                    <span className="font-medium text-base-content/85">{row.key}</span>
+                    <span className="font-medium text-base-content/85">
+                      {row.key}
+                    </span>
                   )}
                 </span>
                 <span className="shrink-0 tabular-nums font-medium text-base-content/70">
@@ -386,7 +396,9 @@ export function BreakdownCard({
               <div className="h-1.5 overflow-hidden rounded-full bg-base-200">
                 <div
                   className={
-                    isHighlight ? "h-full rounded-full bg-emerald-500" : "h-full rounded-full bg-primary"
+                    isHighlight
+                      ? "h-full rounded-full bg-emerald-500"
+                      : "h-full rounded-full bg-primary"
                   }
                   style={{ width: `${Math.max(share * 100, 2)}%` }}
                 />

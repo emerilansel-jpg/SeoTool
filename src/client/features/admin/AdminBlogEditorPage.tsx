@@ -118,7 +118,7 @@ export function AdminBlogEditorPage() {
     const reader = new FileReader();
     reader.addEventListener("load", async () => {
       try {
-        const result = reader.result as string;
+        const result = typeof reader.result === "string" ? reader.result : "";
         const base64 = result.split(",")[1];
         if (!base64) throw new Error("Could not parse image base64 data.");
 
@@ -604,13 +604,15 @@ export function AdminBlogEditorPage() {
                     seotool.im
                   </span>
                   <span className="text-slate-400">›</span>
-                  <span className="truncate">blogs › {slug || "post-slug"}</span>
+                  <span className="truncate">
+                    blogs › {slug || "post-slug"}
+                  </span>
                 </div>
 
                 {/* Title Link */}
                 <h4 className="text-lg font-medium text-blue-700 hover:underline leading-snug cursor-pointer pt-0.5">
-                  {metaTitle.trim() || title.trim() || "Post Title Goes Here"}{" "}
-                  - SeoTool.im Blog
+                  {metaTitle.trim() || title.trim() || "Post Title Goes Here"} -
+                  SeoTool.im Blog
                 </h4>
 
                 {/* Snippet Description */}

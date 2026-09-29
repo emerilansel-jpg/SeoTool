@@ -1,7 +1,7 @@
 import { getDatabaseProvider } from "./provider";
 import * as sqliteApp from "./app.schema";
 import * as sqliteAudit from "./audit.schema";
-import * as sqliteSam from "./sam.schema";
+import * as sqliteJet from "./jet.schema";
 import * as sqliteAuth from "./better-auth-schema";
 import * as sqliteBilling from "./billing.schema";
 import * as sqliteQuota from "./quota.schema";
@@ -13,7 +13,7 @@ import * as sqliteReddit from "./reddit-attribution.schema";
 import * as sqliteTelemetry from "./telemetry.schema";
 import * as pgApp from "./pg/app.schema";
 import * as pgAudit from "./pg/audit.schema";
-import * as pgSam from "./pg/sam.schema";
+import * as pgJet from "./pg/jet.schema";
 import * as pgAuth from "./pg/better-auth-schema";
 import * as pgBilling from "./pg/billing.schema";
 import * as pgQuota from "./pg/quota.schema";
@@ -58,7 +58,7 @@ import * as pgAiTracking from "./pg/ai-tracking.schema";
 // parity test is its drift guard.
 type AppSchema = typeof sqliteApp &
   typeof sqliteAudit &
-  typeof sqliteSam &
+  typeof sqliteJet &
   typeof sqliteAuth &
   typeof sqliteBilling &
   typeof sqliteQuota &
@@ -85,7 +85,7 @@ const runtimeSchema =
     ? {
         ...pgApp,
         ...pgAudit,
-        ...pgSam,
+        ...pgJet,
         ...pgAuth,
         ...pgBilling,
         ...pgQuota,
@@ -110,7 +110,7 @@ const runtimeSchema =
     : {
         ...sqliteApp,
         ...sqliteAudit,
-        ...sqliteSam,
+        ...sqliteJet,
         ...sqliteAuth,
         ...sqliteBilling,
         ...sqliteQuota,
@@ -155,8 +155,6 @@ export const {
   auditLinks,
   auditIssues,
   auditLighthouseResults,
-  samSessions,
-  samProjectMemory,
   jetSessions,
   jetProjectMemory,
   user,

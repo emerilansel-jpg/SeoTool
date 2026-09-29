@@ -147,5 +147,3 @@ export function JetChat({
     </div>
   );
 }
-
-export const SamChat = JetChat;

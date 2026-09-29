@@ -166,14 +166,9 @@ export function JetConversation({
 
       <div className="flex-shrink-0 border-t border-base-300 px-5 py-3">
         <div className="mx-auto w-full max-w-2xl">
-          <ChatComposer
-            busy={isBusy}
-            onSend={(text) => sendText(text)}
-          />
+          <ChatComposer busy={isBusy} onSend={(text) => sendText(text)} />
         </div>
       </div>
     </div>
   );
 }
-
-export const SamConversation = JetConversation;

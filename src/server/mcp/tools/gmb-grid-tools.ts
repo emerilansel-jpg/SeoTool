@@ -39,7 +39,9 @@ export const getGmbGridConfigsTool = {
   },
   handler: withMcpProjectAuth(async (args: ConfigsArgs, context) => {
     // ponytail: returns all active configs; paginate when project exceeds 100 tracked locations
-    const configs = await GmbGridRepository.listConfigsForProject(args.projectId);
+    const configs = await GmbGridRepository.listConfigsForProject(
+      args.projectId,
+    );
 
     if (configs.length === 0) {
       return mcpResponse({
