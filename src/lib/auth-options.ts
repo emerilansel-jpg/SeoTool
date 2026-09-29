@@ -42,6 +42,12 @@ export const baseAuthOptions = {
   },
   user: {
     additionalFields: userAdditionalFields,
+    // Registers Better Auth's deleteUser endpoint. Without this the API route
+    // doesn't exist and auth.api.deleteUser in deleteAccount (account.ts)
+    // always throws, so credential users could never delete their account.
+    deleteUser: {
+      enabled: true,
+    },
   },
   session: {
     // Serve getSession from a signed cookie instead of a DB round trip. The
