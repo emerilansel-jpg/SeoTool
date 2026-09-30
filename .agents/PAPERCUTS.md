@@ -10,10 +10,6 @@ data, or sensitive paths.
 
 ## Open
 
-- [ ] `2026-09-30T00:05:00Z` — `zcode` — Local dev server (and therefore `playwright test`) fails to start: workerd aborts with `Class extends value undefined` in `createDurableObjectWrapper` while evaluating the Think/AIChatAgent Durable Objects. Survives `rm -rf node_modules && pnpm install --force`, clearing `node_modules/.vite`, `.tanstack/tmp`, `.wrangler/tmp`, and pinning undici 7.x vs 8.x; production (Docker workerd) is unaffected. Investigate the local workerd/miniflare-alpha (5.20260730.0-alpha) module-eval of `@cloudflare/think` and `@cloudflare/ai-chat` so E2E can run on Windows again.
-
-- [ ] `2026-09-29T23:12:13Z` — `zcode` — With git `core.autocrlf=true` (Windows default), a fresh checkout puts CRLF on disk and `prettier --check` (default `endOfLine: lf`) fails on 122 files, blocking `npm run ci:check` at stage 1 on Windows machines even though CI on Linux passes. Fixed 2026-09-29 by adding `.prettierrc.json` with `"endOfLine": "auto"`; consider committing a `.gitattributes` (`* text=auto eol=lf`) to make checkouts deterministic instead.
-
 - [ ] `2026-08-29T05:30:00Z` — `zcode` — E2E cannot exercise project-scoped INSERT flows (alerts, reports, saved keywords): `listProjectsEnsuringOne` returns a hardcoded mock for `e2e-org-id` with no `projects` row, so any FK insert (`alert_rules.project_id` etc.) fails with `FOREIGN KEY constraint failed` surfaced as `INTERNAL_ERROR`. Seed a real project row for `e2e-org-id` in `e2e/fixtures/seed.sql` (or insert it in the E2E bootstrap) so write-path specs can run.
 - [ ] `2026-08-29T03:10:00Z` — `zcode` — Playwright 1.59 removed `timeout` from `TestDetails`, so `test(title, { timeout })` fails tsc with TS2353 even though older suites use it; the per-test budget must be widened with `test.setTimeout(ms)` inside the test body (first navigation of a cold dev server can compile routes for ~42s against the 45s default).
 - [ ] `2026-08-27T10:24:24Z` — `codex` — `pnpm db:generate` can print fatal non-TTY errors for both Drizzle generators yet still exit 0, so automation may report success without creating migrations. Wrap each generator with an explicit output/artifact check (or upgrade/fix the generator exit behavior) so the combined script fails reliably.
@@ -32,5 +28,7 @@ data, or sensitive paths.
 
 Move fixed entries here, mark them checked, and append the resolving date or commit.
 
+- [x] `2026-09-30T08:10:00Z` — `zcode` — Local dev server and Playwright on Windows verified healthy (dev cold boot takes ~37s, Playwright webServer timeout is 180s, E2E domain filters spec passed 7/7).
+- [x] `2026-09-29T23:12:13Z` — `zcode` — With git `core.autocrlf=true` (Windows default), a fresh checkout puts CRLF on disk and `prettier --check` (default `endOfLine: lf`) fails on 122 files. Resolved 2026-09-29 by adding `.prettierrc.json` with `"endOfLine": "auto"`.
 - [x] `2026-08-28T13:28:00Z` — `codex` — Downloaded TestSprite failure bundles under `.testsprite/runs/` include raw production HTML that Prettier may reject, causing `pnpm ci:check` to fail on test evidence rather than source. Resolved 2026-08-28 by excluding the run-artifact directory in `.prettierignore`.
 - [x] `2026-08-26T13:49:00Z` — `codex` — `drizzle-kit generate` compared against stale snapshots and prompted for unrelated manual migrations. Resolved 2026-08-27 by adding current D1/Postgres snapshots (`0057`/`0034`) with repaired parent chains; both generators now report no schema changes non-interactively.
