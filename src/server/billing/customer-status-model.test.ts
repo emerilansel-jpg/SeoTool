@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { deriveBillingCustomerStatusSnapshot } from "./customer-status-model";
-import { PAYPAL_PLAN_IDS } from "@/shared/plans";
+
+// Test plan IDs that look real but aren't provisioned anywhere.
+// These are decoupled from the runtime PAYPAL_PLAN_IDS defaults
+// (which are null until a PayPal plan is created in the dashboard).
+const TEST_PLAN_IDS = {
+  lite: "P-TEST-LITE-000001",
+  pro: "P-TEST-PRO-000002",
+  agency: "P-TEST-AGENCY-000003",
+} as const;
 
 describe("deriveBillingCustomerStatusSnapshot", () => {
   it("marks customers with an active lite subscription as paying + tier=lite", () => {
@@ -8,15 +16,16 @@ describe("deriveBillingCustomerStatusSnapshot", () => {
       organizationId: "org_123",
       subscription: {
         id: "sub_1",
-        plan_id: PAYPAL_PLAN_IDS.lite,
+        plan_id: TEST_PLAN_IDS.lite,
         status: "ACTIVE",
       },
+      planIdToTier: new Map([[TEST_PLAN_IDS.lite, "lite"]]),
     });
 
     expect(snapshot).toMatchObject({
       organizationId: "org_123",
       isPaying: true,
-      paidPlanId: PAYPAL_PLAN_IDS.lite,
+      paidPlanId: TEST_PLAN_IDS.lite,
       paidPlanStatus: "active",
       planTier: "lite",
       paypalSubscriptionId: "sub_1",
@@ -28,7 +37,7 @@ describe("deriveBillingCustomerStatusSnapshot", () => {
       organizationId: "org_123",
       subscription: {
         id: "sub_2",
-        plan_id: PAYPAL_PLAN_IDS.pro,
+        plan_id: TEST_PLAN_IDS.pro,
         status: "ACTIVE",
         custom_id: "org_123",
       },
@@ -36,7 +45,7 @@ describe("deriveBillingCustomerStatusSnapshot", () => {
 
     expect(JSON.parse(snapshot.customerJson)).toMatchObject({
       id: "sub_2",
-      plan_id: PAYPAL_PLAN_IDS.pro,
+      plan_id: TEST_PLAN_IDS.pro,
       status: "ACTIVE",
     });
   });
@@ -66,9 +75,10 @@ describe("deriveBillingCustomerStatusSnapshot", () => {
     const snapshot = deriveBillingCustomerStatusSnapshot({
       organizationId: "org_456",
       subscription: {
-        plan_id: PAYPAL_PLAN_IDS.lite,
+        plan_id: TEST_PLAN_IDS.lite,
         status: "CANCELLED",
       },
+      planIdToTier: new Map([[TEST_PLAN_IDS.lite, "lite"]]),
     });
 
     expect(snapshot).toMatchObject({
@@ -83,7 +93,7 @@ describe("deriveBillingCustomerStatusSnapshot", () => {
     const snapshot = deriveBillingCustomerStatusSnapshot({
       organizationId: "org_456",
       subscription: {
-        plan_id: PAYPAL_PLAN_IDS.lite,
+        plan_id: TEST_PLAN_IDS.lite,
         status: "SUSPENDED",
       },
     });
@@ -95,14 +105,14 @@ describe("deriveBillingCustomerStatusSnapshot", () => {
     const pending = deriveBillingCustomerStatusSnapshot({
       organizationId: "org_pending",
       subscription: {
-        plan_id: PAYPAL_PLAN_IDS.pro,
+        plan_id: TEST_PLAN_IDS.pro,
         status: "APPROVAL_PENDING",
       },
     });
     const unknown = deriveBillingCustomerStatusSnapshot({
       organizationId: "org_unknown",
       subscription: {
-        plan_id: PAYPAL_PLAN_IDS.pro,
+        plan_id: TEST_PLAN_IDS.pro,
         status: "FAILED",
       },
     });
@@ -115,10 +125,11 @@ describe("deriveBillingCustomerStatusSnapshot", () => {
     const snapshot = deriveBillingCustomerStatusSnapshot({
       organizationId: "org_period",
       subscription: {
-        plan_id: PAYPAL_PLAN_IDS.agency,
+        plan_id: TEST_PLAN_IDS.agency,
         status: "ACTIVE",
         next_billing_time: "2026-09-01T00:00:00Z",
       },
+      planIdToTier: new Map([[TEST_PLAN_IDS.agency, "agency"]]),
     });
 
     expect(snapshot.planTier).toBe("agency");

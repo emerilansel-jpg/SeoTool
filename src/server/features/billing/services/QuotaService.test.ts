@@ -146,24 +146,21 @@ describe("plans: quota periods", () => {
   });
 });
 
-describe("plans: Autumn plan id mapping", () => {
-  it("maps free tier to null (Autumn Default)", () => {
+describe("plans: PayPal plan id defaults", () => {
+  it("maps free tier to null", () => {
     expect(PAYPAL_PLAN_IDS.free).toBeNull();
   });
 
-  it("maps paid tiers to Autumn plan ids", () => {
-    expect(PAYPAL_PLAN_IDS.lite).toBe("lite-plan");
-    expect(PAYPAL_PLAN_IDS.pro).toBe("pro-plan");
-    expect(PAYPAL_PLAN_IDS.agency).toBe("agency-plan");
+  it("defaults paid tiers to null when env is not set", () => {
+    // Plan IDs are null when env vars are unset; they come from either the
+    // plan_config DB table (admin panel) or env vars at deploy time.
+    expect(PAYPAL_PLAN_IDS.starter).toBeNull();
+    expect(PAYPAL_PLAN_IDS.lite).toBeNull();
+    expect(PAYPAL_PLAN_IDS.pro).toBeNull();
+    expect(PAYPAL_PLAN_IDS.agency).toBeNull();
   });
 
-  it("resolves Autumn plan ids back to tiers", () => {
-    expect(planTierFromPaypalPlanId("lite-plan")).toBe("lite");
-    expect(planTierFromPaypalPlanId("pro-plan")).toBe("pro");
-    expect(planTierFromPaypalPlanId("agency-plan")).toBe("agency");
-  });
-
-  it("returns null for unknown Autumn plan ids", () => {
+  it("resolves unknown plan ids to null", () => {
     expect(planTierFromPaypalPlanId("unknown")).toBeNull();
     expect(planTierFromPaypalPlanId(null)).toBeNull();
     expect(planTierFromPaypalPlanId(undefined)).toBeNull();

@@ -6,7 +6,10 @@ import { KeywordProCohortSeatRepository } from "@/server/features/keywords/repos
 import { KeywordProRepository } from "@/server/features/keywords/repositories/KeywordProRepository";
 import { KeywordProReferralRewardRepository } from "@/server/features/keywords/repositories/KeywordProReferralRewardRepository";
 import { KeywordProConfigService } from "@/server/features/keywords/services/KeywordProConfigService";
-import { getEffectiveMonthlyCreditGrant } from "@/server/billing/plan-config";
+import {
+  getEffectiveMonthlyCreditGrant,
+  getEffectivePaypalPlanId,
+} from "@/server/billing/plan-config";
 import {
   createKeywordProMarker,
   KEYWORD_PRO_REFERRER_RATE,
@@ -74,6 +77,16 @@ export const KeywordProMembershipService = {
     const referral = hasAccess
       ? await KeywordProRepository.getReferralStats(organizationId)
       : null;
+
+    // Check whether the Starter plan has a real PayPal plan ID configured
+    // (either from the plan_config DB table or from deploy-time defaults).
+    // The subscribe page uses this to disable the Starter button when no
+    // plan has been provisioned yet.
+    const starterPlanId = await getEffectivePaypalPlanId("starter");
+    const starterPlanConfigured = Boolean(
+      starterPlanId && starterPlanId.trim().length > 0,
+    );
+
     return {
       hasAccess,
       hasLegacyPaidPlan: entitlement.hasLegacyPaidPlan,
@@ -81,6 +94,7 @@ export const KeywordProMembershipService = {
       membership,
       currentCohort,
       referral,
+      starterPlanConfigured,
     };
   },
 

@@ -177,6 +177,7 @@ function SubscribePage() {
     membershipStatus !== "EXPIRED" &&
     membershipStatus !== "FAILED";
   const hasLegacyPaidPlan = membership.data?.hasLegacyPaidPlan ?? false;
+  const starterPlanConfigured = membership.data?.starterPlanConfigured ?? false;
 
   if (hasRecoverableMembership || hasLegacyPaidPlan) {
     const kind: ExistingSubscriptionKind =
@@ -359,7 +360,7 @@ function SubscribePage() {
 
             <button
               className="btn btn-outline"
-              disabled={starterCheckout.isPending}
+              disabled={starterCheckout.isPending || !starterPlanConfigured}
               onClick={() => starterCheckout.mutate()}
             >
               {starterCheckout.isPending ? (
@@ -367,6 +368,13 @@ function SubscribePage() {
               ) : null}
               Start with $1
             </button>
+            {!starterPlanConfigured ? (
+              <p className="text-xs text-warning">
+                Payments are being set up right now. Please check back soon, or
+                email support@seotool.im and we&apos;ll let you know the moment
+                checkout is live.
+              </p>
+            ) : null}
           </div>
         </section>
       </div>

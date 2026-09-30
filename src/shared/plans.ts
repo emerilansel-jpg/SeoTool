@@ -24,25 +24,42 @@ export const PLAN_TIERS = [
 ] as const;
 export type PlanTier = (typeof PLAN_TIERS)[number];
 
+const readEnvPlanId = (name: string): string | null => {
+  const val =
+    (typeof process !== "undefined" ? process.env?.[name] : undefined) ??
+    (typeof import.meta !== "undefined"
+      ? (import.meta.env as unknown as Record<string, string | undefined>)?.[
+          name
+        ]
+      : undefined);
+  const trimmed = typeof val === "string" ? val.trim() : "";
+  return trimmed.length > 0 ? trimmed : null;
+};
+
 /** PayPal Billing Plan ID for each tier. Maps 1:1 to plans configured in the
- *  PayPal dashboard. The free tier has no subscription plan id. */
+ *  PayPal dashboard. The free tier has no subscription plan id.
+ *
+ *  Sourced from environment variables (PAYPAL_PLAN_ID_STARTER/LITE/PRO/AGENCY).
+ *  When an env var is empty or missing, the tier is treated as unconfigured (null).
+ *  The admin panel stores override plan IDs in the plan_config table (resolved
+ *  by plan-config.ts); values here serve as defaults when the DB row is missing. */
 export const PAYPAL_PLAN_IDS: Record<PlanTier, string | null> = {
   free: null,
-  starter: "starter-plan",
-  lite: "lite-plan",
-  pro: "pro-plan",
-  agency: "agency-plan",
-  standard: "standard-plan",
-  byok: "byok-plan",
+  starter: readEnvPlanId("PAYPAL_PLAN_ID_STARTER"),
+  lite: readEnvPlanId("PAYPAL_PLAN_ID_LITE"),
+  pro: readEnvPlanId("PAYPAL_PLAN_ID_PRO"),
+  agency: readEnvPlanId("PAYPAL_PLAN_ID_AGENCY"),
+  standard: null,
+  byok: null,
 };
 
 /** Reverse lookup: PayPal plan id → our tier. Used by the webhook handler to
- *  resolve a subscription update to a tier. */
+ *  resolve a subscription update to a tier. Tiers with null plan IDs are
+ *  excluded (they haven't been provisioned yet). */
 const PAYPAL_PLAN_ID_TO_TIER = new Map<string, PlanTier>(
-  (["starter", "lite", "pro", "agency"] as const).map((tier) => [
-    PAYPAL_PLAN_IDS[tier]!,
-    tier,
-  ]),
+  (["starter", "lite", "pro", "agency"] as const)
+    .filter((tier) => PAYPAL_PLAN_IDS[tier] != null)
+    .map((tier) => [PAYPAL_PLAN_IDS[tier]!, tier]),
 );
 
 export function planTierFromPaypalPlanId(

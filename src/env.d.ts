@@ -32,6 +32,10 @@ declare namespace Cloudflare {
     PAYPAL_CLIENT_SECRET?: string;
     PAYPAL_MODE?: string;
     PAYPAL_WEBHOOK_ID?: string;
+    PAYPAL_PLAN_ID_STARTER?: string;
+    PAYPAL_PLAN_ID_LITE?: string;
+    PAYPAL_PLAN_ID_PRO?: string;
+    PAYPAL_PLAN_ID_AGENCY?: string;
 
     // Cloudflare Turnstile — signup captcha. Secret verifies tokens
     // server-side; site key is public and inlined into the client build.
@@ -66,6 +70,10 @@ interface ImportMetaEnv {
   readonly VITE_E2E_KEYWORD_FIXTURES?: string;
   readonly VITE_E2E_BYPASS_AUTH?: string;
   readonly BYPASS_AUTH?: string;
+  readonly PAYPAL_PLAN_ID_STARTER?: string;
+  readonly PAYPAL_PLAN_ID_LITE?: string;
+  readonly PAYPAL_PLAN_ID_PRO?: string;
+  readonly PAYPAL_PLAN_ID_AGENCY?: string;
 }
 
 interface ImportMeta {

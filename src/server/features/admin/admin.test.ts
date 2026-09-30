@@ -254,9 +254,9 @@ describe("plan config: effective merge", () => {
     await expect(resolvePlanTierByPaypalPlanId("P-PRO-CUSTOM")).resolves.toBe(
       "pro",
     );
-    // Default plan ids from the constants still resolve.
-    await expect(resolvePlanTierByPaypalPlanId("lite-plan")).resolves.toBe(
-      "lite",
+    // Default plan ids are null (no plan provisioned); unknown ids → null.
+    await expect(resolvePlanTierByPaypalPlanId("unknown-plan")).resolves.toBe(
+      null,
     );
   });
 });
@@ -325,7 +325,70 @@ describe("AdminSettingsService: editable key guard", () => {
   });
 
   it("tests live credentials, webhook configuration, plan status, and prices", async () => {
-    planRepo.listAll.mockResolvedValue([]);
+    // Supply plan configs from DB so testPaypalConfiguration sees plan IDs
+    // (compile-time defaults are null; real plan IDs come from admin panel).
+    planRepo.listAll.mockResolvedValue([
+      {
+        tier: "starter",
+        paypalPlanId: "starter-plan",
+        priceUsdCents: 100,
+        monthlyCredits: 1000,
+        syncStatus: "synced",
+        active: true,
+        updatedByUserId: "admin_1",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      {
+        tier: "lite",
+        paypalPlanId: "lite-plan",
+        priceUsdCents: 4900,
+        monthlyCredits: 5000,
+        syncStatus: "synced",
+        active: true,
+        updatedByUserId: "admin_1",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      {
+        tier: "pro",
+        paypalPlanId: "pro-plan",
+        priceUsdCents: 14900,
+        monthlyCredits: 15000,
+        syncStatus: "synced",
+        active: true,
+        updatedByUserId: "admin_1",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      {
+        tier: "agency",
+        paypalPlanId: "agency-plan",
+        priceUsdCents: 49900,
+        monthlyCredits: 50000,
+        syncStatus: "synced",
+        active: true,
+        updatedByUserId: "admin_1",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      {
+        tier: "standard",
+        paypalPlanId: "standard-plan",
+        priceUsdCents: 900,
+        monthlyCredits: 1000,
+        syncStatus: "synced",
+        active: true,
+        updatedByUserId: "admin_1",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      {
+        tier: "byok",
+        paypalPlanId: "byok-plan",
+        priceUsdCents: 400,
+        monthlyCredits: 0,
+        syncStatus: "synced",
+        active: true,
+        updatedByUserId: "admin_1",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ]);
     keywordProConfig.getCohorts.mockResolvedValue([
       {
         key: "krp_founder_10",

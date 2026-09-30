@@ -98,6 +98,7 @@ export class PayPalRequestError extends Error {
   constructor(
     public readonly status: number,
     message: string,
+    public readonly responseBody?: unknown,
   ) {
     super(message);
     this.name = "PayPalRequestError";
@@ -132,6 +133,21 @@ export async function paypalRequest<T = unknown>(
   const data = await response.json();
 
   if (!response.ok) {
+    if (response.status >= 400 && response.status < 500) {
+      const safeBody = isRecord(data)
+        ? {
+            name: data.name,
+            message: data.message,
+            debug_id: data.debug_id,
+            details: data.details,
+          }
+        : { raw: String(data).slice(0, 500) };
+      console.error(
+        `[PayPal 4xx Error] ${method} ${path} (${response.status}):`,
+        JSON.stringify(safeBody),
+      );
+    }
+
     const details =
       isRecord(data) && Array.isArray(data.details)
         ? data.details.filter(isRecord).map((d) => ({
@@ -146,6 +162,7 @@ export async function paypalRequest<T = unknown>(
     throw new PayPalRequestError(
       response.status,
       `PayPal ${method} ${path} failed (${response.status}): ${msg}`,
+      data,
     );
   }
 
