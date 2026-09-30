@@ -331,3 +331,6 @@ export class JetChatAgent extends Think {
     return super.onRequest(request);
   }
 }
+
+// Retained for Cloudflare Durable Object backward compatibility with wrangler.jsonc migrations (v2: ["SamChatAgent", "JetChatAgent"])
+export class SamChatAgent extends JetChatAgent {}

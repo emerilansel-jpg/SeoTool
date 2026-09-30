@@ -165,8 +165,8 @@ export { AlertWorkflow } from "./server/workflows/AlertWorkflow";
 export { GmbGridWorkflow } from "./server/workflows/GmbGridWorkflow";
 // Durable Object class for the onboarding strategy chat (Agents SDK).
 export { OnboardingChatAgent } from "./server/features/onboarding/OnboardingChatAgent";
-// Durable Object class for the Jet in-app agent (Agents SDK).
-export { JetChatAgent } from "./server/features/jet/JetChatAgent";
+// Durable Object class for the Jet in-app agent (Agents SDK). SamChatAgent is required by wrangler.jsonc migrations v2.
+export { JetChatAgent, SamChatAgent } from "./server/features/jet/JetChatAgent";
 
 export default {
   fetch,
