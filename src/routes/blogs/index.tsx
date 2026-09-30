@@ -60,7 +60,7 @@ const CATEGORY_TABS = [
 
 function BlogIndexPage() {
   const { signedIn } = useMarketingSession();
-  const { posts } = Route.useLoaderData();
+  const { posts }: { posts: PostItem[] } = Route.useLoaderData();
   const [selectedCategory, setSelectedCategory] = useState("All Stories");
 
   // Hero post is the newest / premier post (e.g. dark-queries if present, else first)

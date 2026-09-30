@@ -82,10 +82,7 @@
     }
 
     header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Content-Type-Options nosniff
-        X-Frame-Options DENY
-        Referrer-Policy "strict-origin-when-cross-origin"
+        Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://challenges.cloudflare.com https://us-assets.i.posthog.com https://eu-assets.i.posthog.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://t0.gstatic.com https://t2.gstatic.com https://api.qrserver.com https://unpkg.com https://*.tile.openstreetmap.org; connect-src 'self' https://us.i.posthog.com https://eu.i.posthog.com https://us-assets.i.posthog.com https://eu-assets.i.posthog.com https://cloudflareinsights.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; object-src 'none'; base-uri 'self'; report-uri /api/csp-report;"
     }
     @websockets {
         header Connection *Upgrade*

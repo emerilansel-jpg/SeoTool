@@ -37,6 +37,7 @@ import { Route as AuthenticatedAcceptInvitationRouteImport } from './routes/_aut
 import { Route as AuthenticatedOauthConsentRouteImport } from './routes/_authenticated.oauth-consent'
 import { Route as AuthenticatedSubscribeRouteImport } from './routes/_authenticated.subscribe'
 import { Route as ApiAiVisibilityRouteImport } from './routes/api/ai-visibility'
+import { Route as ApiCspReportRouteImport } from './routes/api/csp-report'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as BlogsIndexRouteImport } from './routes/blogs/index'
 import { Route as BlogsSlugRouteImport } from './routes/blogs/$slug'
@@ -233,6 +234,11 @@ const AuthenticatedSubscribeRoute = AuthenticatedSubscribeRouteImport.update({
 const ApiAiVisibilityRoute = ApiAiVisibilityRouteImport.update({
   id: '/api/ai-visibility',
   path: '/api/ai-visibility',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCspReportRoute = ApiCspReportRouteImport.update({
+  id: '/api/csp-report',
+  path: '/api/csp-report',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
@@ -581,6 +587,7 @@ export interface FileRoutesByFullPath {
   '/oauth-consent': typeof AuthenticatedOauthConsentRoute
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/api/ai-visibility': typeof ApiAiVisibilityRoute
+  '/api/csp-report': typeof ApiCspReportRoute
   '/api/health': typeof ApiHealthRoute
   '/blogs/$slug': typeof BlogsSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
@@ -664,6 +671,7 @@ export interface FileRoutesByTo {
   '/oauth-consent': typeof AuthenticatedOauthConsentRoute
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/api/ai-visibility': typeof ApiAiVisibilityRoute
+  '/api/csp-report': typeof ApiCspReportRoute
   '/api/health': typeof ApiHealthRoute
   '/blogs/$slug': typeof BlogsSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
@@ -749,6 +757,7 @@ export interface FileRoutesById {
   '/_authenticated/oauth-consent': typeof AuthenticatedOauthConsentRoute
   '/_authenticated/subscribe': typeof AuthenticatedSubscribeRoute
   '/api/ai-visibility': typeof ApiAiVisibilityRoute
+  '/api/csp-report': typeof ApiCspReportRoute
   '/api/health': typeof ApiHealthRoute
   '/blogs/$slug': typeof BlogsSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
@@ -835,6 +844,7 @@ export interface FileRouteTypes {
     | '/oauth-consent'
     | '/subscribe'
     | '/api/ai-visibility'
+    | '/api/csp-report'
     | '/api/health'
     | '/blogs/$slug'
     | '/pages/$slug'
@@ -918,6 +928,7 @@ export interface FileRouteTypes {
     | '/oauth-consent'
     | '/subscribe'
     | '/api/ai-visibility'
+    | '/api/csp-report'
     | '/api/health'
     | '/blogs/$slug'
     | '/pages/$slug'
@@ -1002,6 +1013,7 @@ export interface FileRouteTypes {
     | '/_authenticated/oauth-consent'
     | '/_authenticated/subscribe'
     | '/api/ai-visibility'
+    | '/api/csp-report'
     | '/api/health'
     | '/blogs/$slug'
     | '/pages/$slug'
@@ -1080,6 +1092,7 @@ export interface RootRouteChildren {
   VerifyEmailRoute: typeof VerifyEmailRoute
   Char91DotwellKnownChar93OpenaiAppsChallengeRoute: typeof Char91DotwellKnownChar93OpenaiAppsChallengeRoute
   ApiAiVisibilityRoute: typeof ApiAiVisibilityRoute
+  ApiCspReportRoute: typeof ApiCspReportRoute
   ApiHealthRoute: typeof ApiHealthRoute
   BlogsSlugRoute: typeof BlogsSlugRoute
   PagesSlugRoute: typeof PagesSlugRoute
@@ -1286,6 +1299,13 @@ declare module '@tanstack/react-router' {
       path: '/api/ai-visibility'
       fullPath: '/api/ai-visibility'
       preLoaderRoute: typeof ApiAiVisibilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/csp-report': {
+      id: '/api/csp-report'
+      path: '/api/csp-report'
+      fullPath: '/api/csp-report'
+      preLoaderRoute: typeof ApiCspReportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/health': {
@@ -1945,6 +1965,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OpenaiAppsChallengeRoute:
     Char91DotwellKnownChar93OpenaiAppsChallengeRoute,
   ApiAiVisibilityRoute: ApiAiVisibilityRoute,
+  ApiCspReportRoute: ApiCspReportRoute,
   ApiHealthRoute: ApiHealthRoute,
   BlogsSlugRoute: BlogsSlugRoute,
   PagesSlugRoute: PagesSlugRoute,
@@ -1957,13 +1978,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

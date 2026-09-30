@@ -90,7 +90,7 @@ export const Route = createFileRoute("/changelog")({
 
 function ChangelogPage() {
   const { signedIn } = useMarketingSession();
-  const { logs } = Route.useLoaderData();
+  const { logs }: { logs: ChangelogItem[] } = Route.useLoaderData();
 
   return (
     <MarketingChrome signedIn={signedIn}>
