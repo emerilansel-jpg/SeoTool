@@ -49,16 +49,15 @@ export function useOnboardingRedirect(): {
     isEmailVerified &&
     !onboardingQuery.isLoading &&
     !onboardingQuery.isError &&
-    !onboardingQuery.data?.completedAt &&
-    !isExemptPath;
+    !onboardingQuery.data?.completedAt;
 
   useEffect(() => {
-    if (!needsOnboarding) {
+    if (!needsOnboarding || isExemptPath) {
       return;
     }
 
     void navigate({ to: "/onboarding", search: { step: 0 }, replace: true });
-  }, [needsOnboarding, navigate]);
+  }, [isExemptPath, needsOnboarding, navigate]);
 
   return { isChecking, needsOnboarding };
 }

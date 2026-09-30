@@ -25,7 +25,8 @@ function isExemptFromPaywall(pathname: string): boolean {
     pathname.startsWith("/settings") ||
     pathname === "/projects" ||
     pathname.endsWith("/settings") ||
-    pathname.startsWith("/billing")
+    pathname.startsWith("/billing") ||
+    pathname.startsWith("/onboarding")
   );
 }
 
