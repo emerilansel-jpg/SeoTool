@@ -162,7 +162,7 @@ function SubscribePage() {
 
   useEffect(() => {
     if (!shouldReturnToWorkspace) return;
-    void navigate({ to: search.redirect ?? "/", replace: true });
+    void navigate({ to: search.redirect ?? "/projects", replace: true });
   }, [navigate, search.redirect, shouldReturnToWorkspace]);
 
   if (membership.isLoading || shouldReturnToWorkspace) {
@@ -236,7 +236,9 @@ function SubscribePage() {
             </div>
             <button
               className="btn btn-outline mt-auto"
-              onClick={() => void navigate({ to: search.redirect ?? "/" })}
+              onClick={() =>
+                void navigate({ to: search.redirect ?? "/projects" })
+              }
             >
               Continue to workspace
             </button>
