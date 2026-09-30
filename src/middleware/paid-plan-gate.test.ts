@@ -46,6 +46,12 @@ const membershipMeta = {
   filename: "src/serverFunctions/membership.ts",
 };
 
+const projectsMeta = {
+  id: "fn-4",
+  name: "setProjectDomain",
+  filename: "src/serverFunctions/projects.ts",
+};
+
 const anonymousContext = {};
 
 beforeEach(() => {
@@ -80,6 +86,19 @@ describe("paidPlanGateMiddleware hosted mode", () => {
     const result = await handler({
       context: anonymousContext,
       serverFnMeta: membershipMeta,
+      next,
+    });
+
+    expect(result).toEqual({ ok: true });
+    expect(next).toHaveBeenCalledOnce();
+  });
+
+  it("keeps project setup functions reachable for free-tier users", async () => {
+    const next = vi.fn(async () => ({ ok: true }));
+
+    const result = await handler({
+      context: anonymousContext,
+      serverFnMeta: projectsMeta,
       next,
     });
 

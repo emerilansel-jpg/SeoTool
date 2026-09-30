@@ -17,6 +17,18 @@ import { isHostedClientAuthMode } from "@/lib/auth-mode";
  * the paywall kicks in. The caller is responsible for rendering a spinner
  * while onboarding is still resolving.
  */
+function isExemptFromPaywall(pathname: string): boolean {
+  return (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/help") ||
+    pathname.startsWith("/support") ||
+    pathname.startsWith("/settings") ||
+    pathname === "/projects" ||
+    pathname.endsWith("/settings") ||
+    pathname.startsWith("/billing")
+  );
+}
+
 export function usePaidPlanGuard(onboardingIncomplete: boolean = false) {
   const navigate = useNavigate();
   const { isPaid, isLoading } = useIsPaidPlan();
@@ -40,12 +52,7 @@ export function usePaidPlanGuard(onboardingIncomplete: boolean = false) {
     // by the project-layout guard and the paidPlanGate server middleware).
     const isExemptPath =
       typeof window !== "undefined" &&
-      (window.location.pathname.startsWith("/admin") ||
-        window.location.pathname.startsWith("/help") ||
-        window.location.pathname.startsWith("/support") ||
-        window.location.pathname.startsWith("/settings") ||
-        window.location.pathname === "/projects" ||
-        window.location.pathname.startsWith("/billing"));
+      isExemptFromPaywall(window.location.pathname);
     const isKeywordProPath =
       typeof window !== "undefined" &&
       window.location.pathname.endsWith("/keyword-research-pro");
@@ -69,12 +76,7 @@ export function usePaidPlanGuard(onboardingIncomplete: boolean = false) {
 
   const isExemptPath =
     typeof window !== "undefined" &&
-    (window.location.pathname.startsWith("/admin") ||
-      window.location.pathname.startsWith("/help") ||
-      window.location.pathname.startsWith("/support") ||
-      window.location.pathname.startsWith("/settings") ||
-      window.location.pathname === "/projects" ||
-      window.location.pathname.startsWith("/billing"));
+    isExemptFromPaywall(window.location.pathname);
   const isKeywordProPath =
     typeof window !== "undefined" &&
     window.location.pathname.endsWith("/keyword-research-pro");
