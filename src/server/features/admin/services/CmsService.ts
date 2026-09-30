@@ -25,6 +25,11 @@ function todayIso(): string {
   return new Date().toISOString();
 }
 
+function cleanQuotes(str?: string | null): string | null {
+  if (!str) return null;
+  return str.replaceAll("''", "'");
+}
+
 export const CmsService = {
   async listPosts() {
     return CmsRepository.listPosts(true);
@@ -57,15 +62,15 @@ export const CmsService = {
     return CmsRepository.createPost({
       id: crypto.randomUUID(),
       slug,
-      title: input.title,
-      description: input.description ?? null,
+      title: cleanQuotes(input.title) ?? input.title,
+      description: cleanQuotes(input.description),
       contentMd: input.contentMd,
       status: input.published ? "published" : "draft",
       publishedAt: input.published ? todayIso() : null,
       authorUserId,
       featuredImage: input.featuredImage ?? null,
-      metaTitle: input.metaTitle ?? null,
-      metaDescription: input.metaDescription ?? null,
+      metaTitle: cleanQuotes(input.metaTitle),
+      metaDescription: cleanQuotes(input.metaDescription),
       schemaJson: input.schemaJson ?? null,
     });
   },
@@ -98,8 +103,11 @@ export const CmsService = {
 
     const updated = await CmsRepository.updatePost(input.id, {
       slug,
-      title: input.title,
-      description: input.description ?? null,
+      title: cleanQuotes(input.title) ?? input.title,
+      description:
+        input.description !== undefined
+          ? cleanQuotes(input.description)
+          : existing.description,
       contentMd: input.contentMd,
       status: input.published ? "published" : "draft",
       publishedAt: firstPublish
@@ -113,11 +121,11 @@ export const CmsService = {
           : existing.featuredImage,
       metaTitle:
         input.metaTitle !== undefined
-          ? input.metaTitle || null
+          ? cleanQuotes(input.metaTitle)
           : existing.metaTitle,
       metaDescription:
         input.metaDescription !== undefined
-          ? input.metaDescription || null
+          ? cleanQuotes(input.metaDescription)
           : existing.metaDescription,
       schemaJson:
         input.schemaJson !== undefined

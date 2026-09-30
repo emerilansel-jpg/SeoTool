@@ -26,6 +26,7 @@ export const Route = createFileRoute("/blogs/")({
     return { posts };
   },
   head: () => ({
+    links: [{ rel: "canonical", href: "https://seotool.im/blogs" }],
     meta: [
       { title: "SEO Blog & Search Marketing Journal - SeoTool.im" },
       {

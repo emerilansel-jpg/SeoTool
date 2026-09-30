@@ -67,10 +67,12 @@ export const Route = createFileRoute("/blogs/$slug")({
     const canonicalUrl = `https://seotool.im/blogs/${post.slug}`;
 
     const effectiveTitle = post.metaTitle?.trim()
-      ? `${post.metaTitle} - SeoTool.im Blog`
-      : `${post.title} - SeoTool.im Blog`;
-    const effectiveDescription =
-      post.metaDescription?.trim() || post.description;
+      ? `${post.metaTitle.replaceAll("''", "'")} - SeoTool.im Blog`
+      : `${post.title.replaceAll("''", "'")} - SeoTool.im Blog`;
+    const rawDescription = post.metaDescription?.trim() || post.description;
+    const effectiveDescription = rawDescription
+      ? rawDescription.replaceAll("''", "'")
+      : null;
     const effectiveImage =
       post.featuredImage?.trim() ||
       meta.heroImage ||
@@ -112,6 +114,7 @@ export const Route = createFileRoute("/blogs/$slug")({
     const finalSchema = customSchema ?? defaultSchema;
 
     return {
+      links: [{ rel: "canonical", href: canonicalUrl }],
       meta: [
         { title: effectiveTitle },
         ...(effectiveDescription
