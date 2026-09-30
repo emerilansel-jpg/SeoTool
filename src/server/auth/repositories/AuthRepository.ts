@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { member, organization, user as authUser } from "@/db/schema";
 
@@ -28,6 +28,18 @@ async function upsertDelegatedOrganization(input: DelegatedOrganizationInput) {
     });
 }
 
+async function isMemberOf(userId: string, organizationId: string) {
+  const [existing] = await db
+    .select({ id: member.id })
+    .from(member)
+    .where(
+      and(eq(member.userId, userId), eq(member.organizationId, organizationId)),
+    )
+    .limit(1);
+
+  return !!existing;
+}
+
 async function findFirstOrganizationIdForUser(userId: string) {
   const [existingMembership] = await db
     .select({ organizationId: member.organizationId })
@@ -54,4 +66,5 @@ export const AuthRepository = {
   upsertDelegatedOrganization,
   findFirstOrganizationIdForUser,
   getHostedUser,
+  isMemberOf,
 } as const;

@@ -1,5 +1,6 @@
 import { getAuth, hasHostedAuthConfig } from "@/lib/auth";
 import { getActiveOrganizationId } from "@/lib/auth-session";
+import { AuthRepository } from "@/server/auth/repositories/AuthRepository";
 import { getOrCreateDefaultHostedOrganization } from "@/server/auth/default-hosted-organization";
 import { AppError } from "@/server/lib/errors";
 import { getOptionalEnvValue } from "@/server/lib/runtime-env";
@@ -68,12 +69,18 @@ export async function resolveHostedContext(
   const activeOrganizationId = getActiveOrganizationId(session);
 
   if (activeOrganizationId) {
-    return {
-      userId: session.user.id,
-      userEmail: session.user.email,
-      emailVerified: session.user.emailVerified ?? false,
-      organizationId: activeOrganizationId,
-    };
+    const isMember = await AuthRepository.isMemberOf(
+      session.user.id,
+      activeOrganizationId,
+    );
+    if (isMember) {
+      return {
+        userId: session.user.id,
+        userEmail: session.user.email,
+        emailVerified: session.user.emailVerified ?? false,
+        organizationId: activeOrganizationId,
+      };
+    }
   }
 
   const authApi = getAuth().api;

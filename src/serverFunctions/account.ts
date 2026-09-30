@@ -53,16 +53,11 @@ export const deleteAccount = createServerFn({ method: "POST" })
     const auth = getAuth();
     const userId = context.userId;
 
-    // 1. Collect every organization the user is a member of, then delete
-    //    them. Deleting the org cascades all project data.
+    // 1. Snapshot organizations the user belongs to before user deletion cascades member rows.
     const memberships = await db
       .select({ orgId: member.organizationId })
       .from(member)
       .where(eq(member.userId, userId));
-
-    for (const { orgId } of memberships) {
-      await db.delete(organization).where(eq(organization.id, orgId));
-    }
 
     // 2. Check whether the user has a credential (password) account. This
     //    distinguishes password users from OAuth-only users.
@@ -81,7 +76,8 @@ export const deleteAccount = createServerFn({ method: "POST" })
           "Enter your password to confirm account deletion.",
         );
       }
-      // Verify the password against the stored hash, then cascade.
+      // Verify password and delete user first. If password verification fails,
+      // it throws before deleting organizations, preventing orphaned/zombie states.
       try {
         await auth.api.deleteUser({
           headers: request.headers,
@@ -94,11 +90,13 @@ export const deleteAccount = createServerFn({ method: "POST" })
         );
       }
     } else {
-      // OAuth-only user (no credential account): they have no password to
-      // verify, so the "DELETE" confirmation above is the safeguard. Remove
-      // the user row directly; FK cascades clean up sessions, accounts, and
-      // any member rows that remain.
+      // OAuth-only user (no credential account): remove user row directly.
       await db.delete(user).where(eq(user.id, userId));
+    }
+
+    // 3. Delete user's organizations (cascades all project, audit, keyword data).
+    for (const { orgId } of memberships) {
+      await db.delete(organization).where(eq(organization.id, orgId));
     }
 
     return { success: true };
