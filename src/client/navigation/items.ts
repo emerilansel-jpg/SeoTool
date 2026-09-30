@@ -97,7 +97,7 @@ const projectNavItems = [
   },
   {
     to: "/p/$projectId/ai-tracking" as const,
-    label: "AI Generatif",
+    label: "Generative AI",
     icon: Bot,
   },
   {

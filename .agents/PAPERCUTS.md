@@ -10,6 +10,8 @@ data, or sensitive paths.
 
 ## Open
 
+- [ ] `2026-09-30T00:05:00Z` — `zcode` — Local dev server (and therefore `playwright test`) fails to start: workerd aborts with `Class extends value undefined` in `createDurableObjectWrapper` while evaluating the Think/AIChatAgent Durable Objects. Survives `rm -rf node_modules && pnpm install --force`, clearing `node_modules/.vite`, `.tanstack/tmp`, `.wrangler/tmp`, and pinning undici 7.x vs 8.x; production (Docker workerd) is unaffected. Investigate the local workerd/miniflare-alpha (5.20260730.0-alpha) module-eval of `@cloudflare/think` and `@cloudflare/ai-chat` so E2E can run on Windows again.
+
 - [ ] `2026-09-29T23:12:13Z` — `zcode` — With git `core.autocrlf=true` (Windows default), a fresh checkout puts CRLF on disk and `prettier --check` (default `endOfLine: lf`) fails on 122 files, blocking `npm run ci:check` at stage 1 on Windows machines even though CI on Linux passes. Fixed 2026-09-29 by adding `.prettierrc.json` with `"endOfLine": "auto"`; consider committing a `.gitattributes` (`* text=auto eol=lf`) to make checkouts deterministic instead.
 
 - [ ] `2026-08-29T05:30:00Z` — `zcode` — E2E cannot exercise project-scoped INSERT flows (alerts, reports, saved keywords): `listProjectsEnsuringOne` returns a hardcoded mock for `e2e-org-id` with no `projects` row, so any FK insert (`alert_rules.project_id` etc.) fails with `FOREIGN KEY constraint failed` surfaced as `INTERNAL_ERROR`. Seed a real project row for `e2e-org-id` in `e2e/fixtures/seed.sql` (or insert it in the E2E bootstrap) so write-path specs can run.

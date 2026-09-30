@@ -186,7 +186,7 @@ export function AiTrackingPage({ projectId }: Props) {
           <div className="flex flex-wrap items-center gap-2">
             <Bot className="size-5 sm:size-6 text-primary shrink-0" />
             <h1 className="text-lg sm:text-xl font-bold tracking-tight text-base-content">
-              AI Generatif
+              Generative AI
             </h1>
             <span className="badge badge-primary badge-sm font-semibold">
               AI Visibility &amp; Mention Tracking
@@ -231,7 +231,7 @@ export function AiTrackingPage({ projectId }: Props) {
         <div className="rounded-2xl border border-dashed border-base-300/80 p-8 sm:p-12 text-center bg-base-100/60 shadow-2xs">
           <Bot className="mx-auto size-12 text-base-content/30 mb-3" />
           <h2 className="text-base font-bold text-base-content">
-            AI Generatif is not configured yet
+            Generative AI is not configured yet
           </h2>
           <p className="mx-auto mt-1.5 max-w-md text-xs text-base-content/60 leading-relaxed">
             Define your brand name, domain, aliases, and target platforms to
@@ -244,7 +244,7 @@ export function AiTrackingPage({ projectId }: Props) {
               onClick={() => setShowSetupModal(true)}
             >
               <Settings2 className="size-4" />
-              Configure AI Generatif
+              Configure Generative AI
             </button>
           </div>
         </div>

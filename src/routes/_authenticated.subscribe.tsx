@@ -5,7 +5,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Lock, ShieldCheck, User, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ThemePreferenceMenuItems } from "@/client/components/ThemePreferenceMenuItems";
-import { getStandardErrorMessage } from "@/client/lib/error-messages";
+import {
+  getErrorCode,
+  getStandardErrorMessage,
+} from "@/client/lib/error-messages";
 import { signOutAndRedirect, useSession } from "@/lib/auth-client";
 import { normalizeAuthRedirect } from "@/lib/auth-redirect";
 import {
@@ -124,13 +127,17 @@ function SubscribePage() {
   const starterCheckout = useMutation({
     mutationFn: () => createPaypalSubscription({ data: { tier: "starter" } }),
     onSuccess: (result) => window.location.assign(result.approveUrl),
-    onError: (error) =>
+    onError: (error) => {
+      console.error("Starter checkout failed", error);
       toast.error(
-        getStandardErrorMessage(
-          error,
-          "Credit Retainer checkout is not set up yet",
-        ),
-      ),
+        getErrorCode(error) === "UPSTREAM_UNAVAILABLE"
+          ? "We could not reach PayPal to start this checkout. Please try again in a moment, or email support@seotool.im if it keeps failing."
+          : getStandardErrorMessage(
+              error,
+              "Credit Retainer checkout is not set up yet",
+            ),
+      );
+    },
   });
   const verify = useMutation({
     mutationFn: (subscriptionId: string) =>
@@ -307,7 +314,7 @@ function SubscribePage() {
             </button>
             {!cohort?.configured ? (
               <p className="text-xs text-warning">
-                Payments are being set up right now — please check back soon, or
+                Payments are being set up right now. Please check back soon, or
                 email support@seotool.im and we&apos;ll let you know the moment
                 checkout is live.
               </p>
@@ -324,7 +331,7 @@ function SubscribePage() {
                 </span>
                 <h2 className="mt-2 text-xl font-semibold">Starter Retainer</h2>
                 <p className="text-xs text-base-content/60">
-                  From $1/month — 100% becomes credit that never expires
+                  From $1/month. 100% becomes credit that never expires
                 </p>
               </div>
               <div className="text-right">
@@ -336,7 +343,7 @@ function SubscribePage() {
             <ul className="grid gap-2 text-sm">
               {[
                 "1,000 permanent credits every month",
-                "Credits roll over and never expire — ever",
+                "Credits roll over and never expire, ever",
                 "Every SeoTool.im metered tool included",
                 "Cancel anytime; your credit balance stays yours",
                 "Referral rewards for 12 cycles",
