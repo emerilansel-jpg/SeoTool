@@ -86,7 +86,7 @@ function ExistingSubscriptionNotice({
   const description = finalizing
     ? "PayPal approval is complete. We are waiting for the active confirmation."
     : kind === "all-access"
-      ? "Anda sudah memiliki akun All Access aktif. Anda dapat mengelola akun di Billing atau memilih paket LTD di bawah."
+      ? "You already have an active membership. You can manage your account in Billing or choose an LTD plan below."
       : "Your legacy paid plan remains active. Manage it from Billing before switching so you are never billed for two subscriptions.";
   return (
     <div className="w-full max-w-lg space-y-5 text-center">
@@ -98,7 +98,7 @@ function ExistingSubscriptionNotice({
       <h1 className="text-xl font-semibold">
         {finalizing
           ? "Finalizing your membership…"
-          : "Subscription aktif terdeteksi"}
+          : "Active subscription found"}
       </h1>
       <p className="text-sm text-base-content/70">{description}</p>
       <div className="flex justify-center gap-3">
@@ -266,25 +266,25 @@ function SubscribePage() {
         />
         <h1 className="text-2xl font-bold">
           {firstName
-            ? `Pilih Akses Anda, ${firstName}!`
-            : "SeoTool.im Lifetime & Access"}
+            ? `Choose Your Plan, ${firstName}!`
+            : "SeoTool.im Lifetime Deals & Access"}
         </h1>
         <p className="text-sm text-base-content/70 max-w-xl mx-auto">
-          Miliki akses seumur hidup (One-Time Payment) dengan model BYOK bebas markup data,
-          atau pilih micro-retainer mulai dari $1/bulan.
+          Get lifetime access with BYOK mode (zero data markup),
+          or start light with our $1/month credit retainer.
         </p>
       </div>
 
       {search.checkout === "cancelled" ? (
         <div className="alert alert-warning mx-auto max-w-3xl text-sm">
-          Checkout dibatalkan. Tidak ada tagihan yang dibuat.
+          Checkout was canceled. No charges were made.
         </div>
       ) : null}
 
       {search.checkout === "success" && (ltdCapture.isPending || verify.isPending) ? (
         <div className="alert alert-info mx-auto max-w-3xl text-sm flex items-center justify-center gap-2">
           <span className="loading loading-spinner loading-xs" />
-          <span>Memverifikasi transaksi pembayaran dari PayPal…</span>
+          <span>Verifying your PayPal payment…</span>
         </div>
       ) : null}
 
@@ -295,13 +295,13 @@ function SubscribePage() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <span className="badge badge-primary badge-sm font-bold uppercase tracking-wide">
-                  BAYAR CUMA 1X · LIFETIME ACCESS
+                  PAY ONCE · LIFETIME ACCESS
                 </span>
                 <h2 className="mt-2 text-xl font-bold">{ltdTitle}</h2>
                 <p className="text-xs text-base-content/60 font-medium">
                   {isAppsumo ? appsumoPlan.domains : "BYOK Mode · Zero Data Markup"}
                   {!isAppsumo && cohort?.remaining != null
-                    ? ` · ${cohort.remaining} spot tersisa`
+                    ? ` · ${cohort.remaining} spots left`
                     : ""}
                 </p>
               </div>
@@ -310,7 +310,7 @@ function SubscribePage() {
                   ${ltdPriceDollars}
                 </div>
                 <div className="text-xs text-base-content/60 font-semibold">
-                  USD / Sekali Bayar
+                  USD / One-Time
                 </div>
               </div>
             </div>
@@ -318,21 +318,21 @@ function SubscribePage() {
             <div className="rounded-xl bg-primary/[0.05] p-3 text-xs text-base-content/80 flex items-center gap-2">
               <Key className="size-4 text-primary shrink-0" />
               <span>
-                <strong>Model BYOK:</strong> Gunakan API key DataForSEO & AI milik Anda sendiri.
-                Hemat hingga 90% biaya operasional data tanpa markup.
+                <strong>BYOK Mode:</strong> Plug in your own DataForSEO & AI API keys.
+                Save up to 90% on data costs with zero platform markup.
               </span>
             </div>
 
             <ul className="grid gap-2 text-xs sm:grid-cols-2">
               {[
-                "Semua 12+ fitur SEO & audit aktif",
-                "Integrasi DataForSEO & AI BYOK",
-                "Live keyword rank tracking harian",
-                "Technical site audit 100+ parameter",
-                "Generative AI brand visibility",
+                "All 12+ SEO & audit tools included",
+                "Direct DataForSEO & AI BYOK integration",
+                "Daily automated search rank tracking",
+                "100+ check technical site auditor",
+                "AI brand search visibility tracker",
                 "White-label PDF reports & scheduling",
-                "Bonus 5.000 platform data credits",
-                "Akses pembaruan engine seumur hidup",
+                "5,000 bonus credits on activation",
+                "Lifetime engine & platform updates",
               ].map((feature) => (
                 <li key={feature} className="flex gap-2">
                   <Check className="mt-0.5 size-3.5 shrink-0 text-success" />
@@ -352,10 +352,10 @@ function SubscribePage() {
                 ) : (
                   <Zap className="size-4" />
                 )}
-                Bayar Sekarang (${ltdPriceDollars} One-Time via PayPal)
+                Pay Now (${ltdPriceDollars} One-Time via PayPal)
               </button>
               <p className="mt-2 text-center text-[11px] text-base-content/50">
-                Langsung aktif seketika setelah pembayaran. Tanpa biaya langganan bulanan.
+                Instant access right after payment. No monthly bills ever.
               </p>
             </div>
           </div>
@@ -370,29 +370,29 @@ function SubscribePage() {
                   <span className="badge badge-secondary badge-outline badge-sm font-bold">
                     MICRO RETAINER
                   </span>
-                  <h2 className="mt-2 text-lg font-bold">Starter $1 / Bulan</h2>
+                  <h2 className="mt-2 text-lg font-bold">Starter $1 / Month</h2>
                   <p className="text-xs text-base-content/60">
-                    100% jadi kredit permanen yang tidak pernah hangus
+                    100% turns into permanent credits that never expire
                   </p>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-base-content">$1</div>
-                  <div className="text-xs text-base-content/60">USD / bulan</div>
+                  <div className="text-xs text-base-content/60">USD / month</div>
                 </div>
               </div>
 
               <ul className="space-y-1.5 text-xs text-base-content/80">
                 <li className="flex gap-2">
                   <Check className="size-3.5 shrink-0 text-success" />
-                  <span>1.000 kredit permanen masuk setiap bulan</span>
+                  <span>1,000 permanent credits added every month</span>
                 </li>
                 <li className="flex gap-2">
                   <Check className="size-3.5 shrink-0 text-success" />
-                  <span>Kredit roll over &amp; tidak pernah hangus</span>
+                  <span>Credits roll over &amp; never expire</span>
                 </li>
                 <li className="flex gap-2">
                   <Check className="size-3.5 shrink-0 text-success" />
-                  <span>Bisa dibatalkan kapan saja dari dashboard</span>
+                  <span>Cancel anytime from your dashboard</span>
                 </li>
               </ul>
 
@@ -404,7 +404,7 @@ function SubscribePage() {
                 {starterCheckout.isPending ? (
                   <span className="loading loading-spinner loading-xs" />
                 ) : null}
-                Mulai Berlangganan $1/bulan
+                Start for $1/month
               </button>
             </div>
           </section>
@@ -412,10 +412,10 @@ function SubscribePage() {
           <section className="card border border-base-200 bg-base-200/40">
             <div className="card-body p-5">
               <h3 className="text-sm font-bold text-base-content">
-                Ingin melihat dashboard terlebih dahulu?
+                Want to look around first?
               </h3>
               <p className="text-xs text-base-content/70 mt-1">
-                Anda dapat menjelajahi workspace dan mendaftarkan proyek Anda secara gratis.
+                You can explore the workspace and create your first project for free.
               </p>
               <div className="mt-3">
                 <button
@@ -423,7 +423,7 @@ function SubscribePage() {
                   className="btn btn-ghost btn-sm text-xs font-semibold"
                   onClick={() => void navigate({ to: search.redirect ?? "/projects" })}
                 >
-                  Lanjut ke Workspace (Free) →
+                  Continue to Workspace (Free) →
                 </button>
               </div>
             </div>
@@ -433,13 +433,13 @@ function SubscribePage() {
 
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-base-content/60 pt-4">
         <span className="inline-flex items-center gap-1.5">
-          <ShieldCheck className="size-3.5 text-success" /> Garansi uang kembali 30 hari
+          <ShieldCheck className="size-3.5 text-success" /> 30-day money-back guarantee
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <Lock className="size-3.5" /> Pembayaran aman terenkripsi via PayPal
+          <Lock className="size-3.5" /> Encrypted and safe PayPal checkout
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <Sparkles className="size-3.5 text-primary" /> Akses langsung terbuka instan
+          <Sparkles className="size-3.5 text-primary" /> Instant access right after purchase
         </span>
       </div>
     </div>

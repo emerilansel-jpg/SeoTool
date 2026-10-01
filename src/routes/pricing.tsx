@@ -12,29 +12,29 @@ import { CreditPricingGuide } from "@/client/features/billing/CreditPricingGuide
 
 const FAQ_ITEMS = [
   {
-    question: "Apa itu Lifetime Deal (LTD) & sistem naik $10?",
+    question: "What is a Lifetime Deal (LTD)? How does the +$10 jump work?",
     answer:
-      "LTD adalah sistem bayar cuma satu kali untuk mendapatkan akses seumur hidup ke platform SeoTool.im. Kami memberi reward kepada pendukung awal (early believers) dengan harga progresif yang naik $10 setiap kali kuota batch (cohort) penuh: Founder 10 ($29), Early 20 ($39), Growth 50 ($49), dan Public ($59). Begitu Anda membeli, Anda tidak akan pernah ditagih biaya langganan bulanan lagi.",
+      "A Lifetime Deal means you pay once and own the tool forever. No monthly bills ever again. We reward early buyers with lower prices. As each group fills up, the price goes up by $10: Founder ($29) -> Early ($39) -> Growth ($49) -> Public ($59). Grab your spot early to lock the best price!",
   },
   {
-    question: "Bagaimana cara kerja BYOK (Bring Your Own Key)?",
+    question: "What is BYOK (Bring Your Own Key)?",
     answer:
-      "BYOK berarti Anda memasukkan API key DataForSEO dan OpenRouter/OpenAI/Claude milik Anda sendiri di dashboard. Kami tidak mengambil markup sepeser pun dari biaya query data SEO dan token AI Anda. Anda hanya membayar biaya mentah langsung ke provider ($0.002 per scan), sehingga Anda bisa melakukan crawling dan audit berskala enterprise tanpa batasan kuota.",
+      "BYOK means you plug in your own API keys for DataForSEO and AI (OpenRouter, OpenAI, or Claude). We charge zero extra markup on your data. You only pay the raw, cheap provider rates (~$0.002 per scan). Crawl as much as you want without limits!",
   },
   {
-    question: "Bagaimana dengan AppSumo Lifetime Deals?",
+    question: "What are the AppSumo Lifetime Deals?",
     answer:
-      "Bagi pengguna yang ingin limit instan yang lebih tinggi, multi-domain, dan multi-seat tanpa repot, kami menyediakan 5 Tier resmi AppSumo mulai dari $37 hingga $399 (one-time payment). Tier 3 ($149) merupakan pilihan paling populer yang sudah dilengkapi fitur White-label PDF dan export CSV.",
+      "If you want bigger limits, multiple domains, and more team seats in one go, choose from our 5 official AppSumo tiers from $37 to $399 (all one-time payments). Tier 3 ($149) is our most popular Sweet Spot with white-label client PDF reports.",
   },
   {
-    question: "Bagaimana cara kerja $1 Credit Retainer?",
+    question: "How does the $1/month Credit Retainer work?",
     answer:
-      "Jika Anda ingin komitmen paling ringan tanpa membeli LTD, Anda bisa mulai dari $1/bulan. 100% uang Anda dikonversi menjadi kredit pemakaian permanen (1.000 kredit per dollar) yang dapat diakumulasi (roll over) dan tidak pernah hangus selamanya, bahkan jika Anda berhenti berlangganan.",
+      "Want to start tiny without an LTD? Start at just $1/month. 100% of your dollar turns into 1,000 permanent usage credits. They roll over every single month and never expire, even if you cancel your plan.",
   },
   {
-    question: "Apakah ada garansi uang kembali?",
+    question: "Is there a money-back guarantee?",
     answer:
-      "Ya. Semua transaksi dilindungi oleh garansi uang kembali 30 hari penuh tanpa risiko. Jika tools kami tidak sesuai dengan kebutuhan Anda, cukup hubungi support untuk pengembalian dana 100%.",
+      "Yes! You are 100% safe. Every purchase has a full 30-day money-back guarantee. If you do not love it, tell us within 30 days and we refund every penny. No questions asked.",
   },
 ] as const;
 
@@ -44,17 +44,17 @@ const APPSUMO_TIERS = [
     key: "appsumo_tier_1",
     name: "Tier 1",
     price: 37,
-    target: "Solopreneur / Blogger",
+    target: "Solopreneur / Starter",
     domains: "1 Domain · 1 Seat",
-    limits: "150 AI checks/bln · 250 hal audit · 50 SERP kw",
+    limits: "150 AI scans/mo · 250 pages audit · 50 keywords",
     bullets: [
-      "1 Domain & 1 Team Seat",
-      "150 AI Visibility checks/bln",
-      "250 halaman technical audit",
+      "1 Domain & 1 User Seat",
+      "150 AI Visibility scans/mo",
+      "250 pages technical site audit",
       "50 daily tracked keywords",
-      "ChatGPT AI model integration",
+      "ChatGPT AI model support",
       "1,500 bonus data credits",
-      "Akses platform seumur hidup",
+      "Lifetime updates included",
     ],
     popular: false,
   },
@@ -63,17 +63,17 @@ const APPSUMO_TIERS = [
     key: "appsumo_tier_2",
     name: "Tier 2",
     price: 79,
-    target: "Freelancer / Konsultan",
+    target: "Freelancer / Consultant",
     domains: "5 Domains · 2 Seats",
-    limits: "500 AI checks/bln + BYOK 1.5k · 1.000 hal · 200 kw",
+    limits: "500 AI scans/mo + BYOK 1.5k · 1,000 pages · 200 kw",
     bullets: [
-      "5 Domains & 2 Team Seats",
-      "500 AI checks/bln + BYOK 1.5k/bln",
-      "1.000 halaman technical audit",
+      "5 Domains & 2 User Seats",
+      "500 AI scans/mo + BYOK 1.5k/mo",
+      "1,000 pages technical site audit",
       "200 daily tracked keywords",
       "ChatGPT + Google Gemini models",
       "5,000 bonus data credits",
-      "Integrasi BYOK API Keys terbuka",
+      "BYOK API Key integration enabled",
     ],
     popular: false,
   },
@@ -82,13 +82,13 @@ const APPSUMO_TIERS = [
     key: "appsumo_tier_3",
     name: "Tier 3",
     price: 149,
-    target: "Agensi / In-House SEO",
+    target: "Growing Agency / Team",
     domains: "15 Domains · 5 Seats",
-    limits: "1.200 checks/bln + BYOK 10k · 5k hal · 750 kw",
+    limits: "1,200 scans/mo + BYOK 10k · 5,000 pages · 750 kw",
     bullets: [
-      "15 Domains & 5 Team Seats",
-      "1.200 AI checks/bln + BYOK 10k/bln",
-      "5.000 halaman technical audit",
+      "15 Domains & 5 User Seats",
+      "1,200 AI scans/mo + BYOK 10k/mo",
+      "5,000 pages technical site audit",
       "750 daily tracked keywords",
       "ChatGPT, Claude, Gemini & Perplexity",
       "10,000 bonus data credits",
@@ -101,14 +101,14 @@ const APPSUMO_TIERS = [
     key: "appsumo_tier_4",
     name: "Tier 4",
     price: 249,
-    target: "Digital Agency Berkembang",
+    target: "Full Digital Agency",
     domains: "50 Domains · 15 Seats",
-    limits: "BYOK Unlimited (3 Workers) · 20k hal · 2.5k kw",
+    limits: "BYOK Unlimited (3 Workers) · 20k pages · 2.5k kw",
     bullets: [
-      "50 Domains & 15 Team Seats",
-      "BYOK Unlimited queries (3 workers)",
-      "20.000 halaman technical audit",
-      "2.500 daily tracked keywords",
+      "50 Domains & 15 User Seats",
+      "BYOK Unlimited scans (3 workers)",
+      "20,000 pages technical site audit",
+      "2,500 daily tracked keywords",
       "Full White-label Client Reports",
       "25,000 bonus data credits",
       "Full REST API & Webhook automation",
@@ -122,12 +122,12 @@ const APPSUMO_TIERS = [
     price: 399,
     target: "Enterprise / Reseller",
     domains: "150 Domains · 50 Seats",
-    limits: "BYOK True Unlimited (10 Workers) · 50k hal",
+    limits: "BYOK True Unlimited (10 Workers) · 50k pages",
     bullets: [
-      "150 Domains & 50 Team Seats",
+      "150 Domains & 50 User Seats",
       "BYOK True Unlimited (10 workers)",
-      "50.000 halaman technical audit",
-      "5.000 daily tracked keywords",
+      "50,000 pages technical site audit",
+      "5,000 daily tracked keywords",
       "Custom CNAME Portal & White-label",
       "50,000 bonus data credits",
       "Priority 24/7 SLA & Roadmap input",
@@ -147,13 +147,13 @@ export const Route = createFileRoute("/pricing")({
       {
         name: "description",
         content:
-          "SeoTool.im Lifetime Deals (LTD) & Subscriptions. Bayar sekali seumur hidup untuk pendukung awal (BYOK), paket AppSumo, atau retainer $1/bulan.",
+          "SeoTool.im Lifetime Deals (LTD) & Subscriptions. Pay once, keep forever with BYOK, official AppSumo tiers, or start from $1/month.",
       },
       { property: "og:title", content: "Pricing & Lifetime Deals - SeoTool.im" },
       {
         property: "og:description",
         content:
-          "LTD bayar cuma sekali seumur hidup dengan BYOK, AppSumo tiers, atau $1/bln retainer.",
+          "Pay once, keep forever with BYOK. Official AppSumo tiers & $1/mo credit retainer.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://seotool.im/pricing" },
@@ -182,7 +182,7 @@ function CohortCard({
       ? "Unlimited spots"
       : cohort.remaining === 0
         ? "Sold out"
-        : `${cohort.remaining} spot${cohort.remaining === 1 ? "" : "s"} tersisa`;
+        : `${cohort.remaining} spot${cohort.remaining === 1 ? "" : "s"} left`;
   const isSoldOut = cohort.remaining != null && cohort.remaining === 0;
 
   return (
@@ -197,7 +197,7 @@ function CohortCard({
     >
       {isCurrent ? (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3.5 py-0.5 text-xs font-bold text-white shadow-sm">
-          Active Cohort
+          Active Batch
         </div>
       ) : null}
 
@@ -218,24 +218,24 @@ function CohortCard({
               ${priceDollars}
             </span>
             <span className="badge badge-primary badge-outline text-[11px] font-bold">
-              ONE-TIME / BAYAR 1X
+              ONE-TIME PAYMENT
             </span>
           </div>
           <span className="text-xs text-base-content/60 font-medium">
-            Akses seumur hidup (Lifetime Access)
+            Pay once, keep forever (Lifetime Access)
           </span>
         </div>
 
         <div className="mt-3 flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
           <Key className="size-3.5" />
-          <span>BYOK (Bring Your Own Key) · Bebas Markup</span>
+          <span>BYOK Mode · Zero Data Markup</span>
         </div>
 
         {cohort.capacity != null ? (
           <div className="mt-4">
             <div className="flex items-center justify-between text-xs text-base-content/60 mb-1">
-              <span>{cohort.occupied} bergabung</span>
-              <span>Maks {cohort.capacity}</span>
+              <span>{cohort.occupied} joined</span>
+              <span>Max {cohort.capacity}</span>
             </div>
             <div className="h-1.5 w-full rounded-full bg-base-300">
               <div
@@ -251,19 +251,19 @@ function CohortCard({
         <ul className="mt-5 space-y-2 text-xs text-base-content/80">
           <li className="flex items-center gap-2">
             <Check className="size-3.5 text-success shrink-0" />
-            <span>Semua 12+ fitur SEO & audit terbuka</span>
+            <span>All 12+ SEO & audit features unlocked</span>
           </li>
           <li className="flex items-center gap-2">
             <Check className="size-3.5 text-success shrink-0" />
-            <span>Masukkan DataForSEO & AI API Key sendiri</span>
+            <span>Connect your own DataForSEO & AI API Keys</span>
           </li>
           <li className="flex items-center gap-2">
             <Check className="size-3.5 text-success shrink-0" />
-            <span>Gratis 5.000 platform data bonus credits</span>
+            <span>5,000 bonus credits on activation</span>
           </li>
           <li className="flex items-center gap-2">
             <Check className="size-3.5 text-success shrink-0" />
-            <span>Pembaruan sistem & engine seumur hidup</span>
+            <span>Lifetime tool updates & engine access</span>
           </li>
         </ul>
       </div>
@@ -283,7 +283,7 @@ function CohortCard({
                 : "btn-outline border-base-300 hover:border-primary hover:bg-primary/5"
             }`}
           >
-            {isCurrent ? `Ambil LTD (${cohort.label})` : `Pilih ${cohort.label}`}
+            {isCurrent ? `Get Lifetime Deal (${cohort.label})` : `Choose ${cohort.label}`}
             <ArrowRight className="size-4" />
           </Link>
         ) : (
@@ -296,7 +296,7 @@ function CohortCard({
                 : "btn-outline border-base-300 hover:border-primary hover:bg-primary/5"
             }`}
           >
-            {isCurrent ? `Ambil LTD (${cohort.label})` : `Pilih ${cohort.label}`}
+            {isCurrent ? `Get Lifetime Deal (${cohort.label})` : `Choose ${cohort.label}`}
             <ArrowRight className="size-4" />
           </Link>
         )}
@@ -325,9 +325,8 @@ function PricingPage() {
             Pricing That Rewards Early Believers
           </h1>
           <p className="mt-4 text-base text-base-content/70 md:text-lg">
-            Miliki akses platform SEO mandiri terlengkap. Bayar cuma sekali (LTD
-            BYOK yang naik $10 per cohort), paket resmi AppSumo, atau mulai dari
-            $1/bulan micro-retainer.
+            Own the complete SEO workspace. Pay once (LTD with BYOK that goes up $10 per batch),
+            choose an official AppSumo tier, or start easy from $1/month.
           </p>
 
           {/* Pricing Tabs Switcher */}
@@ -355,7 +354,7 @@ function PricingPage() {
                 }`}
               >
                 <Sparkles className="size-4" />
-                AppSumo LTD (5 Tiers)
+                AppSumo Deals (5 Tiers)
               </button>
               <button
                 type="button"
@@ -366,7 +365,7 @@ function PricingPage() {
                     : "text-base-content/70 hover:text-base-content"
                 }`}
               >
-                $1/bln Retainer & Bulanan
+                $1/mo Retainer & Monthly
               </button>
             </div>
           </div>
@@ -378,13 +377,12 @@ function PricingPage() {
             <div className="mx-auto mb-8 max-w-3xl rounded-xl border border-primary/30 bg-primary/[0.04] p-5 text-center">
               <div className="flex items-center justify-center gap-2 text-primary font-bold text-sm">
                 <Lock className="size-4" />
-                <span>Model LTD Bayar Cuma Sekali — Harga Naik $10 Setiap Batch</span>
+                <span>Pay Once, Keep Forever — Price Increases $10 Every Batch</span>
               </div>
               <p className="mt-2 text-xs md:text-sm text-base-content/75 leading-relaxed">
-                Anda hanya membayar satu kali untuk lisensi platform seumur hidup. Menggunakan model{" "}
-                <strong>BYOK (Bring Your Own Key)</strong>: Anda menghubungkan API key DataForSEO &
-                AI milik Anda sendiri sehingga server kami tidak perlu membebankan markup biaya data
-                ke Anda. Skalabilitas tanpa batas!
+                You pay a single one-time fee for lifetime platform access. Powered by{" "}
+                <strong>BYOK (Bring Your Own Key)</strong>: you connect your own DataForSEO & AI API
+                keys so you only pay raw provider cost. Zero platform markup, unlimited scalability!
               </p>
             </div>
 
@@ -409,11 +407,11 @@ function PricingPage() {
                 Official AppSumo Proposal Tiers
               </span>
               <h3 className="text-lg font-bold text-base-content">
-                Pilih Kapasitas yang Sesuai dengan Skala Agensi Anda
+                Pick the Right Capacity for Your Team
               </h3>
               <p className="mt-1 text-xs md:text-sm text-base-content/70">
-                Semua tier merupakan <strong>One-Time Payment</strong> seumur hidup. Tier 3 merupakan
-                Sweet Spot terfavorit untuk agensi SEO.
+                All tiers are <strong>One-Time Payments</strong> for lifetime access. Tier 3 is the
+                most popular Sweet Spot for SEO agencies.
               </p>
             </div>
 
@@ -452,7 +450,7 @@ function PricingPage() {
                         ${tier.price}
                       </span>
                       <span className="text-[11px] text-base-content/50 font-medium">
-                        / sekali bayar
+                        / one-time
                       </span>
                     </div>
 
@@ -478,7 +476,7 @@ function PricingPage() {
                         tier.popular ? "btn-primary shadow-sm" : "btn-outline"
                       }`}
                     >
-                      Beli Tier {tier.tier} (${tier.price})
+                      Get Tier {tier.tier} (${tier.price})
                     </Link>
                   </div>
                 </div>
@@ -495,13 +493,12 @@ function PricingPage() {
                 MICRO RETAINER
               </span>
               <h3 className="mt-3 text-2xl font-bold tracking-tight text-base-content">
-                Mulai Dari $1/bulan — 100% Jadi Kredit Permanen
+                Start at $1/month — 100% Becomes Permanent Credits
               </h3>
               <p className="mt-3 text-sm text-base-content/70 leading-relaxed max-w-xl mx-auto">
-                Bagi Anda yang menginginkan komitmen paling ringan: setiap $1 dikonversi 100% menjadi
-                1.000 kredit pemakaian. Kredit ini terus terakumulasi (roll over) dan{" "}
-                <strong>tidak pernah hangus selamanya</strong>. Bahkan jika Anda membatalkan paket,
-                sisa saldo kredit tetap menjadi milik Anda.
+                Looking for the lowest commitment? Every dollar converts 100% into 1,000 usage
+                credits. Your credits roll over every month and <strong>never expire</strong>. Even
+                if you cancel, your credit balance stays yours forever.
               </p>
               <div className="mt-6 flex justify-center">
                 <Link
@@ -509,7 +506,7 @@ function PricingPage() {
                   search={{ plan: "starter" }}
                   className="btn btn-primary btn-md rounded-xl font-bold shadow-md shadow-primary/20 gap-2 px-6"
                 >
-                  Mulai $1/bulan Retainer
+                  Start $1/month Retainer
                   <ArrowRight className="size-4" />
                 </Link>
               </div>
@@ -524,11 +521,11 @@ function PricingPage() {
               Credit Transparency
             </span>
             <h2 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-              Simulasi Pemakaian & Transparansi Biaya
+              Simple Credit Rates & Usage Simulation
             </h2>
             <p className="mt-2 text-sm text-base-content/70 max-w-2xl mx-auto">
-              Sistem kredit bekerja seperti saldo pulsa prabayar. Lihat rincian biaya per aksi atau
-              simulasikan kebutuhan bulanan Anda.
+              Credits work like mobile prepaid balance. See exact costs per action or explore your
+              monthly usage scenario.
             </p>
           </div>
 
@@ -541,7 +538,7 @@ function PricingPage() {
         <section className="mx-auto mt-20 max-w-3xl">
           <div className="text-center">
             <span className="text-xs font-bold uppercase tracking-wider text-primary">
-              Ada Pertanyaan?
+              Got Questions?
             </span>
             <h2 className="mt-1 text-2xl font-bold tracking-tight">
               Frequently Asked Questions
