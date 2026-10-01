@@ -3,6 +3,7 @@ import { AppError } from "@/server/lib/errors";
 import {
   CreateGmbGridSchema,
   GetGmbGridConfigsSchema,
+  GetGmbGridReportSchema,
   GetGmbGridRunSchema,
   RetryGmbGridPinsSchema,
   SearchGmbProfilesSchema,
@@ -82,4 +83,12 @@ export const retryGmbGridFailedPins = createServerFn({ method: "POST" })
         projectId: data.projectId,
       },
     });
+  });
+
+export const getGmbGridReport = createServerFn({ method: "GET" })
+  .middleware([requireProjectContext])
+  .validator(GetGmbGridReportSchema)
+  .handler(async ({ data, context }) => {
+    assertRequestedProject(data.projectId, context.projectId);
+    return GmbGridService.getReportHistory(data.projectId, data.days);
   });

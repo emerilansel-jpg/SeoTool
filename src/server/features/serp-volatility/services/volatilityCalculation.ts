@@ -1,72 +1,102 @@
-/**
- * Pure volatility computation functions — no DB calls, no side effects.
- */
+/** Pure volatility computation functions. No DB calls or side effects. */
+
+export type PositionChange = {
+  currentPosition: number | null;
+  previousPosition: number | null;
+  unrankedPosition: number;
+};
+
+export type KeywordPositionChange = PositionChange & {
+  keyword: string;
+};
 
 export type TopMover = {
   keyword: string;
   currentPosition: number | null;
   previousPosition: number | null;
-  change: number; // positive = improved, negative = dropped
+  change: number;
+  status: "new" | "dropped" | "improved" | "declined" | "unchanged";
 };
 
-/**
- * Compute a 0-100 volatility score from an array of day-over-day position
- * changes. Uses normalized standard deviation: (stdDev / meanAbsolute) * 10,
- * capped at 100. Returns 0 for empty input.
- */
-export function calculateVolatilityScore(positionChanges: number[]): number {
-  if (positionChanges.length === 0) return 0;
+function effectivePosition(
+  position: number | null,
+  unrankedPosition: number,
+): number {
+  return position ?? unrankedPosition;
+}
 
-  const mean =
-    positionChanges.reduce((sum, v) => sum + v, 0) / positionChanges.length;
-  const variance =
-    positionChanges.reduce((sum, v) => sum + (v - mean) ** 2, 0) /
-    positionChanges.length;
-  const stdDev = Math.sqrt(variance);
-
-  // Normalize by mean absolute change so the score is scale-invariant.
-  const meanAbsolute =
-    positionChanges.reduce((sum, v) => sum + Math.abs(v), 0) /
-    positionChanges.length;
-
-  if (meanAbsolute === 0) return 0;
-
-  const score = (stdDev / meanAbsolute) * 10;
-  return Math.min(100, Math.round(score * 100) / 100);
+export function getPositionChange(change: PositionChange): number {
+  return (
+    effectivePosition(change.previousPosition, change.unrankedPosition) -
+    effectivePosition(change.currentPosition, change.unrankedPosition)
+  );
 }
 
 /**
- * Identify the top 5 movers (largest absolute position change).
- * Change is positive when a keyword improved (lower position number = better).
+ * Score absolute movement magnitude, breadth, and ranking entries/exits.
+ * Magnitude contributes 50 points, breadth 30, and new/dropped terms 20.
  */
-export function identifyTopMovers(
-  changes: {
-    keyword: string;
-    currentPosition: number | null;
-    previousPosition: number | null;
-  }[],
-): TopMover[] {
-  const withChange: TopMover[] = changes
-    .filter((c) => c.currentPosition != null || c.previousPosition != null)
-    .map((c) => {
-      const prev = c.previousPosition ?? 0;
-      const curr = c.currentPosition ?? 0;
-      return {
-        keyword: c.keyword,
-        currentPosition: c.currentPosition,
-        previousPosition: c.previousPosition,
-        change: prev - curr, // positive = improved rank
-      };
-    });
+export function calculateVolatilityScore(changes: PositionChange[]): number {
+  if (changes.length === 0) return 0;
 
-  return withChange
+  let absoluteMovement = 0;
+  let moving = 0;
+  let newOrDropped = 0;
+
+  for (const change of changes) {
+    const delta = getPositionChange(change);
+    absoluteMovement += Math.abs(delta);
+    if (delta !== 0) moving += 1;
+    if (
+      (change.currentPosition === null) !==
+      (change.previousPosition === null)
+    ) {
+      newOrDropped += 1;
+    }
+  }
+
+  const meanAbsolute = absoluteMovement / changes.length;
+  const magnitudeScore = Math.min(meanAbsolute / 10, 1) * 50;
+  const breadthScore = (moving / changes.length) * 30;
+  const entryExitScore = (newOrDropped / changes.length) * 20;
+
+  return Math.min(
+    100,
+    Math.round((magnitudeScore + breadthScore + entryExitScore) * 100) / 100,
+  );
+}
+
+/** Largest effective position changes. Positive means improved or newly ranked. */
+export function identifyTopMovers(
+  changes: KeywordPositionChange[],
+): TopMover[] {
+  return changes
+    .map((change): TopMover => {
+      const delta = getPositionChange(change);
+      const status =
+        change.previousPosition === null && change.currentPosition !== null
+          ? "new"
+          : change.previousPosition !== null && change.currentPosition === null
+            ? "dropped"
+            : delta > 0
+              ? "improved"
+              : delta < 0
+                ? "declined"
+                : "unchanged";
+
+      return {
+        keyword: change.keyword,
+        currentPosition: change.currentPosition,
+        previousPosition: change.previousPosition,
+        change: delta,
+        status,
+      };
+    })
+    .filter((mover) => mover.change !== 0)
     .toSorted((a, b) => Math.abs(b.change) - Math.abs(a.change))
     .slice(0, 5);
 }
 
-/**
- * Categorize a volatility score into a human-readable bucket.
- */
 export function categorizeVolatility(
   score: number,
 ): "low" | "moderate" | "high" | "extreme" {

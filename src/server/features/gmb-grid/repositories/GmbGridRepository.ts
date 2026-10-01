@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull, lte } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNull, lte } from "drizzle-orm";
 import type { InferInsertModel } from "drizzle-orm";
 import { db } from "@/db";
 import { executeInBatches } from "@/db/runBatch";
@@ -245,6 +245,63 @@ async function getDueConfigsWithOrganization(nowIso: string) {
     .limit(50);
 }
 
+async function getReportHistory(projectId: string, sinceIso: string) {
+  return db
+    .select({
+      run: gmbGridRuns,
+      config: gmbGridConfigs,
+    })
+    .from(gmbGridRuns)
+    .innerJoin(gmbGridConfigs, eq(gmbGridRuns.configId, gmbGridConfigs.id))
+    .where(
+      and(
+        eq(gmbGridConfigs.projectId, projectId),
+        gte(gmbGridRuns.startedAt, sinceIso),
+        inArray(gmbGridRuns.status, ["completed", "partial"]),
+      ),
+    )
+    .orderBy(desc(gmbGridRuns.startedAt));
+}
+
+async function listRunsForDateRange(
+  projectId: string,
+  startDateIso: string,
+  endDateIso: string,
+) {
+  return db
+    .select({
+      run: gmbGridRuns,
+      config: gmbGridConfigs,
+    })
+    .from(gmbGridRuns)
+    .innerJoin(gmbGridConfigs, eq(gmbGridRuns.configId, gmbGridConfigs.id))
+    .where(
+      and(
+        eq(gmbGridConfigs.projectId, projectId),
+        gte(gmbGridRuns.startedAt, startDateIso),
+        lte(gmbGridRuns.startedAt, endDateIso),
+      ),
+    )
+    .orderBy(desc(gmbGridRuns.startedAt));
+}
+
+async function getCompletedSnapshotsForRuns(runIds: string[]) {
+  if (runIds.length === 0) return [];
+  return db
+    .select({
+      runId: gmbGridSnapshots.runId,
+      rank: gmbGridSnapshots.rank,
+      status: gmbGridSnapshots.status,
+    })
+    .from(gmbGridSnapshots)
+    .where(
+      and(
+        inArray(gmbGridSnapshots.runId, runIds),
+        eq(gmbGridSnapshots.status, "completed"),
+      ),
+    );
+}
+
 export const GmbGridRepository = {
   listConfigsForProject,
   getConfigById,
@@ -263,4 +320,7 @@ export const GmbGridRepository = {
   resetFailedSnapshotsForRun,
   getProjectMarket,
   getDueConfigsWithOrganization,
+  getReportHistory,
+  listRunsForDateRange,
+  getCompletedSnapshotsForRuns,
 };

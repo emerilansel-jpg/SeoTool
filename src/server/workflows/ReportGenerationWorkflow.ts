@@ -17,6 +17,7 @@ import {
 } from "@/server/features/reports/repositories/ReportsRepository";
 import { NotificationRepository } from "@/server/features/notifications/repositories/NotificationRepository";
 import { sendReportDeliveryEmail } from "@/server/email/report-delivery";
+import type { ReportPeriod } from "@/types/schemas/reports";
 
 interface ReportGenerationParams {
   reportId: string;
@@ -52,6 +53,7 @@ export class ReportGenerationWorkflow extends WorkflowEntrypoint<
             projectId,
             domain: null,
             sections: report.sections,
+            period: (report.reportPeriod as ReportPeriod) ?? "monthly",
           }),
       );
 

@@ -15,6 +15,7 @@ import {
   reportIdInputSchema,
   listSnapshotsInputSchema,
   snapshotIdInputSchema,
+  type ReportPeriod,
 } from "@/types/schemas/reports";
 
 const projectScoped = z.object({ projectId: z.string().min(1) });
@@ -56,9 +57,11 @@ export const createReport = createServerFn({ method: "POST" })
       projectId: context.projectId,
       organizationId: context.organizationId,
       name: data.name,
+      reportPeriod: data.reportPeriod,
       schedule: data.schedule,
       dayOfWeek: data.dayOfWeek,
       dayOfMonth: data.dayOfMonth,
+      monthOfYear: data.monthOfYear,
       clientName: data.clientName,
       logoUrl: data.logoUrl,
       brandColor: data.brandColor,
@@ -79,9 +82,11 @@ export const updateReport = createServerFn({ method: "POST" })
       data.reportId,
       {
         name: data.name,
+        reportPeriod: data.reportPeriod,
         schedule: data.schedule,
         dayOfWeek: data.dayOfWeek,
         dayOfMonth: data.dayOfMonth,
+        monthOfYear: data.monthOfYear,
         clientName: data.clientName,
         logoUrl: data.logoUrl,
         brandColor: data.brandColor,
@@ -131,7 +136,7 @@ export const getReportSnapshot = createServerFn({ method: "POST" })
   });
 
 /** Generate a snapshot for a report config and persist it (manager+ only). */
-const _generateReportSnapshot = createServerFn({ method: "POST" })
+export const generateReportSnapshot = createServerFn({ method: "POST" })
   .middleware([requireProjectContext, requireProjectRole("manager")])
   .validator(generateSnapshotInput)
   .handler(async ({ data, context }) => {
@@ -140,10 +145,16 @@ const _generateReportSnapshot = createServerFn({ method: "POST" })
       context.projectId,
     );
     if (!report) return { error: "Report not found" as const };
+    // DB column is untyped text; fall back to monthly for legacy rows.
+    const period: ReportPeriod =
+      report.reportPeriod === "weekly" || report.reportPeriod === "yearly"
+        ? report.reportPeriod
+        : "monthly";
     const payload = await buildSnapshot({
       projectId: context.projectId,
       domain: context.project?.domain ?? null,
       sections: report.sections,
+      period,
     });
     const snapshot = await ReportsRepository.insertSnapshot({
       id: crypto.randomUUID(),

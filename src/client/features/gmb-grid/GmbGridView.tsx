@@ -26,6 +26,7 @@ import {
 import { GmbScanPipeline } from "./components/GmbScanPipeline";
 import { GmbMap, type GmbSnapshotMarker } from "./components/GmbMap";
 import { PinCompetitorsModal } from "./components/GmbPinModal";
+import { GmbGridReportSection } from "./components/GmbGridReportSection";
 
 type PendingScan = Omit<CreateGmbGridInput, "costConfirmed">;
 
@@ -82,6 +83,9 @@ export function GmbGridView({ projectId }: { projectId: string }) {
     ) {
       void queryClient.invalidateQueries({
         queryKey: ["gmb-configs", projectId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["gmb-grid-report", projectId],
       });
     }
   }, [runStatus, projectId, queryClient]);
@@ -433,6 +437,13 @@ export function GmbGridView({ projectId }: { projectId: string }) {
             />
           )}
         </section>
+      </div>
+
+      <div className="mt-6">
+        <GmbGridReportSection
+          projectId={projectId}
+          onSelectRunId={(runId) => setActiveRunId(runId)}
+        />
       </div>
 
       {pendingScan && (

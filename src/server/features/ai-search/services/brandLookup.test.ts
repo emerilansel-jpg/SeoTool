@@ -1,24 +1,36 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("cloudflare:workers", () => ({ waitUntil: vi.fn() }));
+vi.mock("cloudflare:workers", () => ({ env: {}, waitUntil: vi.fn() }));
 
-const { dataforseoClientMock, cacheMock } = vi.hoisted(() => ({
-  dataforseoClientMock: {
-    aiSearch: {
-      aggregatedMetrics: vi.fn(),
-      topPages: vi.fn(),
-      mentionsSearch: vi.fn(),
-      crossAggregatedMetrics: vi.fn(),
+const { dataforseoClientMock, cacheMock, brandLookupRepoMock } = vi.hoisted(
+  () => ({
+    dataforseoClientMock: {
+      aiSearch: {
+        aggregatedMetrics: vi.fn(),
+        topPages: vi.fn(),
+        mentionsSearch: vi.fn(),
+        crossAggregatedMetrics: vi.fn(),
+      },
     },
-  },
-  cacheMock: {
-    buildCacheKey: vi.fn(async (_prefix: string, params: unknown) =>
-      JSON.stringify(params),
-    ),
-    getCached: vi.fn(),
-    setCached: vi.fn(async () => undefined),
-  },
-}));
+    cacheMock: {
+      buildCacheKey: vi.fn(async (_prefix: string, params: unknown) =>
+        JSON.stringify(params),
+      ),
+      getCached: vi.fn(),
+      setCached: vi.fn(async () => undefined),
+    },
+    brandLookupRepoMock: {
+      persistSnapshot: vi.fn(async () => "mock-snapshot-id"),
+    },
+  }),
+);
+
+vi.mock(
+  "@/server/features/ai-search/repositories/BrandLookupRepository",
+  () => ({
+    BrandLookupRepository: brandLookupRepoMock,
+  }),
+);
 
 vi.mock("@/server/lib/dataforseo", () => {
   return {

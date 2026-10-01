@@ -26,9 +26,11 @@ export const reports = pgTable(
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
+    reportPeriod: text("report_period").notNull().default("monthly"),
     schedule: text("schedule").notNull().default("none"),
     dayOfWeek: integer("day_of_week"),
     dayOfMonth: integer("day_of_month"),
+    monthOfYear: integer("month_of_year"),
     nextRunAt: text("next_run_at"),
     clientName: text("client_name"),
     logoUrl: text("logo_url"),

@@ -1,4 +1,4 @@
-import { and, desc, eq, lte, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   reports,
@@ -42,9 +42,11 @@ async function insertReport(input: {
   projectId: string;
   organizationId: string;
   name: string;
+  reportPeriod?: string;
   schedule: string;
   dayOfWeek: number | null;
   dayOfMonth: number | null;
+  monthOfYear?: number | null;
   nextRunAt: string | null;
   clientName: string | null;
   logoUrl: string | null;
@@ -53,7 +55,14 @@ async function insertReport(input: {
   recipients: string | null;
   createdByUserId: string;
 }): Promise<Report> {
-  const [row] = await db.insert(reports).values(input).returning();
+  const [row] = await db
+    .insert(reports)
+    .values({
+      ...input,
+      reportPeriod: input.reportPeriod ?? "monthly",
+      monthOfYear: input.monthOfYear ?? null,
+    })
+    .returning();
   if (!row) throw new Error("Failed to insert report");
   return row;
 }
@@ -62,9 +71,11 @@ async function updateReport(
   reportId: string,
   set: Partial<{
     name: string;
+    reportPeriod: string;
     schedule: string;
     dayOfWeek: number | null;
     dayOfMonth: number | null;
+    monthOfYear: number | null;
     nextRunAt: string | null;
     clientName: string | null;
     logoUrl: string | null;
@@ -100,7 +111,12 @@ async function listDue(nowIso: string): Promise<Report[]> {
   return db
     .select()
     .from(reports)
-    .where(and(eq(reports.schedule, "weekly"), lte(reports.nextRunAt, nowIso)));
+    .where(
+      and(
+        inArray(reports.schedule, ["weekly", "monthly", "yearly"]),
+        lte(reports.nextRunAt, nowIso),
+      ),
+    );
 }
 
 // --- Sections --------------------------------------------------------------

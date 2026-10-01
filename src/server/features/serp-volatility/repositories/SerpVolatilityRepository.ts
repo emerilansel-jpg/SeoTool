@@ -1,6 +1,10 @@
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte } from "drizzle-orm";
 import { db } from "@/db";
-import { serpVolatilitySnapshots } from "@/db/schema";
+import {
+  rankCheckRuns,
+  rankSnapshots,
+  serpVolatilitySnapshots,
+} from "@/db/schema";
 
 type VolatilitySnapshot = typeof serpVolatilitySnapshots.$inferSelect;
 
@@ -11,9 +15,6 @@ type UpsertData = {
   topMoversJson: string | null;
 };
 
-/**
- * Get the most recent N volatility snapshots for a project, newest first.
- */
 async function getLatestForProject(
   projectId: string,
   limit = 30,
@@ -26,9 +27,6 @@ async function getLatestForProject(
     .limit(limit);
 }
 
-/**
- * Insert or update a volatility snapshot for a specific (project, date) pair.
- */
 async function upsertForProjectDate(
   projectId: string,
   date: string,
@@ -60,9 +58,6 @@ async function upsertForProjectDate(
   }
 }
 
-/**
- * Get volatility snapshots within a date range, inclusive, ordered by date.
- */
 async function getForProjectDateRange(
   projectId: string,
   dateFrom: string,
@@ -81,8 +76,37 @@ async function getForProjectDateRange(
     .orderBy(serpVolatilitySnapshots.date);
 }
 
+async function getCompletedFullRuns(projectId: string, since?: string) {
+  return db
+    .select({
+      id: rankCheckRuns.id,
+      configId: rankCheckRuns.configId,
+      startedAt: rankCheckRuns.startedAt,
+    })
+    .from(rankCheckRuns)
+    .where(
+      and(
+        eq(rankCheckRuns.projectId, projectId),
+        eq(rankCheckRuns.status, "completed"),
+        eq(rankCheckRuns.isSubsetRun, false),
+        since ? gte(rankCheckRuns.startedAt, since) : undefined,
+      ),
+    )
+    .orderBy(asc(rankCheckRuns.configId), desc(rankCheckRuns.startedAt));
+}
+
+async function getSnapshotsForRuns(runIds: string[]) {
+  if (runIds.length === 0) return [];
+  return db
+    .select()
+    .from(rankSnapshots)
+    .where(inArray(rankSnapshots.runId, runIds));
+}
+
 export const SerpVolatilityRepository = {
   getLatestForProject,
   upsertForProjectDate,
   getForProjectDateRange,
+  getCompletedFullRuns,
+  getSnapshotsForRuns,
 };

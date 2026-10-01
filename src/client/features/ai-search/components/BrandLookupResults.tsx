@@ -1,7 +1,13 @@
-import { Info } from "lucide-react";
+import { useState } from "react";
+import { Download, Info } from "lucide-react";
 import { BrandLookupMentionTrendCard } from "@/client/features/ai-search/components/BrandLookupMentionTrendCard";
 import { BrandLookupShareOfVoice } from "@/client/features/ai-search/components/BrandLookupShareOfVoice";
 import { CitationTabsCard } from "@/client/features/ai-search/components/BrandLookupCitationsCard";
+import {
+  BRAND_LOOKUP_REPORT_PERIODS,
+  downloadBrandLookupReportCsv,
+  type BrandLookupReportDays,
+} from "@/client/features/ai-search/components/brandLookupExport";
 import {
   formatCount,
   formatPlatformLabel,
@@ -18,6 +24,8 @@ type PlatformRow = BrandLookupResult["perPlatform"][number];
 type MetricKey = "mentions" | "aiSearchVolume";
 
 export function BrandLookupResults({ result, projectId }: Props) {
+  const [reportDays, setReportDays] = useState<BrandLookupReportDays>(30);
+
   if (!result.hasData) {
     const erroredPlatforms = result.perPlatform.filter(
       (p) => p.status === "error",
@@ -59,6 +67,11 @@ export function BrandLookupResults({ result, projectId }: Props) {
   return (
     <div className="space-y-4">
       <BrandHeader result={result} />
+      <BrandReportToolbar
+        reportDays={reportDays}
+        onReportDaysChange={setReportDays}
+        onExport={() => downloadBrandLookupReportCsv(result, reportDays)}
+      />
 
       {/* One shared grid so the cards align by construction: stats left, trend
           right, Share of Voice flowing into the next free half-width cell —
@@ -76,6 +89,58 @@ export function BrandLookupResults({ result, projectId }: Props) {
 
       <CitationTabsCard result={result} projectId={projectId} />
     </div>
+  );
+}
+
+function BrandReportToolbar({
+  reportDays,
+  onReportDaysChange,
+  onExport,
+}: {
+  reportDays: BrandLookupReportDays;
+  onReportDaysChange: (days: BrandLookupReportDays) => void;
+  onExport: () => void;
+}) {
+  return (
+    <section
+      className="flex flex-col gap-3 rounded-xl border border-base-300 bg-base-100 p-3 sm:flex-row sm:items-center sm:justify-between"
+      aria-labelledby="brand-reporting-title"
+    >
+      <div className="min-w-0">
+        <h3 id="brand-reporting-title" className="text-sm font-semibold">
+          Reporting view
+        </h3>
+        <p className="mt-0.5 text-xs leading-relaxed text-base-content/60">
+          Source data updates monthly. Weekly reports use the latest available
+          monthly data.
+        </p>
+      </div>
+      <div className="flex flex-col gap-2 xs:flex-row xs:items-center">
+        <div className="join" role="group" aria-label="Brand report period">
+          {BRAND_LOOKUP_REPORT_PERIODS.map((period) => (
+            <button
+              key={period.days}
+              type="button"
+              className={`btn btn-sm join-item ${
+                reportDays === period.days ? "btn-primary" : "btn-outline"
+              }`}
+              aria-pressed={reportDays === period.days}
+              onClick={() => onReportDaysChange(period.days)}
+            >
+              {period.label}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          className="btn btn-sm btn-outline gap-1.5"
+          onClick={onExport}
+        >
+          <Download className="size-4" />
+          Export report CSV
+        </button>
+      </div>
+    </section>
   );
 }
 

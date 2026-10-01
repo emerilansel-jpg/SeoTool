@@ -46,6 +46,8 @@ import * as sqliteProjectCompetitors from "./project-competitors.schema";
 import * as pgProjectCompetitors from "./pg/project-competitors.schema";
 import * as sqliteAiTracking from "./ai-tracking.schema";
 import * as pgAiTracking from "./pg/ai-tracking.schema";
+import * as sqliteBrandLookup from "./brand-lookup.schema";
+import * as pgBrandLookup from "./pg/brand-lookup.schema";
 import * as sqliteAdmin from "./admin.schema";
 import * as pgAdmin from "./pg/admin.schema";
 
@@ -184,6 +186,7 @@ const sqliteAppTables = tablesFrom(
   sqliteCancellationFeedback,
   sqliteProjectCompetitors,
   sqliteAiTracking,
+  sqliteBrandLookup,
   sqliteAdmin,
 );
 const pgAppTables = tablesFrom(
@@ -207,6 +210,7 @@ const pgAppTables = tablesFrom(
   pgCancellationFeedback,
   pgProjectCompetitors,
   pgAiTracking,
+  pgBrandLookup,
   pgAdmin,
 );
 const sqliteAuthTables = tablesFrom(sqliteAuth);

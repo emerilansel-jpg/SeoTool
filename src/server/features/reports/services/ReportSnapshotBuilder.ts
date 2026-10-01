@@ -13,9 +13,13 @@ import { type ReportSection } from "@/server/features/reports/repositories/Repor
 import {
   sumSearchTotals,
   buildStrikingDistanceRows,
-  previousPeriod,
 } from "@/server/features/gsc/searchPerformanceReport";
 import { sumTotals } from "@/server/features/ga4/analyticsReport";
+import { resolveReportPeriodRange } from "@/server/features/reports/services/reportDateRange";
+import { buildGmbSection } from "@/server/features/reports/sections/gmbSection";
+import { buildBrandLookupSection } from "@/server/features/reports/sections/brandLookupSection";
+import { buildAiTrackingSection } from "@/server/features/reports/sections/aiTrackingSection";
+import type { ReportPeriod } from "@/types/schemas/reports";
 
 export type SnapshotPayload = {
   generatedAt: string;
@@ -32,6 +36,7 @@ type BuildInput = {
   projectId: string;
   domain: string | null;
   sections: ReportSection[];
+  period?: ReportPeriod;
 };
 
 /** Build a snapshot payload from a report config. Tolerant: if one section's
@@ -40,13 +45,8 @@ type BuildInput = {
 export async function buildSnapshot(
   input: BuildInput,
 ): Promise<SnapshotPayload> {
-  const startDate = new Date(Date.now() - 28 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
-  const endDate = new Date(Date.now() - 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
-  const prev = previousPeriod(startDate, endDate);
+  const range = resolveReportPeriodRange(input.period ?? "monthly");
+  const { startDate, endDate, prevStartDate, prevEndDate } = range;
 
   const sections: Record<string, SectionResult> = {};
 
@@ -56,8 +56,8 @@ export async function buildSnapshot(
       sections[type] = await buildSection(type, input.projectId, input.domain, {
         startDate,
         endDate,
-        prevStartDate: prev.startDate,
-        prevEndDate: prev.endDate,
+        prevStartDate,
+        prevEndDate,
       });
     } catch (error) {
       const isExpected =
@@ -104,6 +104,12 @@ async function buildSection(
       return buildBacklinkSection(projectId, domain);
     case "content":
       return buildContentSection(projectId);
+    case "gmb_grid":
+      return buildGmbSection(projectId, range);
+    case "brand_lookup":
+      return buildBrandLookupSection(projectId, range);
+    case "ai_tracking":
+      return buildAiTrackingSection(projectId, range);
     default:
       return { status: "skipped", reason: `Unknown section type: ${type}` };
   }

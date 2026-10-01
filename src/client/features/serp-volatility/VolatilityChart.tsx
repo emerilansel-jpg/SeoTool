@@ -4,6 +4,8 @@ import { Activity } from "lucide-react";
 type TrendRow = {
   date: string;
   volatilityScore: number;
+  keywordsSampled?: number;
+  avgPositionChange?: number;
 };
 
 function categoryColor(score: number): string {
@@ -24,7 +26,7 @@ export function VolatilityChart({ rows }: { rows: TrendRow[] }) {
       <div className="p-8 text-center text-sm text-base-content/60 space-y-2">
         <Activity className="size-6 text-base-content/30 mx-auto" />
         <p className="font-medium text-base-content/70">
-          No volatility history recorded yet
+          No volatility history recorded for this range
         </p>
         <p className="text-xs text-base-content/50">
           Run periodic rank checks to track SERP turbulence over time.
@@ -42,6 +44,7 @@ export function VolatilityChart({ rows }: { rows: TrendRow[] }) {
           <tr className="border-b border-base-200 text-xs font-semibold uppercase tracking-wider text-base-content/50">
             <th className="py-3 px-4">Date</th>
             <th className="w-full py-3 px-4">Volatility Distribution</th>
+            <th className="py-3 px-4 text-right">Sampled</th>
             <th className="py-3 px-4 text-right">Score</th>
             <th className="py-3 px-4">Status</th>
           </tr>
@@ -64,6 +67,9 @@ export function VolatilityChart({ rows }: { rows: TrendRow[] }) {
                       style={{ width: `${Math.max(pct, 4)}%` }}
                     />
                   </div>
+                </td>
+                <td className="whitespace-nowrap text-right font-mono text-xs text-base-content/70 py-3 px-4">
+                  {row.keywordsSampled ? `${row.keywordsSampled} kw` : "—"}
                 </td>
                 <td className="whitespace-nowrap text-right font-mono text-xs font-bold tabular-nums text-base-content py-3 px-4">
                   {row.volatilityScore.toFixed(1)}

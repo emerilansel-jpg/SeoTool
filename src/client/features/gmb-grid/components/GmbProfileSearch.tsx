@@ -253,8 +253,8 @@ export function GmbProfileSearch({
               </p>
               <p className="text-xs text-base-content/70">
                 Make sure the Target Country above matches where the business is
-                located, or append the city name (e.g. &ldquo;The Grove
-                Los Angeles&rdquo;).
+                located, or append the city name (e.g. &ldquo;The Grove Los
+                Angeles&rdquo;).
               </p>
             </div>
           )}

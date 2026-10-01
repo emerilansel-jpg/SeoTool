@@ -7,7 +7,7 @@ import {
   type ReportSnapshot,
 } from "@/server/features/reports/repositories/ReportsRepository";
 import { computeNextRunAt } from "@/server/features/reports/services/reportSchedule";
-import type { ReportSchedule } from "@/types/schemas/reports";
+import type { ReportPeriod, ReportSchedule } from "@/types/schemas/reports";
 
 export type ReportWithSections = Report & { sections: ReportSection[] };
 
@@ -44,9 +44,11 @@ type CreateInput = {
   projectId: string;
   organizationId: string;
   name: string;
+  reportPeriod?: ReportPeriod;
   schedule: ReportSchedule;
   dayOfWeek?: number;
   dayOfMonth?: number;
+  monthOfYear?: number;
   clientName?: string;
   logoUrl?: string;
   brandColor?: string;
@@ -61,15 +63,18 @@ async function createReport(input: CreateInput): Promise<ReportWithSections> {
     input.schedule,
     input.dayOfWeek ?? null,
     input.dayOfMonth ?? null,
+    input.monthOfYear ?? null,
   );
   const report = await ReportsRepository.insertReport({
     id: crypto.randomUUID(),
     projectId: input.projectId,
     organizationId: input.organizationId,
     name: input.name,
+    reportPeriod: input.reportPeriod ?? "monthly",
     schedule: input.schedule,
     dayOfWeek: input.dayOfWeek ?? null,
     dayOfMonth: input.dayOfMonth ?? null,
+    monthOfYear: input.monthOfYear ?? null,
     nextRunAt,
     clientName: input.clientName ?? null,
     logoUrl: input.logoUrl ?? null,
@@ -100,14 +105,17 @@ async function updateReport(
     input.schedule,
     input.dayOfWeek ?? null,
     input.dayOfMonth ?? null,
+    input.monthOfYear ?? null,
   );
   await ReportsRepository.updateReport(
     reportId,
     {
       name: input.name,
+      reportPeriod: input.reportPeriod,
       schedule: input.schedule,
       dayOfWeek: input.dayOfWeek ?? null,
       dayOfMonth: input.dayOfMonth ?? null,
+      monthOfYear: input.monthOfYear ?? null,
       nextRunAt,
       clientName: input.clientName ?? null,
       logoUrl: input.logoUrl ?? null,
@@ -162,6 +170,7 @@ async function scheduleNextRun(reportId: string): Promise<void> {
     report.schedule as ReportSchedule,
     report.dayOfWeek,
     report.dayOfMonth,
+    report.monthOfYear,
   );
   if (nextRunAt) {
     await ReportsRepository.updateReport(reportId, { nextRunAt });

@@ -12,6 +12,7 @@ import { generateGridNodes } from "@/server/utils/geo-grid";
 import type { CreateGmbGridInput } from "../gmb-grid.schema";
 import { calculateGmbMetrics, estimateGmbGridCost } from "../gmb-grid";
 import { GmbGridRepository } from "../repositories/GmbGridRepository";
+import { getReportHistory } from "./gmbGridReportHistory";
 
 const profileItemSchema = z
   .object({
@@ -406,4 +407,5 @@ export const GmbGridService = {
   listConfigs: GmbGridRepository.listConfigsForProject,
   estimateCost: estimateGmbGridCost,
   computeNextCheckAt,
+  getReportHistory,
 };

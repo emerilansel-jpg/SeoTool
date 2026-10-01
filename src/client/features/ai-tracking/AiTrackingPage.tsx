@@ -37,6 +37,11 @@ import { AiCompetitorsTab } from "./components/AiCompetitorsTab";
 import { AiGscCorrelationTab } from "./components/AiGscCorrelationTab";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import type { SaveAiTrackingConfigInput } from "@/types/schemas/ai-tracking";
+import {
+  downloadAiTrackingReportCsv,
+  type AiTrackingReportDays,
+} from "./aiTrackingReportExport";
+import { AiTrackingReportToolbar } from "./components/AiTrackingReportToolbar";
 
 interface Props {
   projectId: string;
@@ -54,6 +59,7 @@ type TabType =
 export function AiTrackingPage({ projectId }: Props) {
   const queryClient = useQueryClient();
   const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
+  const [reportDays, setReportDays] = useState<AiTrackingReportDays>(30);
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [showSetupModal, setShowSetupModal] = useState(false);
 
@@ -65,10 +71,16 @@ export function AiTrackingPage({ projectId }: Props) {
   const runTrackingFn = useServerFn(runAiTracking);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["ai-tracking", projectId, "dashboard", selectedPlatform],
+    queryKey: [
+      "ai-tracking",
+      projectId,
+      "dashboard",
+      selectedPlatform,
+      reportDays,
+    ],
     queryFn: () =>
       getDashboardFn({
-        data: { projectId, platform: selectedPlatform, days: 30 },
+        data: { projectId, platform: selectedPlatform, days: reportDays },
       }),
   });
 
@@ -250,6 +262,16 @@ export function AiTrackingPage({ projectId }: Props) {
         </div>
       ) : (
         <>
+          <AiTrackingReportToolbar
+            projectId={projectId}
+            reportDays={reportDays}
+            onReportDaysChange={setReportDays}
+            onExport={() =>
+              downloadAiTrackingReportCsv(data, reportDays, selectedPlatform)
+            }
+            canExport={data.kpi.totalResponses > 0 || data.prompts.length > 0}
+          />
+
           {/* Navigation Tabs (Smooth horizontal scroll on mobile) */}
           <div className="border-b border-base-300/80 -mx-3.5 px-3.5 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar">
             <div className="flex flex-nowrap gap-1 -mb-px min-w-max pb-0.5">

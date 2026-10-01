@@ -1,5 +1,5 @@
 // oxlint-disable max-lines, typescript-eslint/no-unsafe-type-assertion
-import { and, desc, eq, inArray, gte } from "drizzle-orm";
+import { and, desc, eq, inArray, gte, lte } from "drizzle-orm";
 import { db } from "@/db";
 import {
   aiTrackingConfigs,
@@ -775,5 +775,41 @@ export const AiTrackingRepository = {
       totalCited,
       totalSearchVolume,
     };
+  },
+
+  async listVisibilitySnapshotsForDateRange(
+    configId: string,
+    startDate: string,
+    endDate: string,
+  ) {
+    return db
+      .select()
+      .from(aiVisibilitySnapshots)
+      .where(
+        and(
+          eq(aiVisibilitySnapshots.configId, configId),
+          gte(aiVisibilitySnapshots.snapshotDate, startDate),
+          lte(aiVisibilitySnapshots.snapshotDate, endDate),
+        ),
+      )
+      .orderBy(aiVisibilitySnapshots.snapshotDate);
+  },
+
+  async getObservationsForDateRange(
+    configId: string,
+    startDateIso: string,
+    endDateIso: string,
+  ) {
+    return db
+      .select()
+      .from(aiTrackingObservations)
+      .where(
+        and(
+          eq(aiTrackingObservations.configId, configId),
+          gte(aiTrackingObservations.observedAt, startDateIso),
+          lte(aiTrackingObservations.observedAt, endDateIso),
+        ),
+      )
+      .orderBy(desc(aiTrackingObservations.observedAt));
   },
 };

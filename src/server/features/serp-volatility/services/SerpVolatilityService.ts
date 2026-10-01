@@ -1,28 +1,36 @@
-import { and, desc, eq, sql } from "drizzle-orm";
-import { db } from "@/db";
-import { rankCheckRuns } from "@/db/schema";
-import { RankTrackingRepository } from "@/server/features/rank-tracking/repositories/RankTrackingRepository";
+import { AppError } from "@/server/lib/errors";
 import { SerpVolatilityRepository } from "../repositories/SerpVolatilityRepository";
 import {
   calculateVolatilityScore,
   categorizeVolatility,
+  getPositionChange,
   identifyTopMovers,
+  type KeywordPositionChange,
 } from "./volatilityCalculation";
-import { AppError } from "@/server/lib/errors";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const BACKFILL_DAYS = 30;
 
 export type TopMover = {
   keyword: string;
   change: number;
   currentPosition?: number;
   previousPosition?: number;
+  status?: "new" | "dropped" | "improved" | "declined" | "unchanged";
 };
+
+type CompletedRun = Awaited<
+  ReturnType<typeof SerpVolatilityRepository.getCompletedFullRuns>
+>[number];
+type RankSnapshot = Awaited<
+  ReturnType<typeof SerpVolatilityRepository.getSnapshotsForRuns>
+>[number];
+type RunPair = { latest: CompletedRun; previous: CompletedRun };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-/** Parse the persisted topMoversJson column; malformed data degrades to
- * fewer movers instead of poisoning API responses with `any`. */
 export function parseTopMovers(json: string | null): TopMover[] {
   if (!json) return [];
   let parsed: unknown;
@@ -32,6 +40,7 @@ export function parseTopMovers(json: string | null): TopMover[] {
     return [];
   }
   if (!Array.isArray(parsed)) return [];
+
   const movers: TopMover[] = [];
   for (const entry of parsed) {
     if (!isRecord(entry)) continue;
@@ -49,248 +58,261 @@ export function parseTopMovers(json: string | null): TopMover[] {
         typeof entry.previousPosition === "number"
           ? entry.previousPosition
           : undefined,
+      status:
+        entry.status === "new" ||
+        entry.status === "dropped" ||
+        entry.status === "improved" ||
+        entry.status === "declined" ||
+        entry.status === "unchanged"
+          ? entry.status
+          : undefined,
     });
   }
   return movers;
 }
 
-/**
- * Compute a daily SERP volatility snapshot for a project by comparing the
- * two most recent completed rank-check runs and measuring position shifts.
- *
- * Requires at least one completed rank check run for the project. If no data
- * is found, returns null without persisting anything.
- */
+/** Grouping after an unbounded project query prevents busy configs starving others. */
+export function selectLatestTwoRunsPerConfig(runs: CompletedRun[]): RunPair[] {
+  const grouped = new Map<string, CompletedRun[]>();
+  for (const run of runs) {
+    const configRuns = grouped.get(run.configId) ?? [];
+    if (configRuns.length < 2) configRuns.push(run);
+    grouped.set(run.configId, configRuns);
+  }
+
+  const pairs: RunPair[] = [];
+  for (const configRuns of grouped.values()) {
+    const latest = configRuns[0];
+    const previous = configRuns[1];
+    if (latest && previous) pairs.push({ latest, previous });
+  }
+  return pairs;
+}
+
+function snapshotKey(snapshot: RankSnapshot): string {
+  return `${snapshot.trackingKeywordId}:${snapshot.device}`;
+}
+
+/** Compare the union so disappeared keywords remain part of the sample. */
+export function buildKeywordChanges(
+  latestSnapshots: RankSnapshot[],
+  previousSnapshots: RankSnapshot[],
+  unrankedPosition: number,
+): KeywordPositionChange[] {
+  const latest = new Map(latestSnapshots.map((row) => [snapshotKey(row), row]));
+  const previous = new Map(
+    previousSnapshots.map((row) => [snapshotKey(row), row]),
+  );
+  const keys = new Set([...latest.keys(), ...previous.keys()]);
+
+  return [...keys].map((key) => {
+    const current = latest.get(key);
+    const prior = previous.get(key);
+    return {
+      keyword: current?.keyword ?? prior?.keyword ?? "Unknown keyword",
+      currentPosition: current?.position ?? null,
+      previousPosition: prior?.position ?? null,
+      unrankedPosition,
+    };
+  });
+}
+
+function groupSnapshotsByRun(snapshots: RankSnapshot[]) {
+  const grouped = new Map<string, RankSnapshot[]>();
+  for (const snapshot of snapshots) {
+    const rows = grouped.get(snapshot.runId) ?? [];
+    rows.push(snapshot);
+    grouped.set(snapshot.runId, rows);
+  }
+  return grouped;
+}
+
+function buildSnapshotData(
+  pairs: RunPair[],
+  snapshotsByRun: Map<string, RankSnapshot[]>,
+) {
+  const changes = pairs.flatMap(({ latest, previous }) => {
+    const latestSnapshots = snapshotsByRun.get(latest.id) ?? [];
+    const previousSnapshots = snapshotsByRun.get(previous.id) ?? [];
+    const maxObservedPosition = Math.max(
+      0,
+      ...latestSnapshots.map((row) => row.position ?? 0),
+      ...previousSnapshots.map((row) => row.position ?? 0),
+    );
+    return buildKeywordChanges(
+      latestSnapshots,
+      previousSnapshots,
+      maxObservedPosition + 1,
+    );
+  });
+
+  if (changes.length === 0) return null;
+  const absoluteMovement = changes.reduce(
+    (sum, change) => sum + Math.abs(getPositionChange(change)),
+    0,
+  );
+  const topMovers = identifyTopMovers(changes);
+
+  return {
+    volatilityScore: calculateVolatilityScore(changes),
+    keywordsSampled: changes.length,
+    avgPositionChange:
+      Math.round((absoluteMovement / changes.length) * 100) / 100,
+    topMoversJson: JSON.stringify(topMovers),
+    topMovers,
+  };
+}
+
+async function persistComparison(
+  projectId: string,
+  date: string,
+  pairs: RunPair[],
+) {
+  const runIds = pairs.flatMap(({ latest, previous }) => [
+    latest.id,
+    previous.id,
+  ]);
+  const snapshots = await SerpVolatilityRepository.getSnapshotsForRuns(runIds);
+  const snapshotData = buildSnapshotData(pairs, groupSnapshotsByRun(snapshots));
+  if (!snapshotData) return null;
+
+  const { topMovers, ...persisted } = snapshotData;
+  await SerpVolatilityRepository.upsertForProjectDate(
+    projectId,
+    date,
+    persisted,
+  );
+  return {
+    date,
+    ...persisted,
+    category: categorizeVolatility(persisted.volatilityScore),
+    topMovers,
+  };
+}
+
 async function computeVolatility(projectId: string) {
-  // Find all active configs for this project.
-  const configs = await RankTrackingRepository.getConfigsForProject(projectId);
-  if (configs.length === 0) {
+  const runs = await SerpVolatilityRepository.getCompletedFullRuns(projectId);
+  const pairs = selectLatestTwoRunsPerConfig(runs);
+  if (pairs.length === 0) {
     throw new AppError(
       "VALIDATION_ERROR",
-      "No active rank tracking configurations found for this project.",
+      "Not enough rank tracking history. Volatility requires two completed full rank checks for at least one tracked domain.",
     );
   }
 
-  const configIds = configs.map((c) => c.id);
-
-  // Get the two most recent completed runs across all configs in this project.
-  // We order by startedAt descending and take enough to cover one per config.
-  const recentRuns = await db
-    .select({
-      id: rankCheckRuns.id,
-      configId: rankCheckRuns.configId,
-      startedAt: rankCheckRuns.startedAt,
-    })
-    .from(rankCheckRuns)
-    .where(
-      and(
-        sql`${rankCheckRuns.configId} IN (${sql.join(
-          configIds.map((id) => sql`${id}`),
-          sql`, `,
-        )})`,
-        eq(rankCheckRuns.status, "completed"),
-        eq(rankCheckRuns.isSubsetRun, false),
-      ),
-    )
-    .orderBy(desc(rankCheckRuns.startedAt))
-    .limit(configIds.length * 2);
-
-  if (recentRuns.length < 2) {
-    throw new AppError(
-      "VALIDATION_ERROR",
-      "Not enough rank tracking history. Volatility calculation requires at least two completed rank checks.",
-    );
-  }
-
-  // Group runs by config, picking the latest and second-latest per config.
-  const runsByConfig = new Map<
-    string,
-    { latest: string; previous: string; date: string }
-  >();
-  const seen = new Map<string, typeof recentRuns>();
-  for (const run of recentRuns) {
-    const arr = seen.get(run.configId) ?? [];
-    arr.push(run);
-    seen.set(run.configId, arr);
-  }
-
-  for (const [configId, runs] of seen) {
-    if (runs.length < 2) continue;
-    runsByConfig.set(configId, {
-      latest: runs[0].id,
-      previous: runs[1].id,
-      date: runs[0].startedAt.slice(0, 10), // YYYY-MM-DD
-    });
-  }
-
-  if (runsByConfig.size === 0) {
-    throw new AppError(
-      "VALIDATION_ERROR",
-      "Not enough rank tracking history. Volatility calculation requires at least two completed rank checks.",
-    );
-  }
-
-  // Collect position changes across all configs.
-  const positionChanges: number[] = [];
-  const keywordChanges: {
-    keyword: string;
-    currentPosition: number | null;
-    previousPosition: number | null;
-  }[] = [];
-
-  for (const [, { latest, previous }] of runsByConfig) {
-    const latestSnapshots =
-      await RankTrackingRepository.getSnapshotsForRun(latest);
-    const previousSnapshots =
-      await RankTrackingRepository.getSnapshotsForRun(previous);
-
-    const prevMap = new Map(
-      previousSnapshots.map((s) => [
-        `${s.trackingKeywordId}:${s.device}`,
-        s.position,
-      ]),
-    );
-
-    for (const snap of latestSnapshots) {
-      const key = `${snap.trackingKeywordId}:${snap.device}`;
-      const prevPos = prevMap.get(key) ?? null;
-      const currPos = snap.position;
-
-      if (currPos != null && prevPos != null) {
-        positionChanges.push(currPos - prevPos);
-      } else if (currPos != null || prevPos != null) {
-        // One appeared / disappeared — treat as max volatility
-        positionChanges.push(currPos != null ? currPos : -(prevPos ?? 0));
-      }
-
-      keywordChanges.push({
-        keyword: snap.keyword,
-        currentPosition: currPos,
-        previousPosition: prevPos,
-      });
-    }
-  }
-
-  if (positionChanges.length === 0) {
+  const date = pairs
+    .map(({ latest }) => latest.startedAt.slice(0, 10))
+    .toSorted()
+    .at(-1)!;
+  const result = await persistComparison(projectId, date, pairs);
+  if (!result) {
     throw new AppError(
       "VALIDATION_ERROR",
       "No keyword position data found in recent rank checks.",
     );
   }
-
-  const volatilityScore = calculateVolatilityScore(positionChanges);
-  const avgPositionChange =
-    positionChanges.reduce((sum, v) => sum + Math.abs(v), 0) /
-    positionChanges.length;
-  const topMovers = identifyTopMovers(keywordChanges);
-
-  // Use the most recent date across all configs.
-  const dates = [...runsByConfig.values()].map((r) => r.date).toSorted();
-  const date = dates[dates.length - 1];
-
-  const snapshotData = {
-    volatilityScore,
-    keywordsSampled: positionChanges.length,
-    avgPositionChange: Math.round(avgPositionChange * 100) / 100,
-    topMoversJson: JSON.stringify(topMovers),
-  };
-
-  await SerpVolatilityRepository.upsertForProjectDate(
-    projectId,
-    date,
-    snapshotData,
-  );
-
-  return {
-    date,
-    ...snapshotData,
-    category: categorizeVolatility(volatilityScore),
-    topMovers,
-  };
+  return result;
 }
 
-/**
- * Get volatility trend for a project, defaulting to the last 30 days.
- */
+/** Backfill missing dates from stored rank runs only. No external API calls. */
+async function backfillMissingSnapshots(projectId: string): Promise<number> {
+  const today = new Date().toISOString().slice(0, 10);
+  const sinceDate = new Date(Date.now() - (BACKFILL_DAYS - 1) * DAY_MS)
+    .toISOString()
+    .slice(0, 10);
+  const querySince = new Date(
+    Date.now() - BACKFILL_DAYS * DAY_MS,
+  ).toISOString();
+  const [runs, existing] = await Promise.all([
+    SerpVolatilityRepository.getCompletedFullRuns(projectId, querySince),
+    SerpVolatilityRepository.getForProjectDateRange(
+      projectId,
+      sinceDate,
+      today,
+    ),
+  ]);
+  if (runs.length < 2) return 0;
+
+  const existingDates = new Set(existing.map((row) => row.date));
+  const runsByConfig = new Map<string, CompletedRun[]>();
+  for (const run of runs.toReversed()) {
+    const configRuns = runsByConfig.get(run.configId) ?? [];
+    configRuns.push(run);
+    runsByConfig.set(run.configId, configRuns);
+  }
+
+  const pairsByDate = new Map<string, RunPair[]>();
+  for (const configRuns of runsByConfig.values()) {
+    for (let index = 1; index < configRuns.length; index += 1) {
+      const latest = configRuns[index];
+      const previous = configRuns[index - 1];
+      if (!latest || !previous) continue;
+      const date = latest.startedAt.slice(0, 10);
+      if (date < sinceDate || date > today || existingDates.has(date)) continue;
+      const pairs = pairsByDate.get(date) ?? [];
+      pairs.push({ latest, previous });
+      pairsByDate.set(date, pairs);
+    }
+  }
+
+  let created = 0;
+  for (const [date, pairs] of pairsByDate) {
+    if (await persistComparison(projectId, date, pairs)) created += 1;
+  }
+  return created;
+}
+
+async function backfillBestEffort(projectId: string): Promise<void> {
+  try {
+    await backfillMissingSnapshots(projectId);
+  } catch (error) {
+    console.warn(
+      `[serp-volatility] Backfill failed for project ${projectId}`,
+      error,
+    );
+  }
+}
+
 async function getVolatilityTrend(projectId: string, days = 30) {
-  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+  const since = new Date(Date.now() - (days - 1) * DAY_MS)
     .toISOString()
     .slice(0, 10);
   const today = new Date().toISOString().slice(0, 10);
-
   const snapshots = await SerpVolatilityRepository.getForProjectDateRange(
     projectId,
     since,
     today,
   );
 
-  return snapshots.map((s) => ({
-    ...s,
-    category: categorizeVolatility(s.volatilityScore),
-    topMovers: parseTopMovers(s.topMoversJson),
+  return snapshots.map((snapshot) => ({
+    ...snapshot,
+    category: categorizeVolatility(snapshot.volatilityScore),
+    topMovers: parseTopMovers(snapshot.topMoversJson),
   }));
 }
 
-/**
- * Get the single latest volatility snapshot for a project.
- */
 async function getLatestVolatility(projectId: string) {
-  const rows = await SerpVolatilityRepository.getLatestForProject(projectId, 1);
-  const row = rows[0];
-  if (!row) return null;
-
-  return {
-    ...row,
-    category: categorizeVolatility(row.volatilityScore),
-    topMovers: parseTopMovers(row.topMoversJson),
-  };
+  const row = (
+    await SerpVolatilityRepository.getLatestForProject(projectId, 1)
+  )[0];
+  return row
+    ? {
+        ...row,
+        category: categorizeVolatility(row.volatilityScore),
+        topMovers: parseTopMovers(row.topMoversJson),
+      }
+    : null;
 }
 
-/**
- * Check if the project has enough rank tracking history to compute volatility.
- */
 async function checkEligibility(projectId: string): Promise<boolean> {
-  const configs = await RankTrackingRepository.getConfigsForProject(projectId);
-  if (configs.length === 0) return false;
-
-  const configIds = configs.map((c) => c.id);
-
-  const recentRuns = await db
-    .select({
-      id: rankCheckRuns.id,
-      configId: rankCheckRuns.configId,
-    })
-    .from(rankCheckRuns)
-    .where(
-      and(
-        sql`${rankCheckRuns.configId} IN (${sql.join(
-          configIds.map((id) => sql`${id}`),
-          sql`, `,
-        )})`,
-        eq(rankCheckRuns.status, "completed"),
-        eq(rankCheckRuns.isSubsetRun, false),
-      ),
-    )
-    .orderBy(desc(rankCheckRuns.startedAt))
-    .limit(configIds.length * 2);
-
-  if (recentRuns.length < 2) return false;
-
-  const seen = new Map<string, number>();
-  for (const run of recentRuns) {
-    seen.set(run.configId, (seen.get(run.configId) ?? 0) + 1);
-  }
-
-  // Eligible if at least one config has 2+ completed runs
-  for (const count of seen.values()) {
-    if (count >= 2) return true;
-  }
-
-  return false;
+  const runs = await SerpVolatilityRepository.getCompletedFullRuns(projectId);
+  return selectLatestTwoRunsPerConfig(runs).length > 0;
 }
 
 export const SerpVolatilityService = {
   computeVolatility,
+  backfillMissingSnapshots,
+  backfillBestEffort,
   getVolatilityTrend,
   getLatestVolatility,
   checkEligibility,

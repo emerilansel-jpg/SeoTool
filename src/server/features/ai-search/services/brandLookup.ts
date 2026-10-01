@@ -10,6 +10,7 @@ import {
 import type { LlmCrossAggregatedItem } from "@/server/lib/dataforseoLlmSchemas";
 import { AppError } from "@/server/lib/errors";
 import { buildCacheKey, getCached, setCached } from "@/server/lib/r2-cache";
+import { BrandLookupRepository } from "@/server/features/ai-search/repositories/BrandLookupRepository";
 import {
   resolveCompetitorGroups,
   type CompetitorGroup,
@@ -75,11 +76,21 @@ export async function getBrandLookup(
 
   const cached = brandLookupResultSchema.safeParse(await getCached(cacheKey));
   if (cached.success) {
-    return {
+    const cachedResult = {
       ...cached.data,
       query: input.query,
       resolvedTarget: detected.value,
     };
+    try {
+      await BrandLookupRepository.persistSnapshot(
+        input.projectId,
+        input,
+        cachedResult,
+      );
+    } catch (err) {
+      console.error("ai-search.brand-lookup.persist-cached failed:", err);
+    }
+    return cachedResult;
   }
 
   const dataforseo = createDataforseoClient(billingCustomer);
@@ -146,6 +157,12 @@ export async function getBrandLookup(
         console.error("ai-search.brand-lookup.cache-write failed:", err);
       }),
     );
+  }
+
+  try {
+    await BrandLookupRepository.persistSnapshot(input.projectId, input, result);
+  } catch (err) {
+    console.error("ai-search.brand-lookup.persist-fresh failed:", err);
   }
 
   return result;

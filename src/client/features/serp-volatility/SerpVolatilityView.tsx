@@ -1,13 +1,15 @@
 // oxlint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import {
   Activity,
-  ArrowDownRight,
-  ArrowUpRight,
+  AlertCircle,
+  ArrowRight,
   Calendar,
-  Minus,
+  Clock,
   RefreshCw,
   Sparkles,
   TrendingUp,
@@ -17,79 +19,24 @@ import {
   getSerpVolatility,
 } from "@/serverFunctions/serp-volatility";
 import { VolatilityChart } from "./VolatilityChart";
+import { SerpVolatilityGuide } from "./SerpVolatilityGuide";
+import {
+  MoverArrow,
+  ScoreGauge,
+  categoryBadgeClass,
+  describeMoverStatus,
+  formatLastComputed,
+} from "./SerpVolatilityUi";
 
-function scoreColor(score: number): string {
-  if (score < 20) return "text-success";
-  if (score < 50) return "text-warning";
-  return "text-error";
-}
-
-function scoreRingColor(score: number): string {
-  if (score < 20) return "stroke-success";
-  if (score < 50) return "stroke-warning";
-  return "stroke-error";
-}
-
-function categoryBadgeClass(score: number): string {
-  if (score < 20) return "badge-success badge-soft text-success";
-  if (score < 50) return "badge-warning badge-soft text-warning";
-  return "badge-error badge-soft text-error";
-}
-
-function MoverArrow({ change }: { change: number }) {
-  if (change > 0)
-    return <ArrowUpRight className="inline h-4 w-4 text-success shrink-0" />;
-  if (change < 0)
-    return <ArrowDownRight className="inline h-4 w-4 text-error shrink-0" />;
-  return <Minus className="inline h-4 w-4 text-base-content/40 shrink-0" />;
-}
-
-/** Circular gauge for the latest volatility score. */
-function ScoreGauge({ score }: { score: number }) {
-  const circumference = 2 * Math.PI * 50;
-  const offset = circumference - (Math.min(score, 100) / 100) * circumference;
-
-  return (
-    <div className="relative flex flex-col items-center justify-center py-2">
-      <svg className="h-32 w-32 -rotate-90 transform" viewBox="0 0 120 120">
-        <circle
-          cx="60"
-          cy="60"
-          r="50"
-          fill="none"
-          strokeWidth="10"
-          className="stroke-base-200"
-        />
-        <circle
-          cx="60"
-          cy="60"
-          r="50"
-          fill="none"
-          strokeWidth="10"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          className={`${scoreRingColor(score)} transition-all duration-700 ease-out`}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span
-          className={`text-3xl font-extrabold tracking-tight tabular-nums ${scoreColor(score)}`}
-        >
-          {score.toFixed(1)}
-        </span>
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-base-content/40">
-          Index
-        </span>
-      </div>
-    </div>
-  );
-}
+type SelectedDays = 7 | 30 | 90;
+const LOW_SAMPLE_THRESHOLD = 10;
 
 export function SerpVolatilityView({ projectId }: { projectId: string }) {
+  const [days, setDays] = useState<SelectedDays>(30);
+
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["serp-volatility", projectId],
-    queryFn: () => getSerpVolatility({ data: { projectId } }),
+    queryKey: ["serp-volatility", projectId, days],
+    queryFn: () => getSerpVolatility({ data: { projectId, days } }),
   });
 
   const computeMutation = useMutation({
@@ -121,6 +68,7 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
   const latest = data?.latest;
   const trend = data?.trend ?? [];
   const isComputable = data?.isComputable ?? false;
+  const isSampleSmall = (latest?.keywordsSampled ?? 0) < LOW_SAMPLE_THRESHOLD;
 
   return (
     <div className="space-y-4">
@@ -136,42 +84,63 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
                 SERP Turbulence Index
               </h2>
               <p className="text-xs text-base-content/60">
-                Calculated from rank tracking position shifts over the last
-                24–48 hours
+                Calculated automatically from full rank tracking position shifts
+                over recent runs
               </p>
             </div>
           </div>
 
-          <button
-            type="button"
-            className="btn btn-primary rounded-xl gap-2 font-semibold shadow-xs shrink-0 self-start sm:self-auto"
-            onClick={() => computeMutation.mutate()}
-            disabled={computeMutation.isPending || (!latest && !isComputable)}
-            title={
-              !latest && !isComputable
-                ? "Not enough rank tracking history to compute volatility yet"
-                : undefined
-            }
-          >
-            {computeMutation.isPending ? (
-              <>
-                <RefreshCw className="size-4 animate-spin" />
-                Computing…
-              </>
-            ) : (
-              <>
-                <RefreshCw className="size-4" />
-                Compute Volatility
-              </>
+          <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+            {latest?.createdAt && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-base-200/60 px-2.5 py-1.5 text-xs text-base-content/70">
+                <Clock className="size-3.5" />
+                Last computed: {formatLastComputed(latest.createdAt)}
+              </span>
             )}
-          </button>
+
+            <button
+              type="button"
+              className="btn btn-primary rounded-xl gap-2 font-semibold shadow-xs shrink-0"
+              onClick={() => computeMutation.mutate()}
+              disabled={computeMutation.isPending || (!latest && !isComputable)}
+              title={
+                !latest && !isComputable
+                  ? "Requires at least two completed rank checks"
+                  : undefined
+              }
+            >
+              {computeMutation.isPending ? (
+                <>
+                  <RefreshCw className="size-4 animate-spin" />
+                  Computing…
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="size-4" />
+                  Compute Volatility
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
+
+      <SerpVolatilityGuide />
+
+      {latest && isSampleSmall && (
+        <div className="alert alert-warning rounded-2xl text-xs py-3">
+          <AlertCircle className="size-4 shrink-0" />
+          <span>
+            Small sample size: only {latest.keywordsSampled} keyword-device
+            positions were evaluated. Add more keywords in Rank Tracking to
+            increase index statistical confidence.
+          </span>
+        </div>
+      )}
 
       {/* Latest score cards */}
       {latest ? (
         <div className="grid gap-5 md:grid-cols-3">
-          {/* Card 1: Gauge */}
           <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs hover:border-base-content/20 transition-all">
             <div className="card-body items-center text-center p-5">
               <div className="flex items-center justify-between w-full border-b border-base-200 pb-2.5">
@@ -187,15 +156,16 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
               <ScoreGauge score={latest.volatilityScore} />
               <p className="text-xs text-base-content/60">
                 {latest.volatilityScore < 20
-                  ? "Rankings are stable across Google SERPs."
+                  ? "Rankings are stable across Google search results."
                   : latest.volatilityScore < 50
-                    ? "Moderate movement detected in search results."
-                    : "High volatility — potential Google algorithm update in progress."}
+                    ? "Moderate movement detected across tracked keywords."
+                    : latest.volatilityScore < 80
+                      ? "High volatility detected. Broad ranking update likely underway."
+                      : "Extreme volatility detected across the tracked keyword portfolio."}
               </p>
             </div>
           </div>
 
-          {/* Card 2: Summary Metrics */}
           <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs hover:border-base-content/20 transition-all">
             <div className="card-body p-5">
               <div className="flex items-center justify-between border-b border-base-200 pb-2.5">
@@ -215,7 +185,7 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
                     Keywords Sampled
                   </dt>
                   <dd className="font-bold tabular-nums text-base-content">
-                    {latest.keywordsSampled} keywords
+                    {latest.keywordsSampled} positions
                   </dd>
                 </div>
 
@@ -225,14 +195,13 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
                     Avg Position Shift
                   </dt>
                   <dd className="font-bold tabular-nums text-base-content">
-                    {latest.avgPositionChange.toFixed(1)} positions
+                    {latest.avgPositionChange.toFixed(1)} ranks
                   </dd>
                 </div>
               </dl>
             </div>
           </div>
 
-          {/* Card 3: Top Movers */}
           <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs hover:border-base-content/20 transition-all">
             <div className="card-body p-5">
               <div className="flex items-center justify-between border-b border-base-200 pb-2.5">
@@ -245,7 +214,7 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
               </div>
 
               {latest.topMovers && latest.topMovers.length > 0 ? (
-                <ul className="mt-2 space-y-2 text-sm max-h-[160px] overflow-y-auto pr-1">
+                <ul className="mt-2 space-y-2 text-sm max-h-[170px] overflow-y-auto pr-1">
                   {latest.topMovers.map((mover) => (
                     <li
                       key={mover.keyword}
@@ -253,14 +222,31 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <MoverArrow change={mover.change} />
-                        <span
-                          className="truncate text-xs font-medium text-base-content"
-                          title={mover.keyword}
-                        >
-                          {mover.keyword}
-                        </span>
+                        <div className="min-w-0">
+                          <p
+                            className="truncate text-xs font-medium text-base-content"
+                            title={mover.keyword}
+                          >
+                            {mover.keyword}
+                          </p>
+                          <p className="text-[10px] text-base-content/50">
+                            {describeMoverStatus(
+                              mover.status,
+                              mover.currentPosition,
+                              mover.previousPosition,
+                            )}
+                          </p>
+                        </div>
                       </div>
-                      <span className="font-mono text-xs font-bold tabular-nums shrink-0">
+                      <span
+                        className={`font-mono text-xs font-bold tabular-nums shrink-0 ${
+                          mover.change > 0
+                            ? "text-success"
+                            : mover.change < 0
+                              ? "text-error"
+                              : "text-base-content/60"
+                        }`}
+                      >
                         {mover.change > 0 ? `+${mover.change}` : mover.change}
                       </span>
                     </li>
@@ -285,52 +271,81 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
             <p className="text-lg font-bold text-base-content">
               {isComputable
                 ? "Ready to compute SERP Volatility"
-                : "Collecting Rank Tracking Data"}
+                : "Rank Tracking History Needed"}
             </p>
             <p className="text-sm text-base-content/70 leading-relaxed">
               {isComputable
-                ? "SERP volatility tracks fluctuations across your tracked keywords over time. Click below to compute your first volatility score based on your latest rank tracking checks."
-                : "SERP volatility requires comparing keyword positions across at least two different days. Your rank tracking is active and collecting data. Check back after your next scheduled rank check runs."}
+                ? "Your project has completed rank check runs ready for comparison. Compute your turbulence index now or wait for the next automatic rank check snapshot."
+                : "SERP volatility compares keyword positions across consecutive completed full rank checks. Run rank checks to start recording volatility."}
             </p>
           </div>
 
-          <div className="pt-2">
-            <button
-              type="button"
-              className="btn btn-primary rounded-xl gap-2 font-semibold shadow-xs"
-              onClick={() => computeMutation.mutate()}
-              disabled={computeMutation.isPending || !isComputable}
-            >
-              {computeMutation.isPending ? (
-                <>
-                  <RefreshCw className="size-4 animate-spin" />
-                  Computing Volatility…
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="size-4" />
-                  Compute Volatility Now
-                </>
-              )}
-            </button>
+          <div className="pt-2 flex flex-wrap justify-center items-center gap-3">
+            {isComputable ? (
+              <button
+                type="button"
+                className="btn btn-primary rounded-xl gap-2 font-semibold shadow-xs"
+                onClick={() => computeMutation.mutate()}
+                disabled={computeMutation.isPending}
+              >
+                {computeMutation.isPending ? (
+                  <>
+                    <RefreshCw className="size-4 animate-spin" />
+                    Computing Volatility…
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="size-4" />
+                    Compute Volatility Now
+                  </>
+                )}
+              </button>
+            ) : (
+              <Link
+                to="/p/$projectId/rank-tracking"
+                params={{ projectId }}
+                className="btn btn-primary rounded-xl gap-2 font-semibold shadow-xs"
+              >
+                Go to Rank Tracking
+                <ArrowRight className="size-4" />
+              </Link>
+            )}
           </div>
         </div>
       )}
 
-      {/* 30-day trend chart */}
+      {/* Volatility trend chart with 7/30/90 range */}
       <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-5 py-4 border-b border-base-300 bg-base-200/20 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-base-300 bg-base-200/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-bold tracking-tight text-base-content">
-              30-Day Volatility Trend
+              {days}-Day Volatility Trend
             </h2>
             <p className="text-xs text-base-content/50">
-              Historical timeline of SERP turbulence
+              Auto-refreshes when full rank runs complete; missing historical
+              dates backfill lazily
             </p>
           </div>
-          <span className="badge badge-neutral badge-soft badge-sm font-semibold">
-            {trend.length} recorded {trend.length === 1 ? "day" : "days"}
-          </span>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <div className="join">
+              {([7, 30, 90] as const).map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  onClick={() => setDays(choice)}
+                  className={`join-item btn btn-xs font-semibold ${
+                    days === choice ? "btn-primary" : "btn-ghost"
+                  }`}
+                >
+                  {choice}d
+                </button>
+              ))}
+            </div>
+            <span className="badge badge-neutral badge-soft badge-sm font-semibold">
+              {trend.length} {trend.length === 1 ? "day" : "days"}
+            </span>
+          </div>
         </div>
         <div className="p-5">
           <VolatilityChart rows={trend} />

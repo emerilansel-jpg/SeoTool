@@ -1,8 +1,18 @@
 // oxlint-disable-next-line eslint-plugin-import/no-named-as-default -- standard jspdf import pattern
 import jsPDF from "jspdf";
-// oxlint-disable-next-line eslint-plugin-import/no-named-as-default -- standard jspdf-autotable import pattern
-import autoTable from "jspdf-autotable";
 import type { ReportWithSections } from "@/server/features/reports/services/ReportService";
+import {
+  addAiTrackingSection,
+  addBrandLookupSection,
+  addGmbGridSection,
+} from "@/client/features/reports/reportPdfSections";
+import {
+  addStat,
+  addTable,
+  n,
+  pct,
+  sectionStart,
+} from "@/client/features/reports/reportPdfHelpers";
 
 type SnapshotData = {
   generatedAt: string;
@@ -14,15 +24,6 @@ type SnapshotData = {
     | { status: "error"; error: string }
   >;
 };
-
-function n(value: unknown): number {
-  const v = Number(value);
-  return Number.isFinite(v) ? v : 0;
-}
-
-function pct(value: unknown): string {
-  return `${(n(value) * 100).toFixed(1)}%`;
-}
 
 function addTitle(doc: jsPDF, report: ReportWithSections) {
   if (report.brandColor) {
@@ -37,34 +38,6 @@ function addTitle(doc: jsPDF, report: ReportWithSections) {
   if (report.clientName) {
     doc.text(report.clientName, 20, 38);
   }
-}
-
-function sectionStart(doc: jsPDF, title: string, y: number): number {
-  if (y > 260) {
-    doc.addPage();
-    y = 20;
-  }
-  doc.setFontSize(13);
-  doc.setTextColor(40, 40, 40);
-  doc.text(title, 20, y);
-  doc.setDrawColor(200, 200, 200);
-  doc.line(20, y + 2, 190, y + 2);
-  return y + 8;
-}
-
-function addStat(
-  doc: jsPDF,
-  label: string,
-  value: string,
-  x: number,
-  y: number,
-) {
-  doc.setFontSize(8);
-  doc.setTextColor(130, 130, 130);
-  doc.text(label, x, y);
-  doc.setFontSize(11);
-  doc.setTextColor(40, 40, 40);
-  doc.text(value, x, y + 5);
 }
 
 function addRankSection(
@@ -93,19 +66,12 @@ function addAuditSection(
       (data.topIssues as Array<{ type?: string; count?: number }>)
     : [];
   if (issues.length > 0) {
-    y += 12;
-    autoTable(doc, {
-      startY: y,
-      head: [["Issue type", "Count"]],
-      body: issues.slice(0, 10).map((i) => [i.type ?? "", String(n(i.count))]),
-      styles: { fontSize: 8, cellPadding: 2 },
-      headStyles: { fillColor: [60, 60, 60] },
-      margin: { left: 20, right: 20 },
-    });
-    y =
-      // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- jspdf-autotable plugin adds lastAutoTable
-      (doc as unknown as { lastAutoTable: { finalY?: number } }).lastAutoTable
-        ?.finalY ?? y + 20;
+    y = addTable(
+      doc,
+      y + 12,
+      ["Issue type", "Count"],
+      issues.slice(0, 10).map((i) => [i.type ?? "", String(n(i.count))]),
+    );
   }
   return y + 6;
 }
@@ -209,6 +175,15 @@ export function reportPdf(
         break;
       case "backlinks":
         y = addBacklinksSection(doc, data, y);
+        break;
+      case "gmb_grid":
+        y = addGmbGridSection(doc, result.data, y);
+        break;
+      case "brand_lookup":
+        y = addBrandLookupSection(doc, result.data, y);
+        break;
+      case "ai_tracking":
+        y = addAiTrackingSection(doc, result.data, y);
         break;
     }
   }

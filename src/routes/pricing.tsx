@@ -369,8 +369,9 @@ function PricingPage() {
               Understand Your Usage & Credit Rates
             </h2>
             <p className="mt-2 text-sm text-base-content/70 max-w-2xl mx-auto">
-              Credits work like mobile prepaid balance. See exact costs per action
-              or explore monthly usage scenarios to see how far your balance goes.
+              Credits work like mobile prepaid balance. See exact costs per
+              action or explore monthly usage scenarios to see how far your
+              balance goes.
             </p>
           </div>
 

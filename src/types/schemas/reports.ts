@@ -8,9 +8,20 @@ export const REPORT_SECTION_TYPES = [
   "ga4",
   "backlinks",
   "content",
+  "gmb_grid",
+  "brand_lookup",
+  "ai_tracking",
 ] as const;
 
-export const REPORT_SCHEDULES = ["none", "weekly", "monthly"] as const;
+export const REPORT_PERIODS = ["weekly", "monthly", "yearly"] as const;
+export type ReportPeriod = (typeof REPORT_PERIODS)[number];
+
+export const REPORT_SCHEDULES = [
+  "none",
+  "weekly",
+  "monthly",
+  "yearly",
+] as const;
 export type ReportSchedule = (typeof REPORT_SCHEDULES)[number];
 
 const projectScoped = {
@@ -26,9 +37,11 @@ const sectionInput = z.object({
 export const createReportInputSchema = z.object({
   ...projectScoped,
   name: z.string().min(1).max(120),
+  reportPeriod: z.enum(REPORT_PERIODS).default("monthly"),
   schedule: z.enum(REPORT_SCHEDULES).default("none"),
   dayOfWeek: z.number().int().min(0).max(6).optional(),
   dayOfMonth: z.number().int().min(1).max(28).optional(),
+  monthOfYear: z.number().int().min(1).max(12).optional(),
   clientName: z.string().max(120).optional(),
   logoUrl: z.string().url().optional(),
   brandColor: z.string().max(20).optional(),

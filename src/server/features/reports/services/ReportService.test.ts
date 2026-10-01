@@ -51,4 +51,41 @@ describe("computeNextRunAt", () => {
       expect(result).toContain("2024-07-01");
     });
   });
+
+  describe("yearly schedule", () => {
+    it("computes run in current year if target month and day are ahead", () => {
+      const result = computeNextRunAt("yearly", null, 15, TODAY, 8);
+      expect(result).toBe(
+        new Date(Date.UTC(2024, 7, 15, 8, 0, 0)).toISOString(),
+      ); // Aug 15 2024
+    });
+
+    it("computes run in current month if target day is ahead", () => {
+      const result = computeNextRunAt("yearly", null, 20, TODAY, 6);
+      expect(result).toBe(
+        new Date(Date.UTC(2024, 5, 20, 8, 0, 0)).toISOString(),
+      ); // Jun 20 2024
+    });
+
+    it("rolls over to next year if target date already passed this year", () => {
+      const result = computeNextRunAt("yearly", null, 1, TODAY, 3);
+      expect(result).toBe(
+        new Date(Date.UTC(2025, 2, 1, 8, 0, 0)).toISOString(),
+      ); // Mar 1 2025
+    });
+
+    it("defaults to January 1 next year when month and day are null", () => {
+      const result = computeNextRunAt("yearly", null, null, TODAY);
+      expect(result).toBe(
+        new Date(Date.UTC(2025, 0, 1, 8, 0, 0)).toISOString(),
+      ); // Jan 1 2025
+    });
+
+    it("clamps dayOfMonth to 28 max", () => {
+      const result = computeNextRunAt("yearly", null, 31, TODAY, 8);
+      expect(result).toBe(
+        new Date(Date.UTC(2024, 7, 28, 8, 0, 0)).toISOString(),
+      ); // Aug 28 2024
+    });
+  });
 });

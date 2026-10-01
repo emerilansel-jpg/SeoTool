@@ -44,7 +44,9 @@ import * as pgCancellationFeedback from "./pg/cancellation-feedback.schema";
 import * as sqliteProjectCompetitors from "./project-competitors.schema";
 import * as pgProjectCompetitors from "./pg/project-competitors.schema";
 import * as sqliteAiTracking from "./ai-tracking.schema";
+import * as sqliteBrandLookup from "./brand-lookup.schema";
 import * as pgAiTracking from "./pg/ai-tracking.schema";
+import * as pgBrandLookup from "./pg/brand-lookup.schema";
 
 // Canonical schema barrel. Repositories import their tables from here and the
 // provider-aware `db` from "@/db", so each repository is written ONCE for both
@@ -78,7 +80,8 @@ type AppSchema = typeof sqliteApp &
   typeof sqliteKeywordResearchPro &
   typeof sqliteCancellationFeedback &
   typeof sqliteProjectCompetitors &
-  typeof sqliteAiTracking;
+  typeof sqliteAiTracking &
+  typeof sqliteBrandLookup;
 
 const runtimeSchema =
   getDatabaseProvider() === "postgres"
@@ -106,6 +109,7 @@ const runtimeSchema =
         ...pgCancellationFeedback,
         ...pgProjectCompetitors,
         ...pgAiTracking,
+        ...pgBrandLookup,
       }
     : {
         ...sqliteApp,
@@ -131,6 +135,7 @@ const runtimeSchema =
         ...sqliteCancellationFeedback,
         ...sqliteProjectCompetitors,
         ...sqliteAiTracking,
+        ...sqliteBrandLookup,
       };
 
 // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- guarded by schema-parity.test.ts
@@ -210,4 +215,7 @@ export const {
   aiDiscoveredPrompts,
   aiTopPages,
   aiVisibilitySnapshots,
+  brandLookupSnapshots,
+  brandLookupPlatformSnapshots,
+  brandLookupSovEntries,
 } = schema;

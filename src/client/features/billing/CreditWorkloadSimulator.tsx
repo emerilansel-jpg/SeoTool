@@ -137,8 +137,8 @@ export function CreditWorkloadSimulator({
             Real-World Monthly Usage Scenarios
           </h4>
           <p className="mt-1.5 text-xs sm:text-sm text-base-content/70 leading-relaxed">
-            See exactly how a month of real search marketing activities fits into
-            credit allowances. No surprises, no hidden caps.
+            See exactly how a month of real search marketing activities fits
+            into credit allowances. No surprises, no hidden caps.
           </p>
         </div>
       ) : null}

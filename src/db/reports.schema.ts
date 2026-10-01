@@ -24,11 +24,14 @@ export const reports = sqliteTable(
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
-    // "none" = on-demand only; "weekly" | "monthly" dispatch via cron.
+    // Snapshot data window. Kept separate from delivery cadence.
+    reportPeriod: text("report_period").notNull().default("monthly"),
+    // "none" = on-demand only; other values dispatch via cron.
     schedule: text("schedule").notNull().default("none"),
-    // 0-6 (Sun-Sat) for weekly; 1-28 for monthly. Null when schedule is none.
+    // 0-6 (Sun-Sat) for weekly; 1-28 for monthly/yearly; 1-12 for yearly.
     dayOfWeek: integer("day_of_week"),
     dayOfMonth: integer("day_of_month"),
+    monthOfYear: integer("month_of_year"),
     // ISO timestamp of the next scheduled run; null when unscheduled. Indexed
     // so the cron query (`nextRunAt <= now`) is cheap.
     nextRunAt: text("next_run_at"),

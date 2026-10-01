@@ -17,6 +17,7 @@ import { pgStep } from "@/server/workflows/pgStep";
 import { createDataforseoClient } from "@/server/lib/dataforseo";
 import { captureServerEvent } from "@/server/lib/posthog";
 import { AppError } from "@/server/lib/errors";
+import { SerpVolatilityService } from "@/server/features/serp-volatility/services/SerpVolatilityService";
 import { getCreditBalance } from "@/server/billing/credits";
 import { estimateRankCheckCredits } from "@/shared/rank-tracking";
 import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
@@ -352,6 +353,24 @@ export class RankCheckWorkflow extends WorkflowEntrypoint<
           queueStats,
         }),
       );
+
+      if (!keywordIds || keywordIds.length === 0) {
+        await pgStep(
+          step,
+          "serp-volatility-snapshot",
+          SINGLE_ATTEMPT_STEP_CONFIG,
+          async () => {
+            try {
+              await SerpVolatilityService.computeVolatility(projectId);
+            } catch (volatilityError) {
+              console.warn(
+                `[rank-check] SERP volatility snapshot skipped for run ${runId}:`,
+                volatilityError,
+              );
+            }
+          },
+        );
+      }
     } catch (error) {
       console.error(`Rank check ${runId} failed:`, error);
       await pgStep(step, "mark-failed", SINGLE_ATTEMPT_STEP_CONFIG, async () =>

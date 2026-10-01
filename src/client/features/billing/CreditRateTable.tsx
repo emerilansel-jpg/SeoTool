@@ -1,4 +1,12 @@
-import { Zap, Key, Search, FileText, Link2, Sparkles, Brain } from "lucide-react";
+import {
+  Zap,
+  Key,
+  Search,
+  FileText,
+  Link2,
+  Sparkles,
+  Brain,
+} from "lucide-react";
 
 export interface RateCardItem {
   icon: typeof Search;
@@ -15,7 +23,8 @@ export const CREDIT_RATE_ITEMS: RateCardItem[] = [
     action: "Track 1 Keyword",
     cost: 1,
     unit: "credit / day",
-    description: "Daily automated search rank tracking on Google desktop and mobile.",
+    description:
+      "Daily automated search rank tracking on Google desktop and mobile.",
     badge: "Light",
   },
   {
@@ -23,7 +32,8 @@ export const CREDIT_RATE_ITEMS: RateCardItem[] = [
     action: "Audit 1 Web Page",
     cost: 2,
     unit: "credits / page",
-    description: "Technical crawler check, Core Web Vitals, metadata, and on-page errors.",
+    description:
+      "Technical crawler check, Core Web Vitals, metadata, and on-page errors.",
     badge: "Light",
   },
   {
@@ -31,7 +41,8 @@ export const CREDIT_RATE_ITEMS: RateCardItem[] = [
     action: "Check 1 Backlink Profile",
     cost: 5,
     unit: "credits / domain",
-    description: "Domain authority scores, referring domains, anchor text, and link equity.",
+    description:
+      "Domain authority scores, referring domains, anchor text, and link equity.",
     badge: "Standard",
   },
   {
@@ -39,7 +50,8 @@ export const CREDIT_RATE_ITEMS: RateCardItem[] = [
     action: "AI Brand Visibility (1 Engine)",
     cost: 5,
     unit: "credits / query",
-    description: "Scan brand mentions and citations on ChatGPT or Perplexity AI.",
+    description:
+      "Scan brand mentions and citations on ChatGPT or Perplexity AI.",
     badge: "Standard",
   },
   {
@@ -47,7 +59,8 @@ export const CREDIT_RATE_ITEMS: RateCardItem[] = [
     action: "Deep Multi-AI Research",
     cost: 20,
     unit: "credits / analysis",
-    description: "Multi-AI consensus (ChatGPT + Claude + Perplexity) combined with live SERP data.",
+    description:
+      "Multi-AI consensus (ChatGPT + Claude + Perplexity) combined with live SERP data.",
     badge: "Deep",
   },
 ];
@@ -66,8 +79,8 @@ export function CreditRateTable() {
               Transparent Credit System
             </h4>
             <p className="text-xs text-base-content/70">
-              Credits work like mobile prepaid balance. Balance only deducts when
-              you run actions, and unused credits roll over every month.
+              Credits work like mobile prepaid balance. Balance only deducts
+              when you run actions, and unused credits roll over every month.
             </p>
           </div>
         </div>
@@ -156,10 +169,10 @@ export function CreditRateTable() {
                 </span>
               </div>
               <p className="mt-1 text-xs leading-relaxed text-base-content/70">
-                Connect your personal DataForSEO and OpenRouter API keys. Raw data
-                is billed directly to your own provider accounts at $0 platform
-                markup, so high-volume agencies can scale to millions of queries
-                without credit limits.
+                Connect your personal DataForSEO and OpenRouter API keys. Raw
+                data is billed directly to your own provider accounts at $0
+                platform markup, so high-volume agencies can scale to millions
+                of queries without credit limits.
               </p>
             </div>
           </div>

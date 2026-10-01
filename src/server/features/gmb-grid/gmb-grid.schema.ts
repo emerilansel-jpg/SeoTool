@@ -44,3 +44,8 @@ export const RetryGmbGridPinsSchema = z.object({
   projectId: z.string().min(1),
   runId: z.string().uuid(),
 });
+
+export const GetGmbGridReportSchema = z.object({
+  projectId: z.string().min(1),
+  days: z.coerce.number().int().min(1).max(365).optional().default(30),
+});
