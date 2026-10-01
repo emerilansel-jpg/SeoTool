@@ -31,74 +31,99 @@ export function addGmbGridSection(
   y: number,
 ): number {
   const model = buildGmbGridModel(data);
-  y = sectionStart(doc, "Local Map Rank", y);
-  addStat(doc, "Total scans", formatReportNumber(model.totalScans, 0), 20, y);
-  addStat(
-    doc,
-    "Share of local voice",
-    withPrevious(
-      formatReportPercent(model.metrics.solv.current),
-      model.metrics.solv.previous === undefined
-        ? undefined
-        : formatReportPercent(model.metrics.solv.previous),
-    ),
-    60,
-    y,
-  );
-  addStat(
-    doc,
-    "Average rank",
-    formatReportNumber(model.metrics.averageRank.current),
-    130,
-    y,
-  );
-  y += 14;
-  addStat(
-    doc,
-    "Top 3",
-    formatReportNumber(model.metrics.top3.current, 0),
-    20,
-    y,
-  );
-  addStat(
-    doc,
-    "Top 10",
-    formatReportNumber(model.metrics.top10.current, 0),
-    60,
-    y,
-  );
-  addStat(
-    doc,
-    "Top 20",
-    formatReportNumber(model.metrics.top20.current, 0),
-    100,
-    y,
-  );
-  addStat(
-    doc,
-    "Scan cost",
-    formatReportCurrency(model.metrics.cost.current),
-    140,
-    y,
-  );
-  y += 14;
-  if (model.keywordLocations.length > 0) {
-    y = addTable(
+  const profilesToRender =
+    model.profiles.length > 1
+      ? model.profiles
+      : [
+          {
+            businessName: model.profiles[0]?.businessName ?? "Local Map Rank",
+            totalScans: model.totalScans,
+            metrics: model.metrics,
+            keywordLocations: model.keywordLocations,
+          },
+        ];
+
+  for (const profile of profilesToRender) {
+    const title =
+      profilesToRender.length > 1
+        ? `Local Map Rank · ${profile.businessName}`
+        : "Local Map Rank";
+    y = sectionStart(doc, title, y);
+    addStat(
       doc,
+      "Total scans",
+      formatReportNumber(profile.totalScans, 0),
+      20,
       y,
-      ["Keyword", "Location", "Scans", "SoLV", "Avg rank"],
-      model.keywordLocations
-        .slice(0, 10)
-        .map((row) => [
-          trunc(row.keyword, 34),
-          trunc(row.location, 26),
-          formatReportNumber(row.scans, 0),
-          formatReportPercent(row.solv),
-          formatReportNumber(row.averageRank),
-        ]),
     );
+    addStat(
+      doc,
+      "Share of local voice",
+      withPrevious(
+        formatReportPercent(profile.metrics.solv.current),
+        profile.metrics.solv.previous === undefined
+          ? undefined
+          : formatReportPercent(profile.metrics.solv.previous),
+      ),
+      60,
+      y,
+    );
+    addStat(
+      doc,
+      "Average rank",
+      formatReportNumber(profile.metrics.averageRank.current),
+      130,
+      y,
+    );
+    y += 14;
+    addStat(
+      doc,
+      "Top 3",
+      formatReportNumber(profile.metrics.top3.current, 0),
+      20,
+      y,
+    );
+    addStat(
+      doc,
+      "Top 10",
+      formatReportNumber(profile.metrics.top10.current, 0),
+      60,
+      y,
+    );
+    addStat(
+      doc,
+      "Top 20",
+      formatReportNumber(profile.metrics.top20.current, 0),
+      100,
+      y,
+    );
+    addStat(
+      doc,
+      "Scan cost",
+      formatReportCurrency(profile.metrics.cost.current),
+      140,
+      y,
+    );
+    y += 14;
+    if (profile.keywordLocations.length > 0) {
+      y = addTable(
+        doc,
+        y,
+        ["Keyword", "Location", "Scans", "SoLV", "Avg rank"],
+        profile.keywordLocations
+          .slice(0, 10)
+          .map((row) => [
+            trunc(row.keyword, 34),
+            trunc(row.location, 26),
+            formatReportNumber(row.scans, 0),
+            formatReportPercent(row.solv),
+            formatReportNumber(row.averageRank),
+          ]),
+      );
+    }
+    y += 10;
   }
-  return y + 6;
+  return y;
 }
 
 export function addBrandLookupSection(

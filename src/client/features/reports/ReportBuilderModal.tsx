@@ -1,5 +1,6 @@
+/* oxlint-disable max-lines, max-lines-per-function, typescript-eslint/no-unsafe-type-assertion */
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Modal } from "@/client/components/Modal";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
@@ -8,6 +9,7 @@ import {
   updateReport,
   deleteReport,
 } from "@/serverFunctions/reports";
+import { getGmbGridConfigs } from "@/serverFunctions/gmb-grid";
 import type { ReportWithSections } from "@/server/features/reports/services/ReportService";
 import {
   REPORT_SECTION_OPTIONS,
@@ -31,6 +33,7 @@ type ReportMutationData = Parameters<typeof createReport>[0]["data"] & {
   monthOfYear?: number;
 };
 
+// oxlint-disable-next-line complexity
 export function ReportBuilderModal({
   projectId,
   report,
@@ -67,6 +70,46 @@ export function ReportBuilderModal({
       : ["rank", "audit", "gsc", "ga4", "backlinks"],
   );
 
+  const existingGmbSection = existing?.sections.find(
+    (s) => s.type === "gmb_grid",
+  );
+  let initialGmbBusiness: string | undefined;
+  if (existingGmbSection?.config) {
+    const raw = existingGmbSection.config;
+    let parsed: Record<string, unknown> | undefined;
+    if (typeof raw === "object" && raw !== null) {
+      parsed = raw as Record<string, unknown>;
+    } else if (typeof raw === "string") {
+      try {
+        const json: unknown = JSON.parse(raw);
+        if (json && typeof json === "object") {
+          parsed = json as Record<string, unknown>;
+        }
+      } catch {}
+    }
+    if (parsed && typeof parsed.businessName === "string") {
+      initialGmbBusiness = parsed.businessName;
+    }
+  }
+  const [gmbProfileScope, setGmbProfileScope] = useState<string>(
+    initialGmbBusiness ?? "all",
+  );
+
+  const gmbConfigsQuery = useQuery({
+    queryKey: ["gmb-grid-configs", projectId],
+    queryFn: () => getGmbGridConfigs({ data: { projectId } }),
+  });
+  const gmbConfigs = (gmbConfigsQuery.data ?? []) as Array<{
+    businessName?: string | null;
+  }>;
+  const gmbBusinessNames: string[] = Array.from(
+    new Set(
+      gmbConfigs
+        .map((c) => c.businessName)
+        .filter((bn): bn is string => Boolean(bn && bn.trim())),
+    ),
+  );
+
   const mutationData = (): ReportMutationData => ({
     projectId,
     name: name.trim(),
@@ -80,7 +123,12 @@ export function ReportBuilderModal({
     recipients: recipients.trim() || undefined,
     brandColor: brandColor || undefined,
     accentColor: accentColor || undefined,
-    sections: sections.map((type) => ({ type })),
+    sections: sections.map((type) => {
+      if (type === "gmb_grid" && gmbProfileScope && gmbProfileScope !== "all") {
+        return { type, config: { businessName: gmbProfileScope } };
+      }
+      return { type };
+    }),
   });
 
   const createMutation = useMutation({
@@ -289,24 +337,46 @@ export function ReportBuilderModal({
           <legend className="mb-2 text-sm font-semibold">Sections</legend>
           <div className="grid gap-2 sm:grid-cols-2">
             {REPORT_SECTION_OPTIONS.map((type) => (
-              <label
-                key={type}
-                className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-base-300 px-3 py-2 text-sm hover:bg-base-200"
-              >
-                <input
-                  type="checkbox"
-                  checked={sections.includes(type)}
-                  onChange={(event) =>
-                    setSections(
-                      event.target.checked
-                        ? [...sections, type]
-                        : sections.filter((section) => section !== type),
-                    )
-                  }
-                  className="checkbox checkbox-sm"
-                />
-                {getReportSectionLabel(type)}
-              </label>
+              <div key={type} className="flex flex-col gap-1">
+                <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-base-300 px-3 py-2 text-sm hover:bg-base-200">
+                  <input
+                    type="checkbox"
+                    checked={sections.includes(type)}
+                    onChange={(event) =>
+                      setSections(
+                        event.target.checked
+                          ? [...sections, type]
+                          : sections.filter((section) => section !== type),
+                      )
+                    }
+                    className="checkbox checkbox-sm"
+                  />
+                  <span>{getReportSectionLabel(type)}</span>
+                </label>
+                {type === "gmb_grid" &&
+                sections.includes("gmb_grid") &&
+                gmbBusinessNames.length > 1 ? (
+                  <div className="rounded-lg bg-base-200/60 p-2 text-xs">
+                    <label className="font-medium text-base-content/70">
+                      Scope listing:
+                    </label>
+                    <select
+                      value={gmbProfileScope}
+                      onChange={(e) => setGmbProfileScope(e.target.value)}
+                      className="select select-bordered select-xs mt-1 w-full"
+                    >
+                      <option value="all">
+                        All Listings (Separated cards)
+                      </option>
+                      {gmbBusinessNames.map((bName) => (
+                        <option key={bName} value={bName}>
+                          Only: {bName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
+              </div>
             ))}
           </div>
           {sections.length === 0 ? (

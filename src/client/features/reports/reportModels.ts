@@ -1,3 +1,4 @@
+/* oxlint-disable max-lines */
 import {
   asRecord,
   readCollection,
@@ -10,6 +11,8 @@ import {
   derivedCompleteness,
   completeness,
   trendLabel,
+  type ComparisonMetric,
+  type Completeness,
 } from "./reportModelHelpers";
 
 // ---------------------------------------------------------------------------
@@ -34,73 +37,30 @@ export function buildGmbGridModel(source: unknown) {
     "configs",
     "runs",
   ]);
-  return {
-    totalScans: readNumber(source, [
-      "summary.totalScans",
-      "totalScans",
-      "scanCount",
-      "current.runsCount",
-      "runs.length",
+
+  const trendMapped = trend.map((row, index) => ({
+    label: trendLabel(row, index),
+    solv: readNumber(row, ["solv", "shareOfLocalVoice", "metrics.solv"]),
+    averageRank: readNumber(row, [
+      "averageRank",
+      "avgRank",
+      "metrics.averageRank",
     ]),
-    metrics: {
-      solv: comparison(source, ["solv", "shareOfLocalVoice", "avgSolv"]),
-      averageRank: comparison(source, ["averageRank", "avgRank"]),
-      top3: {
-        current:
-          comparison(source, ["top3", "top3Count", "top3Percent"]).current ??
-          (rows.length
-            ? rows.reduce((s, r) => s + (readNumber(r, ["top3"]) ?? 0), 0)
-            : undefined),
-        previous: comparison(source, ["top3", "top3Count", "top3Percent"])
-          .previous,
-      },
-      top10: {
-        current:
-          comparison(source, ["top10", "top10Count", "top10Percent"]).current ??
-          (rows.length
-            ? rows.reduce((s, r) => s + (readNumber(r, ["top10"]) ?? 0), 0)
-            : undefined),
-        previous: comparison(source, ["top10", "top10Count", "top10Percent"])
-          .previous,
-      },
-      top20: {
-        current:
-          comparison(source, ["top20", "top20Count", "top20Percent"]).current ??
-          (rows.length
-            ? rows.reduce((s, r) => s + (readNumber(r, ["top20"]) ?? 0), 0)
-            : undefined),
-        previous: comparison(source, ["top20", "top20Count", "top20Percent"])
-          .previous,
-      },
-      cost: comparison(source, [
-        "cost",
-        "costUsd",
-        "actualCostUsd",
-        "totalCostUsd",
-      ]),
-    },
-    trend: trend.map((row, index) => ({
-      label: trendLabel(row, index),
-      solv: readNumber(row, ["solv", "shareOfLocalVoice", "metrics.solv"]),
-      averageRank: readNumber(row, [
-        "averageRank",
-        "avgRank",
-        "metrics.averageRank",
-      ]),
-      top3: readNumber(row, ["top3", "top3Count"]),
-      top10: readNumber(row, ["top10", "top10Count"]),
-      top20: readNumber(row, ["top20", "top20Count"]),
-      cost: readNumber(row, ["cost", "costUsd", "actualCostUsd"]),
-    })),
-    keywordLocations: rows.map((row, index) => ({
+    top3: readNumber(row, ["top3", "top3Count"]),
+    top10: readNumber(row, ["top10", "top10Count"]),
+    top20: readNumber(row, ["top20", "top20Count"]),
+    cost: readNumber(row, ["cost", "costUsd", "actualCostUsd"]),
+  }));
+
+  const keywordLocations = rows.map((row, index) => ({
       keyword:
         readString(row, ["keyword", "query", "term"]) ?? `Keyword ${index + 1}`,
       location:
         readString(row, [
+          "businessName",
           "location",
           "locationName",
           "address",
-          "businessName",
         ]) ?? "N/A",
       scans: readNumber(row, [
         "scans",
@@ -114,16 +74,204 @@ export function buildGmbGridModel(source: unknown) {
         "avgRank",
         "latestRun.averageRank",
       ]),
-    })),
-    completeness:
-      completeness(source) ??
-      derivedCompleteness(
-        source,
-        ["completedScans", "completedPoints", "summary.completed"],
-        ["totalScans", "totalPoints", "summary.total"],
-      ),
-  };
-}
+    }));
+
+    const rawProfiles = readCollection(source, ["profiles"]);
+    let profiles: Array<{
+      businessName: string;
+      location: string;
+      address?: string | null;
+      totalScans: number;
+      metrics: {
+        solv: ComparisonMetric;
+        averageRank: ComparisonMetric;
+        top3: ComparisonMetric;
+        top10: ComparisonMetric;
+        top20: ComparisonMetric;
+        cost: ComparisonMetric;
+      };
+      trend: typeof trendMapped;
+      keywordLocations: typeof keywordLocations;
+      completeness: Completeness | undefined;
+    }> = [];
+
+    if (rawProfiles.length > 0) {
+      profiles = rawProfiles.map((p) => {
+        const pModel = buildGmbGridModel(p);
+        const bName =
+          readString(p, ["businessName", "location", "name"]) ??
+          "Business Profile";
+        return {
+          businessName: bName,
+          location: bName,
+          address: readString(p, ["address"]),
+          totalScans: pModel.totalScans ?? pModel.keywordLocations.length,
+          metrics: pModel.metrics,
+          trend: pModel.trend,
+          keywordLocations: pModel.keywordLocations,
+          completeness: pModel.completeness,
+        };
+      });
+    } else {
+      const distinctBusinesses = Array.from(
+        new Set(
+          keywordLocations
+            .map((k) => k.location)
+            .filter((loc) => Boolean(loc && loc !== "N/A" && loc.trim())),
+        ),
+      );
+
+      if (distinctBusinesses.length > 1) {
+        profiles = distinctBusinesses.map((bName) => {
+          const bRows = keywordLocations.filter((k) => k.location === bName);
+          const bRawRuns = rows.filter(
+            (r) =>
+              readString(r, [
+                "businessName",
+                "location",
+                "locationName",
+              ]) === bName,
+          );
+          const solvList = bRows
+            .map((r) => r.solv)
+            .filter((s): s is number => s !== undefined);
+          const rankList = bRows
+            .map((r) => r.averageRank)
+            .filter((rk): rk is number => rk !== undefined);
+          const costSum = bRawRuns.reduce(
+            (sum, r) => sum + (readNumber(r, ["cost", "costUsd"]) ?? 0),
+            0,
+          );
+          const top3Sum = bRawRuns.reduce(
+            (sum, r) =>
+              sum +
+              (readNumber(r, ["top3"]) ??
+                (readNumber(r, ["averageRank", "avgRank"]) !== undefined &&
+                (readNumber(r, ["averageRank", "avgRank"]) ?? 99) <= 3
+                  ? 1
+                  : 0)),
+            0,
+          );
+          const top10Sum = bRawRuns.reduce(
+            (sum, r) =>
+              sum +
+              (readNumber(r, ["top10"]) ??
+                (readNumber(r, ["averageRank", "avgRank"]) !== undefined &&
+                (readNumber(r, ["averageRank", "avgRank"]) ?? 99) <= 10
+                  ? 1
+                  : 0)),
+            0,
+          );
+          const top20Sum = bRawRuns.reduce(
+            (sum, r) =>
+              sum +
+              (readNumber(r, ["top20"]) ??
+                (readNumber(r, ["averageRank", "avgRank"]) !== undefined &&
+                (readNumber(r, ["averageRank", "avgRank"]) ?? 99) <= 20
+                  ? 1
+                  : 0)),
+            0,
+          );
+
+          return {
+            businessName: bName,
+            location: bName,
+            address:
+              bRawRuns[0] && typeof bRawRuns[0] === "object"
+                ? readString(bRawRuns[0], ["address"])
+                : null,
+            totalScans: bRows.length,
+            metrics: {
+              solv: {
+                current: solvList.length
+                  ? Number(
+                      (
+                        solvList.reduce((a, b) => a + b, 0) / solvList.length
+                      ).toFixed(1),
+                    )
+                  : undefined,
+                previous: undefined,
+              },
+              averageRank: {
+                current: rankList.length
+                  ? Number(
+                      (
+                        rankList.reduce((a, b) => a + b, 0) / rankList.length
+                      ).toFixed(1),
+                    )
+                  : undefined,
+                previous: undefined,
+              },
+              top3: { current: top3Sum, previous: undefined },
+              top10: { current: top10Sum, previous: undefined },
+              top20: { current: top20Sum, previous: undefined },
+              cost: { current: Number(costSum.toFixed(4)), previous: undefined },
+            },
+            trend: trendMapped.filter((_, idx) => idx < bRows.length),
+            keywordLocations: bRows,
+            completeness: undefined,
+          };
+        });
+      }
+    }
+
+    return {
+      totalScans: readNumber(source, [
+        "summary.totalScans",
+        "totalScans",
+        "scanCount",
+        "current.runsCount",
+        "runs.length",
+      ]),
+      metrics: {
+        solv: comparison(source, ["solv", "shareOfLocalVoice", "avgSolv"]),
+        averageRank: comparison(source, ["averageRank", "avgRank"]),
+        top3: {
+          current:
+            comparison(source, ["top3", "top3Count", "top3Percent"]).current ??
+            (rows.length
+              ? rows.reduce((s, r) => s + (readNumber(r, ["top3"]) ?? 0), 0)
+              : undefined),
+          previous: comparison(source, ["top3", "top3Count", "top3Percent"])
+            .previous,
+        },
+        top10: {
+          current:
+            comparison(source, ["top10", "top10Count", "top10Percent"]).current ??
+            (rows.length
+              ? rows.reduce((s, r) => s + (readNumber(r, ["top10"]) ?? 0), 0)
+              : undefined),
+          previous: comparison(source, ["top10", "top10Count", "top10Percent"])
+            .previous,
+        },
+        top20: {
+          current:
+            comparison(source, ["top20", "top20Count", "top20Percent"]).current ??
+            (rows.length
+              ? rows.reduce((s, r) => s + (readNumber(r, ["top20"]) ?? 0), 0)
+              : undefined),
+          previous: comparison(source, ["top20", "top20Count", "top20Percent"])
+            .previous,
+        },
+        cost: comparison(source, [
+          "cost",
+          "costUsd",
+          "actualCostUsd",
+          "totalCostUsd",
+        ]),
+      },
+      trend: trendMapped,
+      keywordLocations,
+      profiles,
+      completeness:
+        completeness(source) ??
+        derivedCompleteness(
+          source,
+          ["completedScans", "completedPoints", "summary.completed"],
+          ["totalScans", "totalPoints", "summary.total"],
+        ),
+    };
+  }
 
 // ---------------------------------------------------------------------------
 // Brand Lookup

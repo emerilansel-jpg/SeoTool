@@ -1,3 +1,4 @@
+/* oxlint-disable max-lines, max-lines-per-function */
 import { describe, expect, it } from "vitest";
 import {
   buildGmbGridModel,
@@ -34,6 +35,7 @@ describe("reportModels with actual backend section shapes", () => {
         costDelta: 0.05,
         runsDelta: 1,
       },
+      profiles: [],
       runs: [
         {
           runId: "run_1",
@@ -82,6 +84,161 @@ describe("reportModels with actual backend section shapes", () => {
     expect(model.metrics.averageRank.current).toBe(3.2);
     expect(model.metrics.cost.current).toBe(0.25);
     expect(model.keywordLocations.length).toBeGreaterThan(0);
+  });
+
+  it("separates multiple business listings into distinct profiles (Lapis vs Omnirank scenario)", () => {
+    const multiBusinessGmbData: GmbSectionData = {
+      hasData: true,
+      current: {
+        runsCount: 5,
+        completedRunsCount: 5,
+        avgSolv: 3.8,
+        avgRank: 1.8,
+        totalCostUsd: 0.0366,
+        dataCompletenessPct: 100,
+      },
+      previous: {
+        runsCount: 0,
+        completedRunsCount: 0,
+        avgSolv: null,
+        avgRank: null,
+        totalCostUsd: 0,
+        dataCompletenessPct: 0,
+      },
+      comparison: { solvDelta: null, rankDelta: null, costDelta: 0.0366, runsDelta: 5 },
+      profiles: [],
+      runs: [
+        {
+          runId: "run_1",
+          configId: "cfg_lapis",
+          businessName: "Lapis Patios & Hardscapes",
+          keyword: "brick patio contractor charlotte nc",
+          gridSize: 3,
+          radiusMeters: 5000,
+          status: "completed",
+          startedAt: "2026-05-15T10:00:00.000Z",
+          completedAt: "2026-05-15T10:05:00.000Z",
+          totalPoints: 9,
+          completedPoints: 9,
+          failedPoints: 0,
+          foundPoints: 9,
+          top3: 1,
+          top10: 1,
+          top20: 1,
+          foundCoveragePct: 100,
+          solv: 11.1,
+          averageRank: 1.0,
+          costUsd: 0.0073,
+        },
+        {
+          runId: "run_2",
+          configId: "cfg_lapis",
+          businessName: "Lapis Patios & Hardscapes",
+          keyword: "patio contractor charlotte nc",
+          gridSize: 3,
+          radiusMeters: 5000,
+          status: "completed",
+          startedAt: "2026-05-15T10:00:00.000Z",
+          completedAt: "2026-05-15T10:05:00.000Z",
+          totalPoints: 9,
+          completedPoints: 9,
+          failedPoints: 0,
+          foundPoints: 5,
+          top3: 1,
+          top10: 1,
+          top20: 1,
+          foundCoveragePct: 55,
+          solv: 0,
+          averageRank: 2.5,
+          costUsd: 0.0073,
+        },
+        {
+          runId: "run_3",
+          configId: "cfg_lapis",
+          businessName: "Lapis Patios & Hardscapes",
+          keyword: "masonry contractor",
+          gridSize: 3,
+          radiusMeters: 5000,
+          status: "completed",
+          startedAt: "2026-05-15T10:00:00.000Z",
+          completedAt: "2026-05-15T10:05:00.000Z",
+          totalPoints: 9,
+          completedPoints: 9,
+          failedPoints: 0,
+          foundPoints: 4,
+          top3: 1,
+          top10: 1,
+          top20: 1,
+          foundCoveragePct: 44,
+          solv: 0,
+          averageRank: 3.0,
+          costUsd: 0.0073,
+        },
+        {
+          runId: "run_4",
+          configId: "cfg_omnirank",
+          businessName: "Omnirank - Jasa SEO Medan",
+          keyword: "jasa seo",
+          gridSize: 3,
+          radiusMeters: 5000,
+          status: "completed",
+          startedAt: "2026-05-15T10:00:00.000Z",
+          completedAt: "2026-05-15T10:05:00.000Z",
+          totalPoints: 9,
+          completedPoints: 9,
+          failedPoints: 0,
+          foundPoints: 9,
+          top3: 0,
+          top10: 0,
+          top20: 0,
+          foundCoveragePct: 100,
+          solv: 0,
+          averageRank: 1.0,
+          costUsd: 0.0073,
+        },
+        {
+          runId: "run_5",
+          configId: "cfg_omnirank",
+          businessName: "Omnirank - Jasa SEO Medan",
+          keyword: "jasa ledeng",
+          gridSize: 3,
+          radiusMeters: 5000,
+          status: "completed",
+          startedAt: "2026-05-15T10:00:00.000Z",
+          completedAt: "2026-05-15T10:05:00.000Z",
+          totalPoints: 9,
+          completedPoints: 9,
+          failedPoints: 0,
+          foundPoints: 9,
+          top3: 0,
+          top10: 0,
+          top20: 0,
+          foundCoveragePct: 100,
+          solv: 0,
+          averageRank: 1.5,
+          costUsd: 0.0073,
+        },
+      ],
+    };
+
+    const model = buildGmbGridModel(multiBusinessGmbData);
+    expect(model.profiles.length).toBe(2);
+
+    const lapis = model.profiles.find((p) => p.businessName === "Lapis Patios & Hardscapes");
+    const omnirank = model.profiles.find((p) => p.businessName === "Omnirank - Jasa SEO Medan");
+
+    expect(lapis).toBeDefined();
+    expect(omnirank).toBeDefined();
+
+    // Lapis has 3 scans, top3 = 3, only Charlotte keywords
+    expect(lapis?.totalScans).toBe(3);
+    expect(lapis?.keywordLocations.length).toBe(3);
+    expect(lapis?.metrics.top3.current).toBe(3);
+
+    // Omnirank has 2 scans, top3 = 0, only Medan keywords
+    expect(omnirank?.totalScans).toBe(2);
+    expect(omnirank?.keywordLocations.length).toBe(2);
+    expect(omnirank?.metrics.top3.current).toBe(0);
   });
 
   it("maps real buildBrandLookupSection data", () => {

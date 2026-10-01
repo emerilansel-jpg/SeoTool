@@ -1,3 +1,4 @@
+// oxlint-disable typescript-eslint/no-unsafe-type-assertion
 import { DashboardService } from "@/server/features/dashboard/services/DashboardService";
 import {
   GscNotConnectedError,
@@ -42,23 +43,44 @@ type BuildInput = {
 /** Build a snapshot payload from a report config. Tolerant: if one section's
  *  data source fails (not connected, API error), the section is marked failed
  *  and the remaining sections continue. */
+function parseConfigObject(raw: unknown): Record<string, unknown> | undefined {
+  if (!raw) return undefined;
+  if (typeof raw === "object") return raw as unknown as Record<string, unknown>;
+  if (typeof raw === "string") {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        return parsed as unknown as Record<string, unknown>;
+      }
+    } catch {}
+  }
+  return undefined;
+}
+
 export async function buildSnapshot(
   input: BuildInput,
 ): Promise<SnapshotPayload> {
-  const range = resolveReportPeriodRange(input.period ?? "monthly");
-  const { startDate, endDate, prevStartDate, prevEndDate } = range;
+  const { startDate, endDate, prevStartDate, prevEndDate } =
+    resolveReportPeriodRange(input.period);
 
   const sections: Record<string, SectionResult> = {};
 
   for (const section of input.sections) {
     const type = section.type;
+    const configObj = parseConfigObject(section.config);
     try {
-      sections[type] = await buildSection(type, input.projectId, input.domain, {
-        startDate,
-        endDate,
-        prevStartDate,
-        prevEndDate,
-      });
+      sections[type] = await buildSection(
+        type,
+        input.projectId,
+        input.domain,
+        {
+          startDate,
+          endDate,
+          prevStartDate,
+          prevEndDate,
+        },
+        configObj,
+      );
     } catch (error) {
       const isExpected =
         error instanceof GscNotConnectedError ||
@@ -90,6 +112,7 @@ async function buildSection(
     prevStartDate: string;
     prevEndDate: string;
   },
+  config?: Record<string, unknown>,
 ): Promise<SectionResult> {
   switch (type) {
     case "rank":
@@ -105,7 +128,7 @@ async function buildSection(
     case "content":
       return buildContentSection(projectId);
     case "gmb_grid":
-      return buildGmbSection(projectId, range);
+      return buildGmbSection(projectId, range, config);
     case "brand_lookup":
       return buildBrandLookupSection(projectId, range);
     case "ai_tracking":

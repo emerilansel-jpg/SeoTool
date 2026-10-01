@@ -19,9 +19,101 @@ import {
 
 export function GmbGridReportSection({ data }: { data: unknown }) {
   const model = buildGmbGridModel(data);
+
+  if (model.profiles && model.profiles.length > 1) {
+    return (
+      <div className="space-y-6">
+        {model.profiles.map((profile, index) => (
+          <ReportSectionCard
+            key={`${profile.businessName}-${index}`}
+            title={`Local Map Rank · ${profile.businessName}`}
+            subtitle={`Google Maps rank tracking for ${profile.businessName}${profile.address ? ` (${profile.address})` : ""}`}
+          >
+            <MetricGrid>
+              <Metric
+                label="Total scans"
+                value={formatReportNumber(profile.totalScans, 0)}
+              />
+              <Metric
+                label="Share of local voice"
+                value={formatReportPercent(profile.metrics.solv.current)}
+                previous={previousPercent(profile.metrics.solv.previous)}
+              />
+              <Metric
+                label="Average rank"
+                value={formatReportNumber(profile.metrics.averageRank.current)}
+                previous={previousNumber(profile.metrics.averageRank.previous)}
+                lowerIsBetter
+              />
+              <Metric
+                label="Top 3"
+                value={formatReportNumber(profile.metrics.top3.current, 0)}
+                previous={previousNumber(profile.metrics.top3.previous, 0)}
+              />
+              <Metric
+                label="Top 10"
+                value={formatReportNumber(profile.metrics.top10.current, 0)}
+              />
+              <Metric
+                label="Top 20"
+                value={formatReportNumber(profile.metrics.top20.current, 0)}
+              />
+              <Metric
+                label="Scan cost"
+                value={formatReportCurrency(profile.metrics.cost.current)}
+              />
+            </MetricGrid>
+            {profile.trend.length > 0 ? (
+              <TrendChart
+                title={`Scan trend · ${profile.businessName}`}
+                data={profile.trend}
+                series={[
+                  { key: "solv", label: "SoLV", color: "#2563eb" },
+                  {
+                    key: "averageRank",
+                    label: "Average rank",
+                    color: "#f97316",
+                  },
+                ]}
+              />
+            ) : null}
+            <CompactTable
+              caption={`Keywords · ${profile.businessName}`}
+              rows={profile.keywordLocations.slice(0, 20)}
+              rowKey={(row, idx) => `${row.keyword}-${idx}`}
+              columns={[
+                { label: "Keyword", render: (row) => row.keyword },
+                {
+                  label: "Scans",
+                  align: "right",
+                  render: (row) => formatReportNumber(row.scans, 0),
+                },
+                {
+                  label: "SoLV",
+                  align: "right",
+                  render: (row) => formatReportPercent(row.solv),
+                },
+                {
+                  label: "Avg rank",
+                  align: "right",
+                  render: (row) => formatReportNumber(row.averageRank),
+                },
+              ]}
+            />
+            <CompletenessNote value={profile.completeness} />
+          </ReportSectionCard>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <ReportSectionCard
-      title="Local Map Rank"
+      title={
+        model.profiles[0]?.businessName
+          ? `Local Map Rank · ${model.profiles[0].businessName}`
+          : "Local Map Rank"
+      }
       subtitle="Google Maps visibility across tracked keywords and locations"
     >
       <MetricGrid>

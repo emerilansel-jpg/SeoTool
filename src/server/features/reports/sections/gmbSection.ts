@@ -43,6 +43,20 @@ export type GmbPeriodSummary = {
   dataCompletenessPct: number;
 };
 
+export type GmbProfileSummary = {
+  businessName: string;
+  placeId: string;
+  address: string | null;
+  summary: GmbPeriodSummary;
+  comparison: {
+    solvDelta: number | null;
+    rankDelta: number | null;
+    costDelta: number;
+    runsDelta: number;
+  };
+  runs: GmbHistoricalRun[];
+};
+
 export type GmbSectionData = {
   hasData: boolean;
   current: GmbPeriodSummary;
@@ -54,13 +68,15 @@ export type GmbSectionData = {
     runsDelta: number;
   };
   runs: GmbHistoricalRun[];
+  profiles: GmbProfileSummary[];
 };
 
 export async function buildGmbSection(
   projectId: string,
   range: RangeInput,
+  sectionConfig?: Record<string, unknown>,
 ): Promise<GmbSectionResult> {
-  const configs = await GmbGridRepository.listConfigsForProject(projectId);
+  let configs = await GmbGridRepository.listConfigsForProject(projectId);
   if (configs.length === 0) {
     return {
       status: "skipped",
@@ -68,7 +84,23 @@ export async function buildGmbSection(
     };
   }
 
-  const [currentRows, prevRows] = await Promise.all([
+  const targetBusiness =
+    typeof sectionConfig?.businessName === "string" &&
+    sectionConfig.businessName.trim()
+      ? sectionConfig.businessName.trim()
+      : null;
+
+  if (targetBusiness) {
+    configs = configs.filter((c) => c.businessName === targetBusiness);
+    if (configs.length === 0) {
+      return {
+        status: "skipped",
+        reason: `No scans found for business profile "${targetBusiness}".`,
+      };
+    }
+  }
+
+  let [currentRows, prevRows] = await Promise.all([
     GmbGridRepository.listRunsForDateRange(
       projectId,
       range.startDate,
@@ -80,6 +112,13 @@ export async function buildGmbSection(
       `${range.prevEndDate}T23:59:59.999Z`,
     ),
   ]);
+
+  if (targetBusiness) {
+    currentRows = currentRows.filter(
+      (r) => r.config.businessName === targetBusiness,
+    );
+    prevRows = prevRows.filter((r) => r.config.businessName === targetBusiness);
+  }
 
   const currentRunIds = currentRows.map((r) => r.run.id);
   const snapshots =
@@ -140,6 +179,56 @@ export async function buildGmbSection(
     };
   });
 
+  const distinctBusinesses = Array.from(
+    new Set(runs.map((r) => r.businessName).filter(Boolean)),
+  );
+
+  const profiles: GmbProfileSummary[] = distinctBusinesses.map((bName) => {
+    const bRuns = runs.filter((r) => r.businessName === bName);
+    const bCurrentRows = currentRows.filter(
+      (r) => r.config.businessName === bName,
+    );
+    const bPrevRows = prevRows.filter((r) => r.config.businessName === bName);
+
+    const bCurrentSummary = summarizeRuns(
+      bCurrentRows.map((r) => r.run),
+      bRuns,
+    );
+    const bPrevSummary = summarizeRuns(
+      bPrevRows.map((r) => r.run),
+      [],
+    );
+
+    const bSolvDelta =
+      bCurrentSummary.avgSolv != null && bPrevSummary.avgSolv != null
+        ? Number((bCurrentSummary.avgSolv - bPrevSummary.avgSolv).toFixed(2))
+        : null;
+    const bRankDelta =
+      bCurrentSummary.avgRank != null && bPrevSummary.avgRank != null
+        ? Number((bCurrentSummary.avgRank - bPrevSummary.avgRank).toFixed(2))
+        : null;
+    const bCostDelta = Number(
+      (bCurrentSummary.totalCostUsd - bPrevSummary.totalCostUsd).toFixed(4),
+    );
+    const bRunsDelta = bCurrentSummary.runsCount - bPrevSummary.runsCount;
+
+    const matchingConfig = configs.find((c) => c.businessName === bName);
+
+    return {
+      businessName: bName,
+      placeId: matchingConfig?.placeId ?? "",
+      address: matchingConfig?.address ?? null,
+      summary: bCurrentSummary,
+      comparison: {
+        solvDelta: bSolvDelta,
+        rankDelta: bRankDelta,
+        costDelta: bCostDelta,
+        runsDelta: bRunsDelta,
+      },
+      runs: bRuns,
+    };
+  });
+
   const currentSummary = summarizeRuns(
     currentRows.map((r) => r.run),
     runs,
@@ -175,6 +264,7 @@ export async function buildGmbSection(
         runsDelta,
       },
       runs,
+      profiles,
     },
   };
 }
