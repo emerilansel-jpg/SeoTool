@@ -5,6 +5,7 @@ import { addTopupCredits } from "./credits";
 import { CREDITS_PER_USD } from "@/shared/billing";
 import { PayPalWebhookEventRepository } from "@/server/features/admin/repositories/PayPalWebhookEventRepository";
 import { parseTopupMarker } from "./paypal-topup";
+import { parseLtdMarker } from "./paypal-ltd";
 import { parseKeywordProMarker } from "@/shared/keyword-pro-membership";
 import { KeywordProRepository } from "@/server/features/keywords/repositories/KeywordProRepository";
 import { KeywordProMembershipService } from "@/server/features/keywords/services/KeywordProMembershipService";
@@ -105,6 +106,30 @@ export async function handlePaypalWebhookRequest(request: Request) {
         return json({ received: true });
       }
 
+      const ltd = extractLtdGrant(payload, orgId);
+      if (ltd) {
+        const { QuotaRepository } = await import(
+          "@/server/features/billing/repositories/QuotaRepository"
+        );
+        const { LTD_OFFERS } = await import("./paypal-checkout-service");
+        const offer = LTD_OFFERS[ltd.planKey] ?? LTD_OFFERS.krp_founder_10;
+        await QuotaRepository.upsertSubscription({
+          organizationId: orgId,
+          planTier: offer.tier,
+          status: "active",
+          currentPeriodEnd: "2099-12-31T23:59:59.000Z",
+        });
+        if (offer.bonusCredits > 0) {
+          await addTopupCredits(orgId, offer.bonusCredits);
+        }
+        await PayPalWebhookEventRepository.markStatus(
+          eventId,
+          "processed",
+          null,
+        );
+        return json({ received: true });
+      }
+
       // One-time credit top-up purchase: grant the purchased credits.
       // Subscription renewals also arrive as PAYMENT.CAPTURE.COMPLETED but
       // carry a custom_id (not a topup reference), so the grant is skipped.
@@ -180,6 +205,8 @@ async function getOrganizationId(
     typeof resource.custom_id === "string" ? resource.custom_id : null;
   const keywordPro = parseKeywordProMarker(customId);
   if (keywordPro) return keywordPro.organizationId;
+  const ltdMarker = parseLtdMarker(customId);
+  if (ltdMarker) return ltdMarker.organizationId;
   if (customId?.startsWith("membership:") || customId?.startsWith("krp:")) {
     // A malformed/unknown membership marker must not be treated as a literal
     // organization id (which would violate the webhook audit-log FK).
@@ -205,6 +232,10 @@ async function getOrganizationId(
   for (const unit of toRecordArray(resource.purchase_units)) {
     const refId =
       typeof unit.reference_id === "string" ? unit.reference_id : null;
+    const unitCustomId =
+      typeof unit.custom_id === "string" ? unit.custom_id : null;
+    const unitLtd = parseLtdMarker(refId) ?? parseLtdMarker(unitCustomId);
+    if (unitLtd) return unitLtd.organizationId;
     if (refId) {
       // reference_id format: "topup-{orgId}-{timestamp}"
       const organizationId = parseTopupReference(refId);
@@ -266,6 +297,29 @@ async function processKeywordProEvent(payload: PayPalWebhookEvent) {
     grossAmountUsdCents: Math.round(amountUsd * 100),
   });
   return true;
+}
+
+/** For a completed LTD purchase capture, extract the plan key and org id. */
+export function extractLtdGrant(
+  payload: PayPalWebhookEvent,
+  fallbackOrgId: string,
+): { organizationId: string; planKey: string } | null {
+  if (payload.event_type !== "PAYMENT.CAPTURE.COMPLETED") return null;
+
+  const resource = payload.resource;
+  const resourceMarker = parseLtdMarker(resource.custom_id);
+  const unitMarker = toRecordArray(resource.purchase_units)
+    .map(
+      (unit) =>
+        parseLtdMarker(unit.custom_id) ??
+        parseLtdMarker(unit.reference_id),
+    )
+    .find((m) => m !== null);
+  const marker = resourceMarker ?? unitMarker ?? null;
+  if (!marker || marker.organizationId !== fallbackOrgId) {
+    return null;
+  }
+  return marker;
 }
 
 /** For a completed top-up capture, resolve the credited amount in credits.

@@ -1,8 +1,8 @@
 // oxlint-disable complexity, max-lines
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Lock, ShieldCheck, User, XCircle } from "lucide-react";
+import { Check, Key, Lock, ShieldCheck, Sparkles, User, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { ThemePreferenceMenuItems } from "@/client/components/ThemePreferenceMenuItems";
 import {
@@ -12,20 +12,26 @@ import {
 import { signOutAndRedirect, useSession } from "@/lib/auth-client";
 import { normalizeAuthRedirect } from "@/lib/auth-redirect";
 import {
-  createMembershipCheckout,
   getMembershipStatus,
   verifyMembershipCheckout,
 } from "@/serverFunctions/membership";
-import { createPaypalSubscription } from "@/serverFunctions/paypal-checkout";
+import {
+  createPaypalSubscription,
+  createPaypalLtdCheckout,
+  capturePaypalLtdCheckout,
+} from "@/serverFunctions/paypal-checkout";
 
 type Search = {
   checkout?: "success" | "cancelled";
   subscriptionId?: string;
+  orderId?: string;
   redirect?: string;
   ref?: string;
   upgrade?: true;
-  /** Legacy deep links are accepted; All Access is the only new paid offer. */
-  plan?: "free" | "starter" | "lite" | "pro" | "agency" | "standard" | "byok";
+  plan?: string;
+  cohort?: string;
+  tier?: number;
+  ltd?: boolean;
 };
 
 export const Route = createFileRoute("/_authenticated/subscribe")({
@@ -37,7 +43,15 @@ export const Route = createFileRoute("/_authenticated/subscribe")({
     subscriptionId:
       typeof search.subscription_id === "string"
         ? search.subscription_id.slice(0, 128)
-        : undefined,
+        : typeof search.subscriptionId === "string"
+          ? search.subscriptionId.slice(0, 128)
+          : undefined,
+    orderId:
+      typeof search.order_id === "string"
+        ? search.order_id.slice(0, 128)
+        : typeof search.orderId === "string"
+          ? search.orderId.slice(0, 128)
+          : undefined,
     redirect:
       typeof search.redirect === "string"
         ? normalizeAuthRedirect(search.redirect)
@@ -48,14 +62,15 @@ export const Route = createFileRoute("/_authenticated/subscribe")({
         : undefined,
     upgrade:
       search.upgrade === true || search.upgrade === "true" ? true : undefined,
-    plan:
-      search.plan === "free" ||
-      search.plan === "starter" ||
-      search.plan === "lite" ||
-      search.plan === "pro" ||
-      search.plan === "agency"
-        ? search.plan
-        : undefined,
+    plan: typeof search.plan === "string" ? search.plan : undefined,
+    cohort: typeof search.cohort === "string" ? search.cohort : undefined,
+    tier:
+      typeof search.tier === "number"
+        ? search.tier
+        : typeof search.tier === "string"
+          ? parseInt(search.tier, 10)
+          : undefined,
+    ltd: search.ltd === true || search.ltd === "true" ? true : undefined,
   }),
   component: SubscribePage,
 });
@@ -69,10 +84,10 @@ function ExistingSubscriptionNotice({
 }) {
   const finalizing = kind === "finalizing";
   const description = finalizing
-    ? "PayPal approval is complete. We are waiting for the active subscription confirmation."
+    ? "PayPal approval is complete. We are waiting for the active confirmation."
     : kind === "all-access"
-      ? "Manage, recover, or cancel the existing All Access membership before starting another checkout."
-      : "Your legacy paid plan remains active. Manage it from Billing before switching to All Access so you are never billed for two subscriptions.";
+      ? "Anda sudah memiliki akun All Access aktif. Anda dapat mengelola akun di Billing atau memilih paket LTD di bawah."
+      : "Your legacy paid plan remains active. Manage it from Billing before switching so you are never billed for two subscriptions.";
   return (
     <div className="w-full max-w-lg space-y-5 text-center">
       <img
@@ -82,27 +97,36 @@ function ExistingSubscriptionNotice({
       />
       <h1 className="text-xl font-semibold">
         {finalizing
-          ? "Finalizing your All Access membership…"
-          : "A subscription already exists for this account"}
+          ? "Finalizing your membership…"
+          : "Subscription aktif terdeteksi"}
       </h1>
       <p className="text-sm text-base-content/70">{description}</p>
-      {finalizing ? (
-        <span className="loading loading-spinner loading-md" />
-      ) : (
-        <Link to="/billing" className="btn btn-primary">
+      <div className="flex justify-center gap-3">
+        <Link to="/billing" className="btn btn-outline">
           Open Billing
         </Link>
-      )}
+        <Link to="/projects" className="btn btn-primary">
+          Open Workspace
+        </Link>
+      </div>
     </div>
   );
 }
+
+const APPSUMO_PRICES: Record<number, { price: number; name: string; domains: string }> = {
+  1: { price: 37, name: "Tier 1", domains: "1 Domain · 1 Seat" },
+  2: { price: 79, name: "Tier 2", domains: "5 Domains · 2 Seats" },
+  3: { price: 149, name: "Tier 3 (Sweet Spot)", domains: "15 Domains · 5 Seats" },
+  4: { price: 249, name: "Tier 4", domains: "50 Domains · 15 Seats" },
+  5: { price: 399, name: "Tier 5", domains: "150 Domains · 50 Seats" },
+};
 
 function SubscribePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const search: Search = Route.useSearch();
   const { data: session } = useSession();
-  const [referralCode, setReferralCode] = useState(search.ref ?? "");
+
   const membership = useQuery({
     queryKey: ["membership-status"],
     queryFn: () => getMembershipStatus(),
@@ -111,19 +135,37 @@ function SubscribePage() {
         ? 2_000
         : false,
   });
-  const shouldReturnToWorkspace = [
-    membership.data?.hasAccess,
-    membership.data?.hasLegacyPaidPlan,
-  ].some(Boolean);
-  const checkout = useMutation({
-    mutationFn: () =>
-      createMembershipCheckout({
-        data: { referralCode: referralCode.trim() || undefined },
-      }),
+
+  const shouldReturnToWorkspace = Boolean(
+    !search.plan &&
+      !search.upgrade &&
+      !search.checkout &&
+      (membership.data?.hasAccess || membership.data?.hasLegacyPaidPlan),
+  );
+
+  // PayPal LTD one-time checkout (No Plan ID needed, works immediately!)
+  const ltdCheckout = useMutation({
+    mutationFn: (planKey: string) =>
+      createPaypalLtdCheckout({ data: { planKey } }),
     onSuccess: (result) => window.location.assign(result.approveUrl),
     onError: (error) =>
-      toast.error(getStandardErrorMessage(error, "Could not start checkout")),
+      toast.error(getStandardErrorMessage(error, "Could not start LTD checkout")),
   });
+
+  // Capture LTD PayPal Order on return
+  const ltdCapture = useMutation({
+    mutationFn: (orderId: string) =>
+      capturePaypalLtdCheckout({ data: { orderId } }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["membership-status"] });
+      toast.success("Lifetime Deal payment successful! Access activated.");
+      void navigate({ to: search.redirect ?? "/projects", replace: true });
+    },
+    onError: (error) =>
+      toast.error(getStandardErrorMessage(error, "Could not capture payment")),
+  });
+
+  // Starter $1/month retainer subscription
   const starterCheckout = useMutation({
     mutationFn: () => createPaypalSubscription({ data: { tier: "starter" } }),
     onSuccess: (result) => window.location.assign(result.approveUrl),
@@ -131,14 +173,13 @@ function SubscribePage() {
       console.error("Starter checkout failed", error);
       toast.error(
         getErrorCode(error) === "UPSTREAM_UNAVAILABLE"
-          ? "We could not reach PayPal to start this checkout. Please try again in a moment, or email support@seotool.im if it keeps failing."
-          : getStandardErrorMessage(
-              error,
-              "Credit Retainer checkout is not set up yet",
-            ),
+          ? "We could not reach PayPal to start this checkout. Please try again in a moment."
+          : getStandardErrorMessage(error, "Checkout is temporarily unavailable"),
       );
     },
   });
+
+  // Legacy subscription verification
   const verify = useMutation({
     mutationFn: (subscriptionId: string) =>
       verifyMembershipCheckout({ data: { subscriptionId } }),
@@ -150,15 +191,16 @@ function SubscribePage() {
       ),
   });
 
+  // Handle return from PayPal
   useEffect(() => {
-    if (
-      search.checkout === "success" &&
-      search.subscriptionId &&
-      verify.isIdle
-    ) {
-      verify.mutate(search.subscriptionId);
+    if (search.checkout === "success") {
+      if (search.orderId && ltdCapture.isIdle) {
+        ltdCapture.mutate(search.orderId);
+      } else if (search.subscriptionId && verify.isIdle) {
+        verify.mutate(search.subscriptionId);
+      }
     }
-  }, [search.checkout, search.subscriptionId, verify]);
+  }, [search.checkout, search.orderId, search.subscriptionId, ltdCapture, verify]);
 
   useEffect(() => {
     if (!shouldReturnToWorkspace) return;
@@ -177,9 +219,12 @@ function SubscribePage() {
     membershipStatus !== "EXPIRED" &&
     membershipStatus !== "FAILED";
   const hasLegacyPaidPlan = membership.data?.hasLegacyPaidPlan ?? false;
-  const starterPlanConfigured = membership.data?.starterPlanConfigured ?? false;
 
-  if (hasRecoverableMembership || hasLegacyPaidPlan) {
+  if (
+    !search.plan &&
+    !search.upgrade &&
+    (hasRecoverableMembership || hasLegacyPaidPlan)
+  ) {
     const kind: ExistingSubscriptionKind =
       hasRecoverableMembership && search.checkout === "success"
         ? "finalizing"
@@ -192,6 +237,23 @@ function SubscribePage() {
   const cohort = membership.data?.currentCohort;
   const firstName = session?.user?.name?.split(" ")[0] ?? "";
 
+  // Determine active LTD plan
+  const isAppsumo = search.plan === "appsumo";
+  const appsumoTierNum = search.tier && search.tier >= 1 && search.tier <= 5 ? search.tier : 3;
+  const appsumoPlan = APPSUMO_PRICES[appsumoTierNum];
+
+  const ltdPlanKey = isAppsumo
+    ? `appsumo_tier_${appsumoTierNum}`
+    : search.cohort || cohort?.key || "krp_founder_10";
+
+  const ltdPriceDollars = isAppsumo
+    ? appsumoPlan.price
+    : Math.round((cohort?.priceUsdCents ?? 2900) / 100);
+
+  const ltdTitle = isAppsumo
+    ? `AppSumo ${appsumoPlan.name}`
+    : `Early Believer LTD (${cohort?.label ?? "Founder 10"})`;
+
   return (
     <div className="w-full max-w-5xl space-y-8">
       <SubscribePageAccountMenu email={session?.user?.email} />
@@ -202,201 +264,184 @@ function SubscribePage() {
           alt="SeoTool.im"
           className="mx-auto size-14 object-contain"
         />
-        <h1 className="text-2xl font-semibold">
+        <h1 className="text-2xl font-bold">
           {firstName
-            ? `Welcome to SeoTool.im, ${firstName}!`
-            : "SeoTool.im All Access"}
+            ? `Pilih Akses Anda, ${firstName}!`
+            : "SeoTool.im Lifetime & Access"}
         </h1>
-        <p className="text-sm text-base-content/70">
-          One membership unlocks every SeoTool.im feature. Usage is paid from
-          credits, with transparent Standard or BYOK pricing.
+        <p className="text-sm text-base-content/70 max-w-xl mx-auto">
+          Miliki akses seumur hidup (One-Time Payment) dengan model BYOK bebas markup data,
+          atau pilih micro-retainer mulai dari $1/bulan.
         </p>
       </div>
 
       {search.checkout === "cancelled" ? (
         <div className="alert alert-warning mx-auto max-w-3xl text-sm">
-          Checkout was canceled. No membership charge was created.
-        </div>
-      ) : null}
-      {search.checkout === "success" ? (
-        <div className="alert alert-info mx-auto max-w-3xl text-sm">
-          PayPal approved the checkout. We are confirming your membership…
+          Checkout dibatalkan. Tidak ada tagihan yang dibuat.
         </div>
       ) : null}
 
-      <div className="mx-auto grid max-w-4xl gap-5 md:grid-cols-[0.8fr_1.2fr]">
-        <section className="card border border-base-300 bg-base-100">
-          <div className="card-body gap-5 p-6">
-            <div>
-              <span className="badge badge-ghost badge-sm">FREE</span>
-              <h2 className="mt-2 text-xl font-semibold">Explore first</h2>
-              <p className="mt-1 text-sm text-base-content/65">
-                Browse your workspace and set up projects. Metered SEO tools
-                unlock with All Access.
-              </p>
-            </div>
-            <button
-              className="btn btn-outline mt-auto"
-              onClick={() =>
-                void navigate({ to: search.redirect ?? "/projects" })
-              }
-            >
-              Continue to workspace
-            </button>
-          </div>
-        </section>
+      {search.checkout === "success" && (ltdCapture.isPending || verify.isPending) ? (
+        <div className="alert alert-info mx-auto max-w-3xl text-sm flex items-center justify-center gap-2">
+          <span className="loading loading-spinner loading-xs" />
+          <span>Memverifikasi transaksi pembayaran dari PayPal…</span>
+        </div>
+      ) : null}
 
-        <section className="card border border-primary/40 bg-base-100 shadow-lg shadow-primary/10">
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* CARD 1: LTD ONE-TIME PAYMENT (PRIMARY) */}
+        <section className="card border-2 border-primary bg-base-100 shadow-xl shadow-primary/10">
           <div className="card-body gap-5 p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <span className="badge badge-primary badge-sm">
-                  LIFETIME PRICE LOCK
+                <span className="badge badge-primary badge-sm font-bold uppercase tracking-wide">
+                  BAYAR CUMA 1X · LIFETIME ACCESS
                 </span>
-                <h2 className="mt-2 text-xl font-semibold">All Access</h2>
-                <p className="text-xs text-base-content/60">
-                  {cohort?.label ?? "Current cohort"}
-                  {cohort?.remaining == null
-                    ? ""
-                    : ` · ${cohort.remaining} spot${cohort.remaining === 1 ? "" : "s"} left`}
+                <h2 className="mt-2 text-xl font-bold">{ltdTitle}</h2>
+                <p className="text-xs text-base-content/60 font-medium">
+                  {isAppsumo ? appsumoPlan.domains : "BYOK Mode · Zero Data Markup"}
+                  {!isAppsumo && cohort?.remaining != null
+                    ? ` · ${cohort.remaining} spot tersisa`
+                    : ""}
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-primary">
-                  ${((cohort?.priceUsdCents ?? 2_900) / 100).toFixed(0)}
+                <div className="text-3xl font-extrabold text-primary">
+                  ${ltdPriceDollars}
                 </div>
-                <div className="text-xs text-base-content/60">USD / month</div>
+                <div className="text-xs text-base-content/60 font-semibold">
+                  USD / Sekali Bayar
+                </div>
               </div>
             </div>
 
-            <ul className="grid gap-2 text-sm sm:grid-cols-2">
+            <div className="rounded-xl bg-primary/[0.05] p-3 text-xs text-base-content/80 flex items-center gap-2">
+              <Key className="size-4 text-primary shrink-0" />
+              <span>
+                <strong>Model BYOK:</strong> Gunakan API key DataForSEO & AI milik Anda sendiri.
+                Hemat hingga 90% biaya operasional data tanpa markup.
+              </span>
+            </div>
+
+            <ul className="grid gap-2 text-xs sm:grid-cols-2">
               {[
-                "10,000 credits/month (roll over, never expire)",
-                "Every SeoTool.im feature included",
-                "Keyword Research Pro pipeline",
-                "Live backlink competition",
-                "Local Map Rank Tracker",
-                "Jet AI agent + 36 MCP tools",
-                "Standard or BYOK credit rate",
-                "Referral rewards for 12 cycles",
+                "Semua 12+ fitur SEO & audit aktif",
+                "Integrasi DataForSEO & AI BYOK",
+                "Live keyword rank tracking harian",
+                "Technical site audit 100+ parameter",
+                "Generative AI brand visibility",
+                "White-label PDF reports & scheduling",
+                "Bonus 5.000 platform data credits",
+                "Akses pembaruan engine seumur hidup",
               ].map((feature) => (
                 <li key={feature} className="flex gap-2">
-                  <Check className="mt-0.5 size-4 shrink-0 text-success" />
-                  {feature}
+                  <Check className="mt-0.5 size-3.5 shrink-0 text-success" />
+                  <span>{feature}</span>
                 </li>
               ))}
             </ul>
 
-            <label className="form-control gap-1">
-              <span className="text-xs font-medium">
-                Referral code (optional)
-              </span>
-              <input
-                className="input input-bordered input-sm"
-                value={referralCode}
-                maxLength={32}
-                onChange={(event) =>
-                  setReferralCode(event.target.value.toUpperCase())
-                }
-                placeholder="Friend's code"
-              />
-              <span className="text-xs text-base-content/50">
-                You receive 5,000 bonus credits after activation.
-              </span>
-            </label>
-
-            <button
-              className="btn btn-primary"
-              disabled={checkout.isPending || !cohort?.configured}
-              onClick={() => checkout.mutate()}
-            >
-              {checkout.isPending ? (
-                <span className="loading loading-spinner loading-xs" />
-              ) : null}
-              Continue with PayPal
-            </button>
-            {!cohort?.configured ? (
-              <p className="text-xs text-warning">
-                Payments are being set up right now. Please check back soon, or
-                email support@seotool.im and we&apos;ll let you know the moment
-                checkout is live.
+            <div className="pt-2">
+              <button
+                className="btn btn-primary w-full btn-md font-bold shadow-md shadow-primary/25 gap-2"
+                disabled={ltdCheckout.isPending}
+                onClick={() => ltdCheckout.mutate(ltdPlanKey)}
+              >
+                {ltdCheckout.isPending ? (
+                  <span className="loading loading-spinner loading-xs" />
+                ) : (
+                  <Zap className="size-4" />
+                )}
+                Bayar Sekarang (${ltdPriceDollars} One-Time via PayPal)
+              </button>
+              <p className="mt-2 text-center text-[11px] text-base-content/50">
+                Langsung aktif seketika setelah pembayaran. Tanpa biaya langganan bulanan.
               </p>
-            ) : null}
+            </div>
           </div>
         </section>
 
-        <section className="card border border-base-300 bg-base-100">
-          <div className="card-body gap-5 p-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <span className="badge badge-ghost badge-sm">
-                  CREDIT RETAINER
-                </span>
-                <h2 className="mt-2 text-xl font-semibold">Starter Retainer</h2>
-                <p className="text-xs text-base-content/60">
-                  From $1/month. 100% becomes credit that never expires
-                </p>
+        {/* CARD 2: $1 MICRO-RETAINER & EXPLORE */}
+        <div className="flex flex-col gap-6">
+          <section className="card border border-base-300 bg-base-100 shadow-sm">
+            <div className="card-body gap-4 p-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <span className="badge badge-secondary badge-outline badge-sm font-bold">
+                    MICRO RETAINER
+                  </span>
+                  <h2 className="mt-2 text-lg font-bold">Starter $1 / Bulan</h2>
+                  <p className="text-xs text-base-content/60">
+                    100% jadi kredit permanen yang tidak pernah hangus
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-base-content">$1</div>
+                  <div className="text-xs text-base-content/60">USD / bulan</div>
+                </div>
               </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold">$1</div>
-                <div className="text-xs text-base-content/60">USD / month</div>
+
+              <ul className="space-y-1.5 text-xs text-base-content/80">
+                <li className="flex gap-2">
+                  <Check className="size-3.5 shrink-0 text-success" />
+                  <span>1.000 kredit permanen masuk setiap bulan</span>
+                </li>
+                <li className="flex gap-2">
+                  <Check className="size-3.5 shrink-0 text-success" />
+                  <span>Kredit roll over &amp; tidak pernah hangus</span>
+                </li>
+                <li className="flex gap-2">
+                  <Check className="size-3.5 shrink-0 text-success" />
+                  <span>Bisa dibatalkan kapan saja dari dashboard</span>
+                </li>
+              </ul>
+
+              <button
+                className="btn btn-outline btn-md w-full font-bold"
+                disabled={starterCheckout.isPending}
+                onClick={() => starterCheckout.mutate()}
+              >
+                {starterCheckout.isPending ? (
+                  <span className="loading loading-spinner loading-xs" />
+                ) : null}
+                Mulai Berlangganan $1/bulan
+              </button>
+            </div>
+          </section>
+
+          <section className="card border border-base-200 bg-base-200/40">
+            <div className="card-body p-5">
+              <h3 className="text-sm font-bold text-base-content">
+                Ingin melihat dashboard terlebih dahulu?
+              </h3>
+              <p className="text-xs text-base-content/70 mt-1">
+                Anda dapat menjelajahi workspace dan mendaftarkan proyek Anda secara gratis.
+              </p>
+              <div className="mt-3">
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm text-xs font-semibold"
+                  onClick={() => void navigate({ to: search.redirect ?? "/projects" })}
+                >
+                  Lanjut ke Workspace (Free) →
+                </button>
               </div>
             </div>
-
-            <ul className="grid gap-2 text-sm">
-              {[
-                "1,000 permanent credits every month",
-                "Credits roll over and never expire, ever",
-                "Every SeoTool.im metered tool included",
-                "Cancel anytime; your credit balance stays yours",
-                "Referral rewards for 12 cycles",
-              ].map((feature) => (
-                <li key={feature} className="flex gap-2">
-                  <Check className="mt-0.5 size-4 shrink-0 text-success" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-
-            <button
-              className="btn btn-outline"
-              disabled={starterCheckout.isPending || !starterPlanConfigured}
-              onClick={() => starterCheckout.mutate()}
-            >
-              {starterCheckout.isPending ? (
-                <span className="loading loading-spinner loading-xs" />
-              ) : null}
-              Start with $1
-            </button>
-            {!starterPlanConfigured ? (
-              <p className="text-xs text-warning">
-                Payments are being set up right now. Please check back soon, or
-                email support@seotool.im and we&apos;ll let you know the moment
-                checkout is live.
-              </p>
-            ) : null}
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-base-content/60">
+      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-base-content/60 pt-4">
         <span className="inline-flex items-center gap-1.5">
-          <ShieldCheck className="size-3.5" /> 30-day money-back guarantee
+          <ShieldCheck className="size-3.5 text-success" /> Garansi uang kembali 30 hari
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <XCircle className="size-3.5" /> Cancel anytime; cancellation ends the
-          price lock
+          <Lock className="size-3.5" /> Pembayaran aman terenkripsi via PayPal
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <Lock className="size-3.5" /> Secure checkout via PayPal
+          <Sparkles className="size-3.5 text-primary" /> Akses langsung terbuka instan
         </span>
       </div>
-      <p className="pb-6 text-center text-xs text-base-content/55">
-        Already exploring?{" "}
-        <Link to="/" className="link">
-          Back to the app
-        </Link>
-      </p>
     </div>
   );
 }
@@ -417,13 +462,13 @@ function SubscribePageAccountMenu({ email }: { email: string | undefined }) {
         <ul className="menu dropdown-content z-[1] mt-2 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow-sm">
           <li className="menu-title truncate px-4 py-2 text-xs">{email}</li>
           <li>
-            <ThemePreferenceMenuItems />
+            <Link to="/billing">Billing</Link>
           </li>
+          <ThemePreferenceMenuItems />
           <li>
             <button
               type="button"
-              className="text-error"
-              onClick={signOutAndRedirect}
+              onClick={() => signOutAndRedirect()}
             >
               Sign out
             </button>

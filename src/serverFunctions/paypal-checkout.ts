@@ -114,3 +114,57 @@ export const capturePaypalTopup = createServerFn({ method: "POST" })
       organizationId: context.organizationId,
     });
   });
+
+/** Create a PayPal one-time payment for LTD (Lifetime Deal) access. */
+export const createPaypalLtdCheckout = createServerFn({ method: "POST" })
+  .middleware([requireAuthenticatedContext])
+  .validator(
+    z.object({
+      planKey: z.string().trim().min(1).max(64),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    if (!(await isHostedServerAuthMode())) {
+      throw new AppError(
+        "AUTH_CONFIG_MISSING",
+        "LTD checkout is only available in hosted mode",
+      );
+    }
+
+    const publicUrl = await import("@/server/lib/runtime-env").then((m) =>
+      m.getRequiredEnvValue("BETTER_AUTH_URL"),
+    );
+
+    return PayPalCheckoutService.createLtdOrder({
+      planKey: data.planKey,
+      organizationId: context.organizationId,
+      publicUrl,
+    });
+  });
+
+/** Capture an approved PayPal LTD order. */
+export const capturePaypalLtdCheckout = createServerFn({ method: "POST" })
+  .middleware([requireAuthenticatedContext])
+  .validator(
+    z.object({
+      orderId: z
+        .string()
+        .trim()
+        .min(1)
+        .max(100)
+        .regex(/^[A-Za-z0-9-]+$/),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    if (!(await isHostedServerAuthMode())) {
+      throw new AppError(
+        "AUTH_CONFIG_MISSING",
+        "LTD checkout is only available in hosted mode",
+      );
+    }
+
+    return PayPalCheckoutService.captureLtdOrder({
+      orderId: data.orderId,
+      organizationId: context.organizationId,
+    });
+  });
