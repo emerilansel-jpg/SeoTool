@@ -1,12 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
-import { AlertCircle, Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { AlertCircle, Loader2, Square } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
+  cancelAudit,
   getAuditResults,
   getAuditStatus,
   getCrawlProgress,
 } from "@/serverFunctions/audit";
+import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { auditSearchSchema } from "@/types/schemas/audit";
 import type { z } from "zod";
 import { LaunchView } from "@/client/features/audit/launch/LaunchView";
@@ -244,6 +247,26 @@ function ProgressCard({
 
   const crawledUrls = crawlProgressQuery.data ?? [];
 
+  const queryClient = useQueryClient();
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelAudit({ data: { projectId, auditId } }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["audit-status", projectId, auditId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["audit-results", projectId, auditId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["audit-history", projectId],
+      });
+      toast.success("Audit stopped and finalized");
+    },
+    onError: (err) => {
+      toast.error(getStandardErrorMessage(err, "Failed to stop audit"));
+    },
+  });
+
   return (
     <div className="space-y-3">
       <div className="card bg-base-100 border border-base-300">
@@ -255,7 +278,22 @@ function ProgressCard({
                 ? "Running Lighthouse checks"
                 : "Crawling pages"}
             </h2>
-            <span className="badge badge-ghost badge-sm">{phaseLabel}</span>
+            <div className="flex items-center gap-2">
+              <span className="badge badge-ghost badge-sm">{phaseLabel}</span>
+              <button
+                type="button"
+                className="btn btn-outline btn-xs gap-1 text-warning hover:bg-warning hover:text-warning-content"
+                onClick={() => cancelMutation.mutate()}
+                disabled={cancelMutation.isPending}
+              >
+                {cancelMutation.isPending ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <Square className="size-3" />
+                )}
+                Stop &amp; Finalize
+              </button>
+            </div>
           </div>
 
           <progress

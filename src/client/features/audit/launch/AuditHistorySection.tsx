@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MoreHorizontal, ScanSearch, Trash2 } from "lucide-react";
+import { MoreHorizontal, ScanSearch, Square, Trash2 } from "lucide-react";
 import type { getAuditHistory } from "@/serverFunctions/audit";
 import { formatDate, StatusBadge } from "@/client/features/audit/shared";
 
@@ -8,11 +8,13 @@ export function AuditHistorySection({
   history,
   isLoading,
   onDelete,
+  onCancel,
 }: {
   projectId: string;
   history: Awaited<ReturnType<typeof getAuditHistory>>;
   isLoading: boolean;
   onDelete: (auditId: string) => void;
+  onCancel?: (auditId: string) => void;
 }) {
   if (history.length === 0 && !isLoading) {
     return (
@@ -63,7 +65,9 @@ export function AuditHistorySection({
                     <HistoryActions
                       projectId={projectId}
                       auditId={audit.id}
+                      status={audit.status}
                       onDelete={onDelete}
+                      onCancel={onCancel}
                     />
                   </td>
                 </tr>
@@ -79,11 +83,15 @@ export function AuditHistorySection({
 function HistoryActions({
   projectId,
   auditId,
+  status,
   onDelete,
+  onCancel,
 }: {
   projectId: string;
   auditId: string;
+  status: string;
   onDelete: (auditId: string) => void;
+  onCancel?: (auditId: string) => void;
 }) {
   return (
     <div className="flex items-center justify-end gap-2">
@@ -108,6 +116,20 @@ function HistoryActions({
           tabIndex={0}
           className="dropdown-content z-10 menu p-2 shadow-lg bg-base-100 border border-base-300 rounded-box w-40"
         >
+          {status === "running" && onCancel ? (
+            <li>
+              <button
+                className="text-warning"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onCancel(auditId);
+                }}
+              >
+                <Square className="size-3.5" />
+                Stop &amp; finalize
+              </button>
+            </li>
+          ) : null}
           <li>
             <button
               className="text-error"

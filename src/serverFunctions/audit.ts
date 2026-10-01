@@ -86,3 +86,10 @@ export const deleteAudit = createServerFn({ method: "POST" })
     await AuditService.remove(data.auditId, context.projectId);
     return { success: true };
   });
+
+export const cancelAudit = createServerFn({ method: "POST" })
+  .middleware([requireProjectContext])
+  .validator(getAuditStatusSchema)
+  .handler(async ({ data, context }) => {
+    return AuditService.cancel(data.auditId, context.projectId);
+  });

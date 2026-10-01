@@ -130,7 +130,7 @@ export function GmbProfileSearch({
             <input
               value={manualName}
               onChange={(e) => setManualName(e.target.value)}
-              placeholder="e.g. Pakuwon Mall"
+              placeholder="e.g. The Grove"
               className="input input-sm input-bordered w-full"
             />
           </label>
@@ -151,7 +151,7 @@ export function GmbProfileSearch({
                 step="any"
                 value={manualLat}
                 onChange={(e) => setManualLat(e.target.value)}
-                placeholder="-7.289"
+                placeholder="34.072"
                 className="input input-sm input-bordered w-full"
               />
             </label>
@@ -162,7 +162,7 @@ export function GmbProfileSearch({
                 step="any"
                 value={manualLng}
                 onChange={(e) => setManualLng(e.target.value)}
-                placeholder="112.675"
+                placeholder="-118.358"
                 className="input input-sm input-bordered w-full"
               />
             </label>
@@ -172,7 +172,7 @@ export function GmbProfileSearch({
             <input
               value={manualAddress}
               onChange={(e) => setManualAddress(e.target.value)}
-              placeholder="Jl. Mayjend. Jonosewojo No.2, Surabaya"
+              placeholder="189 The Grove Dr, Los Angeles, CA 90036"
               className="input input-sm input-bordered w-full"
             />
           </label>
@@ -253,8 +253,8 @@ export function GmbProfileSearch({
               </p>
               <p className="text-xs text-base-content/70">
                 Make sure the Target Country above matches where the business is
-                located, or append the city name (e.g. &ldquo;Pakuwon Mall
-                Surabaya&rdquo;).
+                located, or append the city name (e.g. &ldquo;The Grove
+                Los Angeles&rdquo;).
               </p>
             </div>
           )}

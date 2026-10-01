@@ -2,6 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
+  cancelAudit,
   deleteAudit,
   getAuditHistory,
   startAudit,
@@ -51,7 +52,7 @@ export function useLaunchController({
     queryKey: ["audit-history", projectId],
     queryFn: () => getAuditHistory({ data: { projectId } }),
   });
-  const { startMutation, deleteMutation } = useLaunchMutations({
+  const { startMutation, deleteMutation, cancelMutation } = useLaunchMutations({
     projectId,
     historyRefetch: historyQuery.refetch,
   });
@@ -104,6 +105,7 @@ export function useLaunchController({
     maxPagesLimit,
     commitMaxPagesInput: () => commitMaxPagesInput(launchForm, maxPagesLimit),
     deleteAudit: (auditId: string) => deleteMutation.mutate(auditId),
+    cancelAudit: (auditId: string) => cancelMutation.mutate(auditId),
   };
 }
 
@@ -138,7 +140,19 @@ function useLaunchMutations({
     },
   });
 
-  return { startMutation, deleteMutation };
+  const cancelMutation = useMutation({
+    mutationFn: (auditId: string) =>
+      cancelAudit({ data: { projectId, auditId } }),
+    onSuccess: () => {
+      void historyRefetch();
+      toast.success("Audit stopped and finalized");
+    },
+    onError: (error) => {
+      toast.error(getStandardErrorMessage(error, "Failed to stop audit"));
+    },
+  });
+
+  return { startMutation, deleteMutation, cancelMutation };
 }
 
 function commitMaxPagesInput(

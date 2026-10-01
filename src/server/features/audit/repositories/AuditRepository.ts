@@ -81,12 +81,16 @@ async function updateAuditProgress(
 
 async function completeAudit(
   auditId: string,
-  workflowInstanceId: string,
-  data: {
-    pagesCrawled: number;
-    pagesTotal: number;
+  workflowInstanceId?: string,
+  data?: {
+    pagesCrawled?: number;
+    pagesTotal?: number;
   },
 ) {
+  const conditions = [eq(audits.id, auditId), eq(audits.status, "running")];
+  if (workflowInstanceId) {
+    conditions.push(eq(audits.workflowInstanceId, workflowInstanceId));
+  }
   await db
     .update(audits)
     .set({
@@ -95,18 +99,17 @@ async function completeAudit(
       currentPhase: "completed",
       ...data,
     })
-    .where(
-      and(
-        eq(audits.id, auditId),
-        eq(audits.workflowInstanceId, workflowInstanceId),
-      ),
-    );
+    .where(and(...conditions));
 }
 
-async function failAudit(auditId: string, workflowInstanceId: string) {
+async function failAudit(auditId: string, workflowInstanceId?: string) {
   // Only a running audit can transition to failed: the getStatus reconciler
   // races the workflow's own finalize, and without this guard it could flip
   // a just-completed audit to failed.
+  const conditions = [eq(audits.id, auditId), eq(audits.status, "running")];
+  if (workflowInstanceId) {
+    conditions.push(eq(audits.workflowInstanceId, workflowInstanceId));
+  }
   await db
     .update(audits)
     .set({
@@ -114,13 +117,7 @@ async function failAudit(auditId: string, workflowInstanceId: string) {
       completedAt: new Date().toISOString(),
       currentPhase: "failed",
     })
-    .where(
-      and(
-        eq(audits.id, auditId),
-        eq(audits.workflowInstanceId, workflowInstanceId),
-        eq(audits.status, "running"),
-      ),
-    );
+    .where(and(...conditions));
 }
 
 async function getAuditForWorkflow(
@@ -371,15 +368,23 @@ async function getAuditUsageForUser(userId: string) {
       status: true,
       pagesTotal: true,
       lighthouseTotal: true,
+      startedAt: true,
     },
   });
+
+  const STALE_RUNNING_WINDOW_MS = 20 * 60 * 1000;
+  const activeRunningCount = rows.filter((row) => {
+    if (row.status !== "running") return false;
+    const startedMs = new Date(row.startedAt).getTime();
+    return Date.now() - startedMs <= STALE_RUNNING_WINDOW_MS;
+  }).length;
 
   return {
     capacityUnits: rows.reduce(
       (total, row) => total + row.pagesTotal + row.lighthouseTotal,
       0,
     ),
-    runningCount: rows.filter((row) => row.status === "running").length,
+    runningCount: activeRunningCount,
   };
 }
 

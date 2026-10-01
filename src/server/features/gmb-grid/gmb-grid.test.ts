@@ -96,12 +96,12 @@ describe("GMB grid helpers", () => {
         [
           {
             type: "maps_search",
-            title: "Pakuwon Mall Surabaya!",
+            title: "The Grove Los Angeles!",
             place_id: "random_place_id",
             rank_group: 3,
           },
         ],
-        { placeId: "", businessName: "pakuwon mall surabaya" },
+        { placeId: "", businessName: "the grove los angeles" },
       ),
     ).toBe(3);
   });

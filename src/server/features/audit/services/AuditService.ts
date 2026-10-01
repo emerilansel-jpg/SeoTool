@@ -115,30 +115,75 @@ async function startAudit(input: {
   return { auditId };
 }
 
-async function getStatus(auditId: string, projectId: string) {
-  let audit = await AuditRepository.getAuditForProject(auditId, projectId);
-  if (!audit)
-    throw new AppError("NOT_FOUND", "Audit not found in this project.");
+const AUDIT_STALE_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes max for an active crawl
 
-  // Self-heal audits whose workflow died without reaching the mark-failed
-  // step (instance terminated, mark-failed itself failed, deploys, ...).
-  // Without this they stay "running" forever and hold capacity.
-  if (audit.status === "running" && audit.workflowInstanceId) {
+async function reconcileAudit<
+  T extends {
+    id: string;
+    projectId: string;
+    status: string;
+    workflowInstanceId?: string | null;
+    pagesCrawled: number;
+    pagesTotal: number;
+    startedAt: string;
+  },
+>(audit: T): Promise<T> {
+  if (audit.status !== "running") return audit;
+
+  const startedAtMs = new Date(audit.startedAt).getTime();
+  const isTimedOut = Date.now() - startedAtMs > AUDIT_STALE_TIMEOUT_MS;
+
+  let workflowLive = false;
+  if (audit.workflowInstanceId) {
     try {
       const instance = await env.SITE_AUDIT_WORKFLOW.get(
         audit.workflowInstanceId,
       );
       const { status } = await instance.status();
-      if (status === "errored" || status === "terminated") {
-        await AuditRepository.failAudit(audit.id, audit.workflowInstanceId);
-        audit =
-          (await AuditRepository.getAuditForProject(auditId, projectId)) ??
-          audit;
+      if (status === "running" || status === "waiting" || status === "queued") {
+        workflowLive = true;
       }
     } catch {
-      // Instance not found or status unavailable — leave the audit as-is.
+      // Instance missing or workflow engine unavailable (e.g. self-hosted Docker)
+      workflowLive = false;
     }
   }
+
+  // If the workflow is not live, or if the audit has timed out (>20 min)
+  if (!workflowLive || isTimedOut) {
+    const pagesCount = audit.pagesCrawled ?? 0;
+    if (pagesCount > 0) {
+      // If pages were already crawled, complete the audit so users can view all collected pages & issues!
+      await AuditRepository.completeAudit(
+        audit.id,
+        audit.workflowInstanceId ?? undefined,
+        {
+          pagesCrawled: pagesCount,
+          pagesTotal: Math.max(pagesCount, audit.pagesTotal ?? pagesCount),
+        },
+      );
+    } else {
+      await AuditRepository.failAudit(
+        audit.id,
+        audit.workflowInstanceId ?? undefined,
+      );
+    }
+    const refreshed = await AuditRepository.getAuditForProject(
+      audit.id,
+      audit.projectId,
+    );
+    return (refreshed as unknown as T) ?? audit;
+  }
+
+  return audit;
+}
+
+async function getStatus(auditId: string, projectId: string) {
+  let audit = await AuditRepository.getAuditForProject(auditId, projectId);
+  if (!audit)
+    throw new AppError("NOT_FOUND", "Audit not found in this project.");
+
+  audit = await reconcileAudit(audit);
 
   return {
     id: audit.id,
@@ -184,7 +229,10 @@ async function getResults(auditId: string, projectId: string) {
 }
 
 async function getHistory(projectId: string) {
-  const auditList = await AuditRepository.getAuditsByProject(projectId);
+  const rawList = await AuditRepository.getAuditsByProject(projectId);
+  const auditList = await Promise.all(
+    rawList.map((audit) => reconcileAudit(audit)),
+  );
 
   return auditList.map((audit) => {
     const parsedConfig = parseAuditConfig(audit.config);
@@ -201,6 +249,44 @@ async function getHistory(projectId: string) {
       completedAt: audit.completedAt,
     };
   });
+}
+
+async function cancel(auditId: string, projectId: string) {
+  const audit = await AuditRepository.getAuditForProject(auditId, projectId);
+  if (!audit) {
+    throw new AppError("NOT_FOUND", "Audit not found in this project.");
+  }
+
+  if (audit.status === "running") {
+    if (audit.workflowInstanceId) {
+      try {
+        const instance = await env.SITE_AUDIT_WORKFLOW.get(
+          audit.workflowInstanceId,
+        );
+        await instance.terminate();
+      } catch {
+        // Best-effort termination
+      }
+    }
+
+    if (audit.pagesCrawled > 0) {
+      await AuditRepository.completeAudit(
+        audit.id,
+        audit.workflowInstanceId ?? undefined,
+        {
+          pagesCrawled: audit.pagesCrawled,
+          pagesTotal: Math.max(audit.pagesCrawled, audit.pagesTotal),
+        },
+      );
+    } else {
+      await AuditRepository.failAudit(
+        audit.id,
+        audit.workflowInstanceId ?? undefined,
+      );
+    }
+  }
+
+  return { success: true };
 }
 
 async function getCrawlProgress(auditId: string, projectId: string) {
@@ -262,5 +348,6 @@ export const AuditService = {
   getCrawlProgress,
   getResults,
   getHistory,
+  cancel,
   remove,
 } as const;
