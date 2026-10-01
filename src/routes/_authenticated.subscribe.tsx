@@ -1,4 +1,4 @@
-// oxlint-disable complexity
+// oxlint-disable complexity, max-lines
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

@@ -26,6 +26,7 @@ import {
 } from "@/client/features/marketing/MarketingChrome";
 import { Reveal } from "@/client/features/marketing/useReveal";
 import { INTEGRATION_LIST } from "@/client/features/marketing/IntegrationLogos";
+import { CreditPricingGuide } from "@/client/features/billing/CreditPricingGuide";
 
 /* ---------------------------------- shared --------------------------------- */
 
@@ -757,6 +758,34 @@ function StatsBand() {
   );
 }
 
+/* ------------------------------- credit system ---------------------------- */
+
+function CreditSystemLandingSection() {
+  return (
+    <section className="border-b border-base-300 bg-base-200/40">
+      <div className="mx-auto w-full max-w-6xl border-x border-base-300 px-4 py-20 md:px-6">
+        <Reveal>
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="mono-pill">[ 1,000 CREDITS = $1 ]</span>
+            <h2 className="mt-4 text-4xl font-extrabold tracking-tight text-balance md:text-5xl">
+              Pay only for <span className="text-primary">what you run</span>
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-base-content/60">
+              No confusing tier traps or artificial feature walls. Credits work
+              like a prepaid balance with crystal-clear per-action rates. Heavy
+              agencies can bring their own API keys for unlimited zero-markup
+              data.
+            </p>
+          </div>
+          <div className="mt-12">
+            <CreditPricingGuide />
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 /* ------------------------------- pricing teaser ---------------------------- */
 
 const COHORTS = [
@@ -873,6 +902,11 @@ const FAQ_ITEMS = [
     question: "How does the $1 Credit Retainer work?",
     answer:
       "If you prefer a smaller commitment, you can start with a micro-retainer from $1/month. 100% of your payment is converted into permanent usage credits (1,000 credits per dollar) that roll over and never expire, remaining yours even if you cancel.",
+  },
+  {
+    question: "How are credits calculated and used?",
+    answer:
+      "Credits act like a prepaid phone balance. Running a quick keyword ranking check costs 1 credit, an in-depth page audit costs 2 credits, checking a domain backlink profile costs 5 credits, scanning AI brand visibility costs 5 credits, and deep multi-AI research costs 20 credits. All unused credits roll over every month without expiring. High-volume agencies can switch to BYOK mode (Bring Your Own Key) to run unlimited queries directly at wholesale provider cost without consuming credit allowances.",
   },
 ] as const;
 
@@ -1019,15 +1053,17 @@ export function LandingPage() {
       <Hero signedIn={signedIn} />
       <BrowserMockup />
       <LogoCells />
-      <SectionLabel index="01" total="05" label="Core features" />
+      <SectionLabel index="01" total="06" label="Core features" />
       <ProductCells />
-      <SectionLabel index="02" total="05" label="Power your agent" />
+      <SectionLabel index="02" total="06" label="Power your agent" />
       <AgentSection />
-      <SectionLabel index="03" total="05" label="Features" />
+      <SectionLabel index="03" total="06" label="Features" />
       <HardStuff />
-      <SectionLabel index="04" total="05" label="By the numbers" />
+      <SectionLabel index="04" total="06" label="By the numbers" />
       <StatsBand />
-      <SectionLabel index="05" total="05" label="Pricing" />
+      <SectionLabel index="05" total="06" label="Credit System" />
+      <CreditSystemLandingSection />
+      <SectionLabel index="06" total="06" label="Pricing" />
       <PricingTeaser signedIn={signedIn} />
       <FaqSection />
       <CtaBand signedIn={signedIn} />

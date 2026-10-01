@@ -1,3 +1,4 @@
+// oxlint-disable max-lines
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Check, Lock, Users } from "lucide-react";
 import {
@@ -6,6 +7,7 @@ import {
 } from "@/client/features/marketing/MarketingChrome";
 import { getPublicCohortPricing } from "@/serverFunctions/public-cohorts";
 import type { EffectiveKeywordProCohort } from "@/server/features/keywords/services/KeywordProConfigService";
+import { CreditPricingGuide } from "@/client/features/billing/CreditPricingGuide";
 
 const FAQ_ITEMS = [
   {
@@ -42,6 +44,11 @@ const FAQ_ITEMS = [
     question: "How does the $1 Credit Retainer work?",
     answer:
       "If you want to start small, you can join our Credit Retainer from $1/month. 100% of your payment is converted into permanent usage credits (1,000 credits per dollar) that roll over forever and never expire, even if you cancel.",
+  },
+  {
+    question: "How are credits deducted, and how far do they go?",
+    answer:
+      "Credits work like a prepaid mobile balance with transparent flat rates: 1 credit per keyword tracked daily, 2 credits per page audited, 5 credits per backlink profile or AI brand mention scan, and 20 credits for deep multi-AI research. A typical site owner using 50 keywords, regular audits, and weekly AI scans consumes only ~3,000 credits a month out of a 10,000 monthly allowance. Unused credits never expire and roll over. For high-volume enterprise agency workloads, BYOK mode provides unlimited queries directly via your own provider API keys with zero platform data markup.",
   },
 ] as const;
 
@@ -351,6 +358,26 @@ function PricingPage() {
             </Link>
           </div>
         </div>
+
+        {/* Credit Rate Card & Usage Workload Simulator */}
+        <section className="mx-auto mt-20 max-w-5xl">
+          <div className="text-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">
+              Credit Transparency
+            </span>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+              Understand Your Usage & Credit Rates
+            </h2>
+            <p className="mt-2 text-sm text-base-content/70 max-w-2xl mx-auto">
+              Credits work like mobile prepaid balance. See exact costs per action
+              or explore monthly usage scenarios to see how far your balance goes.
+            </p>
+          </div>
+
+          <div className="mt-10">
+            <CreditPricingGuide />
+          </div>
+        </section>
 
         <IncludedFeatures />
 

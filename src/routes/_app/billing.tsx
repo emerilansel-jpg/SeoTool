@@ -1,6 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Zap } from "lucide-react";
+import { Zap, TableProperties } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
 import { isHostedClientAuthMode } from "@/lib/auth-mode";
@@ -32,6 +32,7 @@ import {
   CancelMembershipFlow,
   type CancelSurvey,
 } from "@/client/features/billing/CancelMembershipFlow";
+import { CreditPricingGuideModal } from "@/client/features/billing/CreditPricingGuide";
 
 export const Route = createFileRoute("/_app/billing")({
   beforeLoad: () => {
@@ -59,6 +60,7 @@ function BillingPage() {
   const [isPortalLoading, setIsPortalLoading] = useState(false);
   const [isBuyingCredits, setIsBuyingCredits] = useState(false);
   const [isCancelFlowOpen, setIsCancelFlowOpen] = useState(false);
+  const [isCreditGuideOpen, setIsCreditGuideOpen] = useState(false);
   const [topupStatus, setTopupStatus] = useState<
     "idle" | "capturing" | "completed" | "cancelled" | "error"
   >("idle");
@@ -272,21 +274,31 @@ function BillingPage() {
       </div>
 
       {/* Credit top-up */}
-      <div className="mt-10 flex items-center justify-between gap-4">
+      <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-lg font-semibold">Overage & Past Usage</h2>
-        <button
-          type="button"
-          className="btn btn-outline btn-sm shrink-0"
-          disabled={isBuyingCredits}
-          onClick={() => void handleBuyCredits()}
-        >
-          {isBuyingCredits ? (
-            <span className="loading loading-spinner loading-xs" />
-          ) : (
-            <Zap className="w-4 h-4" />
-          )}
-          Buy Credits
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm shrink-0 gap-2"
+            onClick={() => setIsCreditGuideOpen(true)}
+          >
+            <TableProperties className="w-4 h-4 text-primary" />
+            Credit Rates & Examples
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm shrink-0"
+            disabled={isBuyingCredits}
+            onClick={() => void handleBuyCredits()}
+          >
+            {isBuyingCredits ? (
+              <span className="loading loading-spinner loading-xs" />
+            ) : (
+              <Zap className="w-4 h-4" />
+            )}
+            Buy Credits
+          </button>
+        </div>
       </div>
       <p className="text-sm text-base-content/70 -mt-3">
         Any limits exceeded will draw from your credit pool if available. Top up
@@ -321,6 +333,11 @@ function BillingPage() {
 
       <BillingUsageChart />
       <BillingFeatureBreakdown />
+
+      <CreditPricingGuideModal
+        isOpen={isCreditGuideOpen}
+        onClose={() => setIsCreditGuideOpen(false)}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   CircleHelp,
   CreditCard,
   LayoutGrid,
+  Zap,
   LogOut,
   MessageCircle,
   Settings,
@@ -24,6 +25,7 @@ import { closeDropdown } from "@/client/lib/dropdown";
 import { signOutAndRedirect, useSession } from "@/lib/auth-client";
 import { isHostedClientAuthMode } from "@/lib/auth-mode";
 import { BILLING_ROUTE } from "@/shared/billing";
+import { CreditPricingGuideModal } from "@/client/features/billing/CreditPricingGuide";
 
 interface SidebarProps {
   projectId: string | null;
@@ -250,6 +252,7 @@ function SidebarFooter({ onNavigate }: { onNavigate?: () => void }) {
   const isHostedMode = isHostedClientAuthMode();
   const email = session?.user?.email;
   const initial = email ? email.charAt(0).toUpperCase() : "U";
+  const [isCreditGuideOpen, setIsCreditGuideOpen] = useState(false);
 
   const closeMenu = () => {
     closeDropdown();
@@ -258,6 +261,20 @@ function SidebarFooter({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="shrink-0 border-t border-base-300 px-2 py-2 pb-safe space-y-1">
+      {isHostedMode ? (
+        <button
+          type="button"
+          onClick={() => setIsCreditGuideOpen(true)}
+          className={`${navItemClass} w-full`}
+        >
+          <Zap className="h-4 w-4 shrink-0 text-primary" />
+          <span className="truncate">Credit Guide</span>
+          <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0.5 font-mono text-[9px] font-bold text-primary">
+            1-20 cr
+          </span>
+        </button>
+      ) : null}
+
       <SidebarNavLink
         icon={CircleHelp}
         label="Help & Community"
@@ -329,6 +346,11 @@ function SidebarFooter({ onNavigate }: { onNavigate?: () => void }) {
           linkProps={{ to: "/settings" }}
         />
       )}
+
+      <CreditPricingGuideModal
+        isOpen={isCreditGuideOpen}
+        onClose={() => setIsCreditGuideOpen(false)}
+      />
     </div>
   );
 }
