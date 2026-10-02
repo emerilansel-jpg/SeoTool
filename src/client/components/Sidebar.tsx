@@ -136,12 +136,12 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
           <img
             src="/logo.png"
             alt="SeoTool.im"
-            className="h-7 w-auto object-contain transition-transform group-hover:scale-105 dark:hidden"
+            className="h-7 w-auto object-contain transition-transform group-hover:scale-105 logo-light dark:hidden"
           />
           <img
             src="/logo-dark.png"
             alt="SeoTool.im"
-            className="h-7 w-auto object-contain transition-transform group-hover:scale-105 hidden dark:block"
+            className="h-7 w-auto object-contain transition-transform group-hover:scale-105 logo-dark hidden dark:block"
           />
         </Link>
         <div className="flex items-center gap-1">

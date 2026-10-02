@@ -1,5 +1,26 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="seotool-dark"], [data-theme="seotool-dark"] *, .dark, .dark *));
+
+/* Logo theme visibility rules */
+html[data-theme="seotool-dark"] .logo-light,
+html.dark .logo-light {
+  display: none !important;
+}
+
+html[data-theme="seotool-dark"] .logo-dark,
+html.dark .logo-dark {
+  display: block !important;
+}
+
+html:not([data-theme="seotool-dark"]):not(.dark) .logo-dark {
+  display: none !important;
+}
+
+html:not([data-theme="seotool-dark"]):not(.dark) .logo-light {
+  display: block !important;
+}
+
 @theme {
   --container-8xl: 88rem;
 }

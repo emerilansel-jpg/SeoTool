@@ -55,10 +55,13 @@ function applyThemePreference(themePreference: ThemePreference) {
     return;
   }
 
-  document.documentElement.setAttribute(
-    "data-theme",
-    resolveThemeName(themePreference),
-  );
+  const themeName = resolveThemeName(themePreference);
+  document.documentElement.setAttribute("data-theme", themeName);
+  if (themeName === DARK_THEME_NAME) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
 }
 
 function subscribeToThemePreference(onStoreChange: () => void) {
@@ -127,7 +130,13 @@ export const themePreferenceInitScript = `(() => {
     else if (p === "dark") t = ${JSON.stringify(DARK_THEME_NAME)};
     else t = window.matchMedia("(prefers-color-scheme: dark)").matches ? ${JSON.stringify(DARK_THEME_NAME)} : ${JSON.stringify(LIGHT_THEME_NAME)};
     document.documentElement.setAttribute("data-theme", t);
+    if (t === ${JSON.stringify(DARK_THEME_NAME)}) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   } catch {
     document.documentElement.setAttribute("data-theme", ${JSON.stringify(LIGHT_THEME_NAME)});
+    document.documentElement.classList.remove("dark");
   }
 })();`;

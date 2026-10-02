@@ -74,12 +74,12 @@ export function MarketingNavbar({ signedIn }: { signedIn: boolean }) {
           <img
             src="/logo.png"
             alt="SeoTool.im"
-            className="h-8 w-auto object-contain transition-transform group-hover:scale-105 dark:hidden"
+            className="h-8 w-auto object-contain transition-transform group-hover:scale-105 logo-light dark:hidden"
           />
           <img
             src="/logo-dark.png"
             alt="SeoTool.im"
-            className="h-8 w-auto object-contain transition-transform group-hover:scale-105 hidden dark:block"
+            className="h-8 w-auto object-contain transition-transform group-hover:scale-105 logo-dark hidden dark:block"
           />
         </Link>
 
@@ -234,12 +234,12 @@ export function MarketingFooter() {
             <img
               src="/logo.png"
               alt="SeoTool.im"
-              className="h-7 w-auto object-contain dark:hidden"
+              className="h-7 w-auto object-contain logo-light dark:hidden"
             />
             <img
               src="/logo-dark.png"
               alt="SeoTool.im"
-              className="h-7 w-auto object-contain hidden dark:block"
+              className="h-7 w-auto object-contain logo-dark hidden dark:block"
             />
           </Link>
           <p className="max-w-sm text-sm leading-relaxed text-base-content/60">
