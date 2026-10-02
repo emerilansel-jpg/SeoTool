@@ -2,9 +2,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Key, Lock, ShieldCheck, Sparkles, User, Zap } from "lucide-react";
+import { Check, Key, Lock, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import { toast } from "sonner";
-import { ThemePreferenceMenuItems } from "@/client/components/ThemePreferenceMenuItems";
+import { AccountMenu } from "@/client/components/AccountMenu";
 import {
   getErrorCode,
   getStandardErrorMessage,
@@ -261,7 +261,7 @@ function SubscribePage() {
 
   return (
     <div className="w-full max-w-5xl space-y-8">
-      <SubscribePageAccountMenu email={session?.user?.email} />
+      <AccountMenu className="absolute right-4 top-4 md:right-6 md:top-6" />
 
       <div className="space-y-3 text-center">
         <img
@@ -446,39 +446,6 @@ function SubscribePage() {
         <span className="inline-flex items-center gap-1.5">
           <Sparkles className="size-3.5 text-primary" /> Instant access right after purchase
         </span>
-      </div>
-    </div>
-  );
-}
-
-function SubscribePageAccountMenu({ email }: { email: string | undefined }) {
-  if (!email) return null;
-  return (
-    <div className="absolute right-4 top-4 md:right-6 md:top-6">
-      <div className="dropdown dropdown-end">
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm px-2"
-          aria-label="Account menu"
-          title={email}
-        >
-          <User className="size-4" />
-        </button>
-        <ul className="menu dropdown-content z-[1] mt-2 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow-sm">
-          <li className="menu-title truncate px-4 py-2 text-xs">{email}</li>
-          <li>
-            <Link to="/billing">Billing</Link>
-          </li>
-          <ThemePreferenceMenuItems />
-          <li>
-            <button
-              type="button"
-              onClick={() => signOutAndRedirect()}
-            >
-              Sign out
-            </button>
-          </li>
-        </ul>
       </div>
     </div>
   );

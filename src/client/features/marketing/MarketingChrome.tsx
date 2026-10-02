@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { AccountMenu } from "@/client/components/AccountMenu";
 
 const NAV_LINKS = [
   { label: "Features", href: "/#features", internal: false },
@@ -110,12 +111,15 @@ export function MarketingNavbar({ signedIn }: { signedIn: boolean }) {
         <div className="flex items-center gap-2">
           <div className="hidden sm:flex items-center gap-2">
             {signedIn ? (
-              <Link
-                to="/projects"
-                className="btn btn-sm gap-1.5 rounded-[10px] border-0 bg-base-200 font-semibold text-base-content transition-transform hover:scale-[1.03]"
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link
+                  to="/projects"
+                  className="btn btn-sm gap-1.5 rounded-[10px] border-0 bg-base-200 font-semibold text-base-content transition-transform hover:scale-[1.03]"
+                >
+                  Dashboard
+                </Link>
+                <AccountMenu />
+              </>
             ) : (
               <>
                 <Link
@@ -134,6 +138,12 @@ export function MarketingNavbar({ signedIn }: { signedIn: boolean }) {
               </>
             )}
           </div>
+
+          {signedIn && (
+            <div className="flex items-center sm:hidden">
+              <AccountMenu />
+            </div>
+          )}
 
           <button
             type="button"

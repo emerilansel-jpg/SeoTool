@@ -10,6 +10,7 @@ import {
 import { GscReEngagementModal } from "@/client/features/gsc/GscReEngagementModal";
 import { BillingStatusBanner } from "@/client/features/billing/BillingStatusBanner";
 import { Sidebar } from "@/client/components/Sidebar";
+import { AccountMenu } from "@/client/components/AccountMenu";
 import { BILLING_ROUTE } from "@/shared/billing";
 import { getSeoApiKeyStatus } from "@/serverFunctions/config";
 import { getProjects } from "@/serverFunctions/projects";
@@ -181,19 +182,22 @@ function MobileTopBar({
   onOpenDrawer: () => void;
 }) {
   return (
-    <div className="flex shrink-0 items-center gap-1 border-b border-base-300 bg-base-100 px-2 py-1.5 md:hidden">
-      <button
-        type="button"
-        className="btn btn-square btn-ghost btn-sm"
-        aria-label="Toggle sidebar"
-        aria-expanded={drawerOpen}
-        onClick={onOpenDrawer}
-      >
-        <Menu className="h-5 w-5" />
-      </button>
-      <Link to="/" className="ml-1 font-semibold text-base-content">
-        SeoTool.im
-      </Link>
+    <div className="flex shrink-0 items-center justify-between border-b border-base-300 bg-base-100 px-3 py-1.5 md:hidden">
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          className="btn btn-square btn-ghost btn-sm"
+          aria-label="Toggle sidebar"
+          aria-expanded={drawerOpen}
+          onClick={onOpenDrawer}
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <Link to="/" className="ml-1 font-semibold text-base-content">
+          SeoTool.im
+        </Link>
+      </div>
+      <AccountMenu />
     </div>
   );
 }
