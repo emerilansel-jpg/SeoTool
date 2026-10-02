@@ -25,6 +25,7 @@ type Search = {
   checkout?: "success" | "cancelled";
   subscriptionId?: string;
   orderId?: string;
+  token?: string;
   redirect?: string;
   ref?: string;
   upgrade?: true;
@@ -51,7 +52,10 @@ export const Route = createFileRoute("/_authenticated/subscribe")({
         ? search.order_id.slice(0, 128)
         : typeof search.orderId === "string"
           ? search.orderId.slice(0, 128)
-          : undefined,
+          : typeof search.token === "string"
+            ? search.token.slice(0, 128)
+            : undefined,
+    token: typeof search.token === "string" ? search.token.slice(0, 128) : undefined,
     redirect:
       typeof search.redirect === "string"
         ? normalizeAuthRedirect(search.redirect)
@@ -194,13 +198,14 @@ function SubscribePage() {
   // Handle return from PayPal
   useEffect(() => {
     if (search.checkout === "success") {
-      if (search.orderId && ltdCapture.isIdle) {
-        ltdCapture.mutate(search.orderId);
+      const activeOrderId = search.orderId || search.token;
+      if (activeOrderId && ltdCapture.isIdle) {
+        ltdCapture.mutate(activeOrderId);
       } else if (search.subscriptionId && verify.isIdle) {
         verify.mutate(search.subscriptionId);
       }
     }
-  }, [search.checkout, search.orderId, search.subscriptionId, ltdCapture, verify]);
+  }, [search.checkout, search.orderId, search.token, search.subscriptionId, ltdCapture, verify]);
 
   useEffect(() => {
     if (!shouldReturnToWorkspace) return;

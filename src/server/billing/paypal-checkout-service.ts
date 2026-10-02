@@ -354,7 +354,7 @@ export const PayPalCheckoutService = {
           locale: "en-US",
           shipping_preference: "NO_SHIPPING",
           user_action: "PAY_NOW",
-          return_url: `${input.publicUrl}/subscribe?checkout=success&orderId={id}&ltd=true`,
+          return_url: `${input.publicUrl}/subscribe?checkout=success&ltd=true`,
           cancel_url: `${input.publicUrl}/subscribe?checkout=cancelled`,
         },
       });
