@@ -15,15 +15,22 @@ import { AppError } from "@/server/lib/errors";
 // DataForSEO spam-score cutoff stays off for all web requests.
 const WEB_SPAM_OPTIONS = { hideSpam: false };
 
-function assertBacklinksBillingInput(input: {
-  billingMode?: "standard" | "byok";
-  byokCredential?: string;
-}) {
-  if (input.billingMode === "byok" && !input.byokCredential) {
-    throw new AppError(
-      "VALIDATION_ERROR",
-      "DataForSEO credential is required for BYOK live backlink research.",
+async function resolveBacklinksCredential(
+  input: { billingMode?: "standard" | "byok"; byokCredential?: string },
+  organizationId: string,
+): Promise<void> {
+  if (input.billingMode === "byok" && !input.byokCredential?.trim()) {
+    const { ByokRepository } = await import(
+      "@/server/features/byok/repositories/ByokRepository"
     );
+    const saved = await ByokRepository.getByOrganizationId(organizationId);
+    if (!saved?.dataforseoApiKey) {
+      throw new AppError(
+        "VALIDATION_ERROR",
+        "DataForSEO credential is required for BYOK live backlink research. Please save it in Settings > BYOK Integrations or provide it here.",
+      );
+    }
+    input.byokCredential = saved.dataforseoApiKey;
   }
 }
 
@@ -39,7 +46,7 @@ export const getBacklinksOverview = createServerFn({
       });
       return profile.overview;
     }
-    assertBacklinksBillingInput(data);
+    await resolveBacklinksCredential(data, context.organizationId);
     const profile = await BacklinksService.profileOverview(
       {
         target: data.target,
@@ -57,8 +64,8 @@ export const getBacklinksRows = createServerFn({
 })
   .middleware([requireProjectContext])
   .validator(backlinksRowsPageRequestSchema)
-  .handler(({ data, context }) => {
-    assertBacklinksBillingInput(data);
+  .handler(async ({ data, context }) => {
+    await resolveBacklinksCredential(data, context.organizationId);
     return BacklinksService.profileBacklinksPage(
       data,
       context,
@@ -71,8 +78,8 @@ export const getBacklinksReferringDomains = createServerFn({
 })
   .middleware([requireProjectContext])
   .validator(referringDomainsPageRequestSchema)
-  .handler(({ data, context }) => {
-    assertBacklinksBillingInput(data);
+  .handler(async ({ data, context }) => {
+    await resolveBacklinksCredential(data, context.organizationId);
     return BacklinksService.profileReferringDomainsPage(
       data,
       context,
@@ -85,8 +92,8 @@ export const getBacklinksTopPages = createServerFn({
 })
   .middleware([requireProjectContext])
   .validator(topPagesPageRequestSchema)
-  .handler(({ data, context }) => {
-    assertBacklinksBillingInput(data);
+  .handler(async ({ data, context }) => {
+    await resolveBacklinksCredential(data, context.organizationId);
     return BacklinksService.profileTopPagesPage(data, context);
   });
 
@@ -95,7 +102,7 @@ export const getBacklinksAnchors = createServerFn({
 })
   .middleware([requireProjectContext])
   .validator(anchorsPageRequestSchema)
-  .handler(({ data, context }) => {
-    assertBacklinksBillingInput(data);
+  .handler(async ({ data, context }) => {
+    await resolveBacklinksCredential(data, context.organizationId);
     return BacklinksService.profileAnchorsPage(data, context, WEB_SPAM_OPTIONS);
   });

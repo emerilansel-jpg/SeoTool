@@ -47,6 +47,8 @@ import * as sqliteAiTracking from "./ai-tracking.schema";
 import * as sqliteBrandLookup from "./brand-lookup.schema";
 import * as pgAiTracking from "./pg/ai-tracking.schema";
 import * as pgBrandLookup from "./pg/brand-lookup.schema";
+import * as sqliteByok from "./byok.schema";
+import * as pgByok from "./pg/byok.schema";
 
 // Canonical schema barrel. Repositories import their tables from here and the
 // provider-aware `db` from "@/db", so each repository is written ONCE for both
@@ -81,7 +83,8 @@ type AppSchema = typeof sqliteApp &
   typeof sqliteCancellationFeedback &
   typeof sqliteProjectCompetitors &
   typeof sqliteAiTracking &
-  typeof sqliteBrandLookup;
+  typeof sqliteBrandLookup &
+  typeof sqliteByok;
 
 const runtimeSchema =
   getDatabaseProvider() === "postgres"
@@ -110,6 +113,7 @@ const runtimeSchema =
         ...pgProjectCompetitors,
         ...pgAiTracking,
         ...pgBrandLookup,
+        ...pgByok,
       }
     : {
         ...sqliteApp,
@@ -136,6 +140,7 @@ const runtimeSchema =
         ...sqliteProjectCompetitors,
         ...sqliteAiTracking,
         ...sqliteBrandLookup,
+        ...sqliteByok,
       };
 
 // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- guarded by schema-parity.test.ts
@@ -218,4 +223,5 @@ export const {
   brandLookupSnapshots,
   brandLookupPlatformSnapshots,
   brandLookupSovEntries,
+  byokSettings,
 } = schema;

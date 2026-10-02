@@ -13,7 +13,31 @@ const DEFAULT_CHAT_AGENT_MODEL = "pesat-pro";
  * PesatRouter gateway is the exclusive LLM provider. Reads from app_settings DB
  * overrides first, then env variables.
  */
-export async function getChatAgentModel(): Promise<LanguageModelV3> {
+export async function getChatAgentModel(
+  organizationId?: string,
+): Promise<LanguageModelV3> {
+  if (organizationId) {
+    try {
+      const { ByokRepository } = await import(
+        "@/server/features/byok/repositories/ByokRepository"
+      );
+      const byok = await ByokRepository.getByOrganizationId(organizationId);
+      if (byok?.aiApiKey) {
+        const baseUrl =
+          byok.aiBaseUrl ||
+          (byok.aiProvider === "openai"
+            ? "https://api.openai.com/v1"
+            : DEFAULT_PESATROUTER_BASE_URL);
+        const modelId =
+          byok.aiModel ||
+          (byok.aiProvider === "openai" ? "gpt-4o-mini" : DEFAULT_CHAT_AGENT_MODEL);
+        return buildChatAgentModel(byok.aiApiKey, modelId, baseUrl);
+      }
+    } catch {
+      // Fallback to system default if DB lookup fails
+    }
+  }
+
   const apiKey = await getOptionalEnvValue("OPENROUTER_API_KEY");
   if (!apiKey) {
     throw new Error("OPENROUTER_API_KEY is required for the AI chat agents");

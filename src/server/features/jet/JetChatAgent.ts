@@ -201,19 +201,25 @@ export class JetChatAgent extends Think {
     this.turnCostUsd = 0;
     this.turnMonthlyRemaining = null;
     return withPgClient(async (): Promise<TurnConfig> => {
-      // ponytail: resolve model dynamically each turn so admin settings DB overrides take effect immediately
-      const model = await getChatAgentModel();
-
       const ctx = await this.loadJetContext();
       if (!ctx) {
         return this.refusalTurn(
           "I couldn't find this chat session. Please start a new one.",
-          model,
+          await getChatAgentModel(),
         );
       }
 
       const { organizationId } = ctx.project;
-      if (await isHostedServerAuthMode()) {
+      // ponytail: resolve model dynamically from organization BYOK if set, else system default
+      const model = await getChatAgentModel(organizationId);
+
+      const { ByokRepository } = await import(
+        "@/server/features/byok/repositories/ByokRepository"
+      );
+      const userByok = await ByokRepository.getByOrganizationId(organizationId);
+      const isUserAiByok = Boolean(userByok?.aiApiKey);
+
+      if (await isHostedServerAuthMode() && !isUserAiByok) {
         const { depleted, monthlyRemaining } = await checkUsageCreditsDepleted({
           userId: ctx.row.userId,
           userEmail: ctx.userEmail,

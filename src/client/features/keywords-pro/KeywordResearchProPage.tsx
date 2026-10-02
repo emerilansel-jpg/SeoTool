@@ -1,11 +1,12 @@
 import { type FormEvent, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { KeyRound, Search } from "lucide-react";
+import { CheckCircle2, KeyRound, Search } from "lucide-react";
 import { toast } from "sonner";
 import { ResearchResults } from "./KeywordResearchProResults";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { researchKeywordsPro } from "@/serverFunctions/keyword-research-pro";
+import { getByokSettings } from "@/serverFunctions/byok";
 import {
   estimateKeywordResearchProCost,
   type KeywordResearchProBillingMode,
@@ -51,6 +52,12 @@ export function KeywordResearchProPage({ projectId }: Props) {
     enabled: hosted && !isE2EBypass,
   });
 
+  const byokQuery = useQuery({
+    queryKey: ["byok-settings"],
+    queryFn: () => getByokSettings(),
+    enabled: hosted && !isE2EBypass,
+  });
+
   const [keywordText, setKeywordText] = useState("");
   const [mode, setMode] = useState<KeywordResearchProMode>("basic");
   const [billingMode, setBillingMode] =
@@ -77,7 +84,7 @@ export function KeywordResearchProPage({ projectId }: Props) {
           billingMode,
           locationCode,
           byokCredential:
-            billingMode === "byok" ? credential.trim() : undefined,
+            billingMode === "byok" ? (credential.trim() || undefined) : undefined,
         },
       }),
     onError: (error) =>
@@ -237,17 +244,38 @@ export function KeywordResearchProPage({ projectId }: Props) {
               </button>
             </div>
             {billingMode === "byok" ? (
-              <div className="max-w-xl">
+              <div className="max-w-xl space-y-2">
+                {byokQuery.data?.dataforseoConfigured ? (
+                  <div className="flex items-center gap-2 text-xs text-success bg-success/10 border border-success/20 rounded-lg p-2.5">
+                    <CheckCircle2 className="size-4 shrink-0" />
+                    <span>
+                      Using saved DataForSEO key (
+                      <code className="font-mono">{byokQuery.data.dataforseoPrefix}</code>)
+                    </span>
+                    <Link
+                      to="/settings"
+                      className="ml-auto underline text-base-content/60 hover:text-base-content"
+                    >
+                      Settings
+                    </Link>
+                  </div>
+                ) : null}
                 <input
                   type="password"
                   autoComplete="off"
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full text-xs font-mono"
                   value={credential}
                   onChange={(event) => setCredential(event.target.value)}
-                  placeholder="DataForSEO login:password or Base64 credential"
+                  placeholder={
+                    byokQuery.data?.dataforseoConfigured
+                      ? "Optional: override with a different key for this run"
+                      : "DataForSEO login:password or Base64 credential"
+                  }
                 />
-                <p className="mt-1 text-xs text-base-content/50">
-                  Used for this run only. SeoTool does not save this credential.
+                <p className="text-[11px] text-base-content/50">
+                  {byokQuery.data?.dataforseoConfigured
+                    ? "Leave blank to use your saved key, or enter one to override for this run."
+                    : "Tip: Save your key once in Settings > BYOK Integrations to use it automatically."}
                 </p>
               </div>
             ) : null}
@@ -265,7 +293,9 @@ export function KeywordResearchProPage({ projectId }: Props) {
             disabled={
               mutation.isPending ||
               keywords.length === 0 ||
-              (billingMode === "byok" && credential.trim().length < 8)
+              (billingMode === "byok" &&
+                !byokQuery.data?.dataforseoConfigured &&
+                credential.trim().length < 8)
             }
           >
             {mutation.isPending ? (

@@ -27,13 +27,13 @@ describe("Keyword Research Pro request limits", () => {
     expect(result.success).toBe(false);
   });
 
-  it("requires a credential for BYOK", () => {
+  it("allows byok without inline credential to fallback to stored organization BYOK", () => {
     const result = keywordResearchProSchema.safeParse({
       projectId: "project-1",
       keywords: ["local seo"],
       mode: "basic",
       billingMode: "byok",
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 });

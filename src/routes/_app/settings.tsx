@@ -14,6 +14,7 @@ import { DataExportSection } from "@/client/features/settings/DataExportSection"
 import { NotificationSection } from "@/client/features/settings/NotificationSection";
 import { SessionSection } from "@/client/features/settings/SessionSection";
 import { TwoFactorSection } from "@/client/features/settings/TwoFactorSection";
+import { ByokSection } from "@/client/features/settings/ByokSection";
 import { ApiKeySection } from "@/client/features/settings/ApiKeySection";
 import { TeamSection } from "@/client/features/settings/TeamSection";
 import { LegalFooter } from "@/client/components/LegalFooter";
@@ -153,6 +154,8 @@ function SettingsPage() {
         {isHosted ? <TwoFactorSection /> : null}
 
         {isHosted ? <SessionSection /> : null}
+
+        {isHosted ? <ByokSection /> : null}
 
         {isHosted ? <ApiKeySection /> : null}
 

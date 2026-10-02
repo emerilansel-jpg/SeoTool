@@ -25,13 +25,6 @@ export const keywordResearchProSchema = z
         message: "Full backlink research supports up to 10 keywords per run",
       });
     }
-    if (value.billingMode === "byok" && !value.byokCredential) {
-      context.addIssue({
-        code: "custom",
-        path: ["byokCredential"],
-        message: "DataForSEO credential is required for BYOK",
-      });
-    }
   });
 
 export type KeywordResearchProInput = z.infer<typeof keywordResearchProSchema>;

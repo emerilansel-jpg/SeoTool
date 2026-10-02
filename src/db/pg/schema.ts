@@ -23,3 +23,4 @@ export * from "./cancellation-feedback.schema";
 export * from "./project-competitors.schema";
 export * from "./ai-tracking.schema";
 export * from "./brand-lookup.schema";
+export * from "./byok.schema";

@@ -35,11 +35,30 @@ export const researchKeywordsPro = createServerFn({ method: "POST" })
         );
       }
     }
+
+    let byokCredential = data.byokCredential;
+    if (data.billingMode === "byok" && !byokCredential) {
+      const { ByokRepository } = await import(
+        "@/server/features/byok/repositories/ByokRepository"
+      );
+      const saved = await ByokRepository.getByOrganizationId(
+        context.organizationId,
+      );
+      if (!saved?.dataforseoApiKey) {
+        throw new AppError(
+          "VALIDATION_ERROR",
+          "DataForSEO BYOK key is not configured. Please save it in Settings > BYOK Integrations or enter it here.",
+        );
+      }
+      byokCredential = saved.dataforseoApiKey;
+    }
+
     return KeywordResearchProService.research(
       {
         ...data,
         ...resolveLabsMarket(data, context.project),
         projectId: context.projectId,
+        byokCredential,
       },
       { ...context, projectId: context.projectId },
     );
