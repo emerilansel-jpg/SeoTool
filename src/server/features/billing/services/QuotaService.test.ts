@@ -30,12 +30,19 @@ describe("plans: tier definitions", () => {
   });
 
   it("orders tiers from lowest to highest", () => {
-    expect(ORDERED_PLAN_TIERS).toEqual(["free", "lite", "pro", "agency"]);
+    expect(ORDERED_PLAN_TIERS).toEqual([
+      "free",
+      "starter",
+      "lite",
+      "standard",
+      "pro",
+      "agency",
+    ]);
   });
 
   it("prices tiers in ascending order", () => {
     const prices = ORDERED_PLAN_TIERS.map((t) => PLAN_PRICES_USD[t]);
-    expect(prices).toEqual([0, 49, 149, 499]);
+    expect(prices).toEqual([0, 1, 7, 17, 27, 37]);
   });
 
   it("defaults new orgs to the free tier", () => {

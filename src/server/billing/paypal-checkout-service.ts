@@ -7,6 +7,7 @@ import {
 } from "@/server/billing/paypal";
 import { QuotaRepository } from "@/server/features/billing/repositories/QuotaRepository";
 import type { PlanTier } from "@/shared/plans";
+import { MONTHLY_CREDIT_PACKS } from "@/shared/billing";
 import { createTopupMarker, parseTopupMarker } from "./paypal-topup";
 import { createLtdMarker, parseLtdMarker } from "./paypal-ltd";
 
@@ -48,41 +49,6 @@ export const LTD_OFFERS: Record<
     bonusCredits: 5000,
     description: "SeoTool.im Early Believer Lifetime Deal (Public - BYOK)",
   },
-  appsumo_tier_1: {
-    priceUsd: 37,
-    title: "AppSumo Tier 1",
-    tier: "byok",
-    bonusCredits: 1500,
-    description: "SeoTool.im AppSumo Lifetime Deal - Tier 1",
-  },
-  appsumo_tier_2: {
-    priceUsd: 79,
-    title: "AppSumo Tier 2",
-    tier: "byok",
-    bonusCredits: 5000,
-    description: "SeoTool.im AppSumo Lifetime Deal - Tier 2",
-  },
-  appsumo_tier_3: {
-    priceUsd: 149,
-    title: "AppSumo Tier 3",
-    tier: "standard",
-    bonusCredits: 10000,
-    description: "SeoTool.im AppSumo Lifetime Deal - Tier 3 (Sweet Spot)",
-  },
-  appsumo_tier_4: {
-    priceUsd: 249,
-    title: "AppSumo Tier 4",
-    tier: "pro",
-    bonusCredits: 25000,
-    description: "SeoTool.im AppSumo Lifetime Deal - Tier 4",
-  },
-  appsumo_tier_5: {
-    priceUsd: 399,
-    title: "AppSumo Tier 5",
-    tier: "agency",
-    bonusCredits: 50000,
-    description: "SeoTool.im AppSumo Lifetime Deal - Tier 5",
-  },
 };
 
 type PaidTier = Exclude<PlanTier, "free">;
@@ -122,6 +88,63 @@ function checkoutContext(publicUrl: string) {
   };
 }
 
+function getMonthlyCreditPackByTier(tier: PlanTier) {
+  return MONTHLY_CREDIT_PACKS.find((pack) => pack.tier === tier) ?? null;
+}
+
+async function provisionMonthlyCreditPlan(
+  tier: PaidTier,
+  pack: NonNullable<ReturnType<typeof getMonthlyCreditPack>>,
+): Promise<string> {
+  try {
+    const { AdminSettingsRepository } = await import(
+      "@/server/features/admin/repositories/AdminSettingsRepository"
+    );
+    const { PlanConfigRepository } = await import(
+      "@/server/features/admin/repositories/PlanConfigRepository"
+    );
+    const productKey = "PAYPAL_MONTHLY_CREDITS_PRODUCT_ID";
+    const existingProduct = await AdminSettingsRepository.get(productKey);
+    let productId = existingProduct?.value ?? null;
+    if (!productId) {
+      const product = await paypal.products.create({
+        name: "SeoTool.im Monthly Credits",
+        description: "Monthly SEO and AI usage credits that roll over forever",
+      });
+      productId = product.id;
+      await AdminSettingsRepository.upsert({
+        key: productKey,
+        value: productId,
+        isSecret: false,
+        updatedByUserId: "system-auto",
+      });
+    }
+
+    const plan = await paypal.billingPlans.create({
+      product_id: productId,
+      name: `${pack.name} Credits ($${pack.priceUsd}/mo)`,
+      description: `${pack.credits.toLocaleString()} permanent credits every month`,
+      monthly_price_cents: pack.priceUsd * 100,
+    });
+    await PlanConfigRepository.upsert({
+      tier,
+      priceUsdCents: pack.priceUsd * 100,
+      monthlyCredits: pack.credits,
+      paypalPlanId: plan.id,
+      syncStatus: "synced",
+      active: true,
+      updatedByUserId: "system-auto",
+    });
+    return plan.id;
+  } catch (error) {
+    console.error("Auto provision monthly credit plan failed:", error);
+    throw new AppError(
+      "UPSTREAM_UNAVAILABLE",
+      "This monthly plan could not be set up. Please try again.",
+    );
+  }
+}
+
 function getTopupOrderDetails(order: PayPalOrder): {
   organizationId: string;
   amountUsd: number;
@@ -157,35 +180,10 @@ export const PayPalCheckoutService = {
     approveUrl: string;
     operation: "create" | "revise";
   }> {
+    const monthlyPack = getMonthlyCreditPackByTier(input.tier);
     let planId = await getEffectivePaypalPlanId(input.tier);
-    if (!planId && input.tier === "starter") {
-      try {
-        const product = await paypal.products.create({
-          name: "SeoTool.im Starter Retainer",
-          description: "Permanent $1 credit retainer with rollover",
-        });
-        const plan = await paypal.billingPlans.create({
-          product_id: product.id,
-          name: "Starter Credit Retainer ($1/mo)",
-          description: "1,000 permanent credits per month that never expire",
-          monthly_price_cents: 100,
-        });
-        planId = plan.id;
-        const { PlanConfigRepository } = await import(
-          "@/server/features/admin/repositories/PlanConfigRepository"
-        );
-        await PlanConfigRepository.upsert({
-          tier: "starter",
-          priceUsdCents: 100,
-          monthlyCredits: 1000,
-          paypalPlanId: plan.id,
-          syncStatus: "synced",
-          active: true,
-          updatedByUserId: "system-auto",
-        });
-      } catch (autoErr) {
-        console.error("Auto provision starter plan failed:", autoErr);
-      }
+    if (!planId && monthlyPack) {
+      planId = await provisionMonthlyCreditPlan(input.tier, monthlyPack);
     }
 
     if (!planId) {
@@ -333,7 +331,10 @@ export const PayPalCheckoutService = {
     organizationId: string;
     publicUrl: string;
   }): Promise<{ orderId: string; approveUrl: string }> {
-    const offer = LTD_OFFERS[input.planKey] ?? LTD_OFFERS.krp_founder_10;
+    const offer = LTD_OFFERS[input.planKey];
+    if (!offer) {
+      throw new AppError("NOT_FOUND", "This Lifetime Deal is not available.");
+    }
     const marker = createLtdMarker(input.organizationId, input.planKey);
     try {
       const order = await paypal.orders.create({

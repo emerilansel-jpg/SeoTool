@@ -162,8 +162,7 @@ export function UpgradeSidebar({
             <span className="text-sm text-base-content/55">/month</span>
           </div>
           <p className="mt-1.5 text-xs leading-relaxed text-base-content/55">
-            Includes $10 of usage credits every month, plus a 30-day money-back
-            guarantee.
+            Includes permanent usage credits every month. Cancel anytime.
           </p>
         </div>
 
@@ -244,7 +243,7 @@ export function ChatGate({
           {isStartingCheckout ? "Redirecting..." : "Upgrade to continue"}
         </button>
         <p className="mt-2 text-xs text-base-content/45">
-          30-day money-back guarantee
+          Cancel anytime from your billing settings
         </p>
       </div>
     </div>

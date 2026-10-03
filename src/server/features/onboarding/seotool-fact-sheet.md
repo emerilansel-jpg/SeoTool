@@ -35,7 +35,7 @@ The All Access plan includes:
 - Google Search Console integration that does not use credits.
 - 10,000 platform credits each month that roll over and never expire.
 - BYOK (Bring Your Own Key) option with heavily discounted credit consumption for power users.
-- A 30-day money-back guarantee for the first charge.
+- Cancel anytime with one click in Billing.
 
 SeoTool.im uses usage credits for features that query paid live data providers. Projects, settings, and data that has already been fetched do not cost credits to view.
 

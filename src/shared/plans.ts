@@ -77,21 +77,21 @@ export const planTierFromAutumnPlanId = planTierFromPaypalPlanId;
 export const PLAN_PRICES_USD: Record<PlanTier, number> = {
   free: 0,
   starter: 1,
-  lite: 49,
-  pro: 149,
-  agency: 499,
-  standard: 9,
+  lite: 7,
+  standard: 17,
+  pro: 27,
+  agency: 37,
   byok: 4,
 };
 
 /** Human-readable tier names for UI. */
 export const PLAN_TIER_LABELS: Record<PlanTier, string> = {
   free: "Free",
-  starter: "Starter",
-  lite: "Lite",
-  pro: "Pro",
-  agency: "Agency",
-  standard: "Standard",
+  starter: "Micro",
+  lite: "Builder",
+  standard: "Business",
+  pro: "Scale",
+  agency: "Power",
   byok: "BYOK",
 };
 
@@ -265,7 +265,14 @@ export const PLAN_FEATURE_ACCESS: Record<
 };
 
 /** Ordered tiers for UI rendering (lowest to highest). */
-export const ORDERED_PLAN_TIERS: PlanTier[] = ["free", "lite", "pro", "agency"];
+export const ORDERED_PLAN_TIERS: PlanTier[] = [
+  "free",
+  "starter",
+  "lite",
+  "standard",
+  "pro",
+  "agency",
+];
 
 /** The default tier assigned at signup. Autumn's Default (free) is attached
  *  at customer creation; our subscription row defaults to "free". */

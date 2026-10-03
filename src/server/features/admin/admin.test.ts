@@ -226,8 +226,8 @@ describe("plan config: effective merge", () => {
   it("falls back to deploy constants when no rows exist", async () => {
     planRepo.listAll.mockResolvedValue([]);
     const configs = await getEffectivePlanConfigs();
-    expect(configs.lite.priceUsdCents).toBe(4900);
-    expect(configs.pro.monthlyCredits).toBe(25000);
+    expect(configs.lite.priceUsdCents).toBe(700);
+    expect(configs.pro.monthlyCredits).toBe(125000);
     expect(configs.free.paypalPlanId).toBeNull();
     expect(configs.lite.priceSource).toBe("default");
   });
@@ -249,7 +249,7 @@ describe("plan config: effective merge", () => {
     expect(configs.pro.priceUsdCents).toBe(19900);
     expect(configs.pro.monthlyCredits).toBe(30000);
     expect(configs.pro.priceSource).toBe("db");
-    expect(configs.lite.priceUsdCents).toBe(4900);
+    expect(configs.lite.priceUsdCents).toBe(700);
     // Custom PayPal plan ids resolve back to their tier.
     await expect(resolvePlanTierByPaypalPlanId("P-PRO-CUSTOM")).resolves.toBe(
       "pro",

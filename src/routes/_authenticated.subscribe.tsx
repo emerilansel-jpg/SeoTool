@@ -1,15 +1,15 @@
 // oxlint-disable complexity, max-lines
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Key, Lock, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { Check, Key, Lock, Sparkles, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { AccountMenu } from "@/client/components/AccountMenu";
 import {
   getErrorCode,
   getStandardErrorMessage,
 } from "@/client/lib/error-messages";
-import { signOutAndRedirect, useSession } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-client";
 import { normalizeAuthRedirect } from "@/lib/auth-redirect";
 import {
   getMembershipStatus,
@@ -20,6 +20,10 @@ import {
   createPaypalLtdCheckout,
   capturePaypalLtdCheckout,
 } from "@/serverFunctions/paypal-checkout";
+import {
+  MONTHLY_CREDIT_PACKS,
+  type MonthlyPlanTier,
+} from "@/shared/billing";
 
 type Search = {
   checkout?: "success" | "cancelled";
@@ -31,7 +35,6 @@ type Search = {
   upgrade?: true;
   plan?: string;
   cohort?: string;
-  tier?: number;
   ltd?: boolean;
 };
 
@@ -68,12 +71,6 @@ export const Route = createFileRoute("/_authenticated/subscribe")({
       search.upgrade === true || search.upgrade === "true" ? true : undefined,
     plan: typeof search.plan === "string" ? search.plan : undefined,
     cohort: typeof search.cohort === "string" ? search.cohort : undefined,
-    tier:
-      typeof search.tier === "number"
-        ? search.tier
-        : typeof search.tier === "string"
-          ? parseInt(search.tier, 10)
-          : undefined,
     ltd: search.ltd === true || search.ltd === "true" ? true : undefined,
   }),
   component: SubscribePage,
@@ -117,14 +114,6 @@ function ExistingSubscriptionNotice({
   );
 }
 
-const APPSUMO_PRICES: Record<number, { price: number; name: string; domains: string }> = {
-  1: { price: 37, name: "Tier 1", domains: "1 Domain · 1 Seat" },
-  2: { price: 79, name: "Tier 2", domains: "5 Domains · 2 Seats" },
-  3: { price: 149, name: "Tier 3 (Sweet Spot)", domains: "15 Domains · 5 Seats" },
-  4: { price: 249, name: "Tier 4", domains: "50 Domains · 15 Seats" },
-  5: { price: 399, name: "Tier 5", domains: "150 Domains · 50 Seats" },
-};
-
 function SubscribePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -147,7 +136,6 @@ function SubscribePage() {
       (membership.data?.hasAccess || membership.data?.hasLegacyPaidPlan),
   );
 
-  // PayPal LTD one-time checkout (No Plan ID needed, works immediately!)
   const ltdCheckout = useMutation({
     mutationFn: (planKey: string) =>
       createPaypalLtdCheckout({ data: { planKey } }),
@@ -156,7 +144,6 @@ function SubscribePage() {
       toast.error(getStandardErrorMessage(error, "Could not start LTD checkout")),
   });
 
-  // Capture LTD PayPal Order on return
   const ltdCapture = useMutation({
     mutationFn: (orderId: string) =>
       capturePaypalLtdCheckout({ data: { orderId } }),
@@ -169,12 +156,12 @@ function SubscribePage() {
       toast.error(getStandardErrorMessage(error, "Could not capture payment")),
   });
 
-  // Starter $1/month retainer subscription
-  const starterCheckout = useMutation({
-    mutationFn: () => createPaypalSubscription({ data: { tier: "starter" } }),
+  const monthlyCheckout = useMutation({
+    mutationFn: (tier: MonthlyPlanTier) =>
+      createPaypalSubscription({ data: { tier } }),
     onSuccess: (result) => window.location.assign(result.approveUrl),
     onError: (error) => {
-      console.error("Starter checkout failed", error);
+      console.error("Monthly subscription checkout failed", error);
       toast.error(
         getErrorCode(error) === "UPSTREAM_UNAVAILABLE"
           ? "We could not reach PayPal to start this checkout. Please try again in a moment."
@@ -183,7 +170,6 @@ function SubscribePage() {
     },
   });
 
-  // Legacy subscription verification
   const verify = useMutation({
     mutationFn: (subscriptionId: string) =>
       verifyMembershipCheckout({ data: { subscriptionId } }),
@@ -195,7 +181,6 @@ function SubscribePage() {
       ),
   });
 
-  // Handle return from PayPal
   useEffect(() => {
     if (search.checkout === "success") {
       const activeOrderId = search.orderId || search.token;
@@ -211,6 +196,11 @@ function SubscribePage() {
     if (!shouldReturnToWorkspace) return;
     void navigate({ to: search.redirect ?? "/projects", replace: true });
   }, [navigate, search.redirect, shouldReturnToWorkspace]);
+
+  const initialTier: MonthlyPlanTier =
+    MONTHLY_CREDIT_PACKS.find((p) => p.tier === search.plan)?.tier ?? "starter";
+  const [selectedMonthlyTier, setSelectedMonthlyTier] =
+    useState<MonthlyPlanTier>(initialTier);
 
   if (membership.isLoading || shouldReturnToWorkspace) {
     return null;
@@ -241,23 +231,13 @@ function SubscribePage() {
 
   const cohort = membership.data?.currentCohort;
   const firstName = session?.user?.name?.split(" ")[0] ?? "";
+  const ltdPlanKey = search.cohort || cohort?.key || "krp_founder_10";
+  const ltdPriceDollars = Math.round((cohort?.priceUsdCents ?? 2900) / 100);
+  const ltdTitle = `Early Believer LTD (${cohort?.label ?? "Founder 10"})`;
 
-  // Determine active LTD plan
-  const isAppsumo = search.plan === "appsumo";
-  const appsumoTierNum = search.tier && search.tier >= 1 && search.tier <= 5 ? search.tier : 3;
-  const appsumoPlan = APPSUMO_PRICES[appsumoTierNum];
-
-  const ltdPlanKey = isAppsumo
-    ? `appsumo_tier_${appsumoTierNum}`
-    : search.cohort || cohort?.key || "krp_founder_10";
-
-  const ltdPriceDollars = isAppsumo
-    ? appsumoPlan.price
-    : Math.round((cohort?.priceUsdCents ?? 2900) / 100);
-
-  const ltdTitle = isAppsumo
-    ? `AppSumo ${appsumoPlan.name}`
-    : `Early Believer LTD (${cohort?.label ?? "Founder 10"})`;
+  const activeMonthlyPack =
+    MONTHLY_CREDIT_PACKS.find((p) => p.tier === selectedMonthlyTier) ??
+    MONTHLY_CREDIT_PACKS[0];
 
   return (
     <div className="w-full max-w-5xl space-y-8">
@@ -276,7 +256,7 @@ function SubscribePage() {
         </h1>
         <p className="text-sm text-base-content/70 max-w-xl mx-auto">
           Get lifetime access with BYOK mode (zero data markup),
-          or start light with our $1/month credit retainer.
+          or subscribe to monthly volume credit packs starting at $1/month.
         </p>
       </div>
 
@@ -304,10 +284,8 @@ function SubscribePage() {
                 </span>
                 <h2 className="mt-2 text-xl font-bold">{ltdTitle}</h2>
                 <p className="text-xs text-base-content/60 font-medium">
-                  {isAppsumo ? appsumoPlan.domains : "BYOK Mode · Zero Data Markup"}
-                  {!isAppsumo && cohort?.remaining != null
-                    ? ` · ${cohort.remaining} spots left`
-                    : ""}
+                  BYOK Mode · Zero Data Markup
+                  {cohort?.remaining != null ? ` · ${cohort.remaining} spots left` : ""}
                 </p>
               </div>
               <div className="text-right">
@@ -366,50 +344,76 @@ function SubscribePage() {
           </div>
         </section>
 
-        {/* CARD 2: $1 MICRO-RETAINER & EXPLORE */}
+        {/* CARD 2: MONTHLY VOLUME CREDIT PACKS */}
         <div className="flex flex-col gap-6">
           <section className="card border border-base-300 bg-base-100 shadow-sm">
             <div className="card-body gap-4 p-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <span className="badge badge-secondary badge-outline badge-sm font-bold">
-                    MICRO RETAINER
+                    MONTHLY CREDIT PACK
                   </span>
-                  <h2 className="mt-2 text-lg font-bold">Starter $1 / Month</h2>
+                  <h2 className="mt-2 text-lg font-bold">
+                    {activeMonthlyPack.name} (${activeMonthlyPack.priceUsd}/mo)
+                  </h2>
                   <p className="text-xs text-base-content/60">
-                    100% turns into permanent credits that never expire
+                    {activeMonthlyPack.credits.toLocaleString()} credits / month · Never expire
                   </p>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-base-content">$1</div>
+                  <div className="text-2xl font-bold text-base-content">
+                    ${activeMonthlyPack.priceUsd}
+                  </div>
                   <div className="text-xs text-base-content/60">USD / month</div>
                 </div>
               </div>
 
-              <ul className="space-y-1.5 text-xs text-base-content/80">
+              {/* Tier selector pills */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {MONTHLY_CREDIT_PACKS.map((pack) => {
+                  const selected = pack.tier === selectedMonthlyTier;
+                  return (
+                    <button
+                      key={pack.key}
+                      type="button"
+                      className={`btn btn-xs rounded-lg font-semibold ${
+                        selected ? "btn-primary shadow-xs" : "btn-ghost border border-base-300"
+                      }`}
+                      onClick={() => setSelectedMonthlyTier(pack.tier)}
+                    >
+                      ${pack.priceUsd}/mo ({pack.name})
+                    </button>
+                  );
+                })}
+              </div>
+
+              <ul className="space-y-1.5 text-xs text-base-content/80 pt-1">
                 <li className="flex gap-2">
                   <Check className="size-3.5 shrink-0 text-success" />
-                  <span>1,000 permanent credits added every month</span>
+                  <span>
+                    <strong>{activeMonthlyPack.credits.toLocaleString()}</strong> usage credits
+                    added every month
+                  </span>
                 </li>
                 <li className="flex gap-2">
                   <Check className="size-3.5 shrink-0 text-success" />
-                  <span>Credits roll over &amp; never expire</span>
+                  <span>Credits roll over and never expire, even if you cancel</span>
                 </li>
                 <li className="flex gap-2">
                   <Check className="size-3.5 shrink-0 text-success" />
-                  <span>Cancel anytime from your dashboard</span>
+                  <span>Cancel anytime with 1 click from your dashboard</span>
                 </li>
               </ul>
 
               <button
                 className="btn btn-outline btn-md w-full font-bold"
-                disabled={starterCheckout.isPending}
-                onClick={() => starterCheckout.mutate()}
+                disabled={monthlyCheckout.isPending}
+                onClick={() => monthlyCheckout.mutate(selectedMonthlyTier)}
               >
-                {starterCheckout.isPending ? (
+                {monthlyCheckout.isPending ? (
                   <span className="loading loading-spinner loading-xs" />
                 ) : null}
-                Start for $1/month
+                Start {activeMonthlyPack.name} (${activeMonthlyPack.priceUsd}/mo)
               </button>
             </div>
           </section>
@@ -437,9 +441,6 @@ function SubscribePage() {
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-base-content/60 pt-4">
-        <span className="inline-flex items-center gap-1.5">
-          <ShieldCheck className="size-3.5 text-success" /> 30-day money-back guarantee
-        </span>
         <span className="inline-flex items-center gap-1.5">
           <Lock className="size-3.5" /> Encrypted and safe PayPal checkout
         </span>

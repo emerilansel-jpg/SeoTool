@@ -233,7 +233,7 @@ function Hero({ signedIn }: { signedIn: boolean }) {
             SeoTool.im unifies keyword research, daily rank tracking, site
             audits, backlinks, and AI visibility in one workspace.{" "}
             <strong className="rounded-sm bg-base-200 px-1 font-semibold text-base-content">
-              Covered by a 30-day money-back guarantee.
+              Transparent usage with roll-over credits and BYOK.
             </strong>
           </p>
 
@@ -886,12 +886,12 @@ const FAQ_ITEMS = [
   {
     question: "Can I cancel anytime?",
     answer:
-      "Yes. Cancel from your billing page and your access continues through the end of the current period. Canceling means you give up your locked-in cohort rate.",
+      "Yes. Cancel from your billing page at any time. Your access continues through the end of the current period, and any unused credits stay in your account forever.",
   },
   {
-    question: "Is there a money-back guarantee?",
+    question: "Do credits expire?",
     answer:
-      "Every membership is covered by a 30-day money-back guarantee, handled through PayPal verified checkout.",
+      "No. All monthly subscription credits and top-up credits roll over and never expire, even if you cancel your plan.",
   },
   {
     question: "Do you support AI agents?",
@@ -954,8 +954,8 @@ function CtaBand({ signedIn }: { signedIn: boolean }) {
                 <span className="text-white/70">Stop guessing with them.</span>
               </h2>
               <p className="mt-4 text-sm text-white/80 sm:text-base">
-                Start for free, upgrade when the data convinces you. Every
-                membership is covered by the 30-day money-back guarantee.
+                Start for free, upgrade when the data convinces you.
+                Transparent usage with permanent roll-over credits.
               </p>
               <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 {signedIn ? (

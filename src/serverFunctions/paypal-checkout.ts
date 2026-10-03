@@ -7,7 +7,7 @@ import { paypal } from "@/server/billing/paypal";
 import { PayPalCheckoutService } from "@/server/billing/paypal-checkout-service";
 
 const createSubscriptionSchema = z.object({
-  tier: z.enum(["starter", "lite", "pro", "agency"]),
+  tier: z.enum(["starter", "lite", "standard", "pro", "agency"]),
 });
 
 /**
