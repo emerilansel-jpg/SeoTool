@@ -94,7 +94,7 @@ function getMonthlyCreditPackByTier(tier: PlanTier) {
 
 async function provisionMonthlyCreditPlan(
   tier: PaidTier,
-  pack: NonNullable<ReturnType<typeof getMonthlyCreditPack>>,
+  pack: NonNullable<ReturnType<typeof getMonthlyCreditPackByTier>>,
 ): Promise<string> {
   try {
     const { AdminSettingsRepository } = await import(

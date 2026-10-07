@@ -25,11 +25,11 @@ function getRequiredEnv(name: string) {
 
 function getHostedAuthEmailConfig() {
   return {
-    apiKey: getRequiredEnv("LOOPS_API_KEY"),
-    verificationTemplateId: getRequiredEnv(
+    apiKey: getOptionalEnv("LOOPS_API_KEY"),
+    verificationTemplateId: getOptionalEnv(
       "LOOPS_TRANSACTIONAL_VERIFY_EMAIL_ID",
     ),
-    passwordResetTemplateId: getRequiredEnv(
+    passwordResetTemplateId: getOptionalEnv(
       "LOOPS_TRANSACTIONAL_RESET_PASSWORD_ID",
     ),
   };
@@ -115,7 +115,14 @@ export async function sendHostedVerificationEmail({
   email: string;
   confirmationUrl: string;
 }) {
+  console.info(`[AUTH] Verification link for ${email}: ${confirmationUrl}`);
   const config = getHostedAuthEmailConfig();
+  if (!config.apiKey || !config.verificationTemplateId) {
+    console.warn(
+      `[AUTH] Verification email skipped for ${email}: LOOPS_API_KEY or LOOPS_TRANSACTIONAL_VERIFY_EMAIL_ID not configured`,
+    );
+    return;
+  }
   await sendLoopsTransactionalEmail({
     apiKey: config.apiKey,
     email,
@@ -134,7 +141,14 @@ export async function sendHostedPasswordResetEmail({
   email: string;
   resetUrl: string;
 }) {
+  console.info(`[AUTH] Password reset link for ${email}: ${resetUrl}`);
   const config = getHostedAuthEmailConfig();
+  if (!config.apiKey || !config.passwordResetTemplateId) {
+    console.warn(
+      `[AUTH] Password reset email skipped for ${email}: LOOPS_API_KEY or LOOPS_TRANSACTIONAL_RESET_PASSWORD_ID not configured`,
+    );
+    return;
+  }
   await sendLoopsTransactionalEmail({
     apiKey: config.apiKey,
     email,
