@@ -60,9 +60,7 @@ export function BacklinksSearchCard({
   provider,
   onProviderChange,
   billingMode,
-  byokCredential,
   onBillingModeChange,
-  onByokCredentialChange,
   tabLimit,
 }: {
   canOpenSearch?: (values: SearchDraft) => boolean;
@@ -72,9 +70,7 @@ export function BacklinksSearchCard({
   provider: BacklinksSearchState["provider"];
   onProviderChange: (provider: BacklinksSearchState["provider"]) => void;
   billingMode: "standard" | "byok";
-  byokCredential: string;
   onBillingModeChange: (mode: "standard" | "byok") => void;
-  onByokCredentialChange: (credential: string) => void;
   tabLimit?: number;
 }) {
   const [userSelectedScope, setUserSelectedScope] = useState(false);
@@ -169,35 +165,28 @@ export function BacklinksSearchCard({
                     <CheckCircle2 className="size-3.5 shrink-0" />
                     <span>
                       Using saved DataForSEO key (
-                      <code className="font-mono">{byokQuery.data.dataforseoPrefix}</code>)
+                      <code className="font-mono">
+                        {byokQuery.data.dataforseoPrefix}
+                      </code>
+                      ) from Settings.
                     </span>
                     <Link
                       to="/settings"
                       className="ml-auto underline text-base-content/60 hover:text-base-content"
                     >
-                      Settings
+                      Manage in Settings
                     </Link>
                   </div>
-                ) : null}
-                <input
-                  type="password"
-                  autoComplete="off"
-                  className="input input-bordered input-sm w-full max-w-xl font-mono text-xs"
-                  value={byokCredential}
-                  onChange={(event) =>
-                    onByokCredentialChange(event.target.value)
-                  }
-                  placeholder={
-                    byokQuery.data?.dataforseoConfigured
-                      ? "Optional: override with a different key"
-                      : "DataForSEO login:password or Base64 credential"
-                  }
-                />
-                <p className="mt-1 text-[11px] text-base-content/50">
-                  {byokQuery.data?.dataforseoConfigured
-                    ? "Leave blank to use your saved key, or enter one to override for this search."
-                    : "Tip: Save your key once in Settings > BYOK Integrations to use it automatically."}
-                </p>
+                ) : (
+                  <div className="flex items-center justify-between gap-2 text-xs text-warning bg-warning/10 border border-warning/20 rounded-lg p-2 max-w-xl">
+                    <span>
+                      DataForSEO key is not configured. Add your key in Settings to use BYOK mode.
+                    </span>
+                    <Link to="/settings" className="btn btn-xs btn-warning">
+                      Go to Settings
+                    </Link>
+                  </div>
+                )}
               </div>
             ) : null}
           </div>
@@ -248,8 +237,7 @@ export function BacklinksSearchCard({
                       isSubmitting ||
                       (provider === "live" &&
                         billingMode === "byok" &&
-                        !byokQuery.data?.dataforseoConfigured &&
-                        byokCredential.trim().length < 8)
+                        !byokQuery.data?.dataforseoConfigured)
                     }
                   >
                     {isSubmitting ? "Loading..." : "Search"}

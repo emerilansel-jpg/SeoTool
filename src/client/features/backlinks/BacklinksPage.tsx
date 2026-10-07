@@ -1,7 +1,9 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { SortingState, Updater } from "@tanstack/react-table";
+import { useQuery } from "@tanstack/react-query";
 import { Link2 } from "lucide-react";
 import { FeatureHeader } from "@/client/components/FeatureHeader";
+import { getByokSettings } from "@/serverFunctions/byok";
 import { BacklinksSearchCard } from "./BacklinksSearchCard";
 import { BacklinksBody } from "./BacklinksPageContent";
 import type { BacklinksPageProps } from "./backlinksPageTypes";
@@ -29,10 +31,19 @@ export function BacklinksPage({
   navigate,
 }: BacklinksPageProps) {
   const filters = useBacklinksFilters();
+  const byokQuery = useQuery({
+    queryKey: ["byok-settings"],
+    queryFn: () => getByokSettings(),
+  });
   const [billingMode, setBillingMode] = useState<"standard" | "byok">(
     "standard",
   );
-  const [byokCredential, setByokCredential] = useState("");
+
+  useEffect(() => {
+    if (byokQuery.data?.dataforseoConfigured) {
+      setBillingMode("byok");
+    }
+  }, [byokQuery.data?.dataforseoConfigured]);
 
   // Sort lives in the URL so sort changes and the page reset commit in one
   // navigation (no transient fetch of the old page with the new sort).
@@ -122,7 +133,7 @@ export function BacklinksPage({
     searchState,
     filters,
     billingMode,
-    byokCredential,
+    isByokConfigured: Boolean(byokQuery.data?.dataforseoConfigured),
   });
 
   const {
@@ -203,9 +214,7 @@ export function BacklinksPage({
         <BacklinksSearchCard
           provider={searchState.provider}
           billingMode={billingMode}
-          byokCredential={byokCredential}
           onBillingModeChange={setBillingMode}
-          onByokCredentialChange={setByokCredential}
           onProviderChange={(provider) => {
             navigate({
               search: (prev) => ({

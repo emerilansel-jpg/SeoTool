@@ -37,7 +37,7 @@ type UseBacklinksPageDataArgs = {
   searchState: BacklinksSearchState;
   filters: BacklinksFiltersState;
   billingMode: "standard" | "byok";
-  byokCredential: string;
+  isByokConfigured?: boolean;
 };
 
 // Five-minute client staleness on top of the server's 6h R2 cache, so window
@@ -79,7 +79,7 @@ export function useBacklinksPageData({
   searchState,
   filters,
   billingMode,
-  byokCredential,
+  isByokConfigured,
 }: UseBacklinksPageDataArgs) {
   const searchCardInitialValues = useMemo(
     () => ({
@@ -95,7 +95,7 @@ export function useBacklinksPageData({
   const billingReady =
     searchState.provider === "basic" ||
     billingMode === "standard" ||
-    byokCredential.trim().length >= 8;
+    Boolean(isByokConfigured);
   const baseQueryKeyParts = [
     projectId,
     searchState.provider,
@@ -105,8 +105,6 @@ export function useBacklinksPageData({
   const pageInputBase = { projectId, target, scope, page, pageSize };
   const billingInput = {
     billingMode,
-    byokCredential:
-      billingMode === "byok" ? byokCredential.trim() || undefined : undefined,
   } as const;
 
   const overviewQuery = useQuery({

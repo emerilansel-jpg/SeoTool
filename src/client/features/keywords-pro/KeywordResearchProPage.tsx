@@ -1,4 +1,4 @@
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckCircle2, KeyRound, Search } from "lucide-react";
@@ -62,7 +62,13 @@ export function KeywordResearchProPage({ projectId }: Props) {
   const [mode, setMode] = useState<KeywordResearchProMode>("basic");
   const [billingMode, setBillingMode] =
     useState<KeywordResearchProBillingMode>("standard");
-  const [credential, setCredential] = useState("");
+
+  useEffect(() => {
+    if (byokQuery.data?.dataforseoConfigured) {
+      setBillingMode("byok");
+    }
+  }, [byokQuery.data?.dataforseoConfigured]);
+
   const [locationCode, setLocationCode] = useState<number | undefined>();
   const keywordLimit = mode === "basic" ? 25 : 10;
   const keywords = useMemo(
@@ -83,8 +89,6 @@ export function KeywordResearchProPage({ projectId }: Props) {
           mode,
           billingMode,
           locationCode,
-          byokCredential:
-            billingMode === "byok" ? (credential.trim() || undefined) : undefined,
         },
       }),
     onError: (error) =>
@@ -132,8 +136,10 @@ export function KeywordResearchProPage({ projectId }: Props) {
   function submit(event: FormEvent) {
     event.preventDefault();
     if (keywords.length === 0) return;
-    if (billingMode === "byok" && credential.trim().length < 8) {
-      toast.error("Enter your DataForSEO login:password or Base64 credential");
+    if (billingMode === "byok" && !byokQuery.data?.dataforseoConfigured) {
+      toast.error(
+        "Please configure your DataForSEO key in Settings > BYOK Integrations",
+      );
       return;
     }
     mutation.mutate();
@@ -250,33 +256,28 @@ export function KeywordResearchProPage({ projectId }: Props) {
                     <CheckCircle2 className="size-4 shrink-0" />
                     <span>
                       Using saved DataForSEO key (
-                      <code className="font-mono">{byokQuery.data.dataforseoPrefix}</code>)
+                      <code className="font-mono">
+                        {byokQuery.data.dataforseoPrefix}
+                      </code>
+                      ) from Settings.
                     </span>
                     <Link
                       to="/settings"
                       className="ml-auto underline text-base-content/60 hover:text-base-content"
                     >
-                      Settings
+                      Manage in Settings
                     </Link>
                   </div>
-                ) : null}
-                <input
-                  type="password"
-                  autoComplete="off"
-                  className="input input-bordered w-full text-xs font-mono"
-                  value={credential}
-                  onChange={(event) => setCredential(event.target.value)}
-                  placeholder={
-                    byokQuery.data?.dataforseoConfigured
-                      ? "Optional: override with a different key for this run"
-                      : "DataForSEO login:password or Base64 credential"
-                  }
-                />
-                <p className="text-[11px] text-base-content/50">
-                  {byokQuery.data?.dataforseoConfigured
-                    ? "Leave blank to use your saved key, or enter one to override for this run."
-                    : "Tip: Save your key once in Settings > BYOK Integrations to use it automatically."}
-                </p>
+                ) : (
+                  <div className="flex items-center justify-between gap-2 text-xs text-warning bg-warning/10 border border-warning/20 rounded-lg p-2.5">
+                    <span>
+                      DataForSEO key is not configured. Add your key in Settings to use BYOK mode.
+                    </span>
+                    <Link to="/settings" className="btn btn-xs btn-warning">
+                      Go to Settings
+                    </Link>
+                  </div>
+                )}
               </div>
             ) : null}
             <p className="text-xs text-base-content/60">
@@ -294,8 +295,7 @@ export function KeywordResearchProPage({ projectId }: Props) {
               mutation.isPending ||
               keywords.length === 0 ||
               (billingMode === "byok" &&
-                !byokQuery.data?.dataforseoConfigured &&
-                credential.trim().length < 8)
+                !byokQuery.data?.dataforseoConfigured)
             }
           >
             {mutation.isPending ? (
