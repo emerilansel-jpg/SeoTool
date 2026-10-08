@@ -170,25 +170,26 @@ function BlogPostPage() {
         featuredImage={displayHeroImage}
       />
 
-      {/* 3-Column Editorial Body Layout */}
-      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-12">
-          {/* Left Column: Author Byline & Social Share Rail */}
+      {/* 3-Column Editorial Body Layout with expanded reading area */}
+      <div className="mx-auto w-full max-w-[1440px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-8 xl:gap-10">
+          {/* Left Column: Author Byline, Social Share Rail, & Table of Contents */}
           <BlogSocialRail
             author={meta.author}
             url={currentUrl}
             title={post.title}
+            headings={headings}
           />
 
-          {/* Center Column: Editorial Article Body */}
-          <article className="min-w-0 flex-1 max-w-3xl">
+          {/* Center Column: Wide Editorial Article Body */}
+          <article className="min-w-0 flex-1 max-w-4xl xl:max-w-5xl">
             <EditorialMarkdown>{post.contentMd}</EditorialMarkdown>
             <BlogTopicsList topics={meta.topics} />
             <BlogAuthorBio author={meta.author} />
           </article>
 
-          {/* Right Column: Sticky Sidebar with Newsletter, Audit, & TOC */}
-          <BlogSidebar headings={headings} />
+          {/* Right Column: Sticky Sidebar with Newsletter & SEO Audit CTAs */}
+          <BlogSidebar />
         </div>
       </div>
 

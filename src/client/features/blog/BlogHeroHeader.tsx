@@ -28,7 +28,7 @@ export function BlogHeroHeader({
 
   return (
     <section className="border-b border-base-300/80 bg-base-200/50 py-10 md:py-14">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb kicker */}
         <nav
           aria-label="Breadcrumb"
@@ -48,7 +48,7 @@ export function BlogHeroHeader({
 
         {/* Subtitle / Deck */}
         {description ? (
-          <p className="mt-4 max-w-4xl text-lg font-normal leading-relaxed text-base-content/75 sm:text-xl">
+          <p className="mt-4 max-w-5xl text-lg font-normal leading-relaxed text-base-content/75 sm:text-xl">
             {description}
           </p>
         ) : null}
@@ -69,11 +69,11 @@ export function BlogHeroHeader({
 
         {/* Featured Image if present */}
         {featuredImage ? (
-          <div className="mt-8 overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-md max-w-4xl">
+          <div className="mt-8 overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-md max-w-5xl">
             <img
               src={featuredImage}
               alt={title}
-              className="max-h-[480px] w-full object-cover"
+              className="max-h-[520px] w-full object-cover"
             />
           </div>
         ) : null}

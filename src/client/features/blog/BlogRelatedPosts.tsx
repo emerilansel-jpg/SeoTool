@@ -17,7 +17,7 @@ export function BlogRelatedPosts({ posts }: Props) {
 
   return (
     <section className="border-t border-base-300 bg-base-200/40 py-16">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-extrabold tracking-tight text-base-content sm:text-3xl">
           Related Articles
         </h2>
