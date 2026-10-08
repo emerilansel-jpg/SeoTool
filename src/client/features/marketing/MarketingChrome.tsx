@@ -7,7 +7,6 @@ import { AccountMenu } from "@/client/components/AccountMenu";
 const NAV_LINKS = [
   { label: "Features", href: "/features", internal: true },
   { label: "Pricing", href: "/pricing", internal: true },
-  { label: "Docs", href: "/docs", internal: false },
   { label: "Blog", href: "/blogs", internal: true },
   { label: "Changelog", href: "/changelog", internal: true },
 ] as const;
@@ -28,13 +27,7 @@ const FOOTER_LINKS = [
   {
     heading: "Resources",
     links: [
-      {
-        label: "Documentation",
-        href: "/docs",
-        internal: false,
-      },
       { label: "Blog", href: "/blogs", internal: true },
-      { label: "Guides", href: "/guides", internal: false },
     ],
   },
   {

@@ -1,20 +1,21 @@
-# SeoTool.im reverse proxy with marketing static files + SaaS app fallback.
-# Caddy automatically obtains and renews Let's Encrypt TLS certificates.
+# ============================================================
+# Caddyfile — SeoTool.im production configuration
+# ============================================================
+# Used by the shared gateway-caddy container on the production VPS.
+# Sits behind Cloudflare (Full SSL). Caddy handles automatic HTTPS
+# with Let's Encrypt / ZeroSSL, or uses Cloudflare Origin CA certs.
 #
-# Marketing static assets and docs are served as static files from /srv/marketing.
-# Everything else is proxied to the SaaS app (open-seo:3001).
+# Static marketing site files: /srv/marketing
+# SaaS application:            http://open-seo:3001 (Docker network)
+# ============================================================
 
 seotool.im {
-    # Marketing static assets (images, videos, avatars, blog).
-    # NOTE: /assets/* is intentionally EXCLUDED here. The SaaS app also
-    # serves its JS/CSS bundles under /assets/. /assets/* is handled
-    # separately below with a file matcher.
+    # Marketing static media assets (images, videos, avatars, blog media, icons).
     @marketingAssets {
         path /avatars/* /blog/*
         path /demo.mp4 /demo-poster.webp
         path /favicon* /apple-touch-icon* /android-chrome*
         path /site.webmanifest /robots.txt /sitemap.xml /social-card.png /product-hunt.svg
-        path /agent-onboarding /js/*
         path /logo* /transparent-logo*
     }
     handle @marketingAssets {
@@ -22,41 +23,25 @@ seotool.im {
         file_server
     }
 
-    # /assets/* is shared by the marketing site AND the SaaS app. Serve the
-    # file from marketing only when it actually exists there; otherwise let
-    # it fall through to the catch-all handle below which proxies to the SaaS
-    # app (so SaaS route chunks load correctly).
-    @marketingAssetFile {
-        path /assets/*
-        file {
-            root /srv/marketing
-        }
-    }
-    handle @marketingAssetFile {
-        root * /srv/marketing
-        header Cache-Control "public, max-age=31536000, immutable"
-        file_server
-    }
+    # Redirect all legacy marketing pages to new routes
+    redir /about / permanent
+    redir /careers / permanent
+    redir /contact / permanent
+    redir /affiliates / permanent
+    redir /open-source-seo /features permanent
+    redir /google-search-console-mcp /features permanent
+    redir /docs* /features permanent
+    redir /guides* /features permanent
+    redir /library* /features permanent
+    redir /free-tools* /features permanent
 
     # SaaS app bundles under /assets/* use content-hashed filenames, so they
-    # can be cached immutably. Without this, Cloudflare REVALIDATES every
-    # asset against the origin on each request (slow round-trip to the VPS).
+    # can be cached immutably.
     handle /assets/* {
         reverse_proxy open-seo:3001 {
             header_up Host localhost
         }
         header Cache-Control "public, max-age=31536000, immutable"
-    }
-
-    # Docs, guides content (marketing subpaths). /blogs* is EXCLUDED:
-    # blog posts are served by the SaaS app from the cms_posts table.
-    @marketingContent {
-        path /docs* /guides* /library*
-    }
-    handle @marketingContent {
-        root * /srv/marketing
-        try_files {path} {path}/index.html /index.html
-        file_server
     }
 
     # Everything else goes to the SaaS app (/, /pricing, /changelog, dashboard, API, etc.)

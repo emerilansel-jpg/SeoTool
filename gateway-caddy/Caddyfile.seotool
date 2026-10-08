@@ -4,22 +4,18 @@
 # Sits BEHIND pesat-caddy on the shared docker network (internal only,
 # no host ports). pesat-caddy terminates TLS for seotool.im and forwards
 # to this container over plain HTTP. All SeoTool routing (marketing
-# static files + SaaS reverse proxy) lives here, not in pesat.
+# static media files + SaaS reverse proxy) lives here, not in pesat.
 # ============================================================
 
 :80 {
     encode gzip zstd
 
-    # Marketing static assets (images, videos, avatars, blog).
-    # NOTE: /assets/* is intentionally EXCLUDED here. The SaaS app also
-    # serves its JS/CSS bundles under /assets/. /assets/* is handled
-    # separately below with a file matcher.
+    # Marketing static media assets (images, videos, avatars, blog media, icons).
     @marketingAssets {
         path /avatars/* /blog/*
         path /demo.mp4 /demo-poster.webp
         path /favicon* /apple-touch-icon* /android-chrome*
         path /site.webmanifest /robots.txt /sitemap.xml /social-card.png /product-hunt.svg
-        path /agent-onboarding /js/*
         path /logo* /transparent-logo*
     }
     handle @marketingAssets {
@@ -27,25 +23,19 @@
         file_server
     }
 
-    # /assets/* is shared by the marketing site AND the SaaS app. Serve the
-    # file from marketing only when it actually exists there; otherwise let
-    # it fall through to the catch-all handle below which proxies to the SaaS
-    # app (so SaaS route chunks load correctly).
-    @marketingAssetFile {
-        path /assets/*
-        file {
-            root /srv/marketing
-        }
-    }
-    handle @marketingAssetFile {
-        root * /srv/marketing
-        header Cache-Control "public, max-age=31536000, immutable"
-        file_server
-    }
+    # Redirect all legacy marketing pages to new routes
+    redir /about / permanent
+    redir /careers / permanent
+    redir /contact / permanent
+    redir /affiliates / permanent
+    redir /open-source-seo /features permanent
+    redir /google-search-console-mcp /features permanent
+    redir /docs* /features permanent
+    redir /guides* /features permanent
+    redir /library* /features permanent
+    redir /free-tools* /features permanent
 
-    # SaaS app bundles under /assets/* use content-hashed filenames, so they
-    # can be cached immutably. Without this, Cloudflare REVALIDATES every
-    # asset against the origin on each request (slow round-trip to the VPS).
+    # SaaS app bundles under /assets/* use content-hashed filenames
     handle /assets/* {
         reverse_proxy open-seo:3001 {
             header_up Host localhost
@@ -53,18 +43,7 @@
         header Cache-Control "public, max-age=31536000, immutable"
     }
 
-    # Marketing routes, docs, guides, library, and feature pages.
-    @marketingContent {
-        path /docs* /guides* /library* /free-tools*
-        path /about /contact /careers /affiliates /open-source-seo /google-search-console-mcp
-    }
-    handle @marketingContent {
-        root * /srv/marketing
-        try_files {path} {path}/index.html /index.html
-        file_server
-    }
-
-    # Everything else (/, /pricing, /changelog, /blogs, /about, /features, /sign-in, dashboard, API, etc.)
+    # Everything else (/, /pricing, /changelog, /blogs, /features, /privacy, /terms-and-conditions, /refund-policy, /sign-in, dashboard, API, etc.)
     # goes directly to the modern SaaS app.
     handle {
         reverse_proxy open-seo:3001 {
