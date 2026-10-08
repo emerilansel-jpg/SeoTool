@@ -12,7 +12,7 @@
 
     # Marketing static media assets (images, videos, avatars, blog media, icons).
     @marketingAssets {
-        path /avatars/* /blog/*
+        path /avatars/* /blog/* /integrations/*
         path /demo.mp4 /demo-poster.webp
         path /favicon* /apple-touch-icon* /android-chrome*
         path /site.webmanifest /robots.txt /sitemap.xml /social-card.png /product-hunt.svg

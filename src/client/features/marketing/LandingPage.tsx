@@ -404,9 +404,11 @@ function LogoCells() {
               return (
                 <div
                   key={item.name}
-                  className="group relative flex min-h-24 flex-col items-center justify-center gap-2 border-r border-b border-base-300 p-4 transition-all duration-150 hover:bg-base-100"
+                  className="group relative flex min-h-24 flex-col items-center justify-center gap-2.5 border-r border-b border-base-300 p-4 transition-all duration-150 hover:bg-base-100"
                 >
-                  <Logo className="size-6 transition-transform duration-200 group-hover:scale-110" />
+                  <div className="flex size-7 items-center justify-center">
+                    <Logo className="size-7 transition-transform duration-200 group-hover:scale-110" />
+                  </div>
                   <span className="text-center text-xs font-semibold text-base-content/65 transition-colors group-hover:text-base-content">
                     {item.name}
                   </span>
