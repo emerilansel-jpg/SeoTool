@@ -412,7 +412,6 @@ function LogoCells() {
                   <span className="text-center text-xs font-semibold text-base-content/65 transition-colors group-hover:text-base-content">
                     {item.name}
                   </span>
-                  <ChevronRight className="absolute right-2 bottom-2 size-3 text-primary opacity-0 transition-opacity group-hover:opacity-100" />
                 </div>
               );
             })}
