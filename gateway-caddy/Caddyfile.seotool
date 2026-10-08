@@ -55,7 +55,7 @@
 
     # Marketing routes, docs, guides, library, and feature pages.
     @marketingContent {
-        path /docs* /guides* /library* /features* /free-tools*
+        path /docs* /guides* /library* /free-tools*
         path /about /contact /careers /affiliates /open-source-seo /google-search-console-mcp
     }
     handle @marketingContent {

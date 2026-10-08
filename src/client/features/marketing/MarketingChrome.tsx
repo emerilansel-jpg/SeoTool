@@ -5,7 +5,7 @@ import { useSession } from "@/lib/auth-client";
 import { AccountMenu } from "@/client/components/AccountMenu";
 
 const NAV_LINKS = [
-  { label: "Features", href: "/#features", internal: false },
+  { label: "Features", href: "/features", internal: true },
   { label: "Pricing", href: "/pricing", internal: true },
   { label: "Docs", href: "/docs", internal: false },
   { label: "Blog", href: "/blogs", internal: true },
@@ -16,8 +16,8 @@ const FOOTER_LINKS = [
   {
     heading: "Product",
     links: [
+      { label: "Features", href: "/features", internal: true },
       { label: "Pricing", href: "/pricing", internal: true },
-      { label: "Features", href: "/#features", internal: false },
       {
         label: "Changelog",
         href: "/changelog",

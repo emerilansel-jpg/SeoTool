@@ -17,6 +17,7 @@ import { Route as ProjectRouteRouteImport } from './routes/_project/route'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as DpaRouteImport } from './routes/dpa'
+import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -131,6 +132,11 @@ const CookiePolicyRoute = CookiePolicyRouteImport.update({
 const DpaRoute = DpaRouteImport.update({
   id: '/dpa',
   path: '/dpa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeaturesRoute = FeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -567,6 +573,7 @@ export interface FileRoutesByFullPath {
   '/changelog': typeof ChangelogRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/dpa': typeof DpaRoute
+  '/features': typeof FeaturesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -652,6 +659,7 @@ export interface FileRoutesByTo {
   '/changelog': typeof ChangelogRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/dpa': typeof DpaRoute
+  '/features': typeof FeaturesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -737,6 +745,7 @@ export interface FileRoutesById {
   '/changelog': typeof ChangelogRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/dpa': typeof DpaRoute
+  '/features': typeof FeaturesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -824,6 +833,7 @@ export interface FileRouteTypes {
     | '/changelog'
     | '/cookie-policy'
     | '/dpa'
+    | '/features'
     | '/forgot-password'
     | '/pricing'
     | '/privacy'
@@ -909,6 +919,7 @@ export interface FileRouteTypes {
     | '/changelog'
     | '/cookie-policy'
     | '/dpa'
+    | '/features'
     | '/forgot-password'
     | '/pricing'
     | '/privacy'
@@ -993,6 +1004,7 @@ export interface FileRouteTypes {
     | '/changelog'
     | '/cookie-policy'
     | '/dpa'
+    | '/features'
     | '/forgot-password'
     | '/pricing'
     | '/privacy'
@@ -1083,6 +1095,7 @@ export interface RootRouteChildren {
   ChangelogRoute: typeof ChangelogRoute
   CookiePolicyRoute: typeof CookiePolicyRoute
   DpaRoute: typeof DpaRoute
+  FeaturesRoute: typeof FeaturesRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -1159,6 +1172,13 @@ declare module '@tanstack/react-router' {
       path: '/dpa'
       fullPath: '/dpa'
       preLoaderRoute: typeof DpaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/features': {
+      id: '/features'
+      path: '/features'
+      fullPath: '/features'
+      preLoaderRoute: typeof FeaturesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -1955,6 +1975,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChangelogRoute: ChangelogRoute,
   CookiePolicyRoute: CookiePolicyRoute,
   DpaRoute: DpaRoute,
+  FeaturesRoute: FeaturesRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,

@@ -15,6 +15,9 @@ export type ChangelogItem = {
  */
 function mdToHtml(md: string): string {
   return md
+    .replace(/https?:\/\/github\.com\/[^\s)]+/g, "")
+    .replace(/open-seo/gi, "SeoTool.im")
+    .replace(/openseo/gi, "seotool")
     .replace(/^### (.+)$/gm, "<h3>$1</h3>")
     .replace(/^## (.+)$/gm, "<h2>$1</h2>")
     .replace(/^# (.+)$/gm, "<h1>$1</h1>")
