@@ -27,6 +27,7 @@ import {
 import { Reveal } from "@/client/features/marketing/useReveal";
 import { INTEGRATION_LIST } from "@/client/features/marketing/IntegrationLogos";
 import { CreditPricingGuide } from "@/client/features/billing/CreditPricingGuide";
+import { LTD_COHORTS } from "@/shared/pricing-definitions";
 
 /* ---------------------------------- shared --------------------------------- */
 
@@ -101,9 +102,9 @@ function AnnouncementBar() {
         to="/pricing"
         className="block rounded-xl bg-primary px-5 py-3 text-center text-sm font-medium text-white shadow-[inset_0_-6px_12px_rgba(0,0,0,0.12)] transition-transform hover:scale-[0.995]"
       >
-        Founder cohort: first 10 members lock $29/month forever.{" "}
+        Early Believer Lifetime Deal: First 10 members claim $29 One-Time (BYOK Mode, price rises $10 every batch).{" "}
         <span className="font-semibold underline underline-offset-2">
-          See pricing
+          Claim spot
         </span>{" "}
         <ArrowRight className="inline size-3.5" />
       </Link>
@@ -217,7 +218,7 @@ function Hero({ signedIn }: { signedIn: boolean }) {
         <div className="relative mx-auto w-full max-w-4xl px-4 pt-16 pb-24 text-center md:px-6 md:pt-24 md:pb-28">
           <div className="hero-rise hero-rise-1">
             <span className="inline-flex items-center gap-2 rounded-full border border-base-300 bg-base-100 py-1.5 pr-1.5 pl-4 text-xs font-medium text-base-content/70">
-              All-in-one SEO platform, powered by live SERP data
+              Native MCP Server · Deep KGR & LowFruits · Local Geogrid · Multi-LLM GEO
               <span className="flex size-5 items-center justify-center rounded-full bg-primary text-white">
                 <ChevronRight className="size-3" />
               </span>
@@ -225,15 +226,16 @@ function Hero({ signedIn }: { signedIn: boolean }) {
           </div>
 
           <h1 className="hero-rise hero-rise-2 mt-6 text-5xl font-extrabold tracking-tight text-balance sm:text-6xl">
-            Turn search data into{" "}
-            <span className="text-primary">rankings that compound</span>
+            The AI-Native SEO Workspace for{" "}
+            <span className="text-primary">Deep Keywords & Local Geogrids</span>
           </h1>
 
           <p className="hero-rise hero-rise-3 mx-auto mt-6 max-w-2xl text-base text-base-content/70 md:text-lg">
-            SeoTool.im unifies keyword research, daily rank tracking, site
-            audits, backlinks, and AI visibility in one workspace.{" "}
+            Connect directly to Cursor and Claude Code via Model Context Protocol.
+            Uncover low-competition keywords with KGR and Reddit/Quora weak-spot detection,
+            track Google Maps local geogrids, and monitor brand citations in ChatGPT, Claude, and Perplexity.{" "}
             <strong className="rounded-sm bg-base-200 px-1 font-semibold text-base-content">
-              Transparent usage with roll-over credits and BYOK.
+              Wholesale data rates with BYOK or transparent $1 credits.
             </strong>
           </p>
 
@@ -427,18 +429,18 @@ function LogoCells() {
 const PRODUCT_CELLS = [
   {
     icon: Search,
-    title: "Search",
-    copy: "Live search volumes, difficulty scores, and intent clustering from real-time SERP indexes.",
+    title: "Deep Keywords (KGR & LowFruits)",
+    copy: "Spot easy-win keywords with KGR <= 0.25 and SERPs with weak forum rankings (Reddit, Quora, Pinterest) plus competitor title gaps.",
   },
   {
-    icon: TrendingUp,
-    title: "Track",
-    copy: "Daily rank positions across Google and Bing with volatility detection and competitor moves.",
+    icon: Globe,
+    title: "Local SEO & GMB Geo-Grid",
+    copy: "Track Google Business ranking pins in a 3x3 to 15x15 radius grid with live Share of Local Voice (SoLV) calculation.",
   },
   {
-    icon: FileSearch,
-    title: "Audit",
-    copy: "Full site crawls across 100+ technical factors, Core Web Vitals, and indexability.",
+    icon: Sparkles,
+    title: "Multi-LLM Brand Visibility",
+    copy: "Monitor citations across ChatGPT, Claude, Perplexity, and Gemini, correlated with 1st-party Google Search Console queries.",
   },
 ] as const;
 
@@ -518,16 +520,15 @@ function AgentSection() {
                 <WindowDots />
                 <div className="flex items-center gap-1 text-xs">
                   <span className="rounded-md bg-base-200 px-2.5 py-1 font-semibold text-base-content">
-                    Skill
+                    Claude Code / Cursor
                   </span>
                   <span className="rounded-md px-2.5 py-1 text-base-content/50">
                     MCP
                   </span>
                 </div>
               </div>
-              <div className="p-4 font-mono text-xs text-base-content/70">
-                <span className="text-base-content/40">$ </span>npx -y{" "}
-                <span className="text-primary">seotool-mcp</span> init --all
+              <div className="p-4 font-mono text-xs text-base-content/70 break-all">
+                <span className="text-base-content/40">$ </span>claude mcp add --transport http seotool <span className="text-primary">https://seotool.im/mcp</span>
               </div>
             </div>
           </Reveal>
@@ -536,12 +537,11 @@ function AgentSection() {
               <div className="flex items-center justify-between border-b border-base-300 px-4 py-2.5">
                 <WindowDots />
                 <span className="rounded-md bg-base-200 px-2.5 py-1 text-xs font-semibold text-base-content">
-                  cURL
+                  CLI Skills
                 </span>
               </div>
-              <div className="p-4 font-mono text-xs text-base-content/70">
-                <span className="text-primary">curl</span> -s
-                seotool.im/agent-onboarding
+              <div className="p-4 font-mono text-xs text-base-content/70 break-all">
+                <span className="text-base-content/40">$ </span>npx -y <span className="text-primary">skills add emerilansel-jpg/SeoTool</span>
               </div>
             </div>
           </Reveal>
@@ -611,22 +611,26 @@ function HardStuff() {
             </div>
           </div>
 
-          {/* cell 2: rank chart */}
+          {/* cell 2: rank chart & local geogrid */}
           <div className="border-b border-base-300 p-8">
             <div className="flex items-center gap-2 text-sm font-medium text-base-content/60">
-              <TrendingUp className="size-4" /> Daily rank tracking
+              <Globe className="size-4" /> Local SEO Geo-Grid & Daily Ranks
             </div>
             <h3 className="mt-3 text-xl font-bold tracking-tight">
-              <span className="font-bold">Every position, every day.</span>{" "}
+              <span className="font-bold">Google Maps pins & SERPs.</span>{" "}
               <span className="font-normal text-base-content/60">
-                Google and Bing positions with volatility detection across
-                devices and locations.
+                Track 3x3 to 15x15 geogrid pins for local businesses and daily organic
+                ranks with live Share of Local Voice (SoLV).
               </span>
             </h3>
             <div className="mt-6 rounded-xl border border-base-300 p-5">
+              <div className="flex items-center justify-between font-mono text-xs mb-3">
+                <span className="badge badge-sm badge-success font-semibold">SoLV: 78% Top 3</span>
+                <span className="text-base-content/50">Radius: 5km (25 pins)</span>
+              </div>
               <svg
                 viewBox="0 0 320 80"
-                className="h-20 w-full"
+                className="h-16 w-full"
                 aria-hidden="true"
               >
                 <polyline
@@ -639,8 +643,8 @@ function HardStuff() {
                 <circle cx="320" cy="12" r="4" fill="var(--color-primary)" />
               </svg>
               <div className="mt-2 flex justify-between font-mono text-xs text-base-content/40">
-                <span>pos #27</span>
-                <span className="text-primary">pos #3</span>
+                <span>Google Maps #8</span>
+                <span className="text-primary font-bold">Maps Pin #1</span>
               </div>
             </div>
           </div>
@@ -648,34 +652,34 @@ function HardStuff() {
           {/* cell 3: keyword intelligence */}
           <div className="border-b border-base-300 p-8 md:border-r">
             <div className="flex items-center gap-2 text-sm font-medium text-base-content/60">
-              <Search className="size-4" /> Keyword intelligence
+              <Search className="size-4" /> Deep Keywords (KGR & LowFruits)
             </div>
             <h3 className="mt-3 text-xl font-bold tracking-tight">
-              <span className="font-bold">Volumes you can trust.</span>{" "}
+              <span className="font-bold">Find untapped weak spots.</span>{" "}
               <span className="font-normal text-base-content/60">
-                Difficulty, intent, and clustering from DataForSEO real-time
-                indexes, not stale databases.
+                Automatic Reddit and Quora forum detection in Top 10 SERPs with
+                exact Keyword Golden Ratio (KGR) scores.
               </span>
             </h3>
             <div className="mt-6 space-y-2">
               {[
-                { kw: "seo audit tool", vol: "4.4K", kd: 34 },
-                { kw: "rank tracker", vol: "2.9K", kd: 41 },
-                { kw: "ai visibility", vol: "1.8K", kd: 22 },
+                { kw: "best ai seo agent for local", vol: "720", badge: "KGR 0.14 · Easy Win", badgeClass: "badge-success" },
+                { kw: "gmb map rank tracker audit", vol: "1.4K", badge: "Reddit in #2 · Weak Spot", badgeClass: "badge-primary" },
+                { kw: "how to rank google business 2026", vol: "2.8K", badge: "Quora in #3 · Title Gap", badgeClass: "badge-warning" },
               ].map((row) => (
                 <div
                   key={row.kw}
-                  className="flex items-center gap-3 rounded-lg border border-base-300 px-3.5 py-2.5"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-base-300 px-3.5 py-2.5"
                 >
-                  <span className="flex-1 truncate font-mono text-xs">
+                  <span className="truncate font-mono text-xs">
                     {row.kw}
                   </span>
-                  <span className="font-mono text-xs text-base-content/50">
-                    {row.vol}
-                  </span>
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 font-mono text-xs font-semibold text-primary">
-                    KD {row.kd}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0 font-mono text-xs">
+                    <span className="text-base-content/50">{row.vol}</span>
+                    <span className={`badge badge-sm ${row.badgeClass} text-[10px] font-semibold`}>
+                      {row.badge}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -789,12 +793,7 @@ function CreditSystemLandingSection() {
 
 /* ------------------------------- pricing teaser ---------------------------- */
 
-const COHORTS = [
-  { label: "Founder 10", price: "$29" },
-  { label: "Early 20", price: "$39" },
-  { label: "Growth 50", price: "$49" },
-  { label: "Public", price: "$59" },
-] as const;
+/* ------------------------------- pricing teaser ---------------------------- */
 
 function PricingTeaser({ signedIn }: { signedIn: boolean }) {
   return (
@@ -802,31 +801,49 @@ function PricingTeaser({ signedIn }: { signedIn: boolean }) {
       <div className="mx-auto w-full max-w-6xl border-x border-base-300 px-4 py-20 md:px-6">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <Reveal>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary mb-3">
+              <Sparkles className="size-3.5" />
+              LIFETIME DEALS (PAY ONCE) & BYOK
+            </div>
             <h2 className="text-4xl font-extrabold tracking-tight text-balance md:text-5xl">
               Pricing that rewards{" "}
               <span className="text-primary">early believers</span>
             </h2>
             <p className="mt-4 text-base leading-relaxed text-base-content/60">
-              One membership unlocks the whole platform. Early cohorts lock a
-              lower monthly rate forever. When a cohort fills, the price rises
-              for the next one. Your rate never increases while you stay active.
+              Pay once, keep forever. Every lifetime cohort includes full BYOK
+              mode (zero platform data markup on your DataForSEO and AI keys),
+              5,000 bonus platform credits, and lifetime engine updates.
+              Price rises by $10 as each batch fills!
             </p>
+
+            <div className="mt-4 rounded-xl border border-base-300 bg-base-100 p-4 text-xs text-base-content/75 space-y-1.5">
+              <div className="font-semibold text-base-content">
+                Three ways to access SeoTool.im:
+              </div>
+              <ul className="space-y-1 text-base-content/70">
+                <li>• <strong>Early Believer LTD:</strong> Pay once from $29 with BYOK for unlimited low-cost scale.</li>
+                <li>• <strong>AppSumo Deals:</strong> 5 official tiers ($37 to $399) with bundled credits & multi-domain seats.</li>
+                <li>• <strong>Micro Retainer:</strong> Start at just $1/month (100% turns into 1,000 permanent credits).</li>
+              </ul>
+            </div>
+
             <div className="mt-6 flex flex-wrap gap-3">
               {signedIn ? (
                 <Link
                   to="/subscribe"
+                  search={{ plan: "ltd", cohort: "krp_founder_10" }}
                   className="btn btn-md gap-2 rounded-[10px] border-0 bg-primary px-5 font-semibold text-white shadow-[inset_0_-6px_12px_rgba(0,0,0,0.12)] transition-transform hover:scale-[1.03]"
                 >
-                  Claim your rate
+                  Get Founder Deal ($29)
                   <ArrowRight className="size-4" />
                 </Link>
               ) : (
                 <Link
                   to="/sign-up"
-                  search={{ redirect: "/subscribe" }}
+                  search={{ redirect: "/subscribe?plan=ltd&cohort=krp_founder_10" }}
                   className="btn btn-md gap-2 rounded-[10px] border-0 bg-primary px-5 font-semibold text-white shadow-[inset_0_-6px_12px_rgba(0,0,0,0.12)] transition-transform hover:scale-[1.03]"
                 >
-                  Claim your rate
+                  Get Founder Deal ($29)
                   <ArrowRight className="size-4" />
                 </Link>
               )}
@@ -834,31 +851,42 @@ function PricingTeaser({ signedIn }: { signedIn: boolean }) {
                 to="/pricing"
                 className="btn btn-md rounded-[10px] border-0 bg-base-200 px-5 font-semibold text-base-content transition-transform hover:scale-[1.03]"
               >
-                Compare cohorts
+                Compare all plans
               </Link>
             </div>
           </Reveal>
           <Reveal delay={1}>
             <div className="grid overflow-hidden rounded-2xl border border-base-300 bg-base-100 sm:grid-cols-2">
-              {COHORTS.map((c, i) => (
+              {LTD_COHORTS.map((c, i) => (
                 <div
-                  key={c.label}
+                  key={c.key}
                   className={`p-6 ${i === 0 ? "bg-primary/[0.04]" : ""} ${
                     i % 2 === 0 ? "border-base-300 sm:border-r" : ""
                   } ${i < 2 ? "border-b border-base-300" : ""}`}
                 >
-                  <div className="text-xs font-medium text-base-content/50">
-                    {c.label}
-                  </div>
-                  <div className="mt-1 font-mono text-3xl font-bold tracking-tight">
-                    {c.price}
-                    <span className="text-xs font-normal text-base-content/40">
-                      /mo
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-base-content/60">
+                      {c.label}
                     </span>
+                    <span className="badge badge-sm badge-ghost text-[10px]">
+                      {c.badge}
+                    </span>
+                  </div>
+                  <div className="mt-2 font-mono text-3xl font-bold tracking-tight">
+                    ${c.priceUsd}
+                  </div>
+                  <div className="mt-0.5 text-[11px] font-bold uppercase tracking-wider text-primary">
+                    ONE-TIME PAYMENT
+                  </div>
+                  <p className="mt-2 text-xs text-base-content/60 leading-relaxed">
+                    {c.description}
+                  </p>
+                  <div className="mt-3 text-[11px] font-semibold text-base-content/50">
+                    BYOK Mode · Zero Data Markup
                   </div>
                   {i === 0 ? (
                     <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                      <Gauge className="size-3" /> Open now
+                      <Gauge className="size-3" /> Open now ($29)
                     </div>
                   ) : null}
                 </div>
@@ -877,37 +905,37 @@ const FAQ_ITEMS = [
   {
     question: "What is SeoTool.im?",
     answer:
-      "An all-in-one SEO platform that combines keyword research, daily rank tracking, technical site audits, backlink intelligence, AI visibility monitoring, and white-label reporting in a single workspace.",
+      "An AI-native SEO platform combining Model Context Protocol (MCP) server integration, deep keyword research (KGR and LowFruits weak-spot detection), local Google Maps geogrids, technical site audits, backlink intelligence, multi-LLM AI visibility, and white-label client reporting.",
   },
   {
-    question: "How does progressive pricing work?",
+    question: "What is a Lifetime Deal (LTD)? How does the +$10 price jump work?",
     answer:
-      "Early members lock in a lower monthly rate forever. As each cohort fills, the price rises for the next group. Your rate never increases while your membership stays active.",
+      "A Lifetime Deal means you pay once and own the tool forever with no monthly fees. We reward early buyers with lower prices. As each cohort sells out, the price increases by $10: Founder ($29) -> Early ($39) -> Growth ($49) -> Public ($59). Grab your spot early to lock the best price!",
   },
   {
-    question: "Can I cancel anytime?",
+    question: "What is BYOK (Bring Your Own Key)?",
     answer:
-      "Yes. Cancel from your billing page at any time. Your access continues through the end of the current period, and any unused credits stay in your account forever.",
+      "BYOK means you plug in your own API keys for DataForSEO and AI (OpenRouter, OpenAI, Claude). We charge zero platform markup on your data. You only pay raw provider rates (~$0.002 per scan), allowing you to crawl and track as much as you want without limits.",
   },
   {
-    question: "Do credits expire?",
+    question: "What are the official AppSumo Lifetime Deals?",
     answer:
-      "No. All monthly subscription credits and top-up credits roll over and never expire, even if you cancel your plan.",
+      "If you want bundled credits, multiple domain slots, and team seats in one go, choose from our 5 official AppSumo tiers from $37 to $399 (all one-time payments). Tier 3 ($149) is our most popular Sweet Spot featuring white-label client PDF reports.",
   },
   {
-    question: "Do you support AI agents?",
+    question: "How does the $1/month Credit Retainer work?",
     answer:
-      "Run the autonomous Jet AI agent inside the app, or connect your own Claude Desktop and IDE via 36+ native MCP tools.",
+      "If you prefer a smaller commitment without an LTD, start at just $1/month. 100% of your payment is converted into permanent usage credits (1,000 credits per dollar). They roll over every month and never expire, remaining yours even if you cancel your plan.",
   },
   {
-    question: "How does the $1 Credit Retainer work?",
+    question: "How does Model Context Protocol (MCP) integration work?",
     answer:
-      "If you prefer a smaller commitment, you can start with a micro-retainer from $1/month. 100% of your payment is converted into permanent usage credits (1,000 credits per dollar) that roll over and never expire, remaining yours even if you cancel.",
+      "Connect SeoTool.im directly to Claude Desktop, Claude Code, Cursor, or any agent framework via https://seotool.im/mcp. Your AI agents gain 32 native tools to audit websites, pull SERPs, extract keyword metrics, and track rankings right from your coding editor or chat.",
   },
   {
     question: "How are credits calculated and used?",
     answer:
-      "Credits act like a prepaid phone balance. Running a quick keyword ranking check costs 1 credit, an in-depth page audit costs 2 credits, checking a domain backlink profile costs 5 credits, scanning AI brand visibility costs 5 credits, and deep multi-AI research costs 20 credits. All unused credits roll over every month without expiring. High-volume agencies can switch to BYOK mode (Bring Your Own Key) to run unlimited queries directly at wholesale provider cost without consuming credit allowances.",
+      "Credits act like a prepaid phone balance. Running a quick keyword ranking check costs 1 credit, an in-depth page audit costs 2 credits, checking a domain backlink profile costs 5 credits, scanning AI brand visibility costs 5 credits, and deep multi-AI research costs 20 credits. All unused credits roll over every month without expiring. Users on BYOK mode bypass credit deductions entirely by using their own keys.",
   },
 ] as const;
 

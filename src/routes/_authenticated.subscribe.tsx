@@ -24,6 +24,7 @@ import {
   MONTHLY_CREDIT_PACKS,
   type MonthlyPlanTier,
 } from "@/shared/billing";
+import { APPSUMO_TIERS } from "@/shared/pricing-definitions";
 
 type Search = {
   checkout?: "success" | "cancelled";
@@ -35,6 +36,7 @@ type Search = {
   upgrade?: true;
   plan?: string;
   cohort?: string;
+  tier?: string;
   ltd?: boolean;
 };
 
@@ -71,6 +73,12 @@ export const Route = createFileRoute("/_authenticated/subscribe")({
       search.upgrade === true || search.upgrade === "true" ? true : undefined,
     plan: typeof search.plan === "string" ? search.plan : undefined,
     cohort: typeof search.cohort === "string" ? search.cohort : undefined,
+    tier:
+      typeof search.tier === "string"
+        ? search.tier
+        : typeof search.tier === "number"
+          ? String(search.tier)
+          : undefined,
     ltd: search.ltd === true || search.ltd === "true" ? true : undefined,
   }),
   component: SubscribePage,
@@ -231,9 +239,19 @@ function SubscribePage() {
 
   const cohort = membership.data?.currentCohort;
   const firstName = session?.user?.name?.split(" ")[0] ?? "";
-  const ltdPlanKey = search.cohort || cohort?.key || "krp_founder_10";
-  const ltdPriceDollars = Math.round((cohort?.priceUsdCents ?? 2900) / 100);
-  const ltdTitle = `Early Believer LTD (${cohort?.label ?? "Founder 10"})`;
+  const appsumoTierDef =
+    search.plan === "appsumo" && search.tier
+      ? APPSUMO_TIERS.find((t) => String(t.tier) === String(search.tier))
+      : undefined;
+  const ltdPlanKey = appsumoTierDef
+    ? `appsumo_tier_${appsumoTierDef.tier}`
+    : search.cohort || cohort?.key || "krp_founder_10";
+  const ltdPriceDollars = appsumoTierDef
+    ? appsumoTierDef.priceUsd
+    : Math.round((cohort?.priceUsdCents ?? 2900) / 100);
+  const ltdTitle = appsumoTierDef
+    ? `AppSumo Lifetime Deal (${appsumoTierDef.name} · ${appsumoTierDef.subtitle})`
+    : `Early Believer LTD (${cohort?.label ?? "Founder 10"})`;
 
   const activeMonthlyPack =
     MONTHLY_CREDIT_PACKS.find((p) => p.tier === selectedMonthlyTier) ??

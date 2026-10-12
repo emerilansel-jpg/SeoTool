@@ -33,7 +33,7 @@ export const TIER_HIGHLIGHTS: Record<PaidTier, TierHighlight> = {
       "25 keyword searches per day",
       "10 tracked keywords",
       "2 site audits per month",
-      `${MONTHLY_CREDIT_GRANTS.starter.toLocaleString()} permanent credits/month — every payment becomes credit that never expires`,
+      `${MONTHLY_CREDIT_GRANTS.starter.toLocaleString()} permanent credits/month. Every payment becomes credit that never expires`,
     ],
     badge: "Retainer",
     popular: false,

@@ -1,7 +1,7 @@
 // oxlint-disable max-lines
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check, Key, Lock, Users, Zap } from "lucide-react";
+import { ArrowRight, Check, Key, Lock, Sparkles, Users, Zap } from "lucide-react";
 import {
   MarketingChrome,
   useMarketingSession,
@@ -10,22 +10,28 @@ import { getPublicCohortPricing } from "@/serverFunctions/public-cohorts";
 import type { EffectiveKeywordProCohort } from "@/server/features/keywords/services/KeywordProConfigService";
 import { CreditPricingGuide } from "@/client/features/billing/CreditPricingGuide";
 import { MONTHLY_CREDIT_PACKS } from "@/shared/billing";
+import { APPSUMO_TIERS } from "@/shared/pricing-definitions";
 
 const FAQ_ITEMS = [
   {
-    question: "What is the Lifetime Deal (LTD)?",
+    question: "What is the Lifetime Deal (LTD)? How does the +$10 price jump work?",
     answer:
-      "A Lifetime Deal is a one-time payment for permanent access to SeoTool.im. No monthly subscription bills. Early buyers get reward pricing that increases by $10 as each batch sells out: Founder ($29) -> Early ($39) -> Growth ($49) -> Public ($59).",
+      "A Lifetime Deal is a one-time payment for permanent access to SeoTool.im. No recurring subscription bills. Early buyers get reward pricing that increases by $10 as each cohort sells out: Founder 10 ($29) -> Early 20 ($39) -> Growth 50 ($49) -> Public ($59). Once you claim a spot, you keep access for life.",
   },
   {
     question: "How does BYOK (Bring Your Own Key) work?",
     answer:
-      "With BYOK, you connect your own DataForSEO and AI provider API keys in Settings. You pay wholesale provider rates directly with zero platform markup. Perfect for high-volume analysis without artificial platform throttles.",
+      "With BYOK, you connect your own DataForSEO and AI provider API keys in Settings. We charge zero platform markup on your data. You pay raw provider rates (~$0.002 per scan) directly, allowing you to crawl and track at scale without limits.",
   },
   {
-    question: "How do Monthly Credit Packs work?",
+    question: "What are the official AppSumo Lifetime Deals?",
     answer:
-      "If you prefer not to bring your own API keys, subscribe to a monthly credit pack from $1 to $37 per month. Every payment converts into permanent usage credits. Higher tiers give you substantially cheaper credits per dollar.",
+      "For teams and agencies wanting bundled domain slots, multi-user seats, and white-label client PDF reports in one package, choose from our 5 official AppSumo tiers from $37 to $399 (all one-time payments). Tier 3 ($149) is our most popular Sweet Spot.",
+  },
+  {
+    question: "How does the $1/month Credit Retainer work?",
+    answer:
+      "If you prefer a micro commitment without an LTD, start at just $1/month. 100% of your dollar converts into 1,000 permanent usage credits per dollar ($1 = 1,000 credits). They roll over every month and never expire, remaining yours even if you cancel your plan.",
   },
   {
     question: "Do monthly credits expire?",
@@ -33,9 +39,9 @@ const FAQ_ITEMS = [
       "No. All subscription credits roll over every month and never expire, even if you cancel your plan later.",
   },
   {
-    question: "Can I cancel my monthly plan anytime?",
+    question: "Can I connect AI coding agents via MCP?",
     answer:
-      "Yes. You can cancel your recurring plan with one click from Billing at any time. Your accumulated credit balance stays yours to use.",
+      "Yes. SeoTool.im provides a native Model Context Protocol (MCP) server at https://seotool.im/mcp with 32 tools for Cursor, Claude Desktop, Claude Code, and autonomous AI agents.",
   },
 ] as const;
 
@@ -297,10 +303,90 @@ function MonthlyPacks({ signedIn }: { signedIn: boolean }) {
   );
 }
 
+function AppSumoTiers({ signedIn }: { signedIn: boolean }) {
+  return (
+    <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-5 items-stretch">
+      {APPSUMO_TIERS.map((tier) => (
+        <div
+          key={tier.tier}
+          className={`relative flex flex-col justify-between rounded-2xl border p-5 transition-all ${
+            tier.popular
+              ? "border-primary shadow-xl ring-2 ring-primary/40 bg-gradient-to-b from-primary/[0.04] to-base-100"
+              : "border-base-300 bg-base-100 hover:border-base-content/20 shadow-xs"
+          }`}
+        >
+          {tier.popular ? (
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary to-cyan-500 px-3 py-0.5 text-[10px] font-extrabold text-white shadow-sm">
+              ★ SWEET SPOT
+            </div>
+          ) : null}
+
+          <div>
+            <div className="flex items-center justify-between">
+              <h4 className="text-base font-bold text-base-content">
+                {tier.name}
+              </h4>
+              <span className="badge badge-sm badge-ghost text-[10px] font-semibold">
+                LTD
+              </span>
+            </div>
+
+            <p className="text-[11px] text-base-content/60 mt-1 min-h-[30px]">
+              {tier.subtitle}
+            </p>
+
+            <div className="mt-3 flex items-baseline gap-1 border-b border-base-200 pb-3">
+              <span className="text-3xl font-extrabold text-base-content">
+                ${tier.priceUsd}
+              </span>
+              <span className="text-[11px] text-base-content/50 font-medium">
+                / one-time
+              </span>
+            </div>
+
+            <ul className="mt-4 space-y-2 text-xs text-base-content/75">
+              {tier.features.map((f) => (
+                <li key={f} className="flex items-start gap-1.5">
+                  <Check className="size-3 text-success shrink-0 mt-0.5" />
+                  <span className="text-[11px] leading-tight">{f}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-6 pt-3 border-t border-base-200">
+            {signedIn ? (
+              <Link
+                to="/subscribe"
+                search={{ plan: "appsumo", tier: String(tier.tier) }}
+                className={`btn w-full btn-sm font-bold ${
+                  tier.popular ? "btn-primary shadow-sm" : "btn-outline"
+                }`}
+              >
+                Get Tier {tier.tier} (${tier.priceUsd})
+              </Link>
+            ) : (
+              <Link
+                to="/sign-up"
+                search={{ redirect: `/subscribe?plan=appsumo&tier=${tier.tier}` }}
+                className={`btn w-full btn-sm font-bold ${
+                  tier.popular ? "btn-primary shadow-sm" : "btn-outline"
+                }`}
+              >
+                Get Tier {tier.tier} (${tier.priceUsd})
+              </Link>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PricingPage() {
   const { signedIn } = useMarketingSession();
   const { cohorts } = Route.useLoaderData();
-  const [activeTab, setActiveTab] = useState<"ltd" | "monthly">("ltd");
+  const [activeTab, setActiveTab] = useState<"ltd" | "appsumo" | "monthly">("ltd");
 
   const currentCohort = cohorts.find(
     (c) => c.active && (c.capacity == null || c.occupied < c.capacity),
@@ -317,8 +403,8 @@ function PricingPage() {
             Choose How You Want to Pay
           </h1>
           <p className="mt-4 text-base text-base-content/70 md:text-lg">
-            Pay once with our BYOK Lifetime Deal, or subscribe to volume-discounted
-            monthly credit packs starting at just $1/month.
+            Pay once with our BYOK Lifetime Deal, choose an official AppSumo tier,
+            or start easy from $1/month ($1 = 1,000 permanent credits).
           </p>
 
           <div className="mt-8 flex justify-center">
@@ -326,25 +412,37 @@ function PricingPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("ltd")}
-                className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs md:text-sm font-bold transition-all ${
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs md:text-sm font-bold transition-all ${
                   activeTab === "ltd"
                     ? "bg-primary text-white shadow-sm"
                     : "text-base-content/70 hover:text-base-content"
                 }`}
               >
                 <Zap className="size-4" />
-                Lifetime Deal (BYOK)
+                Early Believer LTD (BYOK)
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("appsumo")}
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs md:text-sm font-bold transition-all ${
+                  activeTab === "appsumo"
+                    ? "bg-primary text-white shadow-sm"
+                    : "text-base-content/70 hover:text-base-content"
+                }`}
+              >
+                <Sparkles className="size-4" />
+                AppSumo Deals (5 Tiers)
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("monthly")}
-                className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs md:text-sm font-bold transition-all ${
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs md:text-sm font-bold transition-all ${
                   activeTab === "monthly"
                     ? "bg-primary text-white shadow-sm"
                     : "text-base-content/70 hover:text-base-content"
                 }`}
               >
-                Monthly Credit Packs ($1 - $37)
+                $1/mo Retainer & Monthly
               </button>
             </div>
           </div>
@@ -355,7 +453,7 @@ function PricingPage() {
             <div className="mx-auto mb-8 max-w-3xl rounded-xl border border-primary/30 bg-primary/[0.04] p-5 text-center">
               <div className="flex items-center justify-center gap-2 text-primary font-bold text-sm">
                 <Lock className="size-4" />
-                <span>Pay Once, Keep Forever — Price Increases $10 Every Batch</span>
+                <span>Pay Once, Keep Forever. Price Increases $10 Every Batch</span>
               </div>
               <p className="mt-2 text-xs md:text-sm text-base-content/75 leading-relaxed">
                 Pay a single one-time fee for lifetime platform access. Powered by{" "}
@@ -377,15 +475,32 @@ function PricingPage() {
           </div>
         )}
 
+        {activeTab === "appsumo" && (
+          <div className="mt-12">
+            <div className="mx-auto mb-8 max-w-3xl rounded-xl border border-primary/30 bg-primary/[0.04] p-5 text-center">
+              <div className="flex items-center justify-center gap-2 text-primary font-bold text-sm">
+                <Sparkles className="size-4" />
+                <span>Official AppSumo Lifetime Deals (5 Tier Plans)</span>
+              </div>
+              <p className="mt-2 text-xs md:text-sm text-base-content/75 leading-relaxed">
+                All-in-one lifetime packages with bundled domains, team seats, and white-label client PDF reports.
+                Tier 3 ($149) is our most popular Sweet Spot!
+              </p>
+            </div>
+
+            <AppSumoTiers signedIn={signedIn} />
+          </div>
+        )}
+
         {activeTab === "monthly" && (
           <div className="mt-12">
             <div className="mx-auto mb-8 max-w-3xl rounded-xl border border-base-300 bg-base-200/40 p-5 text-center">
               <h3 className="text-base font-bold text-base-content">
-                Volume Credit Packs — Bigger Level, Cheaper Credits
+                Micro Retainer & Monthly Credit Packs ($1 = 1,000 Credits)
               </h3>
               <p className="mt-1 text-xs md:text-sm text-base-content/70">
-                100% of your subscription turns into usage credits. Credits roll over every month
-                and never expire, even if you cancel.
+                100% of your subscription turns into permanent usage credits. Every $1 = 1,000 credits.
+                Credits roll over every month and never expire, even if you cancel.
               </p>
             </div>
 

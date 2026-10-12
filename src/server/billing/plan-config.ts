@@ -63,12 +63,13 @@ async function loadConfigs(): Promise<EffectivePlanConfigs> {
   const configs = {} as EffectivePlanConfigs;
   for (const tier of PLAN_TIERS) {
     const row = byTier.get(tier);
+    const paypalPlanId = row?.paypalPlanId ?? DEFAULT_PAYPAL_PLAN_IDS[tier] ?? null;
     configs[tier] = {
       tier,
       priceUsdCents: row?.priceUsdCents ?? PLAN_PRICES_USD[tier] * 100,
       monthlyCredits: row?.monthlyCredits ?? MONTHLY_CREDIT_GRANTS[tier],
-      paypalPlanId: row?.paypalPlanId ?? DEFAULT_PAYPAL_PLAN_IDS[tier] ?? null,
-      active: row?.active ?? true,
+      paypalPlanId,
+      active: row?.active ?? (tier === "free" || Boolean(paypalPlanId)),
       syncStatus: row?.syncStatus ?? "synced",
       priceSource: row ? "db" : "default",
       creditsSource: row ? "db" : "default",

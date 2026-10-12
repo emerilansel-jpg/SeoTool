@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { AppError } from "@/server/lib/errors";
 import { getEffectivePaypalPlanId } from "@/server/billing/plan-config";
 import {
@@ -48,6 +49,41 @@ export const LTD_OFFERS: Record<
     tier: "byok",
     bonusCredits: 5000,
     description: "SeoTool.im Early Believer Lifetime Deal (Public - BYOK)",
+  },
+  appsumo_tier_1: {
+    priceUsd: 37,
+    title: "AppSumo Tier 1",
+    tier: "byok",
+    bonusCredits: 1500,
+    description: "SeoTool.im AppSumo Lifetime Deal - Tier 1",
+  },
+  appsumo_tier_2: {
+    priceUsd: 79,
+    title: "AppSumo Tier 2",
+    tier: "byok",
+    bonusCredits: 5000,
+    description: "SeoTool.im AppSumo Lifetime Deal - Tier 2",
+  },
+  appsumo_tier_3: {
+    priceUsd: 149,
+    title: "AppSumo Tier 3",
+    tier: "standard",
+    bonusCredits: 10000,
+    description: "SeoTool.im AppSumo Lifetime Deal - Tier 3 (Sweet Spot)",
+  },
+  appsumo_tier_4: {
+    priceUsd: 249,
+    title: "AppSumo Tier 4",
+    tier: "pro",
+    bonusCredits: 25000,
+    description: "SeoTool.im AppSumo Lifetime Deal - Tier 4",
+  },
+  appsumo_tier_5: {
+    priceUsd: 399,
+    title: "AppSumo Tier 5",
+    tier: "agency",
+    bonusCredits: 50000,
+    description: "SeoTool.im AppSumo Lifetime Deal - Tier 5",
   },
 };
 

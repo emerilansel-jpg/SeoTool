@@ -22,12 +22,12 @@ export const LOW_CREDITS_THRESHOLD_USD = 0.25;
  *  it lives here rather than in the server-only credits service. */
 export const MONTHLY_CREDIT_GRANTS: Record<PlanTier, number> = {
   free: 100,
-  starter: 3_000,
-  lite: 25_000,
-  standard: 70_000,
-  pro: 125_000,
-  agency: 190_000,
-  byok: 500,
+  starter: 1_000,
+  lite: 7_000,
+  standard: 17_000,
+  pro: 27_000,
+  agency: 37_000,
+  byok: 5_000,
 };
 
 /** Monthly credit packs convert every successful payment into permanent
@@ -65,35 +65,35 @@ export const MONTHLY_CREDIT_PACKS: readonly MonthlyCreditPack[] = [
     tier: "starter",
     name: "Micro",
     priceUsd: 1,
-    credits: 3_000,
+    credits: 1_000,
   },
   {
     key: "builder",
     tier: "lite",
     name: "Builder",
     priceUsd: 7,
-    credits: 25_000,
+    credits: 7_000,
   },
   {
     key: "business",
     tier: "standard",
     name: "Business",
     priceUsd: 17,
-    credits: 70_000,
+    credits: 17_000,
   },
   {
     key: "scale",
     tier: "pro",
     name: "Scale",
     priceUsd: 27,
-    credits: 125_000,
+    credits: 27_000,
   },
   {
     key: "power",
     tier: "agency",
     name: "Power",
     priceUsd: 37,
-    credits: 190_000,
+    credits: 37_000,
   },
 ] as const;
 

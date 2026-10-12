@@ -158,24 +158,13 @@ export const AdminSettingsService = {
 
     const configs = await getEffectivePlanConfigs();
     const activePaidConfigs = Object.values(configs).filter(
-      (config) => config.tier !== "free" && config.active,
+      (config) => config.tier !== "free" && config.active && Boolean(config.paypalPlanId),
     );
-    if (activePaidConfigs.length === 0) {
-      throw new AppError(
-        "VALIDATION_ERROR",
-        "No active paid plan is configured.",
-      );
-    }
 
     try {
       const basePlans = await Promise.all(
         activePaidConfigs.map(async (config) => {
-          if (!config.paypalPlanId) {
-            throw new AppError(
-              "VALIDATION_ERROR",
-              `${config.tier} is active but has no PayPal plan ID.`,
-            );
-          }
+          if (!config.paypalPlanId) return null;
           const plan = await paypal.billingPlans.get(config.paypalPlanId);
           if (plan.status !== "ACTIVE") {
             throw new AppError(
@@ -210,15 +199,10 @@ export const AdminSettingsService = {
 
       const keywordProCohorts = (
         await KeywordProConfigService.getCohorts()
-      ).filter((cohort) => cohort.active);
+      ).filter((cohort) => cohort.active && Boolean(cohort.paypalPlanId));
       const keywordProPlans = await Promise.all(
         keywordProCohorts.map(async (cohort) => {
-          if (!cohort.paypalPlanId) {
-            throw new AppError(
-              "VALIDATION_ERROR",
-              `${cohort.label} is active but has no PayPal plan ID. Use Set up PayPal plans in Admin > Pricing.`,
-            );
-          }
+          if (!cohort.paypalPlanId) return null;
           const plan = await paypal.billingPlans.get(cohort.paypalPlanId);
           const regularCycle = plan.billing_cycles?.find(
             (cycle) => cycle.tenure_type === "REGULAR",
@@ -244,7 +228,14 @@ export const AdminSettingsService = {
         }),
       );
 
-      return { mode: mode, plans: [...basePlans, ...keywordProPlans] };
+      const validBasePlans = basePlans.filter(
+        (p): p is NonNullable<typeof p> => p !== null,
+      );
+      const validCohortPlans = keywordProPlans.filter(
+        (p): p is NonNullable<typeof p> => p !== null,
+      );
+
+      return { mode, plans: [...validBasePlans, ...validCohortPlans] };
     } catch (error) {
       if (error instanceof AppError) throw error;
       const message = error instanceof Error ? error.message : String(error);

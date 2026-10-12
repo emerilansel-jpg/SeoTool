@@ -227,7 +227,7 @@ describe("plan config: effective merge", () => {
     planRepo.listAll.mockResolvedValue([]);
     const configs = await getEffectivePlanConfigs();
     expect(configs.lite.priceUsdCents).toBe(700);
-    expect(configs.pro.monthlyCredits).toBe(125000);
+    expect(configs.pro.monthlyCredits).toBe(27000);
     expect(configs.free.paypalPlanId).toBeNull();
     expect(configs.lite.priceSource).toBe("default");
   });
