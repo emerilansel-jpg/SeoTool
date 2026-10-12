@@ -21,11 +21,11 @@ const SKILL_NAMES = [
   "competitor-analysis",
   "link-prospecting",
 ];
-const SKILLS_INSTALL = `npx skills add emerilansel-jpg/SeoTool`;
-const ALL_SKILLS_INSTALL = `npx skills add emerilansel-jpg/SeoTool --skill '*'`;
-const CLAUDE_CODE_SKILLS_INSTALL = `npx skills add emerilansel-jpg/SeoTool --skill '*' --agent claude-code`;
-const CODEX_SKILLS_INSTALL = `npx skills add emerilansel-jpg/SeoTool --skill '*' --agent codex`;
-const SKILLS_MANUAL_INSTALL = `git clone https://github.com/emerilansel-jpg/SeoTool.git
+const SKILLS_INSTALL = `npx skills add seotool-im/skills`;
+const ALL_SKILLS_INSTALL = `npx skills add seotool-im/skills --skill '*'`;
+const CLAUDE_CODE_SKILLS_INSTALL = `npx skills add seotool-im/skills --skill '*' --agent claude-code`;
+const CODEX_SKILLS_INSTALL = `npx skills add seotool-im/skills --skill '*' --agent codex`;
+const SKILLS_MANUAL_INSTALL = `git clone https://github.com/seotool-im/seotool.git
 
 # Codex
 mkdir -p ~/.codex/skills

@@ -520,10 +520,10 @@ function AgentSection() {
                 <WindowDots />
                 <div className="flex items-center gap-1 text-xs">
                   <span className="rounded-md bg-base-200 px-2.5 py-1 font-semibold text-base-content">
-                    Claude Code / Cursor
+                    Claude Code
                   </span>
                   <span className="rounded-md px-2.5 py-1 text-base-content/50">
-                    MCP
+                    CLI
                   </span>
                 </div>
               </div>
@@ -536,12 +536,17 @@ function AgentSection() {
             <div className="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
               <div className="flex items-center justify-between border-b border-base-300 px-4 py-2.5">
                 <WindowDots />
-                <span className="rounded-md bg-base-200 px-2.5 py-1 text-xs font-semibold text-base-content">
-                  CLI Skills
-                </span>
+                <div className="flex items-center gap-1 text-xs">
+                  <span className="rounded-md bg-base-200 px-2.5 py-1 font-semibold text-base-content">
+                    Cursor / Desktop
+                  </span>
+                  <span className="rounded-md px-2.5 py-1 text-base-content/50">
+                    mcp.json
+                  </span>
+                </div>
               </div>
               <div className="p-4 font-mono text-xs text-base-content/70 break-all">
-                <span className="text-base-content/40">$ </span>npx -y <span className="text-primary">skills add emerilansel-jpg/SeoTool</span>
+                &#123; "mcpServers": &#123; "seotool": &#123; "url": <span className="text-primary">"https://seotool.im/mcp"</span> &#125; &#125; &#125;
               </div>
             </div>
           </Reveal>
