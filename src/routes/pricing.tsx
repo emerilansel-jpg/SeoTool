@@ -385,11 +385,12 @@ function AppSumoTiers({ signedIn }: { signedIn: boolean }) {
 
 function PricingPage() {
   const { signedIn } = useMarketingSession();
-  const { cohorts } = Route.useLoaderData();
+  const { cohorts } = Route.useLoaderData() as LoaderData;
   const [activeTab, setActiveTab] = useState<"ltd" | "appsumo" | "monthly">("ltd");
 
   const currentCohort = cohorts.find(
-    (c) => c.active && (c.capacity == null || c.occupied < c.capacity),
+    (c: EffectiveKeywordProCohort) =>
+      c.active && (c.capacity == null || c.occupied < c.capacity),
   );
 
   return (

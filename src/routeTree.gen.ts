@@ -46,6 +46,7 @@ import { Route as PagesSlugRouteImport } from './routes/pages/$slug'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as AppHelpDataforseoApiKeyRouteImport } from './routes/_app/help/dataforseo-api-key'
 import { Route as AppHelpOpenrouterApiKeyRouteImport } from './routes/_app/help/openrouter-api-key'
+import { Route as AppHelpSiteAuditRouteImport } from './routes/_app/help/site-audit'
 import { Route as AuthenticatedOnboardingIndexRouteImport } from './routes/_authenticated.onboarding.index'
 import { Route as AuthenticatedOnboardingChatRouteImport } from './routes/_authenticated.onboarding.chat'
 import { Route as ProjectPProjectIdRouteRouteImport } from './routes/_project/p/$projectId/route'
@@ -280,6 +281,11 @@ const AppHelpDataforseoApiKeyRoute = AppHelpDataforseoApiKeyRouteImport.update({
 const AppHelpOpenrouterApiKeyRoute = AppHelpOpenrouterApiKeyRouteImport.update({
   id: '/help/openrouter-api-key',
   path: '/help/openrouter-api-key',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppHelpSiteAuditRoute = AppHelpSiteAuditRouteImport.update({
+  id: '/help/site-audit',
+  path: '/help/site-audit',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AuthenticatedOnboardingIndexRoute =
@@ -602,6 +608,7 @@ export interface FileRoutesByFullPath {
   '/p/$projectId': typeof ProjectPProjectIdRouteRouteWithChildren
   '/help/dataforseo-api-key': typeof AppHelpDataforseoApiKeyRoute
   '/help/openrouter-api-key': typeof AppHelpOpenrouterApiKeyRoute
+  '/help/site-audit': typeof AppHelpSiteAuditRoute
   '/onboarding/chat': typeof AuthenticatedOnboardingChatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/': typeof AppAdminIndexRoute
@@ -686,6 +693,7 @@ export interface FileRoutesByTo {
   '/blogs': typeof BlogsIndexRoute
   '/help/dataforseo-api-key': typeof AppHelpDataforseoApiKeyRoute
   '/help/openrouter-api-key': typeof AppHelpOpenrouterApiKeyRoute
+  '/help/site-audit': typeof AppHelpSiteAuditRoute
   '/onboarding/chat': typeof AuthenticatedOnboardingChatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin': typeof AppAdminIndexRoute
@@ -774,6 +782,7 @@ export interface FileRoutesById {
   '/_project/p/$projectId': typeof ProjectPProjectIdRouteRouteWithChildren
   '/_app/help/dataforseo-api-key': typeof AppHelpDataforseoApiKeyRoute
   '/_app/help/openrouter-api-key': typeof AppHelpOpenrouterApiKeyRoute
+  '/_app/help/site-audit': typeof AppHelpSiteAuditRoute
   '/_authenticated/onboarding/chat': typeof AuthenticatedOnboardingChatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_app/admin/': typeof AppAdminIndexRoute
@@ -862,6 +871,7 @@ export interface FileRouteTypes {
     | '/p/$projectId'
     | '/help/dataforseo-api-key'
     | '/help/openrouter-api-key'
+    | '/help/site-audit'
     | '/onboarding/chat'
     | '/api/auth/$'
     | '/admin/'
@@ -946,6 +956,7 @@ export interface FileRouteTypes {
     | '/blogs'
     | '/help/dataforseo-api-key'
     | '/help/openrouter-api-key'
+    | '/help/site-audit'
     | '/onboarding/chat'
     | '/api/auth/$'
     | '/admin'
@@ -1033,6 +1044,7 @@ export interface FileRouteTypes {
     | '/_project/p/$projectId'
     | '/_app/help/dataforseo-api-key'
     | '/_app/help/openrouter-api-key'
+    | '/_app/help/site-audit'
     | '/_authenticated/onboarding/chat'
     | '/api/auth/$'
     | '/_app/admin/'
@@ -1375,6 +1387,13 @@ declare module '@tanstack/react-router' {
       path: '/help/openrouter-api-key'
       fullPath: '/help/openrouter-api-key'
       preLoaderRoute: typeof AppHelpOpenrouterApiKeyRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/help/site-audit': {
+      id: '/_app/help/site-audit'
+      path: '/help/site-audit'
+      fullPath: '/help/site-audit'
+      preLoaderRoute: typeof AppHelpSiteAuditRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_authenticated/onboarding/': {
@@ -1780,6 +1799,7 @@ interface AppRouteRouteChildren {
   AppSupportRoute: typeof AppSupportRoute
   AppHelpDataforseoApiKeyRoute: typeof AppHelpDataforseoApiKeyRoute
   AppHelpOpenrouterApiKeyRoute: typeof AppHelpOpenrouterApiKeyRoute
+  AppHelpSiteAuditRoute: typeof AppHelpSiteAuditRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
@@ -1791,6 +1811,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppSupportRoute: AppSupportRoute,
   AppHelpDataforseoApiKeyRoute: AppHelpDataforseoApiKeyRoute,
   AppHelpOpenrouterApiKeyRoute: AppHelpOpenrouterApiKeyRoute,
+  AppHelpSiteAuditRoute: AppHelpSiteAuditRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
@@ -1999,13 +2020,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -54,6 +54,21 @@ function SupportPage() {
               )}
             </button>
           </div>
+
+          <Link
+            to="/help/site-audit"
+            className="block rounded-lg border border-base-300 px-5 py-4 transition-colors hover:border-base-content/20"
+          >
+            <p className="text-sm font-semibold">Site Audit Troubleshooting</p>
+            <p className="mt-1 text-sm text-base-content/60">
+              Guide to configure WAF firewalls, Cloudflare allow rules, and
+              robots.txt when audits stop early.
+            </p>
+            <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-base-content">
+              View troubleshooting guide
+              <span aria-hidden="true">&rarr;</span>
+            </span>
+          </Link>
 
           <a
             href={DISCORD_URL}

@@ -201,14 +201,13 @@ function AuditDetail({
               </div>
               <p className="text-xs text-base-content/70">
                 Read our{" "}
-                <a
-                  className="link link-primary font-medium"
-                  href="https://github.com/emerilansel-jpg/SeoTool/blob/main/docs/SITE_AUDIT_TROUBLESHOOTING.md"
+                <Link
+                  to="/help/site-audit"
                   target="_blank"
-                  rel="noreferrer"
+                  className="link link-primary font-medium"
                 >
                   troubleshooting guide
-                </a>
+                </Link>
                 , visit{" "}
                 <Link to="/support" className="link link-primary font-medium">
                   Help &amp; Support
