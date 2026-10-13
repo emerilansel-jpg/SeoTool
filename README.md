@@ -31,7 +31,7 @@ Try SeoTool.im for free on our website. If you want to support the project, a ho
 - Rank tracking
 - Competitor Insights
 - Backlinks
-- Site Audits
+- Site Audits ([Troubleshooting Crawl Issues](./docs/SITE_AUDIT_TROUBLESHOOTING.md))
 - AI Visibility
 
 ## SeoTool.im MCP & Agent Skills

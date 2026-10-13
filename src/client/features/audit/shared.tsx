@@ -1,6 +1,8 @@
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 
-export const SUPPORT_URL = "https://everyapp.dev/support";
+export const SUPPORT_URL = "/support";
+export const SUPPORT_EMAIL = "support@seotool.im";
+export const CRAWLER_USER_AGENT = "SeoTool.im-Audit/1.0";
 
 export function extractPathname(url: string): string {
   try {

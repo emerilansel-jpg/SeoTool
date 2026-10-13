@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { AlertCircle, Loader2, Square } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -15,12 +15,13 @@ import type { z } from "zod";
 import { LaunchView } from "@/client/features/audit/launch/LaunchView";
 import { ResultsView } from "@/client/features/audit/results/ResultsView";
 import {
+  CRAWLER_USER_AGENT,
   extractHostname,
   extractPathname,
   formatStartedAt,
   HttpStatusBadge,
   StatusBadge,
-  SUPPORT_URL,
+  SUPPORT_EMAIL,
 } from "@/client/features/audit/shared";
 
 type Search = z.infer<typeof auditSearchSchema>;
@@ -166,23 +167,60 @@ function AuditDetail({
           <div
             className={isFailed ? "alert alert-error" : "alert alert-warning"}
           >
-            <AlertCircle className="size-5" />
-            <div className="space-y-1">
-              <p className="font-medium">
+            <AlertCircle className="size-5 shrink-0" />
+            <div className="space-y-2 text-sm">
+              <p className="font-semibold text-base">
                 Site audit couldn't fully crawl this website.
               </p>
-              <p>
-                This is often caused by anti-bot or firewall settings. Reach out
-                at{" "}
+              <p className="text-base-content/80">
+                This is usually caused by firewall/anti-bot protection or
+                robots.txt restrictions blocking our crawler.
+              </p>
+              <div className="rounded bg-base-200/50 p-2.5 space-y-1 text-xs">
+                <p className="font-medium text-base-content">How to fix:</p>
+                <ul className="list-disc pl-4 space-y-1 text-base-content/70">
+                  <li>
+                    <strong>Allowlist Crawler:</strong> Add an allow rule in
+                    Cloudflare or your WAF for User-Agent:{" "}
+                    <code className="font-mono bg-base-300 px-1 py-0.5 rounded">
+                      {CRAWLER_USER_AGENT}
+                    </code>
+                  </li>
+                  <li>
+                    <strong>Check robots.txt:</strong> Ensure{" "}
+                    <code className="font-mono">robots.txt</code> allows
+                    crawling for this user-agent.
+                  </li>
+                  <li>
+                    <strong>Sitemap &amp; SPA:</strong> If your site is
+                    client-rendered (SPA), ensure{" "}
+                    <code className="font-mono">/sitemap.xml</code> is
+                    accessible so pages can be discovered.
+                  </li>
+                </ul>
+              </div>
+              <p className="text-xs text-base-content/70">
+                Read our{" "}
                 <a
-                  className="link link-primary"
-                  href={SUPPORT_URL}
+                  className="link link-primary font-medium"
+                  href="https://github.com/emerilansel-jpg/SeoTool/blob/main/docs/SITE_AUDIT_TROUBLESHOOTING.md"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  everyapp.dev/support
-                </a>{" "}
-                and we'll help configure auditing for your site.
+                  troubleshooting guide
+                </a>
+                , visit{" "}
+                <Link to="/support" className="link link-primary font-medium">
+                  Help &amp; Support
+                </Link>
+                , or contact{" "}
+                <a
+                  className="link link-primary font-medium"
+                  href={`mailto:${SUPPORT_EMAIL}`}
+                >
+                  {SUPPORT_EMAIL}
+                </a>
+                .
               </p>
             </div>
           </div>
