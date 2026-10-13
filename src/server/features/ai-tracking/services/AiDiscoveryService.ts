@@ -277,10 +277,31 @@ export const AiDiscoveryService = {
       const domain = config.domain;
       let fallbackPrompts: string[] = [];
 
+      const langCode = (config.languageCode || "en").toLowerCase();
+      const langNames: Record<string, string> = {
+        id: "Indonesian (Bahasa Indonesia)",
+        en: "English",
+        es: "Spanish",
+        de: "German",
+        fr: "French",
+        it: "Italian",
+        pt: "Portuguese",
+        nl: "Dutch",
+        ja: "Japanese",
+        zh: "Chinese",
+        ko: "Korean",
+        ar: "Arabic",
+        ru: "Russian",
+        vi: "Vietnamese",
+        th: "Thai",
+      };
+      const languageName = langNames[langCode] ?? "English";
+
       try {
         const model = await getChatAgentModel();
         const prompt = `You are an SEO & Answer Engine Optimization expert.
-Generate 8 realistic, varied search questions that real users would ask ChatGPT, Claude, Gemini, or Perplexity when researching "${brand}" (website: "${domain}", aliases: "${brandAliases.join(", ")}").
+Generate 8 realistic, varied search questions that real users would ask ChatGPT, Claude, Gemini, or Perplexity in ${languageName} language when researching "${brand}" (website: "${domain}", aliases: "${brandAliases.join(", ")}").
+IMPORTANT: The questions MUST be written in ${languageName} language, matching natural phrasing of local searchers.
 Include questions asking what it is, its services, reviews, reputation, alternatives, and comparisons.
 Return ONLY a valid JSON array of strings, e.g. ["Prompt 1", "Prompt 2"]. Do not include markdown code blocks or commentary.`;
         const res = await generateText({ model, prompt, maxOutputTokens: 600 });
@@ -299,16 +320,40 @@ Return ONLY a valid JSON array of strings, e.g. ["Prompt 1", "Prompt 2"]. Do not
       }
 
       if (fallbackPrompts.length === 0) {
-        fallbackPrompts = [
-          `What is ${brand} and what services do they provide?`,
-          `Is ${brand} good and reliable? Customer reviews`,
-          `Top alternatives and competitors to ${brand}`,
-          `How much does ${brand} (${domain}) cost?`,
-          `Features and capabilities of ${brand}`,
-          `How does ${brand} compare to other industry providers?`,
-          `Who is ${brand} best suited for?`,
-          `Customer feedback and experience with ${brand}`,
-        ];
+        if (langCode === "id") {
+          fallbackPrompts = [
+            `Apa itu ${brand} dan apa layanan yang disediakan?`,
+            `Apakah ${brand} bagus dan terpercaya? Review pelanggan`,
+            `Top alternatif dan kompetitor terbaik untuk ${brand}`,
+            `Berapa biaya / harga layanan di ${brand} (${domain})?`,
+            `Fitur dan keunggulan layanan ${brand}`,
+            `Bagaimana ulasan dan pengalaman pengguna tentang ${brand}?`,
+            `Layanan ${brand} cocok untuk siapa?`,
+            `Testimoni dan review seputar ${brand}`,
+          ];
+        } else if (langCode === "es") {
+          fallbackPrompts = [
+            `¿Qué es ${brand} y qué servicios ofrece?`,
+            `¿Es confiable y recomendable ${brand}? Opiniones de clientes`,
+            `Mejores alternativas y competidores de ${brand}`,
+            `¿Cuánto cuesta el servicio en ${brand} (${domain})?`,
+            `Características y ventajas de ${brand}`,
+            `¿Cómo se compara ${brand} con otros proveedores?`,
+            `¿Para quién está recomendado ${brand}?`,
+            `Opiniones y experiencia de clientes con ${brand}`,
+          ];
+        } else {
+          fallbackPrompts = [
+            `What is ${brand} and what services do they provide?`,
+            `Is ${brand} good and reliable? Customer reviews`,
+            `Top alternatives and competitors to ${brand}`,
+            `How much does ${brand} (${domain}) cost?`,
+            `Features and capabilities of ${brand}`,
+            `How does ${brand} compare to other industry providers?`,
+            `Who is ${brand} best suited for?`,
+            `Customer feedback and experience with ${brand}`,
+          ];
+        }
       }
 
       for (const p of fallbackPrompts) {

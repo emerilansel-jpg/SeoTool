@@ -44,6 +44,8 @@ export const AiTrackingRepository = {
           platforms: platformsJson,
           schedule: input.schedule,
           scheduleStatus: input.scheduleStatus,
+          locationCode: input.locationCode ?? existing.locationCode ?? 2840,
+          languageCode: input.languageCode ?? existing.languageCode ?? "en",
           updatedAt: now,
         })
         .where(
@@ -52,7 +54,13 @@ export const AiTrackingRepository = {
             eq(aiTrackingConfigs.projectId, projectId),
           ),
         );
-      return { ...existing, ...input, updatedAt: now };
+      return {
+        ...existing,
+        ...input,
+        locationCode: input.locationCode ?? existing.locationCode ?? 2840,
+        languageCode: input.languageCode ?? existing.languageCode ?? "en",
+        updatedAt: now,
+      };
     }
 
     const newConfig = {
@@ -64,6 +72,8 @@ export const AiTrackingRepository = {
       platforms: platformsJson,
       schedule: input.schedule,
       scheduleStatus: input.scheduleStatus,
+      locationCode: input.locationCode ?? 2840,
+      languageCode: input.languageCode ?? "en",
       nextRunAt: null,
       lastRunAt: null,
       createdAt: now,

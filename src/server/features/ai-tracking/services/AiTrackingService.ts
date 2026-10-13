@@ -84,6 +84,32 @@ function findBestGscMatch(
   return bestMatch;
 }
 
+function getDefaultLocalizedPrompts(brandName: string, lang = "en"): string[] {
+  const code = (lang || "en").toLowerCase();
+  if (code === "id") {
+    return [
+      `Apa itu ${brandName}?`,
+      `Layanan dan produk apa saja yang ditawarkan ${brandName}?`,
+      `Review dan reputasi ${brandName}`,
+      `Top alternatif dan kompetitor untuk ${brandName}`,
+    ];
+  }
+  if (code === "es") {
+    return [
+      `¿Qué es ${brandName}?`,
+      `¿Qué servicios y productos ofrece ${brandName}?`,
+      `Opiniones y reputación de ${brandName}`,
+      `Principales alternativas y competidores de ${brandName}`,
+    ];
+  }
+  return [
+    `What is ${brandName}?`,
+    `What services and products does ${brandName} offer?`,
+    `Reviews and reputation of ${brandName}`,
+    `Top alternatives and competitors to ${brandName}`,
+  ];
+}
+
 export const AiTrackingService = {
   async getConfig(projectId: string) {
     const config = await AiTrackingRepository.getConfig(projectId);
@@ -129,12 +155,10 @@ export const AiTrackingService = {
     // If config has no prompts yet, auto-seed default high-intent brand prompts
     const existingPrompts = await AiTrackingRepository.listPrompts(config.id);
     if (existingPrompts.length === 0) {
-      const defaultPrompts = [
-        `What is ${input.brandName}?`,
-        `What services and products does ${input.brandName} offer?`,
-        `Reviews and reputation of ${input.brandName}`,
-        `Top alternatives and competitors to ${input.brandName}`,
-      ];
+      const defaultPrompts = getDefaultLocalizedPrompts(
+        input.brandName,
+        input.languageCode,
+      );
       await AiTrackingRepository.addPrompts(config.id, defaultPrompts);
       await AiTrackingRepository.upsertDiscoveredPrompts(
         config.id,
@@ -226,12 +250,10 @@ export const AiTrackingService = {
 
     let activePrompts = await AiTrackingRepository.getActivePrompts(config.id);
     if (activePrompts.length === 0) {
-      const defaultPrompts = [
-        `What is ${config.brandName}?`,
-        `What services and products does ${config.brandName} offer?`,
-        `Reviews and reputation of ${config.brandName}`,
-        `Top alternatives and competitors to ${config.brandName}`,
-      ];
+      const defaultPrompts = getDefaultLocalizedPrompts(
+        config.brandName,
+        config.languageCode,
+      );
       await AiTrackingRepository.addPrompts(config.id, defaultPrompts);
       activePrompts = await AiTrackingRepository.getActivePrompts(config.id);
     }

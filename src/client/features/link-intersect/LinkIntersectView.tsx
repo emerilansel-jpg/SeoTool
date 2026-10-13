@@ -128,10 +128,10 @@ export function LinkIntersectView({ projectId }: { projectId: string }) {
   });
   const project = projectsQuery.data?.find((p) => p.id === projectId);
 
-  const [targetInput, setTargetInput] = useState("");
+  const [targetInput, setTargetInput] = useState<string | null>(null);
   const [competitorsText, setCompetitorsText] = useState("");
   // Seeded once the project's own domain resolves.
-  const target = targetInput || project?.domain || "";
+  const target = targetInput !== null ? targetInput : (project?.domain ?? "");
 
   const [formError, setFormError] = useState<string | null>(null);
 

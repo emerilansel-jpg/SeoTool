@@ -92,22 +92,51 @@ function flattenIntersectItem(
     : undefined;
   const summary = isRecord(record.summary) ? record.summary : undefined;
 
+  let resolvedDomain: string | null =
+    typeof record.domain === "string" ? record.domain : null;
+  let maxRank: number | null =
+    typeof summary?.rank === "number" ? summary.rank : null;
+  let sumBacklinks = 0;
+  let hasBacklinksValue = typeof summary?.backlinks === "number";
+  if (hasBacklinksValue) {
+    sumBacklinks = summary?.backlinks as number;
+  }
+
   const intersection: Record<string, unknown> = {};
   if (domainIntersection) {
     for (const [key, value] of Object.entries(domainIntersection)) {
       // Map the numeric key back to the original target domain for readability.
       const targetDomain = targets[key] ?? key;
       intersection[targetDomain] = value;
+      if (isRecord(value)) {
+        if (!resolvedDomain && typeof value.target === "string") {
+          resolvedDomain = value.target;
+        }
+        if (typeof value.rank === "number") {
+          maxRank =
+            maxRank != null ? Math.max(maxRank, value.rank) : value.rank;
+        }
+        if (typeof value.backlinks === "number") {
+          sumBacklinks += value.backlinks;
+          hasBacklinksValue = true;
+        }
+      }
     }
   }
 
   return {
-    domain: record.domain ?? null,
+    domain: resolvedDomain,
     intersection,
-    summary_rank: summary?.rank ?? null,
-    summary_backlinks: summary?.backlinks ?? null,
-    summary_referring_domains: summary?.referring_domains ?? null,
-    summary_referring_pages: summary?.referring_pages ?? null,
+    summary_rank: maxRank,
+    summary_backlinks: hasBacklinksValue ? sumBacklinks : null,
+    summary_referring_domains:
+      typeof summary?.referring_domains === "number"
+        ? summary.referring_domains
+        : null,
+    summary_referring_pages:
+      typeof summary?.referring_pages === "number"
+        ? summary.referring_pages
+        : null,
   };
 }
 

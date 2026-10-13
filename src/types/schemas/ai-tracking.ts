@@ -43,6 +43,8 @@ export const saveAiTrackingConfigSchema = z.object({
     .min(1, "Select at least one platform"),
   schedule: aiTrackingScheduleSchema.default("manual"),
   scheduleStatus: aiTrackingScheduleStatusSchema.default("idle"),
+  locationCode: z.number().int().default(2840),
+  languageCode: z.string().trim().default("en"),
 });
 
 export type SaveAiTrackingConfigInput = z.infer<

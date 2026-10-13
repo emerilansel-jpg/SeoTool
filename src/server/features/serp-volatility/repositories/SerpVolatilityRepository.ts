@@ -88,7 +88,6 @@ async function getCompletedFullRuns(projectId: string, since?: string) {
       and(
         eq(rankCheckRuns.projectId, projectId),
         eq(rankCheckRuns.status, "completed"),
-        eq(rankCheckRuns.isSubsetRun, false),
         since ? gte(rankCheckRuns.startedAt, since) : undefined,
       ),
     )

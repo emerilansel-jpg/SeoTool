@@ -98,11 +98,20 @@ export function buildKeywordChanges(
   latestSnapshots: RankSnapshot[],
   previousSnapshots: RankSnapshot[],
   unrankedPosition: number,
+  fallbackOlderSnapshots?: RankSnapshot[],
 ): KeywordPositionChange[] {
   const latest = new Map(latestSnapshots.map((row) => [snapshotKey(row), row]));
   const previous = new Map(
     previousSnapshots.map((row) => [snapshotKey(row), row]),
   );
+  if (fallbackOlderSnapshots) {
+    for (const row of fallbackOlderSnapshots) {
+      const key = snapshotKey(row);
+      if (!previous.has(key)) {
+        previous.set(key, row);
+      }
+    }
+  }
   const keys = new Set([...latest.keys(), ...previous.keys()]);
 
   return [...keys].map((key) => {
@@ -130,10 +139,16 @@ function groupSnapshotsByRun(snapshots: RankSnapshot[]) {
 function buildSnapshotData(
   pairs: RunPair[],
   snapshotsByRun: Map<string, RankSnapshot[]>,
+  allSnapshots?: RankSnapshot[],
 ) {
   const changes = pairs.flatMap(({ latest, previous }) => {
     const latestSnapshots = snapshotsByRun.get(latest.id) ?? [];
     const previousSnapshots = snapshotsByRun.get(previous.id) ?? [];
+    const olderSnapshots = allSnapshots
+      ? allSnapshots.filter(
+          (s) => s.runId !== latest.id && s.runId !== previous.id,
+        )
+      : undefined;
     const maxObservedPosition = Math.max(
       0,
       ...latestSnapshots.map((row) => row.position ?? 0),
@@ -143,6 +158,7 @@ function buildSnapshotData(
       latestSnapshots,
       previousSnapshots,
       maxObservedPosition + 1,
+      olderSnapshots,
     );
   });
 
@@ -167,13 +183,20 @@ async function persistComparison(
   projectId: string,
   date: string,
   pairs: RunPair[],
+  additionalRunIds: string[] = [],
 ) {
-  const runIds = pairs.flatMap(({ latest, previous }) => [
-    latest.id,
-    previous.id,
-  ]);
+  const runIds = [
+    ...new Set([
+      ...pairs.flatMap(({ latest, previous }) => [latest.id, previous.id]),
+      ...additionalRunIds,
+    ]),
+  ];
   const snapshots = await SerpVolatilityRepository.getSnapshotsForRuns(runIds);
-  const snapshotData = buildSnapshotData(pairs, groupSnapshotsByRun(snapshots));
+  const snapshotData = buildSnapshotData(
+    pairs,
+    groupSnapshotsByRun(snapshots),
+    snapshots,
+  );
   if (!snapshotData) return null;
 
   const { topMovers, ...persisted } = snapshotData;
@@ -204,7 +227,8 @@ async function computeVolatility(projectId: string) {
     .map(({ latest }) => latest.startedAt.slice(0, 10))
     .toSorted()
     .at(-1)!;
-  const result = await persistComparison(projectId, date, pairs);
+  const recentRunIds = runs.slice(0, 10).map((r) => r.id);
+  const result = await persistComparison(projectId, date, pairs, recentRunIds);
   if (!result) {
     throw new AppError(
       "VALIDATION_ERROR",

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Modal } from "@/client/components/Modal";
+import { LocationSelect } from "@/client/components/LocationSelect";
+import { getLanguageCode } from "@/shared/keyword-locations";
 import type {
   AiTrackingPlatform,
   SaveAiTrackingConfigInput,
@@ -13,6 +15,8 @@ interface Props {
     platforms: AiTrackingPlatform[];
     schedule: "manual" | "daily" | "weekly";
     scheduleStatus: "idle" | "active" | "paused";
+    locationCode?: number;
+    languageCode?: string;
   } | null;
   onSave: (
     input: Omit<SaveAiTrackingConfigInput, "projectId">,
@@ -26,6 +30,24 @@ const ALL_PLATFORMS: Array<{ id: AiTrackingPlatform; label: string }> = [
   { id: "gemini", label: "Gemini" },
   { id: "perplexity", label: "Perplexity" },
   { id: "claude", label: "Claude" },
+];
+
+const POPULAR_LANGUAGES = [
+  { code: "id", label: "Indonesian (Bahasa Indonesia)" },
+  { code: "en", label: "English" },
+  { code: "es", label: "Spanish (Español)" },
+  { code: "fr", label: "French (Français)" },
+  { code: "de", label: "German (Deutsch)" },
+  { code: "pt", label: "Portuguese (Português)" },
+  { code: "it", label: "Italian (Italiano)" },
+  { code: "nl", label: "Dutch (Nederlands)" },
+  { code: "ja", label: "Japanese (日本語)" },
+  { code: "zh", label: "Chinese (中文)" },
+  { code: "ko", label: "Korean (한국어)" },
+  { code: "ar", label: "Arabic (العربية)" },
+  { code: "vi", label: "Vietnamese (Tiếng Việt)" },
+  { code: "th", label: "Thai (ไทย)" },
+  { code: "ru", label: "Russian (Русский)" },
 ];
 
 export function AiTrackingSetupModal({
@@ -47,6 +69,12 @@ export function AiTrackingSetupModal({
   const [schedule, setSchedule] = useState<"manual" | "daily" | "weekly">(
     initialConfig?.schedule ?? "manual",
   );
+  const [locationCode, setLocationCode] = useState<number>(
+    initialConfig?.locationCode ?? 2840,
+  );
+  const [languageCode, setLanguageCode] = useState<string>(
+    initialConfig?.languageCode ?? "en",
+  );
 
   const togglePlatform = (p: AiTrackingPlatform) => {
     if (platforms.includes(p)) {
@@ -55,6 +83,14 @@ export function AiTrackingSetupModal({
       }
     } else {
       setPlatforms([...platforms, p]);
+    }
+  };
+
+  const handleLocationChange = (newCode: number) => {
+    setLocationCode(newCode);
+    const defaultLang = getLanguageCode(newCode);
+    if (defaultLang) {
+      setLanguageCode(defaultLang);
     }
   };
 
@@ -72,6 +108,8 @@ export function AiTrackingSetupModal({
       platforms,
       schedule,
       scheduleStatus: schedule === "manual" ? "idle" : "active",
+      locationCode,
+      languageCode,
     });
   };
 
@@ -157,6 +195,35 @@ export function AiTrackingSetupModal({
                 </label>
               );
             })}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-base-content/80">
+              Country / Region
+            </label>
+            <LocationSelect
+              value={locationCode}
+              onChange={handleLocationChange}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-base-content/80">
+              Target Language
+            </label>
+            <select
+              className="select select-bordered select-sm rounded-xl text-xs w-full"
+              value={languageCode}
+              onChange={(e) => setLanguageCode(e.target.value)}
+            >
+              {POPULAR_LANGUAGES.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.label} ({lang.code})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
