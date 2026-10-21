@@ -199,18 +199,115 @@ export function analyzeSentiment(
   return "neutral";
 }
 
+export function isDomainMatch(
+  sourceUrlOrDomain: string,
+  entityDomain: string,
+): boolean {
+  if (!sourceUrlOrDomain || !entityDomain) return false;
+  const cleanTarget = entityDomain
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/.*$/, "");
+  const cleanSource = sourceUrlOrDomain
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/.*$/, "");
+
+  if (cleanSource === cleanTarget) return true;
+  if (cleanSource.endsWith(`.${cleanTarget}`)) return true;
+  return false;
+}
+
+const NEGATIVE_DISCLAIMER_PATTERNS = [
+  /doesn'?t (?:show|mention|have|find|return) any specific (?:business|service|listing|result)/i,
+  /don'?t (?:show|mention|have|find|return) any specific (?:business|service|listing|result)/i,
+  /couldn'?t find (?:a |any )?(?:clear,? )?(?:official )?(?:business|listing|information|review|result)/i,
+  /could not find (?:a |any )?(?:clear,? )?(?:official )?(?:business|listing|information|review|result)/i,
+  /didn'?t (?:return|find) specific information about/i,
+  /did not (?:return|find) specific information about/i,
+  /no clear,? official business listing/i,
+  /none (?:that )?i found use that exact name/i,
+  /no results? found for/i,
+  /unable to find (?:any )?(?:specific )?(?:information|business|listing)/i,
+  /tidak menemukan (?:adanya )?(?:bisnis|layanan|informasi|listing)/i,
+  /tidak ditemukan (?:adanya )?(?:bisnis|layanan|informasi|listing)/i,
+  /tidak ada (?:informasi|ulasan|listing|profil|bisnis) spesifik/i,
+  /belum menemukan informasi/i,
+  /tidak terdaftar secara resmi/i,
+];
+
+export function isNegativeDisclaimer(sentence: string): boolean {
+  const trimmed = sentence.trim();
+  return NEGATIVE_DISCLAIMER_PATTERNS.some((pat) => pat.test(trimmed));
+}
+
+const PREAMBLE_ECHO_PATTERNS = [
+  /^(?:based on (?:my )?search results,? )?["'“]?[^"'”]+["'”]? refers to /i,
+  /^(?:here are (?:some|the)? (?:top )?(?:nearby )?(?:alternatives|competitors|options|substitutes) (?:to|for))/i,
+  /^(?:when (?:looking|searching) for alternatives to)/i,
+  /^(?:if you are looking for alternatives to)/i,
+  /^(?:in response to your query about)/i,
+  /^#+\s*(?:top )?(?:alternatives|competitors|options)/i,
+  /^(?:berdasarkan hasil pencarian,? )?["'“]?[^"'”]+["'”]? merujuk pada /i,
+  /^(?:berikut (?:ini )?(?:adalah )?(?:beberapa )?(?:alternatif|kompetitor|pilihan) (?:selain|untuk))/i,
+  /^(?:jika anda mencari alternatif)/i,
+];
+
+export function isPreambleEcho(sentence: string, prompt?: string): boolean {
+  const s = sentence.trim();
+  if (PREAMBLE_ECHO_PATTERNS.some((pat) => pat.test(s))) {
+    return true;
+  }
+  if (prompt) {
+    const isAltPrompt =
+      /(?:alternatives?|competitors?|alternatif|kompetitor|selain|versus|vs)\b/i.test(
+        prompt,
+      );
+    if (isAltPrompt) {
+      if (
+        /(?:alternatives? to|competitors? to|alternatif selain|kompetitor dari)/i.test(
+          s,
+        ) &&
+        !/(?:^\d+[.)]|^[-*•]\s+)/m.test(s)
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 /**
- * Find the most relevant sentence or snippet where the brand appears.
+ * Find the most relevant sentence or snippet where the brand appears affirmatively.
  */
-function findEvidenceSnippet(text: string, regex: RegExp): string | null {
+function findValidEvidenceSnippet(
+  text: string,
+  regex: RegExp,
+  prompt?: string,
+): { evidence: string | null; hasValidMention: boolean } {
   const sentences = text.split(/(?<=[.!?])\s+|\n+/);
+  let validSnippet: string | null = null;
+  let hasValidMention = false;
+
   for (const sentence of sentences) {
     const trimmed = sentence.trim();
     if (trimmed.length > 5 && regex.test(trimmed)) {
-      return trimmed.slice(0, 300);
+      if (isNegativeDisclaimer(trimmed)) {
+        continue;
+      }
+      if (isPreambleEcho(trimmed, prompt)) {
+        continue;
+      }
+      hasValidMention = true;
+      if (!validSnippet) {
+        validSnippet = trimmed.slice(0, 300);
+      }
     }
   }
-  return null;
+
+  return { evidence: validSnippet, hasValidMention };
 }
 
 /**
@@ -220,6 +317,7 @@ export function extractMentions(
   text: string,
   citations: Array<{ url: string; domain: string; title?: string | null }>,
   entities: TrackingEntity[],
+  prompt?: string,
 ): ExtractedMention[] {
   const results: ExtractedMention[] = [];
 
@@ -227,34 +325,24 @@ export function extractMentions(
     const keywords = [entity.name, entity.domain, ...entity.aliases];
     const regex = buildBrandRegex(keywords);
 
-    const cleanEntityDomain = entity.domain
-      .toLowerCase()
-      .replace(/^https?:\/\//, "")
-      .replace(/^www\./, "")
-      .replace(/\/.*$/, "");
+    const { evidence: snippet, hasValidMention } = findValidEvidenceSnippet(
+      text,
+      regex,
+      prompt,
+    );
 
-    const mentionedInText = regex.test(text);
-    const mentionedInCitations = citations.some((c) => {
-      const cleanCitDomain = c.domain
-        .toLowerCase()
-        .replace(/^https?:\/\//, "")
-        .replace(/^www\./, "")
-        .replace(/\/.*$/, "");
+    const matchingCitation = citations.find(
+      (c) =>
+        isDomainMatch(c.domain, entity.domain) ||
+        isDomainMatch(c.url, entity.domain),
+    );
+    const mentionedInCitations = Boolean(matchingCitation);
 
-      return (
-        cleanCitDomain.includes(cleanEntityDomain) ||
-        cleanEntityDomain.includes(cleanCitDomain) ||
-        c.url.toLowerCase().includes(cleanEntityDomain) ||
-        regex.test(c.title ?? "") ||
-        regex.test(c.url ?? "")
-      );
-    });
-
-    if (mentionedInText || mentionedInCitations) {
+    if (hasValidMention || mentionedInCitations) {
       const position = extractRankPosition(text, keywords);
       const evidence =
-        findEvidenceSnippet(text, regex) ||
-        (mentionedInCitations ? `Cited in ${citations[0]?.url}` : null);
+        snippet ||
+        (matchingCitation ? `Cited in ${matchingCitation.url}` : null);
       const sentiment = evidence ? analyzeSentiment(evidence) : "neutral";
 
       results.push({

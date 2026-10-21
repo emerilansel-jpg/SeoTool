@@ -8,7 +8,11 @@ import {
   GscNotConnectedError,
 } from "@/server/features/gsc/services/GscService";
 import { AiTrackingRepository } from "../repositories/AiTrackingRepository";
-import { extractMentions, type TrackingEntity } from "../extraction";
+import {
+  extractMentions,
+  isDomainMatch,
+  type TrackingEntity,
+} from "../extraction";
 import {
   aggregateDashboardMetrics,
   extractCitations,
@@ -326,7 +330,12 @@ export const AiTrackingService = {
             },
           ]);
 
-          const mentions = extractMentions(text, citations, entities);
+          const mentions = extractMentions(
+            text,
+            citations,
+            entities,
+            promptItem.prompt,
+          );
           if (mentions.length > 0) {
             await AiTrackingRepository.recordMentions(
               mentions.map((m) => ({
@@ -346,23 +355,11 @@ export const AiTrackingService = {
           }
 
           if (citations.length > 0) {
-            const cleanConfigDomain = config.domain
-              .toLowerCase()
-              .replace(/^https?:\/\//, "")
-              .replace(/^www\./, "")
-              .replace(/\/.*$/, "");
-
             await AiTrackingRepository.recordCitations(
               citations.map((c) => {
-                const cleanCitDomain = c.domain
-                  .toLowerCase()
-                  .replace(/^https?:\/\//, "")
-                  .replace(/^www\./, "")
-                  .replace(/\/.*$/, "");
                 const isTarget =
-                  cleanCitDomain.includes(cleanConfigDomain) ||
-                  cleanConfigDomain.includes(cleanCitDomain) ||
-                  c.url.toLowerCase().includes(cleanConfigDomain);
+                  isDomainMatch(c.domain, config.domain) ||
+                  isDomainMatch(c.url, config.domain);
 
                 return {
                   id: crypto.randomUUID(),

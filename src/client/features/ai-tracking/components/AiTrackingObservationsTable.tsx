@@ -62,6 +62,11 @@ export function AiTrackingObservationsTable({ observations }: Props) {
                         Not mentioned
                       </span>
                     )}
+                    {obs.citations.some((c) => c.isTargetBrand) && (
+                      <span className="badge badge-primary badge-xs font-semibold">
+                        Domain Cited
+                      </span>
+                    )}
                     <span className="text-[11px] text-base-content/50">
                       {obs.observedAt ? obs.observedAt.slice(0, 10) : ""}
                     </span>
@@ -100,6 +105,11 @@ export function AiTrackingObservationsTable({ observations }: Props) {
                       ) : (
                         <span className="badge badge-ghost badge-xs text-base-content/40 text-[10px]">
                           Not mentioned
+                        </span>
+                      )}
+                      {obs.citations.some((c) => c.isTargetBrand) && (
+                        <span className="badge badge-primary badge-xs font-semibold text-[10px]">
+                          Domain Cited
                         </span>
                       )}
                     </div>
@@ -144,28 +154,68 @@ export function AiTrackingObservationsTable({ observations }: Props) {
                   )}
 
                   {obs.citations.length > 0 && (
-                    <div>
-                      <span className="font-semibold text-base-content block mb-2">
-                        Citations ({obs.citations.length}):
-                      </span>
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-semibold text-base-content">
+                          Citations ({obs.citations.length}):
+                        </span>
+                        {obs.citations.some((c) => c.isTargetBrand) ? (
+                          <span className="badge badge-success badge-xs font-semibold">
+                            ✓ Your domain cited (
+                            {
+                              obs.citations.filter((c) => c.isTargetBrand)
+                                .length
+                            }
+                            )
+                          </span>
+                        ) : (
+                          <span className="badge badge-ghost badge-xs text-base-content/60">
+                            0 from your domain (All competitor / external
+                            sources)
+                          </span>
+                        )}
+                      </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {obs.citations.map((c) => (
-                          <a
-                            key={c.url}
-                            href={c.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-between gap-2 rounded border border-base-200 p-2 hover:bg-base-200/50 transition-colors"
-                          >
-                            <div className="flex items-center gap-1.5 truncate">
-                              <Globe className="size-3 shrink-0 text-base-content/50" />
-                              <span className="truncate text-base-content">
-                                {c.title || c.domain}
+                        {obs.citations.map((c) => {
+                          const isTarget = c.isTargetBrand;
+                          return (
+                            <a
+                              key={c.url}
+                              href={c.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`flex flex-col gap-1.5 rounded-lg border p-2.5 transition-colors ${
+                                isTarget
+                                  ? "border-success/40 bg-success/5 hover:bg-success/10"
+                                  : "border-base-200 bg-base-100 hover:bg-base-200/50"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span
+                                  className={`badge badge-xs font-medium ${
+                                    isTarget
+                                      ? "badge-success text-success-content"
+                                      : "badge-ghost text-base-content/60"
+                                  }`}
+                                >
+                                  {isTarget
+                                    ? "Your Website"
+                                    : "Competitor / Source"}
+                                </span>
+                                <ExternalLink className="size-3 shrink-0 text-base-content/40" />
+                              </div>
+                              <div className="flex items-center gap-1.5 truncate">
+                                <Globe className="size-3 shrink-0 text-base-content/50" />
+                                <span className="truncate font-medium text-base-content">
+                                  {c.title || c.domain}
+                                </span>
+                              </div>
+                              <span className="truncate text-[10px] text-base-content/50 font-mono">
+                                {c.domain}
                               </span>
-                            </div>
-                            <ExternalLink className="size-3 shrink-0 text-base-content/40" />
-                          </a>
-                        ))}
+                            </a>
+                          );
+                        })}
                       </div>
                     </div>
                   )}

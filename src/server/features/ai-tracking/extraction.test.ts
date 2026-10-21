@@ -138,4 +138,90 @@ describe("extractMentions", () => {
       sentiment: "neutral",
     });
   });
+
+  it("does not count target brand when response only echoes prompt in preamble and lists competitors", () => {
+    const prompt = "Top alternatives and competitors to filterairgadingserpong";
+    const text = `Based on my search results, "filterairgadingserpong" refers to water filter services in the Gading Serpong area.
+Here are the top alternatives and competitors:
+1. Avorio Filter Air
+2. Nanotec Filter Air
+3. Depo Filter Air`;
+
+    const citations = [
+      {
+        url: "https://www.avoriofilterair.com/2021/08/filter-air-gading-serpong.html",
+        domain: "avoriofilterair.com",
+        title: "Filter Air Gading Serpong",
+      },
+      {
+        url: "https://filterairnanotec.com/filter-air-gading-serpong/",
+        domain: "filterairnanotec.com",
+        title: "Filter Air Nanotec Gading Serpong",
+      },
+    ];
+
+    const entities: TrackingEntity[] = [
+      {
+        name: "filterairgadingserpong",
+        domain: "filterairgadingserpong.com",
+        aliases: ["filter air gading serpong"],
+        isTargetBrand: true,
+      },
+      {
+        name: "Avorio Filter Air",
+        domain: "avoriofilterair.com",
+        aliases: [],
+        isTargetBrand: false,
+      },
+    ];
+
+    const mentions = extractMentions(text, citations, entities, prompt);
+
+    // Target brand should NOT be counted as mentioned
+    const targetMention = mentions.find((m) => m.isTargetBrand);
+    expect(targetMention).toBeUndefined();
+
+    // Competitor Avorio SHOULD be counted
+    const avorio = mentions.find((m) => m.brandName === "Avorio Filter Air");
+    expect(avorio).toBeDefined();
+    expect(avorio?.position).toBe(1);
+  });
+
+  it("does not count target brand when model returns a negative disclaimer of not found", () => {
+    const text =
+      'I searched for "filterairgadingserpong" but the results don\'t show any specific business or service by that exact name.';
+    const entities: TrackingEntity[] = [
+      {
+        name: "filterairgadingserpong",
+        domain: "filterairgadingserpong.com",
+        aliases: [],
+        isTargetBrand: true,
+      },
+    ];
+
+    const mentions = extractMentions(text, [], entities);
+    expect(mentions).toHaveLength(0);
+  });
+
+  it("does not falsely associate competitor citations with target brand due to keyword in title", () => {
+    const text = "Water filters are great.";
+    const citations = [
+      {
+        url: "https://www.depofilterair.com/2021/04/filter-air-gading-serpong.html",
+        domain: "depofilterair.com",
+        title: "Filter Air Gading Serpong",
+      },
+    ];
+    const entities: TrackingEntity[] = [
+      {
+        name: "filterairgadingserpong",
+        domain: "filterairgadingserpong.com",
+        aliases: ["filter air gading serpong"],
+        isTargetBrand: true,
+      },
+    ];
+
+    const mentions = extractMentions(text, citations, entities);
+    expect(mentions).toHaveLength(0);
+  });
 });
