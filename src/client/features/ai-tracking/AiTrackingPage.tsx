@@ -35,6 +35,7 @@ import { AiCitationsTab } from "./components/AiCitationsTab";
 import { AiPagesTab } from "./components/AiPagesTab";
 import { AiCompetitorsTab } from "./components/AiCompetitorsTab";
 import { AiGscCorrelationTab } from "./components/AiGscCorrelationTab";
+import { AiProfoundAlertsBanner } from "./components/AiProfoundAlertsBanner";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import type { SaveAiTrackingConfigInput } from "@/types/schemas/ai-tracking";
 import {
@@ -311,6 +312,9 @@ export function AiTrackingPage({ projectId }: Props) {
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (
             <div className="space-y-4 sm:space-y-6">
+              {/* Profound Pillar 4: Time-Series Alerts & Signals Banner */}
+              <AiProfoundAlertsBanner alerts={data.profoundAlerts ?? []} />
+
               {/* Discovery Summary Card */}
               {data.discoveryStats && (
                 <div className="rounded-xl border border-base-300 bg-gradient-to-r from-base-100 to-base-200/50 p-3.5 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
@@ -342,12 +346,13 @@ export function AiTrackingPage({ projectId }: Props) {
                 </div>
               )}
 
-              {/* KPI Header Card */}
+              {/* KPI Header Card with Profound Per-LLM Citation Rates */}
               <AiTrackingKpiCards
                 kpi={data.kpi}
                 selectedPlatform={selectedPlatform}
                 onSelectPlatform={setSelectedPlatform}
                 availablePlatforms={config.platforms}
+                llmMetrics={data.llmMetrics ?? []}
               />
 
               {/* List Position & Tracked Mention Leaderboard */}
@@ -379,6 +384,7 @@ export function AiTrackingPage({ projectId }: Props) {
             <div className="space-y-6">
               <AiTrackingPromptsTable
                 prompts={data.prompts}
+                promptDiagnostics={data.promptDiagnostics}
                 onAddPrompts={async (prompts) => {
                   await addPromptsMutation.mutateAsync(prompts);
                 }}
@@ -399,7 +405,11 @@ export function AiTrackingPage({ projectId }: Props) {
 
           {/* TAB 4: CITATIONS */}
           {activeTab === "citations" && (
-            <AiCitationsTab projectId={projectId} domain={config.domain} />
+            <AiCitationsTab
+              projectId={projectId}
+              domain={config.domain}
+              llmMetrics={data.llmMetrics ?? []}
+            />
           )}
 
           {/* TAB 5: PAGES */}
@@ -413,6 +423,7 @@ export function AiTrackingPage({ projectId }: Props) {
               projectId={projectId}
               brandName={config.brandName}
               domain={config.domain}
+              coCitedCompetitors={data.coCitedCompetitors ?? []}
             />
           )}
 

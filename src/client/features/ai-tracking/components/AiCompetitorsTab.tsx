@@ -1,15 +1,22 @@
+// oxlint-disable max-lines-per-function
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Swords, Users } from "lucide-react";
+import { Link2, Swords, Users } from "lucide-react";
 import { getAiCompetitors } from "@/serverFunctions/ai-tracking";
+import type { CoCitedCompetitor } from "@/types/schemas/ai-tracking";
 
 interface Props {
   projectId: string;
   brandName: string;
   domain?: string;
+  coCitedCompetitors?: CoCitedCompetitor[];
 }
 
-export function AiCompetitorsTab({ projectId, brandName }: Props) {
+export function AiCompetitorsTab({
+  projectId,
+  brandName,
+  coCitedCompetitors: initialCoCited,
+}: Props) {
   const getCompetitorsFn = useServerFn(getAiCompetitors);
 
   const { data, isLoading } = useQuery({
@@ -19,6 +26,11 @@ export function AiCompetitorsTab({ projectId, brandName }: Props) {
 
   const shareOfVoice = data?.shareOfVoice ?? [];
   const promptGaps = data?.promptGaps ?? [];
+  const coCited =
+    (data as { coCitedCompetitors?: CoCitedCompetitor[] } | undefined)
+      ?.coCitedCompetitors ??
+    initialCoCited ??
+    [];
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -216,6 +228,120 @@ export function AiCompetitorsTab({ projectId, brandName }: Props) {
                     </td>
                   </tr>
                 ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Profound Pillar 3: Co-Cited Competitors (/seo profound competitors <brand>) */}
+      <div className="rounded-xl border border-base-300 bg-base-100 p-4 sm:p-5 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
+          <div>
+            <h3 className="text-sm font-semibold text-base-content flex items-center gap-2">
+              <Link2 className="size-4 text-primary" />
+              Co-Cited Competitors (Profound Intelligence)
+            </h3>
+            <p className="text-xs text-base-content/60">
+              Competitor brands and sources cited alongside {brandName} for the
+              exact same AI prompts.
+            </p>
+          </div>
+          <span className="badge badge-sm badge-outline self-start sm:self-auto shrink-0">
+            {coCited.length} Co-Cited Brands
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="table table-sm">
+            <thead>
+              <tr className="bg-base-200/50 text-xs font-semibold text-base-content/70">
+                <th>Competitor Domain</th>
+                <th>Brand Name</th>
+                <th className="text-center">Co-Citations</th>
+                <th className="text-center">Co-Citation Rate</th>
+                <th className="text-center">Standalone Wins</th>
+                <th className="text-right">Threat Level</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="py-8 text-center text-xs text-base-content/50"
+                  >
+                    Loading co-cited competitors…
+                  </td>
+                </tr>
+              ) : coCited.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="py-8 text-center text-xs text-base-content/60"
+                  >
+                    No co-cited competitors detected yet. Run tracking across
+                    prompts to map competitive overlap.
+                  </td>
+                </tr>
+              ) : (
+                coCited.map((comp, idx) => {
+                  let threatClass = "badge-ghost text-base-content/60";
+                  let threatLabel = "Low Overlap";
+                  if (comp.coCitationRate >= 50 || comp.standaloneWins > 5) {
+                    threatClass = "badge-error text-error-content font-bold";
+                    threatLabel = "High Threat";
+                  } else if (
+                    comp.coCitationRate >= 20 ||
+                    comp.standaloneWins > 2
+                  ) {
+                    threatClass =
+                      "badge-warning text-warning-content font-semibold";
+                    threatLabel = "Moderate Overlap";
+                  }
+
+                  return (
+                    <tr key={idx} className="hover">
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${comp.domain}&size=32`}
+                            alt=""
+                            className="size-4 rounded-xs shrink-0 bg-base-200"
+                            loading="lazy"
+                          />
+                          <span className="font-mono text-xs font-semibold text-base-content">
+                            {comp.domain}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="text-xs text-base-content font-medium">
+                        {comp.brandName}
+                      </td>
+                      <td className="text-center text-xs font-mono font-semibold">
+                        {comp.coCitationCount}
+                      </td>
+                      <td className="text-center text-xs font-mono">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <span className="font-semibold text-base-content">
+                            {comp.coCitationRate}%
+                          </span>
+                          <span className="text-[10px] text-base-content/50">
+                            overlap
+                          </span>
+                        </div>
+                      </td>
+                      <td className="text-center text-xs font-mono text-base-content/70">
+                        {comp.standaloneWins} prompts
+                      </td>
+                      <td className="text-right">
+                        <span className={`badge badge-xs ${threatClass}`}>
+                          {threatLabel}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

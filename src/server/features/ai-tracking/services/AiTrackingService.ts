@@ -515,6 +515,10 @@ export const AiTrackingService = {
         visibilityTrend: [],
         competitorRankings: [],
         recentObservations: [],
+        llmMetrics: [],
+        profoundAlerts: [],
+        promptDiagnostics: { winning: [], gaps: [] },
+        coCitedCompetitors: [],
         lastRun: null,
       };
     }
@@ -619,10 +623,10 @@ export const AiTrackingService = {
       {},
     );
     const obsIds = observations.map((o) => o.id);
-    const mentions = await AiTrackingRepository.getMentionsForObservations(
-      config.id,
-      obsIds,
-    );
+    const [mentions, citations] = await Promise.all([
+      AiTrackingRepository.getMentionsForObservations(config.id, obsIds),
+      AiTrackingRepository.getCitationsForObservations(config.id, obsIds),
+    ]);
 
     // Group mentions by domain
     const mentionCounts = new Map<
@@ -739,10 +743,90 @@ export const AiTrackingService = {
 
     promptGaps.sort((a, b) => b.aiSearchVolume - a.aiSearchVolume);
 
+    // Co-cited competitors (Profound Pillar 3)
+    const targetObsIds = new Set<string>();
+    for (const m of mentions) {
+      if (m.isTargetBrand) targetObsIds.add(m.observationId);
+    }
+    for (const c of citations) {
+      if (c.isTargetBrand) targetObsIds.add(c.observationId);
+    }
+
+    const citationsByObs = new Map<string, typeof citations>();
+    for (const c of citations) {
+      const list = citationsByObs.get(c.observationId) ?? [];
+      list.push(c);
+      citationsByObs.set(c.observationId, list);
+    }
+    const mentionsByObs = new Map<string, typeof mentions>();
+    for (const m of mentions) {
+      const list = mentionsByObs.get(m.observationId) ?? [];
+      list.push(m);
+      mentionsByObs.set(m.observationId, list);
+    }
+
+    const coCitationMap = new Map<
+      string,
+      { brandName: string; coCitationCount: number; standaloneWins: number }
+    >();
+
+    for (const obs of observations) {
+      const isTargetPresent = targetObsIds.has(obs.id);
+      const obsMentions = mentionsByObs.get(obs.id) ?? [];
+      const obsCits = citationsByObs.get(obs.id) ?? [];
+
+      const presentCompetitors = new Map<string, string>();
+      for (const m of obsMentions) {
+        if (!m.isTargetBrand) {
+          presentCompetitors.set(m.domain.toLowerCase(), m.brandName);
+        }
+      }
+      for (const c of obsCits) {
+        if (!c.isTargetBrand) {
+          const domain = c.domain.toLowerCase();
+          if (!presentCompetitors.has(domain)) {
+            presentCompetitors.set(domain, c.title || domain);
+          }
+        }
+      }
+
+      for (const [dom, name] of presentCompetitors.entries()) {
+        const curr = coCitationMap.get(dom) ?? {
+          brandName: name,
+          coCitationCount: 0,
+          standaloneWins: 0,
+        };
+        if (isTargetPresent) {
+          curr.coCitationCount++;
+        } else {
+          curr.standaloneWins++;
+        }
+        coCitationMap.set(dom, curr);
+      }
+    }
+
+    const coCitedCompetitors = Array.from(coCitationMap.entries())
+      .map(([domain, data]) => ({
+        domain,
+        brandName: data.brandName,
+        coCitationCount: data.coCitationCount,
+        coCitationRate:
+          targetObsIds.size > 0
+            ? Math.round((data.coCitationCount / targetObsIds.size) * 100)
+            : 0,
+        standaloneWins: data.standaloneWins,
+      }))
+      .toSorted(
+        (a, b) =>
+          b.coCitationCount - a.coCitationCount ||
+          b.standaloneWins - a.standaloneWins,
+      );
+
     return {
       competitors: projectCompetitors,
       shareOfVoice,
       promptGaps,
+      coCitedCompetitors,
     };
   },
 

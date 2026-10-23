@@ -75,6 +75,10 @@ const data: AiTrackingDashboardData = {
       citations: [],
     },
   ],
+  llmMetrics: [],
+  profoundAlerts: [],
+  promptDiagnostics: { winning: [], gaps: [] },
+  coCitedCompetitors: [],
   lastRun: null,
 };
 

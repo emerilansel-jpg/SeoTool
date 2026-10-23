@@ -1,14 +1,30 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ExternalLink, Link2, Sparkles } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Bot,
+  ExternalLink,
+  Link2,
+  Sparkles,
+} from "lucide-react";
 import { getAiCitations } from "@/serverFunctions/ai-tracking";
+import type { LlmCitationMetric } from "@/types/schemas/ai-tracking";
 
 interface Props {
   projectId: string;
   domain: string;
+  llmMetrics?: LlmCitationMetric[];
 }
 
-export function AiCitationsTab({ projectId, domain }: Props) {
+const PLATFORM_LABELS: Record<string, string> = {
+  chat_gpt: "ChatGPT",
+  gemini: "Gemini",
+  perplexity: "Perplexity",
+  claude: "Claude",
+};
+
+export function AiCitationsTab({ projectId, domain, llmMetrics = [] }: Props) {
   const getCitationsFn = useServerFn(getAiCitations);
 
   const { data, isLoading } = useQuery({
@@ -21,6 +37,86 @@ export function AiCitationsTab({ projectId, domain }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* Profound Pillar 1: Citation Rates per LLM (Time-Series) */}
+      {llmMetrics.length > 0 && (
+        <div className="rounded-xl border border-base-300 bg-base-100 p-4 sm:p-5 shadow-sm space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h3 className="text-sm font-semibold text-base-content flex items-center gap-2">
+                <Bot className="size-4 text-primary" />
+                LLM Citation Rates &amp; 30-Day Trends (Profound)
+              </h3>
+              <p className="text-xs text-base-content/60">
+                Frequency and trend deltas of AI answers linking back to{" "}
+                {domain} as a direct source citation.
+              </p>
+            </div>
+            <span className="badge badge-sm badge-outline text-[11px] self-start sm:self-auto font-medium text-base-content/70">
+              Profound (live, confidence 0.90)
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {llmMetrics.map((m) => {
+              const name = PLATFORM_LABELS[m.platform] || m.platform;
+              const isPositiveTrend = m.trendDeltaPercent > 0;
+              const hasTrend = m.trendDeltaPercent !== 0;
+
+              return (
+                <div
+                  key={m.platform}
+                  className="rounded-lg border border-base-200 bg-base-200/30 p-3 space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-xs text-base-content">
+                      {name}
+                    </span>
+                    {hasTrend ? (
+                      <span
+                        className={`badge badge-xs font-bold gap-0.5 ${
+                          isPositiveTrend ? "badge-success" : "badge-warning"
+                        }`}
+                      >
+                        {isPositiveTrend ? (
+                          <ArrowUpRight className="size-2.5" />
+                        ) : (
+                          <ArrowDownRight className="size-2.5" />
+                        )}
+                        {isPositiveTrend
+                          ? `+${m.trendDeltaPercent}%`
+                          : `${m.trendDeltaPercent}%`}
+                      </span>
+                    ) : (
+                      <span className="badge badge-xs badge-ghost text-base-content/50">
+                        steady
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-xl font-bold text-base-content">
+                      {m.citationRatePercent}%
+                    </div>
+                    <div className="text-[10px] text-base-content/60 font-mono">
+                      {m.citationsCount} / {m.totalResponses} cited
+                    </div>
+                  </div>
+
+                  <div className="w-full bg-base-300 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-primary h-1.5 rounded-full"
+                      style={{
+                        width: `${Math.min(Math.max(m.citationRatePercent, 2), 100)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Overview stats header */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="rounded-xl border border-base-300 bg-base-100 p-4 shadow-sm flex items-center gap-3">

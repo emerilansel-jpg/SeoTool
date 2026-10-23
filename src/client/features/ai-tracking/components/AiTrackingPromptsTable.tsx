@@ -1,9 +1,23 @@
 import { useState } from "react";
-import { Plus, Trash2, CheckCircle2, XCircle } from "lucide-react";
-import type { AiTrackingPromptItem } from "@/types/schemas/ai-tracking";
+import {
+  CheckCircle2,
+  Plus,
+  Sparkles,
+  Swords,
+  Trash2,
+  XCircle,
+} from "lucide-react";
+import type {
+  AiTrackingPromptItem,
+  ProfoundPromptDiagnostic,
+} from "@/types/schemas/ai-tracking";
 
 interface Props {
   prompts: AiTrackingPromptItem[];
+  promptDiagnostics?: {
+    winning: ProfoundPromptDiagnostic[];
+    gaps: ProfoundPromptDiagnostic[];
+  };
   onAddPrompts: (prompts: string[]) => Promise<void>;
   onTogglePrompt: (promptId: string, active: boolean) => Promise<void>;
   onRemovePrompt: (promptId: string) => Promise<void>;
@@ -12,6 +26,7 @@ interface Props {
 
 export function AiTrackingPromptsTable({
   prompts,
+  promptDiagnostics,
   onAddPrompts,
   onTogglePrompt,
   onRemovePrompt,
@@ -19,6 +34,18 @@ export function AiTrackingPromptsTable({
 }: Props) {
   const [newPromptsText, setNewPromptsText] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<"all" | "winning" | "gaps">(
+    "all",
+  );
+
+  const winningIds = new Set(promptDiagnostics?.winning.map((p) => p.id) ?? []);
+  const gapIds = new Set(promptDiagnostics?.gaps.map((p) => p.id) ?? []);
+
+  const filteredPrompts = prompts.filter((p) => {
+    if (activeFilter === "winning") return winningIds.has(p.id);
+    if (activeFilter === "gaps") return gapIds.has(p.id);
+    return true;
+  });
 
   const handleAdd = async () => {
     const lines = newPromptsText
@@ -35,11 +62,15 @@ export function AiTrackingPromptsTable({
     <div className="flex flex-col gap-4 rounded-xl border border-base-300 bg-base-100 p-4 sm:p-6 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h3 className="font-semibold text-base text-base-content">
+          <h3 className="font-semibold text-base text-base-content flex items-center gap-2">
             Tracked AI Prompts
+            <span className="badge badge-sm badge-outline text-[11px] font-medium text-base-content/60">
+              Profound Diagnostics
+            </span>
           </h3>
           <p className="text-xs text-base-content/60">
-            Prompts monitored across AI assistants to track your brand presence.
+            Prompts monitored across AI assistants to track brand
+            recommendations and competitor gaps.
           </p>
         </div>
         <button
@@ -51,6 +82,54 @@ export function AiTrackingPromptsTable({
           Add Prompts
         </button>
       </div>
+
+      {/* Profound Pillar 2: Win vs Gap Prompt Filter */}
+      {promptDiagnostics && (
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-base-200 pb-2">
+          <button
+            type="button"
+            className={`btn btn-xs rounded-lg gap-1 ${
+              activeFilter === "all" ? "btn-primary" : "btn-ghost"
+            }`}
+            onClick={() => setActiveFilter("all")}
+          >
+            All Prompts
+            <span className="badge badge-xs bg-base-100/30">
+              {prompts.length}
+            </span>
+          </button>
+          <button
+            type="button"
+            className={`btn btn-xs rounded-lg gap-1 ${
+              activeFilter === "winning"
+                ? "btn-success text-success-content"
+                : "btn-ghost text-success"
+            }`}
+            onClick={() => setActiveFilter("winning")}
+          >
+            <Sparkles className="size-3" />
+            Winning Prompts (Surfaced)
+            <span className="badge badge-xs badge-success">
+              {promptDiagnostics.winning.length}
+            </span>
+          </button>
+          <button
+            type="button"
+            className={`btn btn-xs rounded-lg gap-1 ${
+              activeFilter === "gaps"
+                ? "btn-warning text-warning-content"
+                : "btn-ghost text-warning"
+            }`}
+            onClick={() => setActiveFilter("gaps")}
+          >
+            <Swords className="size-3" />
+            Gap Prompts (Failing to Surface)
+            <span className="badge badge-xs badge-warning">
+              {promptDiagnostics.gaps.length}
+            </span>
+          </button>
+        </div>
+      )}
 
       {showAddForm && (
         <div className="rounded-lg border border-base-300 bg-base-200/50 p-4 space-y-3">
@@ -99,7 +178,7 @@ Zoho alternatives for small business`}
             </tr>
           </thead>
           <tbody>
-            {prompts.map((p) => (
+            {filteredPrompts.map((p) => (
               <tr key={p.id} className="hover:bg-base-200/30">
                 <td>
                   <input
@@ -169,14 +248,17 @@ Zoho alternatives for small business`}
                 </td>
               </tr>
             ))}
-            {prompts.length === 0 && (
+            {filteredPrompts.length === 0 && (
               <tr>
                 <td
                   colSpan={6}
                   className="py-8 text-center text-sm text-base-content/50"
                 >
-                  No prompts configured yet. Click &quot;Add Prompts&quot; above
-                  to start tracking.
+                  {activeFilter === "winning"
+                    ? "No winning prompts yet. Optimize content or run tracking to capture AI mentions."
+                    : activeFilter === "gaps"
+                      ? "No gap prompts! Your brand surfaces across all tracked prompts."
+                      : 'No prompts configured yet. Click "Add Prompts" above to start tracking.'}
                 </td>
               </tr>
             )}

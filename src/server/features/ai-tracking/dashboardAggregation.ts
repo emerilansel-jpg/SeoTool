@@ -1,3 +1,4 @@
+// oxlint-disable complexity, max-lines-per-function
 import { safeHostname, safeHttpUrl } from "@/server/features/ai-search/safeUrl";
 import type { LlmResponseResult } from "@/server/lib/dataforseoLlmSchemas";
 import type {
@@ -12,6 +13,10 @@ import type {
   AiTrackingPlatform,
   AiTrackingSchedule,
   AiTrackingScheduleStatus,
+  CoCitedCompetitor,
+  LlmCitationMetric,
+  ProfoundAlert,
+  ProfoundPromptDiagnostic,
 } from "@/types/schemas/ai-tracking";
 
 type ObservationRow = typeof aiTrackingObservations.$inferSelect;
@@ -333,6 +338,297 @@ export function aggregateDashboardMetrics(params: {
     };
   });
 
+  // 1. LLM Citation & Mention Metrics (Profound Pillar 1: /seo profound citations <brand>)
+  const ALL_PLATFORMS: AiTrackingPlatform[] = [
+    "chat_gpt",
+    "perplexity",
+    "claude",
+    "gemini",
+  ];
+  const activePlatforms = config.platforms?.length
+    ? config.platforms
+    : ALL_PLATFORMS;
+
+  const nowMs = Date.now();
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+
+  const llmMetrics: LlmCitationMetric[] = activePlatforms.map((platform) => {
+    const platformObs = successfulObservations.filter(
+      (o) => o.platform === platform,
+    );
+    const totalResponsesForModel = platformObs.length;
+    let citationsCount = 0;
+    let mentionsCount = 0;
+
+    let recentTotal = 0;
+    let recentCitations = 0;
+    let baselineTotal = 0;
+    let baselineCitations = 0;
+
+    for (const obs of platformObs) {
+      const obsTime = new Date(obs.observedAt).getTime();
+      const ageMs = nowMs - obsTime;
+
+      const hasTargetCitation = (citationsByObs.get(obs.id) ?? []).some(
+        (c) => c.isTargetBrand,
+      );
+      const hasTargetMention = (mentionsByObs.get(obs.id) ?? []).some(
+        (m) => m.isTargetBrand,
+      );
+
+      if (hasTargetCitation) citationsCount++;
+      if (hasTargetMention) mentionsCount++;
+
+      if (ageMs <= sevenDaysMs) {
+        recentTotal++;
+        if (hasTargetCitation) recentCitations++;
+      } else if (ageMs <= fourteenDaysMs) {
+        baselineTotal++;
+        if (hasTargetCitation) baselineCitations++;
+      }
+    }
+
+    const citationRatePercent =
+      totalResponsesForModel > 0
+        ? Math.round((citationsCount / totalResponsesForModel) * 100)
+        : 0;
+    const mentionRatePercent =
+      totalResponsesForModel > 0
+        ? Math.round((mentionsCount / totalResponsesForModel) * 100)
+        : 0;
+
+    let trendDeltaPercent = 0;
+    if (recentTotal > 0 && baselineTotal > 0) {
+      const recentRate = (recentCitations / recentTotal) * 100;
+      const baselineRate = (baselineCitations / baselineTotal) * 100;
+      trendDeltaPercent = Math.round(recentRate - baselineRate);
+    }
+
+    return {
+      platform,
+      citationRatePercent,
+      mentionRatePercent,
+      totalResponses: totalResponsesForModel,
+      citationsCount,
+      mentionsCount,
+      trendDeltaPercent,
+    };
+  });
+
+  // 2. Profound Baseline Alerts (Profound Pillar 4: /seo profound alerts <brand>)
+  const profoundAlerts: ProfoundAlert[] = [];
+  const PLATFORM_NAMES: Record<string, string> = {
+    chat_gpt: "ChatGPT",
+    perplexity: "Perplexity",
+    claude: "Claude",
+    gemini: "Gemini",
+  };
+
+  for (const m of llmMetrics) {
+    const name = PLATFORM_NAMES[m.platform] || m.platform;
+    if (m.trendDeltaPercent >= 10) {
+      profoundAlerts.push({
+        id: `alert-spike-${m.platform}`,
+        type: "spike",
+        severity: "success",
+        title: `${name} Citation Spike (+${m.trendDeltaPercent}%)`,
+        description: `Citation rate on ${name} rose to ${m.citationRatePercent}% (+${m.trendDeltaPercent}% vs 7-day baseline).`,
+        metric: `${m.citationRatePercent}% citation rate`,
+        delta: m.trendDeltaPercent,
+      });
+    } else if (m.trendDeltaPercent <= -10) {
+      profoundAlerts.push({
+        id: `alert-drop-${m.platform}`,
+        type: "drop",
+        severity: "warning",
+        title: `${name} Citation Drop (${m.trendDeltaPercent}%)`,
+        description: `Citation rate on ${name} fell to ${m.citationRatePercent}% (${m.trendDeltaPercent}% vs 7-day baseline).`,
+        metric: `${m.citationRatePercent}% citation rate`,
+        delta: m.trendDeltaPercent,
+      });
+    }
+  }
+
+  // Check passage citability gap
+  const totalTargetCitations = citations.filter((c) => c.isTargetBrand).length;
+  if (targetMentionsCount > 0 && totalTargetCitations === 0) {
+    profoundAlerts.push({
+      id: "alert-passage-citability",
+      type: "opportunity",
+      severity: "info",
+      title: "Passage Citability Opportunity",
+      description: `${config.brandName} is recognized in AI answers, but no source links point to ${config.domain}. Add entity definition schema and concise, factual Q&A blocks to get cited.`,
+    });
+  }
+
+  // Check competitor threat
+  const topCompetitor = competitorRankings.find((c) => !c.isTargetBrand);
+  if (topCompetitor && topCompetitor.visibilityPct >= 40) {
+    profoundAlerts.push({
+      id: `alert-comp-${topCompetitor.domain}`,
+      type: "competitor_threat",
+      severity: "warning",
+      title: `Competitor Threat: ${topCompetitor.brandName}`,
+      description: `${topCompetitor.brandName} (${topCompetitor.domain}) captures ${topCompetitor.visibilityPct}% AI visibility across your tracked prompts.`,
+      metric: `${topCompetitor.visibilityPct}% visibility`,
+    });
+  }
+
+  // 3. Winning vs Failing / Gap Prompts (Profound Pillar 2: /seo profound prompts <brand>)
+  const winningPrompts: ProfoundPromptDiagnostic[] = [];
+  const gapPrompts: ProfoundPromptDiagnostic[] = [];
+
+  for (const p of promptsList) {
+    const obsForPrompt = successfulObservations.filter(
+      (o) =>
+        o.promptId === p.id ||
+        o.prompt.toLowerCase().trim() === p.prompt.toLowerCase().trim(),
+    );
+
+    const modelsSurfaced = new Set<AiTrackingPlatform>();
+    const competitorsCited = new Set<string>();
+    let hasDomainCitation = false;
+    let isWinning = false;
+    let bestPos: number | null = null;
+    let lastCheckedAt: string | null = null;
+
+    for (const obs of obsForPrompt) {
+      if (!lastCheckedAt || obs.observedAt > lastCheckedAt) {
+        lastCheckedAt = obs.observedAt;
+      }
+      const obsMentions = mentionsByObs.get(obs.id) ?? [];
+      const tm = obsMentions.find((m) => m.isTargetBrand);
+      const obsCits = citationsByObs.get(obs.id) ?? [];
+      const tc = obsCits.find((c) => c.isTargetBrand);
+
+      if (tc) hasDomainCitation = true;
+      if (tm || tc) {
+        isWinning = true;
+        modelsSurfaced.add(obs.platform as AiTrackingPlatform);
+        if (
+          tm?.position != null &&
+          (bestPos == null || tm.position < bestPos)
+        ) {
+          bestPos = tm.position;
+        }
+      }
+
+      for (const m of obsMentions) {
+        if (!m.isTargetBrand) {
+          competitorsCited.add(m.brandName || m.domain);
+        }
+      }
+      for (const c of obsCits) {
+        if (!c.isTargetBrand) {
+          competitorsCited.add(c.domain);
+        }
+      }
+    }
+
+    const diag: ProfoundPromptDiagnostic = {
+      id: p.id,
+      prompt: p.prompt,
+      isWinning,
+      position: bestPos,
+      modelsSurfaced: Array.from(modelsSurfaced),
+      competitorsCited: Array.from(competitorsCited),
+      hasDomainCitation,
+      lastCheckedAt,
+    };
+
+    if (isWinning) {
+      winningPrompts.push(diag);
+    } else {
+      gapPrompts.push(diag);
+    }
+  }
+
+  const sortedWinningPrompts = winningPrompts.toSorted((a, b) => {
+    if (a.position != null && b.position != null)
+      return a.position - b.position;
+    if (a.position != null) return -1;
+    if (b.position != null) return 1;
+    return b.modelsSurfaced.length - a.modelsSurfaced.length;
+  });
+
+  const sortedGapPrompts = gapPrompts.toSorted(
+    (a, b) => b.competitorsCited.length - a.competitorsCited.length,
+  );
+
+  // 4. Co-Cited Competitors (Profound Pillar 3: /seo profound competitors <brand>)
+  const targetObsIds = new Set<string>();
+  for (const obs of successfulObservations) {
+    const hasMention = (mentionsByObs.get(obs.id) ?? []).some(
+      (m) => m.isTargetBrand,
+    );
+    const hasCit = (citationsByObs.get(obs.id) ?? []).some(
+      (c) => c.isTargetBrand,
+    );
+    if (hasMention || hasCit) {
+      targetObsIds.add(obs.id);
+    }
+  }
+
+  const coCitationMap = new Map<
+    string,
+    { brandName: string; coCitationCount: number; standaloneWins: number }
+  >();
+
+  for (const obs of successfulObservations) {
+    const isTargetPresent = targetObsIds.has(obs.id);
+    const obsMentions = mentionsByObs.get(obs.id) ?? [];
+    const obsCits = citationsByObs.get(obs.id) ?? [];
+
+    const presentCompetitors = new Map<string, string>();
+    for (const m of obsMentions) {
+      if (!m.isTargetBrand) {
+        presentCompetitors.set(m.domain.toLowerCase(), m.brandName);
+      }
+    }
+    for (const c of obsCits) {
+      if (!c.isTargetBrand) {
+        const domain = c.domain.toLowerCase();
+        if (!presentCompetitors.has(domain)) {
+          presentCompetitors.set(domain, c.title || domain);
+        }
+      }
+    }
+
+    for (const [dom, name] of presentCompetitors.entries()) {
+      const curr = coCitationMap.get(dom) ?? {
+        brandName: name,
+        coCitationCount: 0,
+        standaloneWins: 0,
+      };
+      if (isTargetPresent) {
+        curr.coCitationCount++;
+      } else {
+        curr.standaloneWins++;
+      }
+      coCitationMap.set(dom, curr);
+    }
+  }
+
+  const coCitedCompetitors: CoCitedCompetitor[] = Array.from(
+    coCitationMap.entries(),
+  )
+    .map(([domain, data]) => ({
+      domain,
+      brandName: data.brandName,
+      coCitationCount: data.coCitationCount,
+      coCitationRate:
+        targetObsIds.size > 0
+          ? Math.round((data.coCitationCount / targetObsIds.size) * 100)
+          : 0,
+      standaloneWins: data.standaloneWins,
+    }))
+    .toSorted(
+      (a, b) =>
+        b.coCitationCount - a.coCitationCount ||
+        b.standaloneWins - a.standaloneWins,
+    );
+
   return {
     config,
     prompts: promptItems,
@@ -361,6 +657,13 @@ export function aggregateDashboardMetrics(params: {
     visibilityTrend,
     competitorRankings,
     recentObservations,
+    llmMetrics,
+    profoundAlerts,
+    promptDiagnostics: {
+      winning: sortedWinningPrompts,
+      gaps: sortedGapPrompts,
+    },
+    coCitedCompetitors,
     lastRun: latestRun,
   };
 }

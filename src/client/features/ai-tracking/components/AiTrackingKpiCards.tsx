@@ -1,7 +1,15 @@
-import { Bot, ThumbsUp, X } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Bot,
+  Link2,
+  ThumbsUp,
+  X,
+} from "lucide-react";
 import type {
   AiTrackingKpi,
   AiTrackingPlatform,
+  LlmCitationMetric,
 } from "@/types/schemas/ai-tracking";
 
 interface Props {
@@ -9,6 +17,7 @@ interface Props {
   selectedPlatform: string;
   onSelectPlatform: (platform: string) => void;
   availablePlatforms: AiTrackingPlatform[];
+  llmMetrics?: LlmCitationMetric[];
 }
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -23,6 +32,7 @@ export function AiTrackingKpiCards({
   selectedPlatform,
   onSelectPlatform,
   availablePlatforms,
+  llmMetrics = [],
 }: Props) {
   const isAllSelected = selectedPlatform === "all";
 
@@ -121,6 +131,89 @@ export function AiTrackingKpiCards({
           </div>
         </div>
       </div>
+
+      {/* Profound Pillar 1: Time-series citation rates per LLM model */}
+      {llmMetrics.length > 0 && (
+        <div className="border-t border-base-200/80 pt-4 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-base-content/60 flex items-center gap-1.5">
+              <Link2 className="size-3 text-primary" />
+              Profound Citation Rate per LLM (30d Trend)
+            </span>
+            <span className="text-[10px] text-base-content/50">
+              vs 7-day baseline
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {llmMetrics.map((m) => {
+              const name = PLATFORM_LABELS[m.platform] || m.platform;
+              const hasTrend = m.trendDeltaPercent !== 0;
+              const isPositiveTrend = m.trendDeltaPercent > 0;
+
+              return (
+                <div
+                  key={m.platform}
+                  className="rounded-xl border border-base-200/80 bg-base-200/30 p-2.5 sm:p-3 flex flex-col justify-between gap-1.5"
+                >
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="font-semibold text-xs text-base-content truncate">
+                      {name}
+                    </span>
+                    {hasTrend ? (
+                      <span
+                        className={`badge badge-xs font-bold gap-0.5 text-[10px] ${
+                          isPositiveTrend ? "badge-success" : "badge-warning"
+                        }`}
+                      >
+                        {isPositiveTrend ? (
+                          <ArrowUpRight className="size-2.5" />
+                        ) : (
+                          <ArrowDownRight className="size-2.5" />
+                        )}
+                        {isPositiveTrend
+                          ? `+${m.trendDeltaPercent}%`
+                          : `${m.trendDeltaPercent}%`}
+                      </span>
+                    ) : (
+                      <span className="badge badge-xs badge-ghost text-[10px] text-base-content/50">
+                        steady
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-baseline justify-between gap-2">
+                    <div>
+                      <span className="text-lg sm:text-xl font-bold text-base-content">
+                        {m.citationRatePercent}%
+                      </span>
+                      <span className="text-[10px] text-base-content/50 ml-1">
+                        citations
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-base-content/60 font-mono">
+                      {m.mentionRatePercent}% mentions
+                    </span>
+                  </div>
+
+                  <div className="w-full bg-base-300 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.min(Math.max(m.citationRatePercent, 2), 100)}%`,
+                      }}
+                    />
+                  </div>
+
+                  <span className="text-[10px] text-base-content/50 truncate">
+                    {m.citationsCount} of {m.totalResponses} cited
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

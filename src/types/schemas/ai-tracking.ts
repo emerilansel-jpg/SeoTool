@@ -154,6 +154,45 @@ export interface AiTrackingObservationItem {
   }>;
 }
 
+export interface LlmCitationMetric {
+  platform: AiTrackingPlatform;
+  citationRatePercent: number;
+  mentionRatePercent: number;
+  totalResponses: number;
+  citationsCount: number;
+  mentionsCount: number;
+  trendDeltaPercent: number; // vs 7-day baseline
+}
+
+export interface ProfoundPromptDiagnostic {
+  id: string;
+  prompt: string;
+  isWinning: boolean;
+  position: number | null;
+  modelsSurfaced: AiTrackingPlatform[];
+  competitorsCited: string[];
+  hasDomainCitation: boolean;
+  lastCheckedAt: string | null;
+}
+
+export interface ProfoundAlert {
+  id: string;
+  type: "spike" | "drop" | "competitor_threat" | "opportunity";
+  severity: "info" | "success" | "warning" | "error";
+  title: string;
+  description: string;
+  metric?: string;
+  delta?: number;
+}
+
+export interface CoCitedCompetitor {
+  domain: string;
+  brandName: string;
+  coCitationCount: number;
+  coCitationRate: number; // % of target prompts where both appear
+  standaloneWins: number; // prompts where competitor appears but target does not
+}
+
 export interface AiTrackingDashboardData {
   config: {
     id: string;
@@ -173,6 +212,13 @@ export interface AiTrackingDashboardData {
   visibilityTrend: AiTrackingTrendPoint[];
   competitorRankings: AiTrackingCompetitorRanking[];
   recentObservations: AiTrackingObservationItem[];
+  llmMetrics: LlmCitationMetric[];
+  profoundAlerts: ProfoundAlert[];
+  promptDiagnostics: {
+    winning: ProfoundPromptDiagnostic[];
+    gaps: ProfoundPromptDiagnostic[];
+  };
+  coCitedCompetitors: CoCitedCompetitor[];
   lastRun: {
     id: string;
     status: string;
