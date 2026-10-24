@@ -164,7 +164,7 @@ export function AiDiscoveredPromptsTab({ projectId, domain }: Props) {
         <table className="table table-sm">
           <thead>
             <tr className="bg-base-200/50 text-xs font-semibold text-base-content/70">
-              <th>Prompt / Question</th>
+              <th className="min-w-[260px]">Prompt / Question</th>
               <th>Platform</th>
               <th>AI Mention</th>
               <th>AI Citation</th>
@@ -197,8 +197,8 @@ export function AiDiscoveredPromptsTab({ projectId, domain }: Props) {
             ) : (
               items.map((item) => (
                 <tr key={item.id} className="hover">
-                  <td className="font-medium text-base-content max-w-xs">
-                    <span className="line-clamp-2">{item.prompt}</span>
+                  <td className="font-medium text-xs text-base-content min-w-[260px] whitespace-normal break-words leading-relaxed select-text py-2.5">
+                    {item.prompt}
                   </td>
                   <td>
                     <span className="badge badge-xs font-medium uppercase">

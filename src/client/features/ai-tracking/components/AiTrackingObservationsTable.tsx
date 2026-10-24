@@ -40,18 +40,18 @@ export function AiTrackingObservationsTable({ observations }: Props) {
                 onClick={() => setExpandedId(isExpanded ? null : obs.id)}
               >
                 {/* Desktop layout: 1 line */}
-                <div className="hidden sm:flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="badge badge-sm badge-outline gap-1 font-medium shrink-0">
+                <div className="hidden sm:flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <div className="badge badge-sm badge-outline gap-1 font-medium shrink-0 mt-0.5">
                       <Bot className="size-3" />
                       {PLATFORM_LABELS[obs.platform] || obs.platform}
                     </div>
-                    <span className="font-medium text-xs text-base-content truncate max-w-md">
+                    <span className="font-medium text-xs text-base-content whitespace-normal break-words leading-relaxed select-text">
                       {obs.prompt}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-3 shrink-0 mt-0.5">
                     {obs.brandMentioned ? (
                       <span className="badge badge-success badge-xs font-semibold">
                         Mentioned{" "}
@@ -124,7 +124,7 @@ export function AiTrackingObservationsTable({ observations }: Props) {
                       )}
                     </div>
                   </div>
-                  <p className="text-xs font-medium text-base-content leading-snug line-clamp-2">
+                  <p className="text-xs font-medium text-base-content leading-relaxed whitespace-normal break-words select-text">
                     {obs.prompt}
                   </p>
                 </div>
@@ -132,6 +132,14 @@ export function AiTrackingObservationsTable({ observations }: Props) {
 
               {isExpanded && (
                 <div className="border-t border-base-200 bg-base-100 p-4 space-y-4 text-xs">
+                  <div>
+                    <span className="font-semibold text-base-content block mb-1">
+                      Target AI Prompt:
+                    </span>
+                    <p className="rounded-lg bg-base-200/50 p-2.5 font-medium text-xs text-base-content select-all whitespace-normal break-words leading-relaxed border border-base-200">
+                      {obs.prompt}
+                    </p>
+                  </div>
                   {obs.evidence && (
                     <div className="rounded-lg bg-base-200/50 p-3">
                       <span className="font-semibold text-base-content block mb-1">

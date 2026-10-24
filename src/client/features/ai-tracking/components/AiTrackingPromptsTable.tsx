@@ -170,7 +170,7 @@ Zoho alternatives for small business`}
           <thead>
             <tr className="bg-base-200/50 text-base-content/60">
               <th>Active</th>
-              <th>Prompt</th>
+              <th className="min-w-[280px]">Prompt</th>
               <th>List Position</th>
               <th>Mentioned</th>
               <th>Sentiment</th>
@@ -180,7 +180,7 @@ Zoho alternatives for small business`}
           <tbody>
             {filteredPrompts.map((p) => (
               <tr key={p.id} className="hover:bg-base-200/30">
-                <td>
+                <td className="align-top py-3">
                   <input
                     type="checkbox"
                     className="toggle toggle-xs toggle-primary"
@@ -188,10 +188,10 @@ Zoho alternatives for small business`}
                     onChange={(e) => onTogglePrompt(p.id, e.target.checked)}
                   />
                 </td>
-                <td className="font-medium text-xs max-w-md truncate text-base-content">
+                <td className="font-medium text-xs text-base-content whitespace-normal break-words leading-relaxed py-3 min-w-[280px] select-text">
                   {p.prompt}
                 </td>
-                <td>
+                <td className="align-top py-3">
                   {p.lastPosition != null ? (
                     <span className="badge badge-sm badge-outline font-semibold">
                       #{p.lastPosition}
@@ -200,7 +200,7 @@ Zoho alternatives for small business`}
                     <span className="text-xs text-base-content/40">—</span>
                   )}
                 </td>
-                <td>
+                <td className="align-top py-3">
                   {p.lastMentioned === true && (
                     <span className="inline-flex items-center gap-1 text-xs text-success font-medium">
                       <CheckCircle2 className="size-3.5" />
@@ -219,7 +219,7 @@ Zoho alternatives for small business`}
                     </span>
                   )}
                 </td>
-                <td>
+                <td className="align-top py-3">
                   {p.lastSentiment ? (
                     <span
                       className={`badge badge-xs ${
@@ -236,7 +236,7 @@ Zoho alternatives for small business`}
                     <span className="text-xs text-base-content/40">—</span>
                   )}
                 </td>
-                <td className="text-right">
+                <td className="text-right align-top py-3">
                   <button
                     type="button"
                     className="btn btn-ghost btn-xs text-error hover:bg-error/10"

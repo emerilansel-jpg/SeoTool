@@ -162,7 +162,7 @@ export function AiCompetitorsTab({
           <table className="table table-sm">
             <thead>
               <tr className="bg-base-200/50 text-xs font-semibold text-base-content/70">
-                <th>Prompt / Question</th>
+                <th className="min-w-[260px]">Prompt / Question</th>
                 <th className="text-right">AI Search Volume</th>
                 <th>Our Brand</th>
                 <th>Competitors Mentioned</th>
@@ -192,8 +192,8 @@ export function AiCompetitorsTab({
               ) : (
                 promptGaps.map((gap, i) => (
                   <tr key={i} className="hover">
-                    <td className="font-medium text-base-content max-w-sm">
-                      <span className="line-clamp-2">{gap.prompt}</span>
+                    <td className="font-medium text-xs text-base-content min-w-[260px] whitespace-normal break-words leading-relaxed select-text py-2.5">
+                      {gap.prompt}
                     </td>
                     <td className="text-right font-mono text-xs font-semibold">
                       {gap.aiSearchVolume > 0
