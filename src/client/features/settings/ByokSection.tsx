@@ -198,7 +198,7 @@ export function ByokSection() {
                   ) : null}
                 </div>
                 <p className="text-[11px] text-base-content/50">
-                  You can find your API credentials in your DataForSEO dashboard under API Access.
+                  You can find your API credentials in your Search API provider dashboard under API Access.
                 </p>
               </div>
             )}

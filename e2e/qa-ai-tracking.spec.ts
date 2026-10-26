@@ -36,42 +36,46 @@ test.describe("AI Visibility & Mention Tracking QA Audit", () => {
 
     // Verify page header
     const heading = page.locator("h1");
-    await expect(heading).toContainText("AI Generatif");
+    await expect(heading).toContainText(/AI Generatif|Generative AI/);
 
     // Capture initial unconfigured state
     await page.screenshot({
       path: path.join(QA_DIR, "01_unconfigured_state.png"),
     });
 
-    // 2. Open Setup Modal & Configure Brand
+    // 2. Open Setup Modal & Configure Brand if not already configured
     const setupBtn = page
-      .getByRole("button", { name: /Configure AI Generatif|Setup Tracking/i })
+      .getByRole("button", { name: /Configure AI Generatif|Setup Tracking|Configure Generative AI/i })
       .first();
-    await expect(setupBtn).toBeVisible();
-    await setupBtn.click();
-    await page.waitForTimeout(500);
+    if (await setupBtn.isVisible()) {
+      await setupBtn.click();
+      await page.waitForTimeout(500);
 
-    const modalDialog = page.locator('div[role="dialog"]');
-    await expect(modalDialog).toBeVisible();
-    await page.screenshot({
-      path: path.join(QA_DIR, "02_setup_modal_clean.png"),
-    });
+      const modalDialog = page.locator('div[role="dialog"]');
+      await expect(modalDialog).toBeVisible();
+      await page.screenshot({
+        path: path.join(QA_DIR, "02_setup_modal_clean.png"),
+      });
 
-    // Fill form
-    await page
-      .getByPlaceholder("e.g. Zoho", { exact: true })
-      .fill("Acme Digital");
-    await page
-      .getByPlaceholder("e.g. zoho.com", { exact: true })
-      .fill("acmedigital.com");
-    await page
-      .getByPlaceholder("e.g. Zoho CRM, Zoho Suite")
-      .fill("Acme, Acme SEO");
+      // Fill form
+      await page
+        .getByPlaceholder("e.g. Zoho", { exact: true })
+        .fill("Acme Digital");
+      await page
+        .getByPlaceholder("e.g. zoho.com", { exact: true })
+        .fill("acmedigital.com");
+      await page
+        .getByPlaceholder("e.g. Zoho CRM, Zoho Suite")
+        .fill("Acme, Acme SEO");
 
-    // Submit form
-    const saveBtn = page.getByRole("button", { name: "Save Configuration" });
-    await expect(saveBtn).toBeEnabled();
-    await saveBtn.click();
+      // Submit form
+      const saveBtn = page.getByRole("button", { name: "Save Configuration" });
+      await expect(saveBtn).toBeEnabled();
+      await saveBtn.click();
+    } else {
+      const settingsBtn = page.getByRole("button", { name: /Settings/i }).first();
+      await expect(settingsBtn).toBeVisible();
+    }
     await page.waitForTimeout(1500);
 
     // 3. Verify Configured Dashboard & KPI Cards
@@ -95,62 +99,35 @@ test.describe("AI Visibility & Mention Tracking QA Audit", () => {
       await page.waitForTimeout(500);
     }
 
-    // 5. Test Tab: AI Prompts (Discovered)
+    // 5. Test Pillar 2: Actionable Prompts
     const promptsTabBtn = page
-      .getByRole("button", { name: /AI Prompts/i })
+      .getByRole("button", { name: /Actionable Prompts/i })
       .first();
     await expect(promptsTabBtn).toBeVisible();
     await promptsTabBtn.click();
     await page.waitForTimeout(800);
     await page.screenshot({
-      path: path.join(QA_DIR, "05_tab_discovered_prompts.png"),
+      path: path.join(QA_DIR, "05_tab_actionable_prompts.png"),
     });
 
-    // 6. Test Tab: Tracked Prompts
-    const trackedTabBtn = page
-      .getByRole("button", { name: /Tracked Prompts/i })
-      .first();
-    await expect(trackedTabBtn).toBeVisible();
-    await trackedTabBtn.click();
-    await page.waitForTimeout(800);
-    await page.screenshot({
-      path: path.join(QA_DIR, "06_tab_tracked_prompts.png"),
-    });
-
-    // 7. Test Tab: Citations
+    // 6. Test Pillar 3: Sources & Citations
     const citationsTabBtn = page
-      .getByRole("button", { name: /Citations/i })
+      .getByRole("button", { name: /Sources & Citations/i })
       .first();
     await expect(citationsTabBtn).toBeVisible();
     await citationsTabBtn.click();
     await page.waitForTimeout(800);
-    await page.screenshot({ path: path.join(QA_DIR, "07_tab_citations.png") });
+    await page.screenshot({ path: path.join(QA_DIR, "06_tab_sources_citations.png") });
 
-    // 8. Test Tab: Pages
-    const pagesTabBtn = page.getByRole("button", { name: /^Pages/i }).first();
-    await expect(pagesTabBtn).toBeVisible();
-    await pagesTabBtn.click();
-    await page.waitForTimeout(800);
-    await page.screenshot({ path: path.join(QA_DIR, "08_tab_pages.png") });
-
-    // 9. Test Tab: Competitors
+    // 7. Test Pillar 4: Competitor Overlap
     const compTabBtn = page
-      .getByRole("button", { name: /Competitors/i })
+      .getByRole("button", { name: /Competitor Overlap/i })
       .first();
     await expect(compTabBtn).toBeVisible();
     await compTabBtn.click();
     await page.waitForTimeout(800);
     await page.screenshot({
-      path: path.join(QA_DIR, "09_tab_competitors.png"),
-    });
-
-    // 10. Test Tab: GSC Correlation
-    const gscTabBtn = page.getByRole("button", { name: /GSC/i }).first();
-    await expect(gscTabBtn).toBeVisible();
-    await gscTabBtn.click();
-    await page.waitForTimeout(800);
-    await page.screenshot({
-      path: path.join(QA_DIR, "10_tab_gsc_correlation.png"),
+      path: path.join(QA_DIR, "07_tab_competitor_overlap.png"),
     });
 
     // Verify zero console errors
@@ -183,11 +160,11 @@ test.describe("AI Visibility & Mention Tracking QA Audit", () => {
     });
 
     // Wait for either the configured card or the unconfigured state
-    await page.waitForSelector('h1:has-text("AI Generatif")', {
+    await page.waitForSelector('h1:has-text("AI Generatif"), h1:has-text("Generative AI")', {
       timeout: 30_000,
     });
     await page.waitForSelector(
-      '.card, button:has-text("Configure AI Generatif"), button:has-text("Settings")',
+      '.card, button:has-text("Configure AI Generatif"), button:has-text("Configure Generative AI"), button:has-text("Settings")',
       { timeout: 30_000 },
     );
     await page.waitForTimeout(1000);

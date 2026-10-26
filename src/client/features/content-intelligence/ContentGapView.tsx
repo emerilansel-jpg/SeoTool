@@ -99,7 +99,7 @@ const gapColumns = [
     ),
     sortDescFirst: false,
   }),
-  gapColumnHelper.accessor((row) => row.competitors.length, {
+  gapColumnHelper.accessor((row) => row.competitors?.length ?? 0, {
     id: "competitors",
     header: "Competitors",
     cell: ({ getValue }) =>
