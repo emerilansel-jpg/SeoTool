@@ -14,9 +14,9 @@ export const KEYWORD_PRO_COHORT_KEYS = [
 export const KEYWORD_PRO_COHORTS = [
   {
     key: KEYWORD_PRO_COHORT_KEYS[0],
-    label: "Founder 10",
-    capacity: 10,
-    defaultPriceUsdCents: 2_900,
+    label: "Founder Pass",
+    capacity: 100,
+    defaultPriceUsdCents: 2_700,
   },
   {
     key: KEYWORD_PRO_COHORT_KEYS[1],

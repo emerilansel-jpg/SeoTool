@@ -8,6 +8,7 @@ import {
   contentScoreSummaryInputSchema,
   contentScoresInputSchema,
   pageEntitiesInputSchema,
+  polishGapKeywordsInputSchema,
 } from "@/types/schemas/content-intelligence";
 
 // Read-only content scores are available to any project member (viewer+).
@@ -53,6 +54,18 @@ export const getContentGap = createServerFn({ method: "POST" })
       },
       context,
     );
+  });
+
+// Polish gap keywords with AI to filter out junk / irrelevant terms.
+export const polishGapKeywords = createServerFn({ method: "POST" })
+  .middleware([requireProjectContext])
+  .validator(polishGapKeywordsInputSchema)
+  .handler(async ({ data, context }) => {
+    return ContentGapService.polishKeywords({
+      domain: data.domain,
+      keywords: data.keywords,
+      organizationId: context.organizationId,
+    });
   });
 
 // Read-only per-page entity/topic extraction results. Entity extraction runs

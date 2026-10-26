@@ -34,3 +34,11 @@ export const contentGapInputSchema = z.object({
   locationCode: z.number().int().optional(),
   languageCode: z.string().optional(),
 });
+
+/** Input for AI Polish & Keyword Cleaning for Content Gap */
+export const polishGapKeywordsInputSchema = z.object({
+  ...projectScoped,
+  domain: z.string().min(1),
+  keywords: z.array(z.string().min(1)).min(1).max(200),
+});
+

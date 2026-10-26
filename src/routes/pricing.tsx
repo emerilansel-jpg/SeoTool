@@ -14,19 +14,14 @@ import { APPSUMO_TIERS } from "@/shared/pricing-definitions";
 
 const FAQ_ITEMS = [
   {
-    question: "What is the Lifetime Deal (LTD)? How does the +$10 price jump work?",
+    question: "What is the Lifetime Deal (LTD)?",
     answer:
-      "A Lifetime Deal is a one-time payment for permanent access to SeoTool.im. No recurring subscription bills. Early buyers get reward pricing that increases by $10 as each cohort sells out: Founder 10 ($29) -> Early 20 ($39) -> Growth 50 ($49) -> Public ($59). Once you claim a spot, you keep access for life.",
+      "A Lifetime Deal is a single one-time payment of $27 for permanent access to SeoTool.im. No recurring subscription bills. Once you claim a spot, you keep access for life.",
   },
   {
     question: "How does BYOK (Bring Your Own Key) work?",
     answer:
-      "With BYOK, you connect your own DataForSEO and AI provider API keys in Settings. We charge zero platform markup on your data. You pay raw provider rates (~$0.002 per scan) directly, allowing you to crawl and track at scale without limits.",
-  },
-  {
-    question: "What are the official AppSumo Lifetime Deals?",
-    answer:
-      "For teams and agencies wanting bundled domain slots, multi-user seats, and white-label client PDF reports in one package, choose from our 5 official AppSumo tiers from $37 to $399 (all one-time payments). Tier 3 ($149) is our most popular Sweet Spot.",
+      "With BYOK, you connect your own Search Engine and AI provider API keys in Settings. We charge zero platform markup on your data. You pay raw provider rates (~$0.002 per scan) directly, allowing you to crawl and track at scale without limits.",
   },
   {
     question: "How does the $1/month Credit Retainer work?",
@@ -229,9 +224,13 @@ function MonthlyPacks({ signedIn }: { signedIn: boolean }) {
                 : "border-base-300 bg-base-100 hover:border-base-content/20 shadow-xs"
             }`}
           >
-            {isSweet ? (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[10px] font-extrabold text-white shadow-sm">
-                MOST POPULAR
+            {pack.badge ? (
+              <div
+                className={`absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-0.5 text-[10px] font-extrabold shadow-sm ${
+                  isSweet ? "bg-primary text-white" : "bg-emerald-600 text-white"
+                }`}
+              >
+                {pack.badge}
               </div>
             ) : null}
 
@@ -262,6 +261,12 @@ function MonthlyPacks({ signedIn }: { signedIn: boolean }) {
                   <Check className="size-3 text-success shrink-0 mt-0.5" />
                   <span>100% of payment turns into credits</span>
                 </li>
+                {pack.bonusPercent ? (
+                  <li className="flex items-start gap-1.5 font-medium text-emerald-600">
+                    <Check className="size-3 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>+{pack.bonusPercent}% volume bonus credits</span>
+                  </li>
+                ) : null}
                 <li className="flex items-start gap-1.5">
                   <Check className="size-3 text-success shrink-0 mt-0.5" />
                   <span>Access all tools & Jet AI agent</span>
@@ -386,7 +391,7 @@ function AppSumoTiers({ signedIn }: { signedIn: boolean }) {
 function PricingPage() {
   const { signedIn } = useMarketingSession();
   const { cohorts } = Route.useLoaderData() as LoaderData;
-  const [activeTab, setActiveTab] = useState<"ltd" | "appsumo" | "monthly">("ltd");
+  const [activeTab, setActiveTab] = useState<"ltd" | "monthly">("ltd");
 
   const currentCohort = cohorts.find(
     (c: EffectiveKeywordProCohort) =>
@@ -404,8 +409,7 @@ function PricingPage() {
             Choose How You Want to Pay
           </h1>
           <p className="mt-4 text-base text-base-content/70 md:text-lg">
-            Pay once with our BYOK Lifetime Deal, choose an official AppSumo tier,
-            or start easy from $1/month ($1 = 1,000 permanent credits).
+            Pay once $27 with our BYOK Lifetime Deal, or start easy from $1/month ($1 = 1,000 permanent credits + volume bonuses).
           </p>
 
           <div className="mt-8 flex justify-center">
@@ -420,19 +424,7 @@ function PricingPage() {
                 }`}
               >
                 <Zap className="size-4" />
-                Early Believer LTD (BYOK)
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("appsumo")}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs md:text-sm font-bold transition-all ${
-                  activeTab === "appsumo"
-                    ? "bg-primary text-white shadow-sm"
-                    : "text-base-content/70 hover:text-base-content"
-                }`}
-              >
-                <Sparkles className="size-4" />
-                AppSumo Deals (5 Tiers)
+                Early Believer LTD ($27 Once)
               </button>
               <button
                 type="button"
@@ -443,7 +435,8 @@ function PricingPage() {
                     : "text-base-content/70 hover:text-base-content"
                 }`}
               >
-                $1/mo Retainer & Monthly
+                <Sparkles className="size-4" />
+                Monthly Packs (Save up to 40%)
               </button>
             </div>
           </div>
@@ -451,45 +444,32 @@ function PricingPage() {
 
         {activeTab === "ltd" && (
           <div className="mt-12">
-            <div className="mx-auto mb-8 max-w-3xl rounded-xl border border-primary/30 bg-primary/[0.04] p-5 text-center">
+            <div className="mx-auto mb-8 max-w-2xl rounded-xl border border-primary/30 bg-primary/[0.04] p-5 text-center">
               <div className="flex items-center justify-center gap-2 text-primary font-bold text-sm">
                 <Lock className="size-4" />
-                <span>Pay Once, Keep Forever. Price Increases $10 Every Batch</span>
+                <span>Single Lifetime Pass — $27 Once, Yours Forever</span>
               </div>
               <p className="mt-2 text-xs md:text-sm text-base-content/75 leading-relaxed">
                 Pay a single one-time fee for lifetime platform access. Powered by{" "}
-                <strong>BYOK (Bring Your Own Key)</strong>: connect your own DataForSEO & AI API
-                keys to pay raw provider costs with zero markup.
+                <strong>BYOK (Bring Your Own Key)</strong>: connect your own search engine & AI API
+                keys to run unlimited audits and research with zero platform markup.
               </p>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {cohorts.map((cohort) => (
-                <CohortCard
-                  key={cohort.key}
-                  cohort={cohort}
-                  isCurrent={cohort.key === currentCohort?.key}
-                  signedIn={signedIn}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "appsumo" && (
-          <div className="mt-12">
-            <div className="mx-auto mb-8 max-w-3xl rounded-xl border border-primary/30 bg-primary/[0.04] p-5 text-center">
-              <div className="flex items-center justify-center gap-2 text-primary font-bold text-sm">
-                <Sparkles className="size-4" />
-                <span>Official AppSumo Lifetime Deals (5 Tier Plans)</span>
+            <div className="flex justify-center">
+              <div className="w-full max-w-md">
+                {cohorts
+                  .filter((c) => c.key === "krp_founder_10" || cohorts.length === 1)
+                  .map((cohort) => (
+                    <CohortCard
+                      key={cohort.key}
+                      cohort={cohort}
+                      isCurrent={true}
+                      signedIn={signedIn}
+                    />
+                  ))}
               </div>
-              <p className="mt-2 text-xs md:text-sm text-base-content/75 leading-relaxed">
-                All-in-one lifetime packages with bundled domains, team seats, and white-label client PDF reports.
-                Tier 3 ($149) is our most popular Sweet Spot!
-              </p>
             </div>
-
-            <AppSumoTiers signedIn={signedIn} />
           </div>
         )}
 
@@ -497,10 +477,10 @@ function PricingPage() {
           <div className="mt-12">
             <div className="mx-auto mb-8 max-w-3xl rounded-xl border border-base-300 bg-base-200/40 p-5 text-center">
               <h3 className="text-base font-bold text-base-content">
-                Micro Retainer & Monthly Credit Packs ($1 = 1,000 Credits)
+                Micro Retainer & Monthly Credit Packs (Save More When You Buy More)
               </h3>
               <p className="mt-1 text-xs md:text-sm text-base-content/70">
-                100% of your subscription turns into permanent usage credits. Every $1 = 1,000 credits.
+                100% of your subscription turns into permanent usage credits with up to +62% bonus credits.
                 Credits roll over every month and never expire, even if you cancel.
               </p>
             </div>

@@ -158,6 +158,60 @@ async function getGap(
   return view;
 }
 
+/**
+ * Uses LLM to act as an SEO/GEO expert, filtering out noisy, irrelevant,
+ * non-actionable, or competitor-branded junk keywords from a content gap list.
+ */
+async function polishKeywords({
+  domain,
+  keywords,
+  organizationId,
+}: {
+  domain: string;
+  keywords: string[];
+  organizationId?: string;
+}): Promise<string[]> {
+  if (keywords.length === 0) return [];
+  try {
+    const { generateText } = await import("ai");
+    const { getChatAgentModel } = await import("@/server/lib/openrouter");
+    const model = await getChatAgentModel(organizationId);
+
+    const prompt = `You are a high-level SEO & GEO (Generative Engine Optimization) strategist.
+Target Domain: ${domain}
+
+Here is a raw list of competitor gap keywords:
+${JSON.stringify(keywords)}
+
+Task:
+Filter and retain ONLY the keywords that are strictly relevant, commercial, informative, or genuinely actionable for ${domain} to target and create content for.
+Eliminate:
+1. Irrelevant competitor-specific internal terms / login links / noise / nonsense keywords
+2. Adult, spam, or totally off-niche terms
+3. Junk keywords with zero search intent for ${domain}
+
+Respond with ONLY a JSON array of clean, vetted keyword strings in the exact same format, e.g. ["keyword 1", "keyword 2"]. Do not include markdown codeblocks or explanation.`;
+
+    const res = await generateText({
+      model,
+      prompt,
+      maxOutputTokens: 1000,
+    });
+
+    const cleaned = res.text.trim().replace(/^```json/i, "").replace(/^```/i, "").replace(/```$/i, "").trim();
+    const parsed = JSON.parse(cleaned);
+    if (Array.isArray(parsed) && parsed.every((k) => typeof k === "string")) {
+      return parsed;
+    }
+    return keywords;
+  } catch (err) {
+    console.error("polishKeywords error:", err);
+    return keywords;
+  }
+}
+
 export const ContentGapService = {
   getGap,
+  polishKeywords,
 } as const;
+

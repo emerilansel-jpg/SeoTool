@@ -138,7 +138,7 @@ export function KeywordResearchProPage({ projectId }: Props) {
     if (keywords.length === 0) return;
     if (billingMode === "byok" && !byokQuery.data?.dataforseoConfigured) {
       toast.error(
-        "Please configure your DataForSEO key in Settings > BYOK Integrations",
+        "Please configure your Search API key in Settings > BYOK Integrations",
       );
       return;
     }
@@ -255,7 +255,7 @@ export function KeywordResearchProPage({ projectId }: Props) {
                   <div className="flex items-center gap-2 text-xs text-success bg-success/10 border border-success/20 rounded-lg p-2.5">
                     <CheckCircle2 className="size-4 shrink-0" />
                     <span>
-                      Using saved DataForSEO key (
+                      Using saved Search API key (
                       <code className="font-mono">
                         {byokQuery.data.dataforseoPrefix}
                       </code>
@@ -271,7 +271,7 @@ export function KeywordResearchProPage({ projectId }: Props) {
                 ) : (
                   <div className="flex items-center justify-between gap-2 text-xs text-warning bg-warning/10 border border-warning/20 rounded-lg p-2.5">
                     <span>
-                      DataForSEO key is not configured. Add your key in Settings to use BYOK mode.
+                      Search API key is not configured. Add your key in Settings to use BYOK mode.
                     </span>
                     <Link to="/settings" className="btn btn-xs btn-warning">
                       Go to Settings
@@ -283,7 +283,7 @@ export function KeywordResearchProPage({ projectId }: Props) {
             <p className="text-xs text-base-content/60">
               Estimated total: <strong>{money(estimate.totalOutlay)}</strong>
               {billingMode === "byok"
-                ? ` (${money(estimate.raw)} paid on your DataForSEO account + ${money(estimate.seoToolCharge)} SeoTool fee)`
+                ? ` (${money(estimate.raw)} paid directly on your API account + ${money(estimate.seoToolCharge)} SeoTool fee)`
                 : " from SeoTool credits"}
               . Actual billing follows the provider's task cost.
             </p>

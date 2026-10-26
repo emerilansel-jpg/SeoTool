@@ -23,11 +23,11 @@ export const LTD_OFFERS: Record<
   }
 > = {
   krp_founder_10: {
-    priceUsd: 29,
-    title: "Founder 10 (LTD)",
+    priceUsd: 27,
+    title: "Founder Pass (LTD)",
     tier: "byok",
     bonusCredits: 5000,
-    description: "SeoTool.im Early Believer Lifetime Deal (Founder 10 - BYOK)",
+    description: "SeoTool.im Early Believer Lifetime Deal (Founder Pass - BYOK)",
   },
   krp_early_20: {
     priceUsd: 39,

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { MIN_PAGES } from "@/client/features/audit/launch/types";
 import type { useLaunchController } from "@/client/features/audit/launch/useLaunchController";
+import { ensureProtocol } from "@/client/features/domain/utils";
 import { getFieldError, getFormError } from "@/client/lib/forms";
 import { PAID_MAX_AUDIT_PAGES } from "@/shared/audit-limits";
 import { SUBSCRIBE_ROUTE } from "@/shared/billing";
@@ -40,12 +41,18 @@ export function LaunchFormCard({
                   className={`input input-bordered rounded-xl w-full lg:col-span-9 ${urlError ? "input-error" : ""}`}
                 >
                   <input
-                    placeholder="https://example.com"
+                    placeholder="example.com or https://example.com"
                     value={field.state.value}
                     onChange={(event) => {
                       field.handleChange(event.target.value);
                       if (launchForm.state.errorMap.onSubmit) {
                         launchForm.setErrorMap({ onSubmit: undefined });
+                      }
+                    }}
+                    onBlur={(event) => {
+                      const val = event.target.value.trim();
+                      if (val) {
+                        field.handleChange(ensureProtocol(val));
                       }
                     }}
                   />

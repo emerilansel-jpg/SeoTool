@@ -20,23 +20,15 @@ describe("Pricing and Credits Parity Guard", () => {
     expect(MICRO_RETAINER.priceUsd).toBe(1);
   });
 
-  it("ensures every monthly credit pack matches the 1,000 credits/dollar standard", () => {
+  it("ensures every monthly credit pack gives at least 1,000 credits/dollar with volume bonuses", () => {
     for (const pack of MONTHLY_CREDIT_PACKS) {
-      expect(pack.credits).toBe(pack.priceUsd * 1000);
+      expect(pack.credits).toBeGreaterThanOrEqual(pack.priceUsd * 1000);
     }
   });
 
-  it("validates LTD cohort ladder ($29, $39, $49, $59 one-time)", () => {
-    const expected = [
-      { key: "krp_founder_10", priceUsd: 29 },
-      { key: "krp_early_20", priceUsd: 39 },
-      { key: "krp_growth_50", priceUsd: 49 },
-      { key: "krp_public", priceUsd: 59 },
-    ];
-
-    expect(LTD_COHORTS.map((c) => ({ key: c.key, priceUsd: c.priceUsd }))).toEqual(
-      expected,
-    );
+  it("validates LTD Founder Pass ($27 one-time)", () => {
+    expect(LTD_COHORTS[0].priceUsd).toBe(27);
+    expect(LTD_COHORTS[0].key).toBe("krp_founder_10");
   });
 
   it("validates AppSumo 5-tier pricing ($37, $79, $149, $249, $399)", () => {

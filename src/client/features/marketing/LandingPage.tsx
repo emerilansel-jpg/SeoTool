@@ -102,7 +102,7 @@ function AnnouncementBar() {
         to="/pricing"
         className="block rounded-xl bg-primary px-5 py-3 text-center text-sm font-medium text-white shadow-[inset_0_-6px_12px_rgba(0,0,0,0.12)] transition-transform hover:scale-[0.995]"
       >
-        Early Believer Lifetime Deal: First 10 members claim $29 One-Time (BYOK Mode, price rises $10 every batch).{" "}
+        Early Believer Lifetime Deal: Claim the Founder Pass for $27 One-Time (Unlimited BYOK Mode, Zero Data Markup).{" "}
         <span className="font-semibold underline underline-offset-2">
           Claim spot
         </span>{" "}
@@ -225,18 +225,55 @@ function Hero({ signedIn }: { signedIn: boolean }) {
             </span>
           </div>
 
-          <h1 className="hero-rise hero-rise-2 mt-6 text-5xl font-extrabold tracking-tight text-balance sm:text-6xl">
-            The AI-Native SEO Workspace for{" "}
-            <span className="text-primary">Deep Keywords & Local Geogrids</span>
+          <h1 className="hero-rise hero-rise-2 mt-6 text-4xl font-extrabold tracking-tight text-balance sm:text-5xl md:text-6xl">
+            Everything You Expect From an SEO Tool,{" "}
+            <span className="text-primary">Plus 3 Extra Powers</span>
           </h1>
 
-          <p className="hero-rise hero-rise-3 mx-auto mt-6 max-w-2xl text-base text-base-content/70 md:text-lg">
-            Connect directly to Cursor and Claude Code via Model Context Protocol.
-            Uncover low-competition keywords with KGR and Reddit/Quora weak-spot detection,
-            track Google Maps local geogrids, and monitor brand citations in ChatGPT, Claude, and Perplexity.{" "}
-            <strong className="rounded-sm bg-base-200 px-1 font-semibold text-base-content">
-              Wholesale data rates with BYOK or transparent $1 credits.
-            </strong>
+          {/* 3 Extra Powers Grid */}
+          <div className="hero-rise hero-rise-3 mx-auto mt-8 grid max-w-3xl gap-3 text-left sm:grid-cols-3">
+            <div className="rounded-xl border border-base-300/80 bg-base-100/90 p-4 shadow-2xs backdrop-blur-xs">
+              <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wide">
+                <Search className="size-3.5" />
+                <span>Rank faster</span>
+              </div>
+              <h3 className="mt-1.5 text-sm font-bold text-base-content">
+                Smarter keyword research
+              </h3>
+              <p className="mt-1 text-xs text-base-content/70 leading-relaxed">
+                Find weak SERPs with KGR and Reddit/Quora weak-spot detection.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-base-300/80 bg-base-100/90 p-4 shadow-2xs backdrop-blur-xs">
+              <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wide">
+                <Globe className="size-3.5" />
+                <span>Rank locally</span>
+              </div>
+              <h3 className="mt-1.5 text-sm font-bold text-base-content">
+                Local SEO tracking
+              </h3>
+              <p className="mt-1 text-xs text-base-content/70 leading-relaxed">
+                Track Google Maps positions with geogrids.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-base-300/80 bg-base-100/90 p-4 shadow-2xs backdrop-blur-xs">
+              <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wide">
+                <Sparkles className="size-3.5" />
+                <span>Rank in AI</span>
+              </div>
+              <h3 className="mt-1.5 text-sm font-bold text-base-content">
+                GEO tracking
+              </h3>
+              <p className="mt-1 text-xs text-base-content/70 leading-relaxed">
+                Monitor citations in ChatGPT, Claude, and Perplexity.
+              </p>
+            </div>
+          </div>
+
+          <p className="hero-rise hero-rise-3 mx-auto mt-6 max-w-2xl text-sm sm:text-base text-base-content/70">
+            Connect via MCP to Codex, Cursor, or any AI agent. Use BYOK, or start at $1/month.
           </p>
 
           <div className="hero-rise hero-rise-4 mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -815,20 +852,18 @@ function PricingTeaser({ signedIn }: { signedIn: boolean }) {
               <span className="text-primary">early believers</span>
             </h2>
             <p className="mt-4 text-base leading-relaxed text-base-content/60">
-              Pay once, keep forever. Every lifetime cohort includes full BYOK
-              mode (zero platform data markup on your DataForSEO and AI keys),
+              Pay once, keep forever. The Early Believer Founder Pass includes full BYOK
+              mode (zero platform data markup on your search API and AI keys),
               5,000 bonus platform credits, and lifetime engine updates.
-              Price rises by $10 as each batch fills!
             </p>
 
             <div className="mt-4 rounded-xl border border-base-300 bg-base-100 p-4 text-xs text-base-content/75 space-y-1.5">
               <div className="font-semibold text-base-content">
-                Three ways to access SeoTool.im:
+                Two simple ways to access SeoTool.im:
               </div>
               <ul className="space-y-1 text-base-content/70">
-                <li>• <strong>Early Believer LTD:</strong> Pay once from $29 with BYOK for unlimited low-cost scale.</li>
-                <li>• <strong>AppSumo Deals:</strong> 5 official tiers ($37 to $399) with bundled credits & multi-domain seats.</li>
-                <li>• <strong>Micro Retainer:</strong> Start at just $1/month (100% turns into 1,000 permanent credits).</li>
+                <li>• <strong>Early Believer Pass ($27 Once):</strong> Lifetime BYOK workspace, MCP agent access, zero markup forever.</li>
+                <li>• <strong>Monthly Credit Retainer:</strong> Start at just $1/month (100% turns into permanent credits, save up to 40% on larger packs).</li>
               </ul>
             </div>
 
@@ -839,7 +874,7 @@ function PricingTeaser({ signedIn }: { signedIn: boolean }) {
                   search={{ plan: "ltd", cohort: "krp_founder_10" }}
                   className="btn btn-md gap-2 rounded-[10px] border-0 bg-primary px-5 font-semibold text-white shadow-[inset_0_-6px_12px_rgba(0,0,0,0.12)] transition-transform hover:scale-[1.03]"
                 >
-                  Get Founder Deal ($29)
+                  Get Early Believer Pass ($27)
                   <ArrowRight className="size-4" />
                 </Link>
               ) : (
@@ -848,7 +883,7 @@ function PricingTeaser({ signedIn }: { signedIn: boolean }) {
                   search={{ redirect: "/subscribe?plan=ltd&cohort=krp_founder_10" }}
                   className="btn btn-md gap-2 rounded-[10px] border-0 bg-primary px-5 font-semibold text-white shadow-[inset_0_-6px_12px_rgba(0,0,0,0.12)] transition-transform hover:scale-[1.03]"
                 >
-                  Get Founder Deal ($29)
+                  Get Early Believer Pass ($27)
                   <ArrowRight className="size-4" />
                 </Link>
               )}
@@ -861,39 +896,58 @@ function PricingTeaser({ signedIn }: { signedIn: boolean }) {
             </div>
           </Reveal>
           <Reveal delay={1}>
-            <div className="grid overflow-hidden rounded-2xl border border-base-300 bg-base-100 sm:grid-cols-2">
-              {LTD_COHORTS.map((c, i) => (
+            <div className="overflow-hidden rounded-2xl border border-primary/40 bg-base-100 shadow-md">
+              {LTD_COHORTS.map((c) => (
                 <div
                   key={c.key}
-                  className={`p-6 ${i === 0 ? "bg-primary/[0.04]" : ""} ${
-                    i % 2 === 0 ? "border-base-300 sm:border-r" : ""
-                  } ${i < 2 ? "border-b border-base-300" : ""}`}
+                  className="p-8 bg-primary/[0.03]"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-base-content/60">
+                    <span className="text-sm font-bold text-base-content">
                       {c.label}
                     </span>
-                    <span className="badge badge-sm badge-ghost text-[10px]">
+                    <span className="badge badge-sm badge-primary text-[10px] font-bold">
                       {c.badge}
                     </span>
                   </div>
-                  <div className="mt-2 font-mono text-3xl font-bold tracking-tight">
-                    ${c.priceUsd}
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <span className="font-mono text-4xl font-extrabold tracking-tight">
+                      ${c.priceUsd}
+                    </span>
+                    <span className="badge badge-primary badge-outline text-[11px] font-bold">
+                      ONE-TIME PAYMENT
+                    </span>
                   </div>
-                  <div className="mt-0.5 text-[11px] font-bold uppercase tracking-wider text-primary">
-                    ONE-TIME PAYMENT
-                  </div>
-                  <p className="mt-2 text-xs text-base-content/60 leading-relaxed">
+                  <p className="mt-3 text-sm text-base-content/70 leading-relaxed">
                     {c.description}
                   </p>
-                  <div className="mt-3 text-[11px] font-semibold text-base-content/50">
-                    BYOK Mode · Zero Data Markup
-                  </div>
-                  {i === 0 ? (
-                    <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                      <Gauge className="size-3" /> Open now ($29)
+                  <div className="mt-4 space-y-2 text-xs text-base-content/80 border-t border-base-200 pt-4">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="size-3.5 text-success shrink-0" />
+                      <span>Lifetime Access to all 12+ SEO & Audit Modules</span>
                     </div>
-                  ) : null}
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="size-3.5 text-success shrink-0" />
+                      <span>Full BYOK Mode: Zero Data & AI Markup Forever</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="size-3.5 text-success shrink-0" />
+                      <span>5,000 Bonus Platform Credits on Activation</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="size-3.5 text-success shrink-0" />
+                      <span>Model Context Protocol (MCP) Access for AI Agents</span>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Link
+                      to="/subscribe"
+                      search={{ plan: "ltd", cohort: c.key }}
+                      className="btn btn-primary btn-md w-full font-bold shadow-sm"
+                    >
+                      Claim Founder Pass (${c.priceUsd})
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>

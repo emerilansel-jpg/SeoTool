@@ -18,6 +18,7 @@ import {
   shouldValidateFieldOnChange,
 } from "@/client/lib/forms";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
+import { ensureProtocol } from "@/client/features/domain/utils";
 
 function getLaunchValidationErrors(
   value: LaunchFormValues,
@@ -81,9 +82,10 @@ export function useLaunchController({
       }
 
       try {
+        const normalizedUrl = ensureProtocol(value.url);
         const result = await startMutation.mutateAsync({
           projectId,
-          startUrl: value.url,
+          startUrl: normalizedUrl,
           maxPages: effectiveMaxPages,
           lighthouseStrategy: value.runLighthouse ? "auto" : "none",
         });

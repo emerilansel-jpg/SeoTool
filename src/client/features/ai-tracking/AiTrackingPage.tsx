@@ -50,12 +50,9 @@ interface Props {
 
 type TabType =
   | "overview"
-  | "ai_prompts"
-  | "tracked_prompts"
+  | "prompts"
   | "citations"
-  | "pages"
-  | "competitors"
-  | "gsc";
+  | "competitors";
 
 export function AiTrackingPage({ projectId }: Props) {
   const queryClient = useQueryClient();
@@ -170,25 +167,15 @@ export function AiTrackingPage({ projectId }: Props) {
     icon: typeof Bot;
     badge?: string | number;
   }> = [
-    { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "overview", label: "Overview & Mentions", icon: LayoutDashboard },
     {
-      id: "ai_prompts",
-      label: "AI Prompts",
+      id: "prompts",
+      label: "Actionable Prompts",
       icon: Compass,
-      badge: data.discoveryStats?.totalDiscovered
-        ? data.discoveryStats.totalDiscovered
-        : undefined,
-    },
-    {
-      id: "tracked_prompts",
-      label: "Tracked Prompts",
-      icon: CheckCircle2,
       badge: data.prompts.length > 0 ? data.prompts.length : undefined,
     },
-    { id: "citations", label: "Citations", icon: Link2 },
-    { id: "pages", label: "Pages", icon: Globe },
-    { id: "competitors", label: "Competitors", icon: Users },
-    { id: "gsc", label: "GSC AI Performance", icon: BarChart2 },
+    { id: "citations", label: "Sources & Citations", icon: Link2 },
+    { id: "competitors", label: "Competitor Overlap", icon: Users },
   ];
 
   return (
@@ -328,7 +315,7 @@ export function AiTrackingPage({ projectId }: Props) {
                         Discovered for {config.domain}
                       </h3>
                       <p className="text-[11px] sm:text-xs text-base-content/60 mt-0.5 leading-relaxed">
-                        DataForSEO discovery:{" "}
+                        Search discovery:{" "}
                         {data.discoveryStats.totalMentioned} mentioned •{" "}
                         {data.discoveryStats.totalCited} cited •{" "}
                         {data.discoveryStats.totalSearchVolume.toLocaleString()}{" "}
@@ -339,9 +326,9 @@ export function AiTrackingPage({ projectId }: Props) {
                   <button
                     type="button"
                     className="btn btn-sm sm:btn-xs btn-outline btn-primary shrink-0 w-full sm:w-auto justify-center"
-                    onClick={() => setActiveTab("ai_prompts")}
+                    onClick={() => setActiveTab("prompts")}
                   >
-                    View All AI Prompts →
+                    View Actionable Prompts →
                   </button>
                 </div>
               )}
@@ -371,16 +358,8 @@ export function AiTrackingPage({ projectId }: Props) {
             </div>
           )}
 
-          {/* TAB 2: AI ORGANIC PROMPTS (DISCOVERED) */}
-          {activeTab === "ai_prompts" && (
-            <AiDiscoveredPromptsTab
-              projectId={projectId}
-              domain={config.domain}
-            />
-          )}
-
-          {/* TAB 3: TRACKED PROMPTS */}
-          {activeTab === "tracked_prompts" && (
+          {/* TAB 2: ACTIONABLE PROMPTS (COMBINED DISCOVERY & TRACKED) */}
+          {activeTab === "prompts" && (
             <div className="space-y-6">
               <AiTrackingPromptsTable
                 prompts={data.prompts}
@@ -397,13 +376,20 @@ export function AiTrackingPage({ projectId }: Props) {
                 isAdding={addPromptsMutation.isPending}
               />
 
+              <div className="pt-2">
+                <AiDiscoveredPromptsTab
+                  projectId={projectId}
+                  domain={config.domain}
+                />
+              </div>
+
               <AiTrackingObservationsTable
                 observations={data.recentObservations}
               />
             </div>
           )}
 
-          {/* TAB 4: CITATIONS */}
+          {/* TAB 3: SOURCES & CITATIONS */}
           {activeTab === "citations" && (
             <AiCitationsTab
               projectId={projectId}
@@ -412,12 +398,7 @@ export function AiTrackingPage({ projectId }: Props) {
             />
           )}
 
-          {/* TAB 5: PAGES */}
-          {activeTab === "pages" && (
-            <AiPagesTab projectId={projectId} domain={config.domain} />
-          )}
-
-          {/* TAB 6: COMPETITORS */}
+          {/* TAB 4: COMPETITOR OVERLAP */}
           {activeTab === "competitors" && (
             <AiCompetitorsTab
               projectId={projectId}
@@ -426,9 +407,6 @@ export function AiTrackingPage({ projectId }: Props) {
               coCitedCompetitors={data.coCitedCompetitors ?? []}
             />
           )}
-
-          {/* TAB 7: GSC AI PERFORMANCE */}
-          {activeTab === "gsc" && <AiGscCorrelationTab projectId={projectId} />}
         </>
       )}
 

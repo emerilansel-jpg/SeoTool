@@ -13,35 +13,11 @@ export interface PricingCohortDefinition {
 export const LTD_COHORTS: readonly PricingCohortDefinition[] = [
   {
     key: "krp_founder_10",
-    label: "Founder 10",
-    priceUsd: 29,
-    capacity: 10,
-    badge: "10 spots only",
-    description: "First 10 believers lock the absolute lowest entry price.",
-  },
-  {
-    key: "krp_early_20",
-    label: "Early 20",
-    priceUsd: 39,
-    capacity: 20,
-    badge: "20 spots",
-    description: "Next wave of early adopters before public price jump.",
-  },
-  {
-    key: "krp_growth_50",
-    label: "Growth 50",
-    priceUsd: 49,
-    capacity: 50,
-    badge: "50 spots",
-    description: "Scale cohort as new features and engines go live.",
-  },
-  {
-    key: "krp_public",
-    label: "Public",
-    priceUsd: 59,
-    capacity: null,
-    badge: "Open cohort",
-    description: "General public lifetime license. Unlimited spots.",
+    label: "Founder Pass",
+    priceUsd: 27,
+    capacity: 100,
+    badge: "Most Popular",
+    description: "Full lifetime access for builders. Zero data markup with BYOK.",
   },
 ] as const;
 

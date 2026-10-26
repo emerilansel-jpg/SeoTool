@@ -23,10 +23,10 @@ export const LOW_CREDITS_THRESHOLD_USD = 0.25;
 export const MONTHLY_CREDIT_GRANTS: Record<PlanTier, number> = {
   free: 100,
   starter: 1_000,
-  lite: 7_000,
-  standard: 17_000,
-  pro: 27_000,
-  agency: 37_000,
+  lite: 8_500,
+  standard: 22_000,
+  pro: 40_000,
+  agency: 60_000,
   byok: 5_000,
 };
 
@@ -57,6 +57,8 @@ export interface MonthlyCreditPack {
   name: string;
   priceUsd: number;
   credits: number;
+  bonusPercent?: number;
+  badge?: string;
 }
 
 export const MONTHLY_CREDIT_PACKS: readonly MonthlyCreditPack[] = [
@@ -72,28 +74,36 @@ export const MONTHLY_CREDIT_PACKS: readonly MonthlyCreditPack[] = [
     tier: "lite",
     name: "Builder",
     priceUsd: 7,
-    credits: 7_000,
+    credits: 8_500,
+    bonusPercent: 21,
+    badge: "+21% Bonus",
   },
   {
     key: "business",
     tier: "standard",
     name: "Business",
     priceUsd: 17,
-    credits: 17_000,
+    credits: 22_000,
+    bonusPercent: 29,
+    badge: "Most Popular · +29% Bonus",
   },
   {
     key: "scale",
     tier: "pro",
     name: "Scale",
     priceUsd: 27,
-    credits: 27_000,
+    credits: 40_000,
+    bonusPercent: 48,
+    badge: "+48% Bonus",
   },
   {
     key: "power",
     tier: "agency",
     name: "Power",
     priceUsd: 37,
-    credits: 37_000,
+    credits: 60_000,
+    bonusPercent: 62,
+    badge: "Best Value · +62% Bonus",
   },
 ] as const;
 

@@ -51,3 +51,8 @@ patch_ga4.cjs
 # TestSprite runs & local plans (contain sensitive trace artifacts)
 .testsprite/
 .playwright-mcp/
+evidence_*.png
+prod_evidence_*.png
+screenshot*.png
+*.pdf
+scripts/capture_*.py

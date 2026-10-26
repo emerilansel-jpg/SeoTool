@@ -64,13 +64,13 @@ export function ByokSection() {
       queryClient.setQueryData(["byok-settings"], updated);
       toast.success(
         updated.dataforseoConfigured
-          ? "DataForSEO API key saved successfully."
-          : "DataForSEO API key removed.",
+          ? "Search API key saved successfully."
+          : "Search API key removed.",
       );
       setDfsKey("");
       setIsEditingDfs(false);
     },
-    onError: () => toast.error("Failed to update DataForSEO key."),
+    onError: () => toast.error("Failed to update Search API key."),
   });
 
   const aiMutation = useMutation({
@@ -110,7 +110,7 @@ export function ByokSection() {
           <h2 className="text-base font-semibold">BYOK Integrations (Bring Your Own Keys)</h2>
         </div>
         <p className="text-xs text-base-content/60">
-          Store your own API keys once to unlock wholesale DataForSEO rates across all SEO tools
+          Store your own API keys once to unlock wholesale search API rates across all SEO tools
           and power Jet Agent with your own OpenAI or Claude compatible provider.
         </p>
       </div>
@@ -121,12 +121,12 @@ export function ByokSection() {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* DATAFORSEO CARD */}
+          {/* SEARCH API CARD */}
           <div className="rounded-lg border border-base-300 p-4 space-y-3 bg-base-200/40">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Database className="size-4 text-info" />
-                <span className="text-sm font-medium">DataForSEO (Keywords, SERP, Backlinks, Audits)</span>
+                <span className="text-sm font-medium">Search Engine API (Keywords, SERP, Backlinks, Audits)</span>
               </div>
               {settings?.dataforseoConfigured ? (
                 <span className="badge badge-success badge-sm gap-1">
@@ -139,7 +139,7 @@ export function ByokSection() {
 
             <p className="text-xs text-base-content/60">
               When connected, Keyword Research, KGR, Deep SERP, and Backlinks automatically use your
-              DataForSEO account directly with zero platform markup.
+              search API account directly with zero platform markup.
             </p>
 
             {settings?.dataforseoConfigured && !isEditingDfs ? (
@@ -174,7 +174,7 @@ export function ByokSection() {
                     className="input input-bordered input-sm flex-1 font-mono text-xs"
                     value={dfsKey}
                     onChange={(e) => setDfsKey(e.target.value)}
-                    placeholder="Enter DataForSEO login:password or Base64 string"
+                    placeholder="Enter API key or login:password"
                   />
                   <button
                     type="button"

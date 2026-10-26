@@ -19,7 +19,7 @@ function SeoApiStatusBanners({
             <div className="alert alert-warning">
               <AlertTriangle className="size-4 shrink-0" />
               <span className="text-sm">
-                Setup needed: add your DataForSEO API key to use SeoTool.im
+                Setup needed: add your Search API key to use SeoTool.im
                 features. See the quick steps on the{" "}
                 <Link
                   {...dataforseoHelpLinkOptions}
@@ -40,7 +40,7 @@ function SeoApiStatusBanners({
             <div className="alert alert-info">
               <AlertTriangle className="size-4 shrink-0" />
               <span className="text-sm">
-                We could not verify your DataForSEO setup. If features are not
+                We could not verify your Search API setup. If features are not
                 working, check the setup steps on the{" "}
                 <Link
                   {...dataforseoHelpLinkOptions}
@@ -119,7 +119,7 @@ const MissingSeoSetupModal = React.forwardRef<
               id="dataforseo-setup-description"
               className="text-sm text-base-content/75"
             >
-              Add your DataForSEO API key to start using SeoTool.im.
+              Add your Search API key to start using SeoTool.im.
             </p>
           </div>
         </div>

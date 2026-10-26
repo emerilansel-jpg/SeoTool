@@ -118,3 +118,17 @@ export function pagesToTable(rows: PageRow[]): ExportTable {
     rows: rows.map((row) => [row.page, row.organicTraffic, row.keywords]),
   };
 }
+
+/**
+ * Automatically ensures an input string has https:// prepended if missing.
+ * Ideal for URL and domain input fields where users omit the protocol.
+ */
+export function ensureProtocol(input: string): string {
+  const trimmed = input.trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
+

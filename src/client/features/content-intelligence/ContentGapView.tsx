@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { SortingState } from "@tanstack/react-table";
-import { AlertCircle, Layers, Search, Sparkles, Split } from "lucide-react";
+import { AlertCircle, Filter, Layers, RotateCcw, Search, Sparkles, Split, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import {
@@ -10,7 +10,7 @@ import {
   useAppTable,
 } from "@/client/components/table/AppDataTable";
 import { SortableHeader } from "@/client/components/table/SortableHeader";
-import { getContentGap } from "@/serverFunctions/content-intelligence";
+import { getContentGap, polishGapKeywords } from "@/serverFunctions/content-intelligence";
 import { getProjects } from "@/serverFunctions/projects";
 import {
   listProjectCompetitors,
@@ -305,7 +305,7 @@ export function ContentGapView({ projectId }: { projectId: string }) {
             </div>
 
             <span className="text-xs text-base-content/40">
-              Costs DataForSEO credits
+              Costs Search API credits
             </span>
           </div>
         </div>
@@ -313,7 +313,7 @@ export function ContentGapView({ projectId }: { projectId: string }) {
 
       {/* Results or Empty State */}
       {result ? (
-        <Results result={result} />
+        <Results result={result} projectId={projectId} targetDomain={domain} />
       ) : (
         <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/60 space-y-5">
           <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mx-auto">
@@ -354,8 +354,46 @@ export function ContentGapView({ projectId }: { projectId: string }) {
   );
 }
 
-function Results({ result }: { result: GapResult }) {
-  const keywords = result.keywords;
+function Results({
+  result,
+  projectId,
+  targetDomain,
+}: {
+  result: GapResult;
+  projectId: string;
+  targetDomain: string;
+}) {
+  const [cleanedKeywords, setCleanedKeywords] = useState<string[] | null>(null);
+
+  const polishMutation = useMutation({
+    mutationFn: (kws: string[]) =>
+      polishGapKeywords({
+        data: {
+          projectId,
+          domain: targetDomain || result.domain,
+          keywords: kws,
+        },
+      }),
+    onSuccess: (polished) => {
+      setCleanedKeywords(polished);
+      toast.success(
+        `AI Polishing complete! Kept ${polished.length} actionable keywords.`,
+      );
+    },
+    onError: (err) => {
+      toast.error(getStandardErrorMessage(err, "Failed to polish keywords"));
+    },
+  });
+
+  const baseKeywords = result.keywords;
+  const filteredKeywords = cleanedKeywords
+    ? baseKeywords.filter((k) =>
+        cleanedKeywords.some(
+          (c) => c.toLowerCase() === k.keyword.toLowerCase(),
+        ),
+      )
+    : baseKeywords;
+
   return (
     <div className="space-y-6">
       <GapSummaryCards
@@ -385,26 +423,68 @@ function Results({ result }: { result: GapResult }) {
       )}
 
       <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-5 py-4 border-b border-base-300 bg-base-200/20 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-base-300 bg-base-200/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h3 className="text-sm font-bold tracking-tight text-base-content">
-              Gap Keywords
-            </h3>
-            <p className="text-xs text-base-content/50">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold tracking-tight text-base-content">
+                Gap Keywords
+              </h3>
+              {cleanedKeywords ? (
+                <span className="badge badge-primary badge-sm gap-1 font-medium">
+                  <Sparkles className="size-3" /> AI Polished & Cleaned
+                </span>
+              ) : null}
+            </div>
+            <p className="text-xs text-base-content/50 mt-0.5">
               Keywords where competitors hold search rank positions
             </p>
           </div>
-          <span className="badge badge-neutral badge-soft badge-sm font-semibold">
-            {keywords.length} keywords found
-          </span>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            {cleanedKeywords ? (
+              <button
+                type="button"
+                className="btn btn-xs btn-ghost gap-1 text-base-content/70"
+                onClick={() => setCleanedKeywords(null)}
+              >
+                <RotateCcw className="size-3" /> Reset Filter
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-xs btn-primary gap-1.5 shadow-sm"
+                disabled={polishMutation.isPending || baseKeywords.length === 0}
+                onClick={() =>
+                  polishMutation.mutate(
+                    baseKeywords.slice(0, 150).map((k) => k.keyword),
+                  )
+                }
+              >
+                {polishMutation.isPending ? (
+                  <>
+                    <span className="loading loading-spinner loading-xs" />
+                    Cleaning Noise…
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="size-3" />
+                    AI Polish & Clean Noise
+                  </>
+                )}
+              </button>
+            )}
+
+            <span className="badge badge-neutral badge-soft badge-sm font-semibold">
+              {filteredKeywords.length} of {baseKeywords.length} keywords
+            </span>
+          </div>
         </div>
-        {keywords.length === 0 ? (
+        {filteredKeywords.length === 0 ? (
           <div className="p-8 text-center text-sm text-base-content/60">
-            No gap keywords found. Your domain already covers what these
-            competitors rank for.
+            No keywords match the current view.
           </div>
         ) : (
-          <GapKeywordsTable keywords={keywords} />
+          <GapKeywordsTable keywords={filteredKeywords} />
         )}
       </div>
     </div>
