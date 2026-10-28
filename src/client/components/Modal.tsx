@@ -5,11 +5,13 @@ export function Modal({
   children,
   onClose,
   labelledBy,
+  closeOnBackdropClick = true,
 }: {
   maxWidth?: string;
   children: ReactNode;
   onClose?: () => void;
   labelledBy?: string;
+  closeOnBackdropClick?: boolean;
 }) {
   useEffect(() => {
     if (!onClose) return;
@@ -25,12 +27,20 @@ export function Modal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 cursor-pointer"
+      onClick={(e) => {
+        if (closeOnBackdropClick && e.target === e.currentTarget && onClose) {
+          onClose();
+        }
+      }}
+    >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
-        className={`w-full ${maxWidth} max-h-[92vh] overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xl`}
+        className={`w-full ${maxWidth} max-h-[92vh] overflow-hidden rounded-2xl border border-base-300/80 bg-base-100 shadow-2xl cursor-default`}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6 gap-4 overflow-y-auto max-h-[calc(92vh-2rem)]">
           {children}

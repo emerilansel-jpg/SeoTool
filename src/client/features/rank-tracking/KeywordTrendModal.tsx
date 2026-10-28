@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Copy, Download, Loader2 } from "lucide-react";
+import { Copy, Download, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { Modal } from "@/client/components/Modal";
@@ -166,7 +166,18 @@ export function KeywordTrendModal({
             &middot; Position over time
           </p>
         </div>
-        <TrendRangeToggle value={sinceDays} onChange={setSinceDays} />
+        <div className="flex items-center gap-2">
+          <TrendRangeToggle value={sinceDays} onChange={setSinceDays} />
+          <button
+            type="button"
+            className="btn btn-sm btn-circle btn-ghost text-base-content/60 hover:text-base-content hover:bg-base-200"
+            onClick={onClose}
+            title="Close modal (Esc)"
+            aria-label="Close modal"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
       </div>
 
       {/* Tab toggle */}

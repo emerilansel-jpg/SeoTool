@@ -11,6 +11,7 @@ import {
   Minus,
   Monitor,
   Smartphone,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Modal } from "@/client/components/Modal";
@@ -208,6 +209,17 @@ export function KeywordDetailsModal({
                 Monthly
               </button>
             </div>
+
+            {/* Prominent Close Button */}
+            <button
+              type="button"
+              className="btn btn-sm btn-circle btn-ghost text-base-content/60 hover:text-base-content hover:bg-base-200"
+              onClick={onClose}
+              title="Close modal (Esc)"
+              aria-label="Close modal"
+            >
+              <X className="size-4" />
+            </button>
           </div>
         </div>
 
@@ -338,6 +350,17 @@ export function KeywordDetailsModal({
             </div>
           </div>
         )}
+
+        {/* Modal Footer with Close Button */}
+        <div className="flex items-center justify-end pt-3 border-t border-base-200">
+          <button
+            type="button"
+            className="btn btn-sm btn-ghost px-4"
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </div>
       </div>
     </Modal>
   );
