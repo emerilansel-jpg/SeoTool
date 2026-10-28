@@ -1,5 +1,5 @@
 // oxlint-disable max-lines, max-lines-per-function
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -7,6 +7,8 @@ import type { SortingState } from "@tanstack/react-table";
 import {
   AlertCircle,
   Download,
+  ExternalLink,
+  Filter,
   Search,
   Sparkles,
   Waypoints,
@@ -72,12 +74,23 @@ const intersectColumns = [
   intersectColumnHelper.accessor("domain", {
     header: "Domain",
     cell: ({ getValue }) => (
-      <span
-        className="block max-w-[280px] font-medium truncate text-base-content"
-        title={getValue()}
-      >
-        {getValue()}
-      </span>
+      <div className="flex items-center gap-1.5 max-w-[280px]">
+        <span
+          className="font-medium truncate text-base-content"
+          title={getValue()}
+        >
+          {getValue()}
+        </span>
+        <a
+          href={`https://${getValue()}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-base-content/40 hover:text-primary transition-colors inline-flex shrink-0"
+          title={`Visit ${getValue()}`}
+        >
+          <ExternalLink className="size-3" />
+        </a>
+      </div>
     ),
   }),
   intersectColumnHelper.accessor((row) => row.rank ?? 0, {
@@ -106,12 +119,18 @@ const intersectColumns = [
     enableSorting: false,
     cell: ({ row }) => (
       <div className="flex flex-wrap gap-1.5">
-        {Object.keys(row.original.competitors).map((comp) => (
+        {Object.entries(row.original.competitors).map(([comp, data]) => (
           <span
             key={comp}
-            className="badge badge-neutral badge-soft badge-sm font-semibold"
+            className="badge badge-neutral badge-soft badge-sm gap-1 font-semibold text-[11px]"
+            title={`${comp}: ${data.backlinks ?? 0} backlinks, rank #${data.rank ?? "—"}`}
           >
-            {comp}
+            <span>{comp}</span>
+            {data.backlinks != null && data.backlinks > 0 && (
+              <span className="badge badge-primary badge-2xs text-[9px] px-1 font-bold">
+                {data.backlinks} bl
+              </span>
+            )}
           </span>
         ))}
       </div>
@@ -399,6 +418,29 @@ export function LinkIntersectView({ projectId }: { projectId: string }) {
 
 function Results({ result }: { result: IntersectResult }) {
   const domains = result.domains;
+  const [filterPreset, setFilterPreset] = useState<
+    "all" | "high_dr" | "high_bl" | "multi"
+  >("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredDomains = useMemo(() => {
+    let list = domains;
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      list = list.filter((d) => d.domain.toLowerCase().includes(q));
+    }
+    if (filterPreset === "high_dr") {
+      list = list.filter((d) => (d.rank ?? 0) >= 40);
+    } else if (filterPreset === "high_bl") {
+      list = list.filter((d) => (d.backlinks ?? 0) >= 10);
+    } else if (filterPreset === "multi") {
+      const minOverlap = Math.min(2, result.competitors.length);
+      list = list.filter(
+        (d) => Object.keys(d.competitors).length >= minOverlap,
+      );
+    }
+    return list;
+  }, [domains, searchQuery, filterPreset, result.competitors.length]);
 
   const handleExportOutreachCsv = () => {
     const headers = [
@@ -408,7 +450,7 @@ function Results({ result }: { result: IntersectResult }) {
       "Intersecting Competitors",
       "Outreach Action Note",
     ];
-    const rows = domains.map((d) => [
+    const rows = filteredDomains.map((d) => [
       d.domain,
       d.rank ?? "—",
       d.backlinks ?? 0,
@@ -430,37 +472,109 @@ function Results({ result }: { result: IntersectResult }) {
       />
 
       <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-5 py-4 border-b border-base-300 bg-base-200/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h3 className="text-sm font-bold tracking-tight text-base-content">
-              Link Opportunities
-            </h3>
-            <p className="text-xs text-base-content/50">
-              Domains linking to your competitors that could link to you
-            </p>
+        {/* Table Header & Toolbar */}
+        <div className="px-5 py-4 border-b border-base-300 bg-base-200/20 flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-bold tracking-tight text-base-content">
+                Link Opportunities
+              </h3>
+              <p className="text-xs text-base-content/50 mt-0.5">
+                Domains linking to your competitors that could link to you
+              </p>
+            </div>
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              {filteredDomains.length > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-xs btn-outline gap-1.5 font-medium"
+                  onClick={handleExportOutreachCsv}
+                >
+                  <Download className="size-3" /> Export Outreach CSV
+                </button>
+              )}
+              <span className="badge badge-neutral badge-soft badge-sm font-semibold">
+                {domains.length} total domains
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 self-start sm:self-auto">
-            {domains.length > 0 && (
+
+          {/* Quick Filters & Domain Search Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2 border-t border-base-200">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-semibold text-base-content/60 mr-1 flex items-center gap-1">
+                <Filter className="size-3" /> Filter:
+              </span>
               <button
                 type="button"
-                className="btn btn-xs btn-ghost gap-1.5 font-medium"
-                onClick={handleExportOutreachCsv}
+                className={`btn btn-xs rounded-full ${
+                  filterPreset === "all"
+                    ? "btn-neutral"
+                    : "btn-ghost text-base-content/70"
+                }`}
+                onClick={() => setFilterPreset("all")}
               >
-                <Download className="size-3" /> Export Outreach CSV
+                All ({domains.length})
               </button>
-            )}
-            <span className="badge badge-neutral badge-soft badge-sm font-semibold">
-              {domains.length} referring domains
-            </span>
+              <button
+                type="button"
+                className={`btn btn-xs rounded-full ${
+                  filterPreset === "high_dr"
+                    ? "btn-success btn-soft font-bold"
+                    : "btn-ghost text-base-content/70"
+                }`}
+                onClick={() => setFilterPreset("high_dr")}
+              >
+                High DR (Rank ≥ 40)
+              </button>
+              <button
+                type="button"
+                className={`btn btn-xs rounded-full ${
+                  filterPreset === "high_bl"
+                    ? "btn-info btn-soft font-bold"
+                    : "btn-ghost text-base-content/70"
+                }`}
+                onClick={() => setFilterPreset("high_bl")}
+              >
+                High Links (≥ 10)
+              </button>
+              <button
+                type="button"
+                className={`btn btn-xs rounded-full ${
+                  filterPreset === "multi"
+                    ? "btn-warning btn-soft font-bold"
+                    : "btn-ghost text-base-content/70"
+                }`}
+                onClick={() => setFilterPreset("multi")}
+              >
+                Multi-Competitor Overlap
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="relative w-full sm:w-56">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3 text-base-content/50" />
+                <input
+                  type="text"
+                  placeholder="Filter domains..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="input input-xs input-bordered w-full pl-7 text-xs"
+                />
+              </div>
+              <span className="badge badge-neutral badge-soft badge-sm font-semibold shrink-0">
+                {filteredDomains.length} results
+              </span>
+            </div>
           </div>
         </div>
-        {domains.length === 0 ? (
+
+        {filteredDomains.length === 0 ? (
           <div className="p-8 text-center text-sm text-base-content/60">
-            No link opportunities found. These competitors may share the same
-            backlink profile as your domain.
+            No link opportunities match the current filter.
           </div>
         ) : (
-          <IntersectTable domains={domains} />
+          <IntersectTable domains={filteredDomains} />
         )}
       </div>
     </div>

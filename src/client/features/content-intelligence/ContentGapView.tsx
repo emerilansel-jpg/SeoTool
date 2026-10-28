@@ -8,6 +8,8 @@ import {
   AlertCircle,
   BookmarkPlus,
   Check,
+  Download,
+  Filter,
   Layers,
   RotateCcw,
   Search,
@@ -33,6 +35,7 @@ import {
 } from "@/serverFunctions/project-competitors";
 import { saveKeywords } from "@/serverFunctions/keywords";
 import { useContentIntelligenceQuota } from "@/client/features/billing/use-billing";
+import { buildCsv, downloadCsv } from "@/client/lib/csv";
 import {
   DifficultyPill,
   GapSummaryCards,
@@ -171,14 +174,30 @@ function makeGapColumns(projectId: string) {
     gapColumnHelper.accessor((row) => row.competitors?.length ?? 0, {
       id: "competitors",
       header: "Competitors",
-      cell: ({ getValue }) =>
-        getValue() > 0 ? (
-          <span className="badge badge-neutral badge-soft badge-sm font-semibold">
-            {getValue()} {getValue() === 1 ? "domain" : "domains"}
-          </span>
-        ) : (
-          <span className="text-base-content/30">—</span>
-        ),
+      cell: ({ row }) => (
+        <div className="flex flex-wrap gap-1 max-w-[280px]">
+          {row.original.competitors.length > 0 ? (
+            row.original.competitors.map((c) => (
+              <span
+                key={c.competitor}
+                className="badge badge-neutral badge-soft badge-xs gap-1 font-mono text-[11px]"
+                title={`${c.competitor}: Rank #${c.position ?? "—"}${c.url ? ` (${c.url})` : ""}`}
+              >
+                <span className="font-semibold text-base-content/80">
+                  {c.competitor}
+                </span>
+                {c.position !== null && (
+                  <span className="badge badge-primary badge-2xs text-[9px] px-1 font-bold">
+                    #{c.position}
+                  </span>
+                )}
+              </span>
+            ))
+          ) : (
+            <span className="text-base-content/30">—</span>
+          )}
+        </div>
+      ),
     }),
     gapColumnHelper.accessor((row) => row.cpc ?? 0, {
       id: "cpc",
@@ -517,6 +536,11 @@ function Results({
   targetDomain: string;
 }) {
   const [cleanedKeywords, setCleanedKeywords] = useState<string[] | null>(null);
+  const [filterPreset, setFilterPreset] = useState<
+    "all" | "easy" | "high_vol" | "multi"
+  >("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [bulkSaving, setBulkSaving] = useState(false);
 
   const polishMutation = useMutation({
     mutationFn: (kws: string[]) =>
@@ -539,13 +563,74 @@ function Results({
   });
 
   const baseKeywords = result.keywords;
-  const filteredKeywords = cleanedKeywords
-    ? baseKeywords.filter((k) =>
-        cleanedKeywords.some(
-          (c) => c.toLowerCase() === k.keyword.toLowerCase(),
-        ),
-      )
-    : baseKeywords;
+  const filteredKeywords = useMemo(() => {
+    let list = cleanedKeywords
+      ? baseKeywords.filter((k) =>
+          cleanedKeywords.some(
+            (c) => c.toLowerCase() === k.keyword.toLowerCase(),
+          ),
+        )
+      : baseKeywords;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      list = list.filter((k) => k.keyword.toLowerCase().includes(q));
+    }
+
+    if (filterPreset === "easy") {
+      list = list.filter(
+        (k) => k.keywordDifficulty != null && k.keywordDifficulty <= 35,
+      );
+    } else if (filterPreset === "high_vol") {
+      list = list.filter(
+        (k) => k.searchVolume != null && k.searchVolume >= 1000,
+      );
+    } else if (filterPreset === "multi") {
+      list = list.filter((k) => (k.competitors?.length ?? 0) >= 2);
+    }
+
+    return list;
+  }, [baseKeywords, cleanedKeywords, searchQuery, filterPreset]);
+
+  const handleExportGapCsv = () => {
+    const headers = [
+      "Keyword",
+      "Search Volume",
+      "Difficulty",
+      "CPC",
+      "Competitor Count",
+      "Competitors Ranking",
+    ];
+    const rows = filteredKeywords.map((k) => [
+      k.keyword,
+      k.searchVolume ?? 0,
+      k.keywordDifficulty ?? "—",
+      k.cpc ?? 0,
+      k.competitors.length,
+      k.competitors
+        .map((c) => `${c.competitor} (#${c.position ?? "—"})`)
+        .join("; "),
+    ]);
+    downloadCsv(
+      `content-gap-${(targetDomain || result.domain).replace(/\s+/g, "-")}.csv`,
+      buildCsv(headers, rows),
+    );
+    toast.success("Content gap keywords CSV exported");
+  };
+
+  const handleBulkSave = async () => {
+    if (filteredKeywords.length === 0 || bulkSaving) return;
+    setBulkSaving(true);
+    try {
+      const kws = filteredKeywords.slice(0, 50).map((k) => k.keyword);
+      await saveKeywords({ data: { projectId, keywords: kws } });
+      toast.success(`Saved ${kws.length} keywords to project Saved Keywords`);
+    } catch {
+      toast.error("Failed to save keywords");
+    } finally {
+      setBulkSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -576,62 +661,158 @@ function Results({
       )}
 
       <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-5 py-4 border-b border-base-300 bg-base-200/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold tracking-tight text-base-content">
-                Gap Keywords
-              </h3>
-              {cleanedKeywords ? (
-                <span className="badge badge-primary badge-sm gap-1 font-medium">
-                  <Sparkles className="size-3" /> AI Polished & Cleaned
-                </span>
-              ) : null}
+        {/* Table Header & Toolbar */}
+        <div className="px-5 py-4 border-b border-base-300 bg-base-200/20 flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold tracking-tight text-base-content">
+                  Gap Keywords
+                </h3>
+                {cleanedKeywords ? (
+                  <span className="badge badge-primary badge-sm gap-1 font-medium">
+                    <Sparkles className="size-3" /> AI Polished & Cleaned
+                  </span>
+                ) : null}
+              </div>
+              <p className="text-xs text-base-content/50 mt-0.5">
+                Keywords where competitors hold search rank positions
+              </p>
             </div>
-            <p className="text-xs text-base-content/50 mt-0.5">
-              Keywords where competitors hold search rank positions
-            </p>
+
+            <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+              {filteredKeywords.length > 0 && (
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-xs btn-outline gap-1 font-medium"
+                    onClick={handleBulkSave}
+                    disabled={bulkSaving}
+                  >
+                    {bulkSaving ? (
+                      <span className="loading loading-spinner loading-xs" />
+                    ) : (
+                      <BookmarkPlus className="size-3" />
+                    )}
+                    Save All ({Math.min(50, filteredKeywords.length)})
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-xs btn-ghost gap-1 font-medium"
+                    onClick={handleExportGapCsv}
+                  >
+                    <Download className="size-3" /> Export CSV
+                  </button>
+                </>
+              )}
+
+              {cleanedKeywords ? (
+                <button
+                  type="button"
+                  className="btn btn-xs btn-ghost gap-1 text-base-content/70"
+                  onClick={() => setCleanedKeywords(null)}
+                >
+                  <RotateCcw className="size-3" /> Reset Filter
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-xs btn-primary gap-1.5 shadow-sm"
+                  disabled={
+                    polishMutation.isPending || baseKeywords.length === 0
+                  }
+                  onClick={() =>
+                    polishMutation.mutate(
+                      baseKeywords.slice(0, 150).map((k) => k.keyword),
+                    )
+                  }
+                >
+                  {polishMutation.isPending ? (
+                    <>
+                      <span className="loading loading-spinner loading-xs" />
+                      Cleaning Noise…
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="size-3" />
+                      AI Polish & Clean Noise
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
-            {cleanedKeywords ? (
+          {/* Quick Filters & Keyword Search Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2 border-t border-base-200">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-semibold text-base-content/60 mr-1 flex items-center gap-1">
+                <Filter className="size-3" /> Filter:
+              </span>
               <button
                 type="button"
-                className="btn btn-xs btn-ghost gap-1 text-base-content/70"
-                onClick={() => setCleanedKeywords(null)}
+                className={`btn btn-xs rounded-full ${
+                  filterPreset === "all"
+                    ? "btn-neutral"
+                    : "btn-ghost text-base-content/70"
+                }`}
+                onClick={() => setFilterPreset("all")}
               >
-                <RotateCcw className="size-3" /> Reset Filter
+                All ({baseKeywords.length})
               </button>
-            ) : (
               <button
                 type="button"
-                className="btn btn-xs btn-primary gap-1.5 shadow-sm"
-                disabled={polishMutation.isPending || baseKeywords.length === 0}
-                onClick={() =>
-                  polishMutation.mutate(
-                    baseKeywords.slice(0, 150).map((k) => k.keyword),
-                  )
-                }
+                className={`btn btn-xs rounded-full ${
+                  filterPreset === "easy"
+                    ? "btn-success btn-soft font-bold"
+                    : "btn-ghost text-base-content/70"
+                }`}
+                onClick={() => setFilterPreset("easy")}
               >
-                {polishMutation.isPending ? (
-                  <>
-                    <span className="loading loading-spinner loading-xs" />
-                    Cleaning Noise…
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="size-3" />
-                    AI Polish & Clean Noise
-                  </>
-                )}
+                Easy Wins (KD ≤ 35)
               </button>
-            )}
+              <button
+                type="button"
+                className={`btn btn-xs rounded-full ${
+                  filterPreset === "high_vol"
+                    ? "btn-info btn-soft font-bold"
+                    : "btn-ghost text-base-content/70"
+                }`}
+                onClick={() => setFilterPreset("high_vol")}
+              >
+                High Vol (≥ 1k)
+              </button>
+              <button
+                type="button"
+                className={`btn btn-xs rounded-full ${
+                  filterPreset === "multi"
+                    ? "btn-warning btn-soft font-bold"
+                    : "btn-ghost text-base-content/70"
+                }`}
+                onClick={() => setFilterPreset("multi")}
+              >
+                2+ Competitors
+              </button>
+            </div>
 
-            <span className="badge badge-neutral badge-soft badge-sm font-semibold">
-              {filteredKeywords.length} of {baseKeywords.length} keywords
-            </span>
+            <div className="flex items-center gap-2">
+              <div className="relative w-full sm:w-56">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3 text-base-content/50" />
+                <input
+                  type="text"
+                  placeholder="Filter keywords..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="input input-xs input-bordered w-full pl-7 text-xs"
+                />
+              </div>
+              <span className="badge badge-neutral badge-soft badge-sm font-semibold shrink-0">
+                {filteredKeywords.length} results
+              </span>
+            </div>
           </div>
         </div>
+
         {filteredKeywords.length === 0 ? (
           <div className="p-8 text-center text-sm text-base-content/60">
             No keywords match the current view.
