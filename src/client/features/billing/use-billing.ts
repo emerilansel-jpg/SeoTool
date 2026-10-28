@@ -73,3 +73,40 @@ export function useSubscriptionProblemStatus(): {
     isLoading: query.isLoading,
   };
 }
+
+/** Returns the content_intelligence quota and remaining balance. */
+export function useContentIntelligenceQuota(): {
+  limit: number;
+  used: number;
+  remaining: number;
+  planTier: PlanTier;
+  isLoading: boolean;
+} {
+  const { data: session } = useSession();
+  const hasSession = Boolean(session?.user?.id);
+
+  const query = useQuery({
+    queryKey: ["billing", "quota-summary"],
+    queryFn: async () => {
+      const state = await getQuotaStateSummary({ data: undefined });
+      return state;
+    },
+    enabled: hasSession,
+    staleTime: 15_000,
+  });
+
+  const ciQuota = query.data?.quotas?.find(
+    (q) => q.feature === "content_intelligence",
+  );
+  const limit = ciQuota?.limit ?? 10;
+  const used = ciQuota?.used ?? 0;
+  const remaining = Math.max(0, limit - used);
+
+  return {
+    limit,
+    used,
+    remaining,
+    planTier: isPlanTier(query.data?.planTier) ? query.data.planTier : "free",
+    isLoading: query.isLoading,
+  };
+}

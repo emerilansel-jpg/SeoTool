@@ -1,8 +1,16 @@
+// oxlint-disable max-lines, max-lines-per-function
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { SortingState } from "@tanstack/react-table";
-import { AlertCircle, Search, Sparkles, Waypoints } from "lucide-react";
+import {
+  AlertCircle,
+  Download,
+  Search,
+  Sparkles,
+  Waypoints,
+} from "lucide-react";
 import { toast } from "sonner";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import {
@@ -12,6 +20,9 @@ import {
 import { SortableHeader } from "@/client/components/table/SortableHeader";
 import { getLinkIntersect } from "@/serverFunctions/link-intersect";
 import { getProjects } from "@/serverFunctions/projects";
+import { listProjectCompetitors } from "@/serverFunctions/project-competitors";
+import { useContentIntelligenceQuota } from "@/client/features/billing/use-billing";
+import { buildCsv, downloadCsv } from "@/client/lib/csv";
 import { IntersectSummaryCards } from "@/client/features/link-intersect/LinkIntersectParts";
 import type { IntersectDomain } from "@/server/features/link-intersect/services/linkIntersectTypes";
 
@@ -128,10 +139,21 @@ export function LinkIntersectView({ projectId }: { projectId: string }) {
   });
   const project = projectsQuery.data?.find((p) => p.id === projectId);
 
+  const savedCompetitorsQuery = useQuery({
+    queryKey: ["project-competitors", projectId],
+    queryFn: () => listProjectCompetitors({ data: { projectId } }),
+  });
+
+  const { remaining, isLoading: quotaLoading } = useContentIntelligenceQuota();
+
   const [targetInput, setTargetInput] = useState<string | null>(null);
   const [competitorsText, setCompetitorsText] = useState("");
   // Seeded once the project's own domain resolves.
   const target = targetInput !== null ? targetInput : (project?.domain ?? "");
+
+  const parsedCompList = parseCompetitors(competitorsText);
+  const estimatedCredits = Math.max(1, parsedCompList.length);
+  const isInsufficient = !quotaLoading && remaining < estimatedCredits;
 
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -219,7 +241,12 @@ export function LinkIntersectView({ projectId }: { projectId: string }) {
             <button
               type="submit"
               className="btn btn-primary shrink-0 px-6 font-semibold"
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || isInsufficient}
+              title={
+                isInsufficient
+                  ? `Insufficient credits (${remaining} remaining, requires ${estimatedCredits})`
+                  : undefined
+              }
             >
               {mutation.isPending ? (
                 <>
@@ -227,10 +254,72 @@ export function LinkIntersectView({ projectId }: { projectId: string }) {
                   Analyzing…
                 </>
               ) : (
-                "Search"
+                `Search (${estimatedCredits} cr)`
               )}
             </button>
           </form>
+
+          {/* Insufficient Quota Warning Banner */}
+          {isInsufficient && (
+            <div className="alert alert-warning text-xs rounded-xl flex items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="size-4 shrink-0 text-warning" />
+                <span>
+                  <strong>Credit limit reached:</strong> You have {remaining}{" "}
+                  credits remaining, but this analysis requires{" "}
+                  {estimatedCredits} credits.
+                </span>
+              </div>
+              <Link
+                to="/billing"
+                className="btn btn-xs btn-neutral font-semibold shrink-0"
+              >
+                Upgrade Plan &rarr;
+              </Link>
+            </div>
+          )}
+
+          {/* Dynamic Project Competitor Suggestions */}
+          {savedCompetitorsQuery.data &&
+            savedCompetitorsQuery.data.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-xs font-semibold text-base-content/70">
+                  Project Competitors:
+                </span>
+                {savedCompetitorsQuery.data.map((comp) => {
+                  const isAlreadyIn = parsedCompList.includes(
+                    comp.toLowerCase(),
+                  );
+                  return (
+                    <button
+                      key={comp}
+                      type="button"
+                      onClick={() => {
+                        if (isAlreadyIn) return;
+                        const updated = competitorsText
+                          ? `${competitorsText}, ${comp}`
+                          : comp;
+                        setCompetitorsText(updated);
+                      }}
+                      disabled={isAlreadyIn}
+                      className={`badge badge-sm cursor-pointer transition-colors ${
+                        isAlreadyIn
+                          ? "badge-neutral opacity-50"
+                          : "badge-primary badge-outline hover:badge-primary"
+                      }`}
+                      title={
+                        isAlreadyIn
+                          ? "Already added"
+                          : "Click to add competitor"
+                      }
+                    >
+                      {isAlreadyIn ? "✓ " : "+ "}
+                      {comp}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
           {formError && (
             <div className="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error flex items-center gap-2">
@@ -257,8 +346,9 @@ export function LinkIntersectView({ projectId }: { projectId: string }) {
               ))}
             </div>
 
-            <span className="text-xs text-base-content/40">
-              Costs Backlinks credits
+            <span className="text-xs font-medium text-base-content/60">
+              Cost: {estimatedCredits} credit
+              {estimatedCredits > 1 ? "s" : ""} ({remaining} remaining)
             </span>
           </div>
         </div>
@@ -309,6 +399,29 @@ export function LinkIntersectView({ projectId }: { projectId: string }) {
 
 function Results({ result }: { result: IntersectResult }) {
   const domains = result.domains;
+
+  const handleExportOutreachCsv = () => {
+    const headers = [
+      "Referring Domain",
+      "Domain Rank",
+      "Backlinks Count",
+      "Intersecting Competitors",
+      "Outreach Action Note",
+    ];
+    const rows = domains.map((d) => [
+      d.domain,
+      d.rank ?? "—",
+      d.backlinks ?? 0,
+      Object.keys(d.competitors).length,
+      `Competitors currently have backlinks on ${d.domain}. Pitch ${result.target} as superior resource.`,
+    ]);
+    downloadCsv(
+      `link-intersect-outreach-${result.target.replace(/\s+/g, "-")}.csv`,
+      buildCsv(headers, rows),
+    );
+    toast.success("Outreach prospects CSV exported");
+  };
+
   return (
     <div className="space-y-6">
       <IntersectSummaryCards
@@ -317,7 +430,7 @@ function Results({ result }: { result: IntersectResult }) {
       />
 
       <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-5 py-4 border-b border-base-300 bg-base-200/20 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-base-300 bg-base-200/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h3 className="text-sm font-bold tracking-tight text-base-content">
               Link Opportunities
@@ -326,9 +439,20 @@ function Results({ result }: { result: IntersectResult }) {
               Domains linking to your competitors that could link to you
             </p>
           </div>
-          <span className="badge badge-neutral badge-soft badge-sm font-semibold">
-            {domains.length} referring domains
-          </span>
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            {domains.length > 0 && (
+              <button
+                type="button"
+                className="btn btn-xs btn-ghost gap-1.5 font-medium"
+                onClick={handleExportOutreachCsv}
+              >
+                <Download className="size-3" /> Export Outreach CSV
+              </button>
+            )}
+            <span className="badge badge-neutral badge-soft badge-sm font-semibold">
+              {domains.length} referring domains
+            </span>
+          </div>
         </div>
         {domains.length === 0 ? (
           <div className="p-8 text-center text-sm text-base-content/60">

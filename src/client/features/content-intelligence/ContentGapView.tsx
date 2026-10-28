@@ -1,8 +1,20 @@
-import { useState, useEffect } from "react";
+// oxlint-disable max-lines, max-lines-per-function
+import { useState, useEffect, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { SortingState } from "@tanstack/react-table";
-import { AlertCircle, Filter, Layers, RotateCcw, Search, Sparkles, Split, Wand2 } from "lucide-react";
+import {
+  AlertCircle,
+  BookmarkPlus,
+  Check,
+  Layers,
+  RotateCcw,
+  Search,
+  Sparkles,
+  Split,
+  Wand2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import {
@@ -10,12 +22,17 @@ import {
   useAppTable,
 } from "@/client/components/table/AppDataTable";
 import { SortableHeader } from "@/client/components/table/SortableHeader";
-import { getContentGap, polishGapKeywords } from "@/serverFunctions/content-intelligence";
+import {
+  getContentGap,
+  polishGapKeywords,
+} from "@/serverFunctions/content-intelligence";
 import { getProjects } from "@/serverFunctions/projects";
 import {
   listProjectCompetitors,
   addProjectCompetitor,
 } from "@/serverFunctions/project-competitors";
+import { saveKeywords } from "@/serverFunctions/keywords";
+import { useContentIntelligenceQuota } from "@/client/features/billing/use-billing";
 import {
   DifficultyPill,
   GapSummaryCards,
@@ -63,65 +80,128 @@ function parseCompetitors(text: string): string[] {
   return result;
 }
 
+function SaveGapKeywordButton({
+  projectId,
+  keyword,
+}: {
+  projectId: string;
+  keyword: string;
+}) {
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async () => {
+    if (saved || loading) return;
+    setLoading(true);
+    try {
+      await saveKeywords({ data: { projectId, keywords: [keyword] } });
+      setSaved(true);
+      toast.success(`"${keyword}" saved to Saved Keywords`);
+    } catch {
+      toast.error("Failed to save keyword");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      className={`btn btn-xs gap-1 font-medium ${
+        saved
+          ? "btn-success btn-outline"
+          : "btn-ghost text-base-content/60 hover:text-primary"
+      }`}
+      onClick={handleSave}
+      disabled={loading}
+      title={saved ? "Saved" : "Save to project keywords"}
+    >
+      {saved ? (
+        <>
+          <Check className="size-3" /> Saved
+        </>
+      ) : loading ? (
+        <span className="loading loading-spinner loading-xs" />
+      ) : (
+        <>
+          <BookmarkPlus className="size-3" /> Save
+        </>
+      )}
+    </button>
+  );
+}
+
 const gapColumnHelper = createColumnHelper<GapKeyword>();
 
-const gapColumns = [
-  gapColumnHelper.accessor("keyword", {
-    header: "Keyword",
-    cell: ({ getValue }) => (
-      <span
-        className="block max-w-[280px] font-medium truncate text-base-content"
-        title={getValue()}
-      >
-        {getValue()}
-      </span>
-    ),
-  }),
-  gapColumnHelper.accessor((row) => row.searchVolume ?? 0, {
-    id: "searchVolume",
-    header: ({ column }) => <SortableHeader column={column} label="Volume" />,
-    cell: ({ row }) => (
-      <span className="tabular-nums font-semibold text-base-content/80">
-        {row.original.searchVolume != null
-          ? row.original.searchVolume.toLocaleString()
-          : "—"}
-      </span>
-    ),
-    sortDescFirst: true,
-  }),
-  gapColumnHelper.accessor((row) => row.keywordDifficulty ?? 0, {
-    id: "keywordDifficulty",
-    header: ({ column }) => (
-      <SortableHeader column={column} label="Difficulty" />
-    ),
-    cell: ({ row }) => (
-      <DifficultyPill value={row.original.keywordDifficulty} />
-    ),
-    sortDescFirst: false,
-  }),
-  gapColumnHelper.accessor((row) => row.competitors?.length ?? 0, {
-    id: "competitors",
-    header: "Competitors",
-    cell: ({ getValue }) =>
-      getValue() > 0 ? (
-        <span className="badge badge-neutral badge-soft badge-sm font-semibold">
-          {getValue()} {getValue() === 1 ? "domain" : "domains"}
+function makeGapColumns(projectId: string) {
+  return [
+    gapColumnHelper.accessor("keyword", {
+      header: "Keyword",
+      cell: ({ getValue }) => (
+        <span
+          className="block max-w-[280px] font-medium truncate text-base-content"
+          title={getValue()}
+        >
+          {getValue()}
         </span>
-      ) : (
-        <span className="text-base-content/30">—</span>
       ),
-  }),
-  gapColumnHelper.accessor((row) => row.cpc ?? 0, {
-    id: "cpc",
-    header: ({ column }) => <SortableHeader column={column} label="CPC" />,
-    cell: ({ row }) => (
-      <span className="tabular-nums text-base-content/70">
-        {row.original.cpc != null ? `$${row.original.cpc.toFixed(2)}` : "—"}
-      </span>
-    ),
-    sortDescFirst: true,
-  }),
-];
+    }),
+    gapColumnHelper.accessor((row) => row.searchVolume ?? 0, {
+      id: "searchVolume",
+      header: ({ column }) => <SortableHeader column={column} label="Volume" />,
+      cell: ({ row }) => (
+        <span className="tabular-nums font-semibold text-base-content/80">
+          {row.original.searchVolume != null
+            ? row.original.searchVolume.toLocaleString()
+            : "—"}
+        </span>
+      ),
+      sortDescFirst: true,
+    }),
+    gapColumnHelper.accessor((row) => row.keywordDifficulty ?? 0, {
+      id: "keywordDifficulty",
+      header: ({ column }) => (
+        <SortableHeader column={column} label="Difficulty" />
+      ),
+      cell: ({ row }) => (
+        <DifficultyPill value={row.original.keywordDifficulty} />
+      ),
+      sortDescFirst: false,
+    }),
+    gapColumnHelper.accessor((row) => row.competitors?.length ?? 0, {
+      id: "competitors",
+      header: "Competitors",
+      cell: ({ getValue }) =>
+        getValue() > 0 ? (
+          <span className="badge badge-neutral badge-soft badge-sm font-semibold">
+            {getValue()} {getValue() === 1 ? "domain" : "domains"}
+          </span>
+        ) : (
+          <span className="text-base-content/30">—</span>
+        ),
+    }),
+    gapColumnHelper.accessor((row) => row.cpc ?? 0, {
+      id: "cpc",
+      header: ({ column }) => <SortableHeader column={column} label="CPC" />,
+      cell: ({ row }) => (
+        <span className="tabular-nums text-base-content/70">
+          {row.original.cpc != null ? `$${row.original.cpc.toFixed(2)}` : "—"}
+        </span>
+      ),
+      sortDescFirst: true,
+    }),
+    gapColumnHelper.display({
+      id: "actions",
+      header: "",
+      cell: ({ row }) => (
+        <SaveGapKeywordButton
+          projectId={projectId}
+          keyword={row.original.keyword}
+        />
+      ),
+    }),
+  ];
+}
 
 export function ContentGapView({ projectId }: { projectId: string }) {
   const queryClient = useQueryClient();
@@ -140,6 +220,11 @@ export function ContentGapView({ projectId }: { projectId: string }) {
   const [competitorsText, setCompetitorsText] = useState("");
   // Seeded once the project's own domain resolves.
   const domain = domainInput || project?.domain || "";
+
+  const { remaining, isLoading: quotaLoading } = useContentIntelligenceQuota();
+  const parsedCompList = parseCompetitors(competitorsText);
+  const estimatedCredits = Math.max(1, parsedCompList.length);
+  const isInsufficient = !quotaLoading && remaining < estimatedCredits;
 
   // Auto-fill competitors from saved list on first load
   useEffect(() => {
@@ -235,7 +320,12 @@ export function ContentGapView({ projectId }: { projectId: string }) {
             <button
               type="submit"
               className="btn btn-primary shrink-0 px-6 font-semibold"
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || isInsufficient}
+              title={
+                isInsufficient
+                  ? `Insufficient credits (${remaining} remaining, requires ${estimatedCredits})`
+                  : undefined
+              }
             >
               {mutation.isPending ? (
                 <>
@@ -243,10 +333,72 @@ export function ContentGapView({ projectId }: { projectId: string }) {
                   Analyzing…
                 </>
               ) : (
-                "Search"
+                `Search (${estimatedCredits} cr)`
               )}
             </button>
           </form>
+
+          {/* Insufficient Quota Warning Banner */}
+          {isInsufficient && (
+            <div className="alert alert-warning text-xs rounded-xl flex items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="size-4 shrink-0 text-warning" />
+                <span>
+                  <strong>Credit limit reached:</strong> You have {remaining}{" "}
+                  credits remaining, but this analysis requires{" "}
+                  {estimatedCredits} credits.
+                </span>
+              </div>
+              <Link
+                to="/billing"
+                className="btn btn-xs btn-neutral font-semibold shrink-0"
+              >
+                Upgrade Plan &rarr;
+              </Link>
+            </div>
+          )}
+
+          {/* Dynamic Project Competitor Suggestions */}
+          {savedCompetitorsQuery.data &&
+            savedCompetitorsQuery.data.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-xs font-semibold text-base-content/70">
+                  Project Competitors:
+                </span>
+                {savedCompetitorsQuery.data.map((comp) => {
+                  const isAlreadyIn = parsedCompList.includes(
+                    comp.toLowerCase(),
+                  );
+                  return (
+                    <button
+                      key={comp}
+                      type="button"
+                      onClick={() => {
+                        if (isAlreadyIn) return;
+                        const updated = competitorsText
+                          ? `${competitorsText}, ${comp}`
+                          : comp;
+                        setCompetitorsText(updated);
+                      }}
+                      disabled={isAlreadyIn}
+                      className={`badge badge-sm cursor-pointer transition-colors ${
+                        isAlreadyIn
+                          ? "badge-neutral opacity-50"
+                          : "badge-primary badge-outline hover:badge-primary"
+                      }`}
+                      title={
+                        isAlreadyIn
+                          ? "Already added"
+                          : "Click to add competitor"
+                      }
+                    >
+                      {isAlreadyIn ? "✓ " : "+ "}
+                      {comp}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
           {/* Save competitors for future use */}
           {parseCompetitors(competitorsText).length > 0 && (
@@ -304,8 +456,9 @@ export function ContentGapView({ projectId }: { projectId: string }) {
               ))}
             </div>
 
-            <span className="text-xs text-base-content/40">
-              Costs Search API credits
+            <span className="text-xs font-medium text-base-content/60">
+              Cost: {estimatedCredits} credit
+              {estimatedCredits > 1 ? "s" : ""} ({remaining} remaining)
             </span>
           </div>
         </div>
@@ -484,20 +637,27 @@ function Results({
             No keywords match the current view.
           </div>
         ) : (
-          <GapKeywordsTable keywords={filteredKeywords} />
+          <GapKeywordsTable keywords={filteredKeywords} projectId={projectId} />
         )}
       </div>
     </div>
   );
 }
 
-function GapKeywordsTable({ keywords }: { keywords: GapKeyword[] }) {
+function GapKeywordsTable({
+  keywords,
+  projectId,
+}: {
+  keywords: GapKeyword[];
+  projectId: string;
+}) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "searchVolume", desc: true },
   ]);
+  const columns = useMemo(() => makeGapColumns(projectId), [projectId]);
   const table = useAppTable({
     data: keywords,
-    columns: gapColumns,
+    columns,
     state: { sorting },
     onSortingChange: setSorting,
     withSorting: true,
