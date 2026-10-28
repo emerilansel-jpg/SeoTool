@@ -103,7 +103,7 @@ export const getSerpVolatilityTool = {
       meta: buildProjectMeta(
         context,
         args.projectId,
-        `/p/${args.projectId}/serp-volatility`,
+        `/p/${args.projectId}/rank-tracking`,
       ),
       structuredContent: { latest, trend },
     });

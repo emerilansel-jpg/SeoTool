@@ -1,5 +1,4 @@
 import {
-  Activity,
   BarChart3,
   Bell,
   Bookmark,
@@ -140,11 +139,6 @@ const projectNavItems = [
     label: "Crawl Budget",
     icon: Bug,
   },
-  {
-    to: "/p/$projectId/serp-volatility" as const,
-    label: "SERP Volatility",
-    icon: Activity,
-  },
 ] as const;
 
 const aiNavItem = linkOptions({
@@ -215,7 +209,6 @@ export function getProjectNavGroups(projectId: string) {
         byPath("/p/$projectId/backlinks"),
         byPath("/p/$projectId/content-gap"),
         byPath("/p/$projectId/link-intersect"),
-        byPath("/p/$projectId/serp-volatility"),
       ],
     },
     {
