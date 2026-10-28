@@ -23,7 +23,12 @@ import {
   getKeywordHistorySchema,
   getConfigTrendSchema,
   getPositionMatrixSchema,
+  getKeywordIntelligenceSchema,
 } from "@/types/schemas/rank-tracking";
+import {
+  KeywordIntelligenceService,
+  type KeywordIntelligenceDetail,
+} from "@/server/features/rank-tracking/services/KeywordIntelligenceService";
 
 export interface RankKeywordHistoryPoint {
   device: "desktop" | "mobile";
@@ -352,4 +357,18 @@ export const getRankPositionMatrix = createServerFn({ method: "POST" })
       data.device,
       data.runLimit,
     );
+  });
+
+export const getKeywordIntelligenceDetail = createServerFn({ method: "POST" })
+  .middleware([requireProjectContext])
+  .validator(getKeywordIntelligenceSchema)
+  .handler(async ({ data, context }): Promise<KeywordIntelligenceDetail> => {
+    const config = await requireConfig(data.configId, context.projectId);
+    return KeywordIntelligenceService.getDetail({
+      configId: data.configId,
+      domain: config.domain,
+      trackingKeywordId: data.trackingKeywordId,
+      device: data.device,
+      sinceDays: data.sinceDays,
+    });
   });

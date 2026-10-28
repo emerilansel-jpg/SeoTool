@@ -186,3 +186,15 @@ export function scheduleLabel(
 export function devicesCount(devices: RankTrackingConfig["devices"]): number {
   return devices === "both" ? 2 : 1;
 }
+
+/**
+ * Calculates SEO CTR Visibility % (0-100) based on weighted ranking position.
+ */
+export function positionToVisibility(pos: number | null): number {
+  if (pos === null || pos <= 0 || pos > 20) return 0;
+  if (pos === 1) return 100;
+  if (pos === 2) return 70;
+  if (pos === 3) return 50;
+  if (pos <= 10) return Math.max(8, Math.round(35 - (pos - 4) * 3.5));
+  return 5;
+}

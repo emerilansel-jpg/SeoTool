@@ -1,5 +1,5 @@
 import { useMemo, type MutableRefObject } from "react";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown, Sparkles, Flame } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { makeSelectionColumn } from "@/client/components/table/AppDataTable";
 import type { RankTrackingRow } from "@/types/schemas/rank-tracking";
@@ -121,16 +121,53 @@ function makeKeywordColumn(
     header: ({ column }) => (
       <SortableHeader column={column} label="Keyword" id="keyword" />
     ),
-    cell: ({ row }) => (
-      <button
-        type="button"
-        className="font-medium text-left link link-hover decoration-dotted underline-offset-2"
-        onClick={() => onKeywordClick(row.original)}
-        title="View position history"
-      >
-        {row.original.keyword}
-      </button>
-    ),
+    cell: ({ row }) => {
+      const allFeatures = [
+        ...row.original.desktop.serpFeatures,
+        ...row.original.mobile.serpFeatures,
+      ];
+      const hasAiOverview = allFeatures.includes("ai_overview");
+      const dChange =
+        row.original.desktop.position !== null &&
+        row.original.desktop.previousPosition !== null
+          ? Math.abs(
+              row.original.desktop.previousPosition -
+                row.original.desktop.position,
+            )
+          : 0;
+      const isVolatile = dChange >= 4;
+
+      return (
+        <div className="flex flex-col gap-0.5 items-start">
+          <button
+            type="button"
+            className="font-medium text-left link link-hover decoration-dotted underline-offset-2 hover:text-primary transition-colors"
+            onClick={() => onKeywordClick(row.original)}
+            title="Open Keyword Intelligence & Volatility Detail"
+          >
+            {row.original.keyword}
+          </button>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {hasAiOverview && (
+              <span
+                className="badge badge-secondary badge-2xs gap-0.5 text-[9px] font-semibold"
+                title="Google AI Overview detected for this search query"
+              >
+                <Sparkles className="size-2.5" /> AI Overview
+              </span>
+            )}
+            {isVolatile && (
+              <span
+                className="badge badge-error badge-2xs gap-0.5 text-[9px] font-semibold"
+                title={`SERP Volatility: Position moved ${dChange} ranks recently`}
+              >
+                <Flame className="size-2.5" /> Volatile (±{dChange})
+              </span>
+            )}
+          </div>
+        </div>
+      );
+    },
     sortingFn: "alphanumeric",
   };
 }

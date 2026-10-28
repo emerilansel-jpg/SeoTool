@@ -1,4 +1,4 @@
-// oxlint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+// oxlint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, max-lines-per-function
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -72,6 +72,25 @@ export function SerpVolatilityView({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-4">
+      {/* Unification banner with Rank Tracking */}
+      <div className="alert alert-info bg-info/10 border-info/30 text-xs rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        <div className="flex items-center gap-2.5">
+          <Sparkles className="size-4 text-info shrink-0" />
+          <span>
+            <strong>Unified Intelligence:</strong> Keyword-level SERP
+            Volatility, AI Overview citations, and competitor churn are now
+            embedded directly in each keyword inside Rank Tracking.
+          </span>
+        </div>
+        <Link
+          to="/p/$projectId/rank-tracking"
+          params={{ projectId }}
+          className="btn btn-xs btn-primary font-semibold shrink-0"
+        >
+          Open Rank Tracker &rarr;
+        </Link>
+      </div>
+
       {/* Top Action Bar */}
       <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-xs">
         <div className="card-body p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">

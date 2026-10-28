@@ -146,3 +146,11 @@ export const getPositionMatrixSchema = z.object({
   device: deviceEnum,
   runLimit: z.number().int().positive().max(26).default(12),
 });
+
+export const getKeywordIntelligenceSchema = z.object({
+  projectId: z.string().uuid(),
+  configId: z.string().uuid(),
+  trackingKeywordId: z.string().uuid(),
+  device: deviceEnum.default("desktop"),
+  sinceDays: sinceDaysField.optional().default(30),
+});

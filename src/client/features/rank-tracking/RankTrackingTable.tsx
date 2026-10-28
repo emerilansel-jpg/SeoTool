@@ -22,9 +22,9 @@ import type { RankTrackingRow } from "@/types/schemas/rank-tracking";
 import { useRankTrackingColumns } from "./RankTrackingColumns";
 import { buildRankTrackingExport } from "./RankTrackingTableParts";
 import {
-  KeywordTrendModal,
-  type KeywordTrendTarget,
-} from "./KeywordTrendModal";
+  KeywordDetailsModal,
+  type KeywordDetailsTarget,
+} from "./KeywordDetailsModal";
 import type { SelectionAnchor } from "@/client/components/table/tableSelection";
 
 export function RankTrackingTable({
@@ -56,7 +56,7 @@ export function RankTrackingTable({
 }) {
   const queryClient = useQueryClient();
   const [showConfirm, setShowConfirm] = useState(false);
-  const [trendTarget, setTrendTarget] = useState<KeywordTrendTarget | null>(
+  const [trendTarget, setTrendTarget] = useState<KeywordDetailsTarget | null>(
     null,
   );
   const selectAnchorRef = useRef<SelectionAnchor | null>(null);
@@ -236,7 +236,7 @@ export function RankTrackingTable({
       )}
 
       {trendTarget && (
-        <KeywordTrendModal
+        <KeywordDetailsModal
           target={trendTarget}
           projectId={projectId}
           configId={configId}
