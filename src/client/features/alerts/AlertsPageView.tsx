@@ -116,19 +116,60 @@ export function AlertsPageView({ projectId }: { projectId: string }) {
       />
 
       {rules.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-base-300 rounded-box">
+        <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center border-2 border-dashed border-base-300 rounded-box">
           <Bell className="w-12 h-12 text-base-content/30 mb-4" />
           <h3 className="text-lg font-semibold">No Alerts Configured</h3>
-          <p className="text-base-content/70 max-w-md mt-2 mb-6">
-            Create alert rules to monitor your rankings and audit health. You'll
-            receive email notifications when conditions are met.
+          <p className="text-base-content/70 max-w-md mt-2 mb-6 text-sm">
+            Create alert rules to monitor your rankings and audit health. You
+            will receive email notifications when conditions are met.
           </p>
-          <button
-            className="btn btn-primary"
-            onClick={() => setIsModalOpen(true)}
-          >
-            <Plus className="size-4" /> Create Alert Rule
-          </button>
+          <div className="flex flex-wrap items-center justify-center gap-2.5">
+            <button
+              className="btn btn-primary btn-sm gap-1.5"
+              onClick={() => {
+                setEditingRule(null);
+                setIsModalOpen(true);
+              }}
+            >
+              <Plus className="size-4" /> Custom Alert
+            </button>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => {
+                setEditingRule({
+                  id: "",
+                  name: "Significant Rank Drop (> 3 positions)",
+                  metricType: "rank_drop",
+                  threshold: 3,
+                  keyword: "",
+                  frequency: "weekly",
+                  recipients: "",
+                  enabled: true,
+                });
+                setIsModalOpen(true);
+              }}
+            >
+              Template: Rank Drop &gt; 3
+            </button>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => {
+                setEditingRule({
+                  id: "",
+                  name: "Critical Audit Health Issue (> 5 errors)",
+                  metricType: "audit_critical",
+                  threshold: 5,
+                  keyword: "",
+                  frequency: "weekly",
+                  recipients: "",
+                  enabled: true,
+                });
+                setIsModalOpen(true);
+              }}
+            >
+              Template: Audit Errors &gt; 5
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -220,7 +261,7 @@ function AlertRuleModal({
   onClose: () => void;
 }) {
   const queryClient = useQueryClient();
-  const isEditing = !!editingRule;
+  const isEditing = Boolean(editingRule?.id);
 
   const [name, setName] = useState(editingRule?.name ?? "");
   const [metricType, setMetricType] = useState(

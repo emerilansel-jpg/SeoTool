@@ -60,6 +60,21 @@ export function SitemapValidationView({ projectId }: { projectId: string }) {
         </button>
       </form>
 
+      {mutation.isError && (
+        <div
+          role="alert"
+          className="alert alert-error text-sm rounded-xl flex items-start gap-2.5 shadow-sm"
+        >
+          <AlertTriangle className="size-5 shrink-0 mt-0.5" />
+          <span>
+            {getStandardErrorMessage(
+              mutation.error,
+              "Failed to validate sitemap. Please verify the URL points to a valid XML sitemap.",
+            )}
+          </span>
+        </div>
+      )}
+
       {mutation.data ? (
         <ValidationReportView report={mutation.data} />
       ) : (

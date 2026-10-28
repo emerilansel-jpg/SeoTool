@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { FileCheck, Globe } from "lucide-react";
+import { AlertCircle, FileCheck, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { checkOnPageSeoFn } from "@/serverFunctions/on-page-checker";
@@ -55,6 +55,21 @@ export function OnPageCheckerView({ projectId }: { projectId: string }) {
           Analyze
         </button>
       </form>
+
+      {mutation.isError && (
+        <div
+          role="alert"
+          className="alert alert-error text-sm rounded-xl flex items-start gap-2.5 shadow-sm"
+        >
+          <AlertCircle className="size-5 shrink-0 mt-0.5" />
+          <span>
+            {getStandardErrorMessage(
+              mutation.error,
+              "Failed to analyze page. Please check that the URL is public and accessible.",
+            )}
+          </span>
+        </div>
+      )}
 
       {mutation.data ? (
         <OnPageReportView report={mutation.data} />

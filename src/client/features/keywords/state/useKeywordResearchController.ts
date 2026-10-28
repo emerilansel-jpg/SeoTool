@@ -211,6 +211,15 @@ export function useKeywordResearchController(
   const handleSearchSubmit = useCallback(
     (event: FormEvent) => {
       event.preventDefault();
+      const formEl = event.currentTarget as HTMLFormElement | null;
+      const ta = formEl?.querySelector("textarea");
+      if (
+        ta &&
+        ta.value.trim() &&
+        ta.value !== controlsForm.getFieldValue("keyword")
+      ) {
+        controlsForm.setFieldValue("keyword", ta.value);
+      }
       void controlsForm.handleSubmit();
     },
     [controlsForm],

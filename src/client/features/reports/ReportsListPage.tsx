@@ -55,18 +55,28 @@ export function ReportsListPage({ projectId }: { projectId: string }) {
             ))}
           </div>
         ) : reports.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-base-300 p-10 text-center">
-            <p className="text-sm text-base-content/55">
-              No reports yet. Create your first white-label report to start
-              delivering value to clients.
-            </p>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm mt-4"
-              onClick={openCreate}
-            >
-              Create report
-            </button>
+          <div className="rounded-xl border border-dashed border-base-300 p-8 sm:p-12 text-center max-w-lg mx-auto space-y-4">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <FileText className="size-6" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-base font-bold text-base-content">
+                No reports generated yet
+              </p>
+              <p className="text-sm text-base-content/60 leading-relaxed">
+                Build branded PDF and web reports combining keyword rankings,
+                site audit health, and GSC insights for clients or stakeholders.
+              </p>
+            </div>
+            <div className="pt-2">
+              <button
+                type="button"
+                className="btn btn-primary btn-sm gap-1.5 font-semibold shadow-xs"
+                onClick={openCreate}
+              >
+                Create First Report
+              </button>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">

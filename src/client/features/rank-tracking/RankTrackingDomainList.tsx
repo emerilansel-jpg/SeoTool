@@ -224,15 +224,16 @@ function DomainRow({
   onArchive: () => void;
 }) {
   return (
-    <div className="relative flex w-full items-center gap-4 px-5 py-3.5 transition-colors hover:bg-base-200/50">
-      <Link
-        to="/p/$projectId/rank-tracking/$configId"
-        params={{ projectId, configId: summary.id }}
-        className="absolute inset-0 z-0"
-        aria-label={`Open ${summary.domain}`}
-      />
-      <div className="min-w-0 flex-1 pointer-events-none">
-        <p className="font-medium truncate">{summary.domain}</p>
+    <Link
+      to="/p/$projectId/rank-tracking/$configId"
+      params={{ projectId, configId: summary.id }}
+      className="group flex w-full items-center gap-4 px-5 py-3.5 transition-colors hover:bg-base-200/50 cursor-pointer"
+      aria-label={`Open ${summary.domain}`}
+    >
+      <div className="min-w-0 flex-1">
+        <p className="font-medium truncate group-hover:text-primary transition-colors">
+          {summary.domain}
+        </p>
         <p className="text-xs text-base-content/60">
           {summary.locationName
             ? formatLocationLabel(summary.locationName, 2)
@@ -254,7 +255,7 @@ function DomainRow({
           </p>
         )}
       </div>
-      <div className="hidden sm:flex items-center gap-6 text-sm pointer-events-none">
+      <div className="hidden sm:flex items-center gap-6 text-sm">
         {summary.keywordCount > 0 && (
           <div className="text-center">
             <p className="text-xs uppercase tracking-wide text-base-content/60">
@@ -266,7 +267,7 @@ function DomainRow({
       </div>
       <button
         type="button"
-        className="btn btn-ghost btn-xs text-base-content/40 hover:text-error relative z-10"
+        className="btn btn-ghost btn-xs text-base-content/40 hover:text-error"
         title="Archive domain"
         onClick={(e) => {
           e.stopPropagation();
@@ -276,7 +277,7 @@ function DomainRow({
       >
         <Archive className="size-4" />
       </button>
-      <ChevronRight className="size-4 shrink-0 text-base-content/40 pointer-events-none" />
-    </div>
+      <ChevronRight className="size-4 shrink-0 text-base-content/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+    </Link>
   );
 }

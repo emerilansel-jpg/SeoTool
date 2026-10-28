@@ -111,8 +111,12 @@ export function KeywordResearchSearchBar({ controller }: Props) {
 
             <button
               type="submit"
-              className="btn btn-primary rounded-xl font-semibold shadow-xs w-full px-6 sm:w-auto shrink-0 col-span-2 sm:col-span-1"
+              disabled={controller.isLoading}
+              className="btn btn-primary rounded-xl font-semibold shadow-xs w-full px-6 sm:w-auto shrink-0 col-span-2 sm:col-span-1 gap-2"
             >
+              {controller.isLoading ? (
+                <span className="loading loading-spinner loading-xs" />
+              ) : null}
               Search
             </button>
           </div>

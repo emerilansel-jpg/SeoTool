@@ -280,8 +280,13 @@ export function AiCompetitorsTab({
                     colSpan={6}
                     className="py-8 text-center text-xs text-base-content/60"
                   >
-                    No co-cited competitors detected yet. Run tracking across
-                    prompts to map competitive overlap.
+                    <p className="font-medium">
+                      No co-cited competitors detected yet.
+                    </p>
+                    <p className="mt-1 text-base-content/50">
+                      Run tracking across at least 5 prompts to map competitive
+                      co-citation overlap.
+                    </p>
                   </td>
                 </tr>
               ) : (
@@ -346,6 +351,15 @@ export function AiCompetitorsTab({
             </tbody>
           </table>
         </div>
+
+        {coCited.length > 0 && coCited.length <= 2 && (
+          <div className="rounded-lg border border-info/20 bg-info/5 p-3 text-xs text-base-content/70">
+            <span className="font-semibold text-info">Pro tip:</span>{" "}
+            Co-citation patterns become more accurate as you track more prompts.
+            Run at least 5 prompts across multiple models to unlock deeper
+            competitor overlap analysis.
+          </div>
+        )}
       </div>
     </div>
   );
