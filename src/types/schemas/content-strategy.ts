@@ -1,10 +1,22 @@
 import { z } from "zod";
 
+const flexibleOptionalUrlSchema = z
+  .string()
+  .optional()
+  .nullable()
+  .transform((val) => {
+    if (!val) return val;
+    const trimmed = val.trim();
+    if (!trimmed) return null;
+    return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  })
+  .pipe(z.string().url("Must be a valid URL").optional().nullable());
+
 export const createTopicClusterSchema = z.object({
   projectId: z.string().min(1),
   name: z.string().min(1, "Name is required").max(100),
   description: z.string().max(500).optional().nullable(),
-  pillarPageUrl: z.string().url().optional().nullable(),
+  pillarPageUrl: flexibleOptionalUrlSchema,
 });
 
 export const updateTopicClusterSchema = createTopicClusterSchema
@@ -20,7 +32,7 @@ export const createContentBriefSchema = z.object({
     .enum(["idea", "briefing", "writing", "published", "archived"])
     .default("idea"),
   priorityScore: z.number().min(0).max(100).optional().nullable(),
-  targetUrl: z.string().url().optional().nullable(),
+  targetUrl: flexibleOptionalUrlSchema,
   briefDataJson: z.string().optional().nullable(), // Stored as stringified JSON
 });
 

@@ -28,7 +28,11 @@ export function SitemapValidationView({ projectId }: { projectId: string }) {
     e.preventDefault();
     const trimmed = url.trim();
     if (!trimmed) return;
-    mutation.mutate(trimmed);
+    const targetUrl = /^https?:\/\//i.test(trimmed)
+      ? trimmed
+      : `https://${trimmed}`;
+    setUrl(targetUrl);
+    mutation.mutate(targetUrl);
   };
 
   return (
@@ -42,6 +46,12 @@ export function SitemapValidationView({ projectId }: { projectId: string }) {
             type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
+            onBlur={(e) => {
+              const val = e.target.value.trim();
+              if (val && !/^https?:\/\//i.test(val)) {
+                setUrl(`https://${val}`);
+              }
+            }}
             placeholder="example.com or https://example.com/sitemap.xml"
             className="input join-item input-bordered flex-1"
           />

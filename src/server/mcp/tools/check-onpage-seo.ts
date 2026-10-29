@@ -10,7 +10,18 @@ import { AppError } from "@/server/lib/errors";
 
 const inputSchema = z.object({
   projectId: projectIdSchema,
-  url: z.string().url().describe("Full URL of the page to analyze"),
+  url: z
+    .string()
+    .min(1)
+    .max(2048)
+    .transform((val) => {
+      const trimmed = val.trim();
+      return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    })
+    .pipe(z.string().url())
+    .describe(
+      "URL of the page to analyze (https:// is added automatically if omitted)",
+    ),
 });
 
 const outputSchema = z.object({

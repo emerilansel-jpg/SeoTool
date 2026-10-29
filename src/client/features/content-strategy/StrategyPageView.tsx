@@ -279,11 +279,17 @@ function CreateClusterModal({
             <span className="text-base-content/40">(optional)</span>
           </label>
           <input
-            type="url"
+            type="text"
             className="input input-bordered w-full"
-            placeholder="https://example.com/email-marketing"
+            placeholder="example.com/email-marketing or https://example.com/email-marketing"
             value={pillarPageUrl}
             onChange={(e) => setPillarPageUrl(e.target.value)}
+            onBlur={(e) => {
+              const val = e.target.value.trim();
+              if (val && !/^https?:\/\//i.test(val)) {
+                setPillarPageUrl(`https://${val}`);
+              }
+            }}
           />
         </div>
 

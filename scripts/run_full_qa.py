@@ -139,8 +139,8 @@ def full_live_qa():
         polish_btn = page.locator("button:has-text('AI Polish & Clean Noise')")
         scorecard["5_AI_Polish_Button_Visible"] = polish_btn.is_visible()
         
-        # White label indicator
-        api_cost_label = page.locator("text=Costs Search API credits")
+        # Search API credit cost indicator
+        api_cost_label = page.locator("button:has-text('Search (')")
         scorecard["5b_Whitelabel_Search_API_Indicator"] = api_cost_label.is_visible()
 
         rows_before = page.locator("table tbody tr").count()

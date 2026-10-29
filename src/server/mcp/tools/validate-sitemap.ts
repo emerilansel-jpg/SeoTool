@@ -12,9 +12,15 @@ const inputSchema = z.object({
   projectId: projectIdSchema,
   url: z
     .string()
-    .url()
+    .min(1)
+    .max(2048)
+    .transform((val) => {
+      const trimmed = val.trim();
+      return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    })
+    .pipe(z.string().url())
     .describe(
-      "Full URL of the sitemap to validate (e.g. https://example.com/sitemap.xml)",
+      "URL of the sitemap to validate (e.g. example.com or https://example.com/sitemap.xml)",
     ),
 });
 

@@ -374,10 +374,17 @@ function BriefEditForm({
       <label className="block">
         <span className="mb-1 block text-sm">Target URL</span>
         <input
+          type="text"
           className="input input-bordered input-sm"
           value={targetUrl}
           onChange={(e) => setTargetUrl(e.target.value)}
-          placeholder="https://..."
+          onBlur={(e) => {
+            const val = e.target.value.trim();
+            if (val && !/^https?:\/\//i.test(val)) {
+              setTargetUrl(`https://${val}`);
+            }
+          }}
+          placeholder="example.com/page or https://..."
         />
       </label>
       <label className="block">
