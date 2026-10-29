@@ -102,7 +102,7 @@ function AnnouncementBar() {
         to="/pricing"
         className="block rounded-xl bg-primary px-5 py-3 text-center text-sm font-medium text-white shadow-[inset_0_-6px_12px_rgba(0,0,0,0.12)] transition-transform hover:scale-[0.995]"
       >
-        Early Believer Lifetime Deal: Claim the Founder Pass for $27 One-Time (Unlimited BYOK Mode, Zero Data Markup).{" "}
+        Early Believer Lifetime Deal: Claim the Founder Pass for $27 One-Time (Batch 1: strictly 10 seats, price increases to $39 after 10 subscribers).{" "}
         <span className="font-semibold underline underline-offset-2">
           Claim spot
         </span>{" "}
@@ -862,8 +862,8 @@ function PricingTeaser({ signedIn }: { signedIn: boolean }) {
                 Two simple ways to access SeoTool.im:
               </div>
               <ul className="space-y-1 text-base-content/70">
-                <li>• <strong>Early Believer Pass ($27 Once):</strong> Lifetime BYOK workspace, MCP agent access, zero markup forever.</li>
-                <li>• <strong>Monthly Credit Retainer:</strong> Start at just $1/month (100% turns into permanent credits, save up to 40% on larger packs).</li>
+                <li>• <strong>Early Believer Pass ($27 Once):</strong> Lifetime BYOK workspace, MCP agent access, zero markup forever. Limited to 10 users per batch (price increases to $39 next).</li>
+                <li>• <strong>Monthly Credit Retainer:</strong> Start at just $1/month (100% turns into permanent credits, get up to +22% bonus credits on larger packs).</li>
               </ul>
             </div>
 
@@ -921,6 +921,9 @@ function PricingTeaser({ signedIn }: { signedIn: boolean }) {
                   <p className="mt-3 text-sm text-base-content/70 leading-relaxed">
                     {c.description}
                   </p>
+                  <div className="mt-3 rounded-lg border border-warning/40 bg-warning/10 p-2.5 text-[11px] text-base-content/85">
+                    <span className="font-bold text-warning-content">🔥 Scarcity Alert:</span> Price increases by $10–$12 after every 10 subscribers ($27 → $39 → $49). Lock in Batch 1 now.
+                  </div>
                   <div className="mt-4 space-y-2 text-xs text-base-content/80 border-t border-base-200 pt-4">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="size-3.5 text-success shrink-0" />

@@ -14,25 +14,25 @@ export const KEYWORD_PRO_COHORT_KEYS = [
 export const KEYWORD_PRO_COHORTS = [
   {
     key: KEYWORD_PRO_COHORT_KEYS[0],
-    label: "Founder Pass",
-    capacity: 100,
+    label: "Founder Pass (Batch 1)",
+    capacity: 10,
     defaultPriceUsdCents: 2_700,
   },
   {
     key: KEYWORD_PRO_COHORT_KEYS[1],
-    label: "Early 20",
-    capacity: 20,
+    label: "Early Believer (Batch 2)",
+    capacity: 10,
     defaultPriceUsdCents: 3_900,
   },
   {
     key: KEYWORD_PRO_COHORT_KEYS[2],
-    label: "Growth 50",
-    capacity: 50,
+    label: "Growth (Batch 3)",
+    capacity: 10,
     defaultPriceUsdCents: 4_900,
   },
   {
     key: KEYWORD_PRO_COHORT_KEYS[3],
-    label: "Public",
+    label: "Public Release",
     capacity: null,
     defaultPriceUsdCents: 5_900,
   },

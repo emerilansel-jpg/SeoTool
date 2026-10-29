@@ -2,7 +2,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Key, Lock, Sparkles, Zap } from "lucide-react";
+import { Check, Flame, Key, Lock, Sparkles, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { AccountMenu } from "@/client/components/AccountMenu";
 import {
@@ -316,10 +316,20 @@ function SubscribePage() {
               </div>
             </div>
 
+            <div className="rounded-xl border border-warning/40 bg-warning/10 p-3 text-xs text-base-content/85">
+              <div className="flex items-center gap-1.5 font-bold text-warning-content">
+                <Flame className="size-3.5 text-warning shrink-0" />
+                <span>Price Increases Every 10 Subscribers</span>
+              </div>
+              <p className="mt-1 text-base-content/70 leading-snug">
+                Batch 1 is strictly capped at 10 users ($27). Next batch automatically rises to $39.
+              </p>
+            </div>
+
             <div className="rounded-xl bg-primary/[0.05] p-3 text-xs text-base-content/80 flex items-center gap-2">
               <Key className="size-4 text-primary shrink-0" />
               <span>
-                <strong>BYOK Mode:</strong> Plug in your own DataForSEO & AI API keys.
+                <strong>BYOK Mode:</strong> Plug in your own Search API & AI API keys.
                 Save up to 90% on data costs with zero platform markup.
               </span>
             </div>
@@ -327,7 +337,7 @@ function SubscribePage() {
             <ul className="grid gap-2 text-xs sm:grid-cols-2">
               {[
                 "All 12+ SEO & audit tools included",
-                "Direct DataForSEO & AI BYOK integration",
+                "Direct Search API & AI BYOK integration",
                 "Daily automated search rank tracking",
                 "100+ check technical site auditor",
                 "AI brand search visibility tracker",

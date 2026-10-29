@@ -13,11 +13,11 @@ export interface PricingCohortDefinition {
 export const LTD_COHORTS: readonly PricingCohortDefinition[] = [
   {
     key: "krp_founder_10",
-    label: "Founder Pass",
+    label: "Founder Pass (Batch 1)",
     priceUsd: 27,
-    capacity: 100,
-    badge: "Most Popular",
-    description: "Full lifetime access for builders. Zero data markup with BYOK.",
+    capacity: 10,
+    badge: "🔥 Increases every 10 users",
+    description: "Full lifetime access for builders. Zero data markup with BYOK. Price increases to $39 after 10 subscribers.",
   },
 ] as const;
 

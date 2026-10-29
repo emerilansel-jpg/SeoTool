@@ -82,12 +82,12 @@ describe("KeywordProConfigService.reserveCheckoutCohort", () => {
     expect(KeywordProCohortSeatRepository.reserve).toHaveBeenNthCalledWith(
       1,
       "krp_founder_10",
-      100,
+      10,
     );
     expect(KeywordProCohortSeatRepository.reserve).toHaveBeenNthCalledWith(
       2,
       "krp_early_20",
-      20,
+      10,
     );
   });
 });

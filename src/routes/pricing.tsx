@@ -1,7 +1,7 @@
 // oxlint-disable max-lines
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check, Key, Lock, Sparkles, Users, Zap } from "lucide-react";
+import { ArrowRight, Check, Flame, Key, Lock, Sparkles, Users, Zap } from "lucide-react";
 import {
   MarketingChrome,
   useMarketingSession,
@@ -139,7 +139,7 @@ function CohortCard({
           <div className="mt-4">
             <div className="flex items-center justify-between text-xs text-base-content/60 mb-1">
               <span>{cohort.occupied} joined</span>
-              <span>Max {cohort.capacity}</span>
+              <span>Batch Limit: {cohort.capacity} seats</span>
             </div>
             <div className="h-1.5 w-full rounded-full bg-base-300">
               <div
@@ -152,6 +152,17 @@ function CohortCard({
           </div>
         ) : null}
 
+        {/* Scarcity Notice */}
+        <div className="mt-3.5 rounded-xl border border-warning/40 bg-warning/10 p-3 text-[11px] text-base-content/85">
+          <div className="flex items-center gap-1.5 font-bold text-warning-content">
+            <Flame className="size-3.5 text-warning shrink-0" />
+            <span>Price Increases Every 10 Subscribers</span>
+          </div>
+          <p className="mt-1 text-base-content/70 leading-snug">
+            Each batch is strictly limited to 10 users ($27 → $39 → $49). Lock in your $27 Founder Pass before the next batch price increase.
+          </p>
+        </div>
+
         <ul className="mt-5 space-y-2 text-xs text-base-content/80">
           <li className="flex items-center gap-2">
             <Check className="size-3.5 text-success shrink-0" />
@@ -159,7 +170,7 @@ function CohortCard({
           </li>
           <li className="flex items-center gap-2">
             <Check className="size-3.5 text-success shrink-0" />
-            <span>Connect your own DataForSEO & AI API Keys</span>
+            <span>Connect your own Search API & AI API Keys (BYOK)</span>
           </li>
           <li className="flex items-center gap-2">
             <Check className="size-3.5 text-success shrink-0" />
@@ -436,7 +447,7 @@ function PricingPage() {
                 }`}
               >
                 <Sparkles className="size-4" />
-                Monthly Packs (Save up to 40%)
+                Monthly Packs (Up to +22% Bonus)
               </button>
             </div>
           </div>
@@ -454,6 +465,10 @@ function PricingPage() {
                 <strong>BYOK (Bring Your Own Key)</strong>: connect your own search engine & AI API
                 keys to run unlimited audits and research with zero platform markup.
               </p>
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-warning/40 bg-warning/10 px-3 py-1 text-xs font-semibold text-warning-content">
+                <Flame className="size-3.5 text-warning" />
+                <span>Price increases by $10–$12 every 10 subscribers ($27 → $39 → $49)</span>
+              </div>
             </div>
 
             <div className="flex justify-center">
@@ -480,7 +495,7 @@ function PricingPage() {
                 Micro Retainer & Monthly Credit Packs (Save More When You Buy More)
               </h3>
               <p className="mt-1 text-xs md:text-sm text-base-content/70">
-                100% of your subscription turns into permanent usage credits with up to +62% bonus credits.
+                100% of your subscription turns into permanent usage credits with up to +22% volume bonus credits.
                 Credits roll over every month and never expire, even if you cancel.
               </p>
             </div>

@@ -81,11 +81,11 @@ def full_live_qa():
         # Monthly Volume Discount Check
         page.locator("button:has-text('Monthly Packs')").click()
         time.sleep(1.5)
-        d21 = page.locator("text=+21% volume bonus")
-        d29 = page.locator("text=+29% volume bonus")
-        d48 = page.locator("text=+48% volume bonus")
-        d62 = page.locator("text=+62% volume bonus")
-        scorecard["2e_Monthly_Volume_Discounts"] = d21.is_visible() and d29.is_visible() and d48.is_visible() and d62.is_visible()
+        d10 = page.locator("text=+10% volume bonus").first
+        d15 = page.locator("text=+15% volume bonus").first
+        d20 = page.locator("text=+20% volume bonus").first
+        d22 = page.locator("text=+22% volume bonus").first
+        scorecard["2e_Monthly_Volume_Discounts"] = d10.is_visible() and d15.is_visible() and d20.is_visible() and d22.is_visible()
 
         page.screenshot(path="qa_evidence_2b_pricing_monthly.png")
         print("  ✓ Saved qa_evidence_2_pricing_ltd.png & qa_evidence_2b_pricing_monthly.png")
