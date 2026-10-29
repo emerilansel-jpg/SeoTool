@@ -162,6 +162,31 @@ export interface LlmCitationMetric {
   citationsCount: number;
   mentionsCount: number;
   trendDeltaPercent: number; // vs 7-day baseline
+  primaryPickPercent?: number; // % of responses where brand is #1
+  avgPosition?: number | null;
+}
+
+export interface AiShiftFactor {
+  factor: string;
+  impact: "positive" | "negative" | "neutral";
+  description: string;
+}
+
+export interface AiShiftDiagnosis {
+  headline: string;
+  summary: string;
+  primaryFactors: AiShiftFactor[];
+  actionItems: string[];
+}
+
+export interface AiHeadToHeadRecord {
+  competitorDomain: string;
+  competitorBrand: string;
+  wins: number;
+  losses: number;
+  ties: number;
+  winRatePercent: number;
+  totalPromptsCompared: number;
 }
 
 export interface ProfoundPromptDiagnostic {
@@ -219,6 +244,8 @@ export interface AiTrackingDashboardData {
     gaps: ProfoundPromptDiagnostic[];
   };
   coCitedCompetitors: CoCitedCompetitor[];
+  shiftDiagnosis?: AiShiftDiagnosis;
+  headToHead?: AiHeadToHeadRecord[];
   lastRun: {
     id: string;
     status: string;

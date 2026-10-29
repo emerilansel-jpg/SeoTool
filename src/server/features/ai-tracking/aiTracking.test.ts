@@ -552,5 +552,69 @@ describe("aggregateDashboardMetrics", () => {
       expect(citabilityAlert).toBeDefined();
       expect(citabilityAlert?.title).toContain("Passage Citability");
     });
+
+    it("generates Trackings.ai shift diagnosis, head-to-head records, and primary pick metrics", () => {
+      const prompt1 = {
+        id: "p-1",
+        configId: "cfg-1",
+        prompt: "Best CRM for startups",
+        active: true,
+        createdAt: new Date().toISOString(),
+      };
+
+      const obs1 = makeObservation("obs-1", {
+        promptId: "p-1",
+        prompt: "Best CRM for startups",
+        platform: "chat_gpt",
+      });
+
+      const mentions = [
+        makeMention({
+          id: "m-1",
+          observationId: "obs-1",
+          brandName: "Zoho",
+          domain: "zoho.com",
+          isTargetBrand: true,
+          position: 1,
+        }),
+        makeMention({
+          id: "m-2",
+          observationId: "obs-1",
+          brandName: "Salesforce",
+          domain: "salesforce.com",
+          isTargetBrand: false,
+          position: 2,
+        }),
+      ];
+
+      const result = aggregateDashboardMetrics({
+        config: baseConfig,
+        promptsList: [prompt1],
+        observations: [obs1],
+        mentions,
+        citations: [],
+        latestRun: null,
+      });
+
+      // Shift Diagnosis
+      expect(result.shiftDiagnosis).toBeDefined();
+      expect(result.shiftDiagnosis?.headline).toContain("AI Visibility");
+      expect(result.shiftDiagnosis?.primaryFactors).toHaveLength(3);
+      expect(result.shiftDiagnosis?.actionItems.length).toBeGreaterThanOrEqual(1);
+
+      // Head-to-Head Win Rate
+      expect(result.headToHead).toBeDefined();
+      expect(result.headToHead?.length).toBe(1);
+      const sfRecord = result.headToHead?.[0];
+      expect(sfRecord?.competitorDomain).toBe("salesforce.com");
+      expect(sfRecord?.wins).toBe(1); // Zoho pos 1 < Salesforce pos 2
+      expect(sfRecord?.losses).toBe(0);
+      expect(sfRecord?.winRatePercent).toBe(100);
+
+      // Primary Pick Metric on LLM Metrics
+      const gptMetric = result.llmMetrics.find((m) => m.platform === "chat_gpt");
+      expect(gptMetric?.primaryPickPercent).toBe(100);
+      expect(gptMetric?.avgPosition).toBe(1);
+    });
   });
 });

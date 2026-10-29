@@ -4,11 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  BarChart2,
   Bot,
-  CheckCircle2,
   Compass,
-  Globe,
   LayoutDashboard,
   Link2,
   Play,
@@ -25,6 +22,9 @@ import {
   toggleAiTrackingPrompt,
 } from "@/serverFunctions/ai-tracking";
 import { AiTrackingKpiCards } from "./components/AiTrackingKpiCards";
+import { AiShiftDiagnosisCard } from "./components/AiShiftDiagnosisCard";
+import { AiMultiEngineMatrix } from "./components/AiMultiEngineMatrix";
+import { AiHeadToHeadCard } from "./components/AiHeadToHeadCard";
 import { AiTrackingPositionCard } from "./components/AiTrackingPositionCard";
 import { AiTrackingSentimentCard } from "./components/AiTrackingSentimentCard";
 import { AiTrackingPromptsTable } from "./components/AiTrackingPromptsTable";
@@ -32,9 +32,7 @@ import { AiTrackingObservationsTable } from "./components/AiTrackingObservations
 import { AiTrackingSetupModal } from "./components/AiTrackingSetupModal";
 import { AiDiscoveredPromptsTab } from "./components/AiDiscoveredPromptsTab";
 import { AiCitationsTab } from "./components/AiCitationsTab";
-import { AiPagesTab } from "./components/AiPagesTab";
 import { AiCompetitorsTab } from "./components/AiCompetitorsTab";
-import { AiGscCorrelationTab } from "./components/AiGscCorrelationTab";
 import { AiProfoundAlertsBanner } from "./components/AiProfoundAlertsBanner";
 import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import type { SaveAiTrackingConfigInput } from "@/types/schemas/ai-tracking";
@@ -48,11 +46,7 @@ interface Props {
   projectId: string;
 }
 
-type TabType =
-  | "overview"
-  | "prompts"
-  | "citations"
-  | "competitors";
+type TabType = "overview" | "prompts" | "citations" | "competitors";
 
 export function AiTrackingPage({ projectId }: Props) {
   const queryClient = useQueryClient();
@@ -302,6 +296,9 @@ export function AiTrackingPage({ projectId }: Props) {
               {/* Profound Pillar 4: Time-Series Alerts & Signals Banner */}
               <AiProfoundAlertsBanner alerts={data.profoundAlerts ?? []} />
 
+              {/* Trackings.ai Signature: Why AI Visibility Shifted Diagnostic */}
+              <AiShiftDiagnosisCard diagnosis={data.shiftDiagnosis} />
+
               {/* Discovery Summary Card */}
               {data.discoveryStats && (
                 <div className="rounded-xl border border-base-300 bg-gradient-to-r from-base-100 to-base-200/50 p-3.5 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
@@ -315,9 +312,8 @@ export function AiTrackingPage({ projectId }: Props) {
                         Discovered for {config.domain}
                       </h3>
                       <p className="text-[11px] sm:text-xs text-base-content/60 mt-0.5 leading-relaxed">
-                        Search discovery:{" "}
-                        {data.discoveryStats.totalMentioned} mentioned •{" "}
-                        {data.discoveryStats.totalCited} cited •{" "}
+                        Search discovery: {data.discoveryStats.totalMentioned}{" "}
+                        mentioned • {data.discoveryStats.totalCited} cited •{" "}
                         {data.discoveryStats.totalSearchVolume.toLocaleString()}{" "}
                         monthly AI search volume
                       </p>
@@ -340,6 +336,19 @@ export function AiTrackingPage({ projectId }: Props) {
                 onSelectPlatform={setSelectedPlatform}
                 availablePlatforms={config.platforms}
                 llmMetrics={data.llmMetrics ?? []}
+              />
+
+              {/* Trackings.ai Signature: 4-Engine Multi-Model Matrix */}
+              <AiMultiEngineMatrix
+                llmMetrics={data.llmMetrics ?? []}
+                selectedPlatform={selectedPlatform}
+                onSelectPlatform={setSelectedPlatform}
+              />
+
+              {/* Trackings.ai Signature: Head-to-Head Win-Loss Matrix */}
+              <AiHeadToHeadCard
+                headToHead={data.headToHead ?? []}
+                brandName={config.brandName}
               />
 
               {/* List Position & Tracked Mention Leaderboard */}
@@ -400,12 +409,18 @@ export function AiTrackingPage({ projectId }: Props) {
 
           {/* TAB 4: COMPETITOR OVERLAP */}
           {activeTab === "competitors" && (
-            <AiCompetitorsTab
-              projectId={projectId}
-              brandName={config.brandName}
-              domain={config.domain}
-              coCitedCompetitors={data.coCitedCompetitors ?? []}
-            />
+            <div className="space-y-6">
+              <AiHeadToHeadCard
+                headToHead={data.headToHead ?? []}
+                brandName={config.brandName}
+              />
+              <AiCompetitorsTab
+                projectId={projectId}
+                brandName={config.brandName}
+                domain={config.domain}
+                coCitedCompetitors={data.coCitedCompetitors ?? []}
+              />
+            </div>
           )}
         </>
       )}

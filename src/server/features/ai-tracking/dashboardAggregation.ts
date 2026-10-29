@@ -9,6 +9,8 @@ import type {
   aiTrackingRuns,
 } from "@/db/schema";
 import type {
+  AiHeadToHeadRecord,
+  AiShiftDiagnosis,
   AiTrackingDashboardData,
   AiTrackingPlatform,
   AiTrackingSchedule,
@@ -360,6 +362,8 @@ export function aggregateDashboardMetrics(params: {
     const totalResponsesForModel = platformObs.length;
     let citationsCount = 0;
     let mentionsCount = 0;
+    let primaryPicks = 0;
+    const modelTargetPositions: number[] = [];
 
     let recentTotal = 0;
     let recentCitations = 0;
@@ -373,12 +377,18 @@ export function aggregateDashboardMetrics(params: {
       const hasTargetCitation = (citationsByObs.get(obs.id) ?? []).some(
         (c) => c.isTargetBrand,
       );
-      const hasTargetMention = (mentionsByObs.get(obs.id) ?? []).some(
+      const targetMention = (mentionsByObs.get(obs.id) ?? []).find(
         (m) => m.isTargetBrand,
       );
 
       if (hasTargetCitation) citationsCount++;
-      if (hasTargetMention) mentionsCount++;
+      if (targetMention) {
+        mentionsCount++;
+        if (targetMention.position === 1) primaryPicks++;
+        if (targetMention.position != null) {
+          modelTargetPositions.push(targetMention.position);
+        }
+      }
 
       if (ageMs <= sevenDaysMs) {
         recentTotal++;
@@ -397,6 +407,19 @@ export function aggregateDashboardMetrics(params: {
       totalResponsesForModel > 0
         ? Math.round((mentionsCount / totalResponsesForModel) * 100)
         : 0;
+    const primaryPickPercent =
+      totalResponsesForModel > 0
+        ? Math.round((primaryPicks / totalResponsesForModel) * 100)
+        : 0;
+    const avgPosition =
+      modelTargetPositions.length > 0
+        ? Number(
+            (
+              modelTargetPositions.reduce((a, b) => a + b, 0) /
+              modelTargetPositions.length
+            ).toFixed(1),
+          )
+        : null;
 
     let trendDeltaPercent = 0;
     if (recentTotal > 0 && baselineTotal > 0) {
@@ -413,6 +436,8 @@ export function aggregateDashboardMetrics(params: {
       citationsCount,
       mentionsCount,
       trendDeltaPercent,
+      primaryPickPercent,
+      avgPosition,
     };
   });
 
@@ -629,6 +654,160 @@ export function aggregateDashboardMetrics(params: {
         b.standaloneWins - a.standaloneWins,
     );
 
+  // 5. Head-to-Head Win/Loss/Tie vs Competitors (Trackings.ai Head-to-Head Matrix)
+  const nonTargetEntities = Array.from(entityStats.values()).filter(
+    (e) => !e.isTargetBrand,
+  );
+  const headToHead: AiHeadToHeadRecord[] = nonTargetEntities
+    .map((comp) => {
+      let wins = 0;
+      let losses = 0;
+      let ties = 0;
+      const compDomLower = comp.domain.toLowerCase();
+
+      for (const p of promptsList) {
+        const obsForPrompt = successfulObservations.filter(
+          (o) =>
+            o.promptId === p.id ||
+            o.prompt.toLowerCase().trim() === p.prompt.toLowerCase().trim(),
+        );
+
+        for (const obs of obsForPrompt) {
+          const obsMentions = mentionsByObs.get(obs.id) ?? [];
+          const tm = obsMentions.find((m) => m.isTargetBrand);
+          const cm = obsMentions.find(
+            (m) =>
+              m.domain.toLowerCase() === compDomLower ||
+              m.brandName.toLowerCase() === comp.brandName.toLowerCase(),
+          );
+
+          if (tm && !cm) {
+            wins++;
+          } else if (cm && !tm) {
+            losses++;
+          } else if (tm && cm) {
+            const tPos = tm.position ?? 999;
+            const cPos = cm.position ?? 999;
+            if (tPos < cPos) wins++;
+            else if (cPos < tPos) losses++;
+            else ties++;
+          }
+        }
+      }
+
+      const totalPromptsCompared = wins + losses + ties;
+      const winRatePercent =
+        wins + losses > 0
+          ? Math.round((wins / (wins + losses)) * 100)
+          : wins > 0
+            ? 100
+            : 0;
+
+      return {
+        competitorDomain: comp.domain,
+        competitorBrand: comp.brandName,
+        wins,
+        losses,
+        ties,
+        winRatePercent,
+        totalPromptsCompared,
+      };
+    })
+    .filter((h) => h.totalPromptsCompared > 0)
+    .toSorted((a, b) => b.totalPromptsCompared - a.totalPromptsCompared);
+
+  // 6. Why Rankings Shifted (Trackings.ai Root-Cause Shift Diagnosis)
+  const overallCitationRate =
+    totalResponses > 0
+      ? Math.round((totalTargetCitations / totalResponses) * 100)
+      : 0;
+
+  const sortedLlmByMention = llmMetrics.toSorted(
+    (a, b) => b.mentionRatePercent - a.mentionRatePercent,
+  );
+  const bestModel = sortedLlmByMention[0];
+  const weakestModel = sortedLlmByMention[sortedLlmByMention.length - 1];
+
+  const bestName = bestModel
+    ? PLATFORM_NAMES[bestModel.platform] || bestModel.platform
+    : "ChatGPT";
+  const weakestName = weakestModel
+    ? PLATFORM_NAMES[weakestModel.platform] || weakestModel.platform
+    : "Perplexity";
+
+  let headline = `AI Visibility at ${mentionCoveragePercent}% across frontier engines`;
+  if (mentionCoveragePercent >= 60) {
+    headline = `Strong AI Visibility: ${config.brandName} commands ${mentionCoveragePercent}% mention share`;
+  } else if (mentionCoveragePercent >= 30) {
+    headline = `Moderate AI Presence: ${mentionCoveragePercent}% coverage with model-specific gaps`;
+  } else if (totalResponses > 0) {
+    headline = `Under-indexed in AI: ${config.brandName} surfaces in only ${mentionCoveragePercent}% of prompts`;
+  } else {
+    headline = `Awaiting AI evaluation runs for ${config.brandName}`;
+  }
+
+  const summary =
+    totalResponses > 0
+      ? `${config.brandName} appeared in ${targetMentionsCount} of ${totalResponses} evaluated LLM answers (${mentionCoveragePercent}% coverage). Peak performance on ${bestName} (${bestModel?.mentionRatePercent ?? 0}%), while ${weakestName} has ${weakestModel?.mentionRatePercent ?? 0}% visibility.`
+      : `Run tracking to evaluate brand visibility across ChatGPT, Gemini, Perplexity, and Claude.`;
+
+  const primaryFactors: AiShiftDiagnosis["primaryFactors"] = [
+    {
+      factor: "Engine Retrieval Divergence",
+      impact:
+        (bestModel?.mentionRatePercent ?? 0) >= 40 ? "positive" : "neutral",
+      description: `Model answers diverge: ${bestName} recognizes your brand in ${bestModel?.mentionRatePercent ?? 0}% of prompts, vs ${weakestName} at ${weakestModel?.mentionRatePercent ?? 0}%.`,
+    },
+    {
+      factor: "Source Citation Grounding",
+      impact: overallCitationRate >= 20 ? "positive" : "negative",
+      description:
+        overallCitationRate >= 20
+          ? `Direct domain citations to ${config.domain} are present in ${overallCitationRate}% of answers.`
+          : `Only ${overallCitationRate}% of responses provide clickable source citations to ${config.domain}, despite textual brand mentions.`,
+    },
+    {
+      factor: "Competitor Pressure",
+      impact:
+        topCompetitor && topCompetitor.visibilityPct > mentionCoveragePercent
+          ? "negative"
+          : "neutral",
+      description: topCompetitor
+        ? `${topCompetitor.brandName} maintains ${topCompetitor.visibilityPct}% visibility with ${sortedGapPrompts.length} prompt gaps where competitors outrank you.`
+        : `No dominant rival entity detected across the current prompt library.`,
+    },
+  ];
+
+  const actionItems: string[] = [];
+  if (sortedGapPrompts.length > 0) {
+    actionItems.push(
+      `Target priority prompt gap: "${sortedGapPrompts[0].prompt}" — publish high-authority answer content addressing this intent directly.`,
+    );
+  } else {
+    actionItems.push(
+      `Expand prompt library to include emerging category questions and comparative queries.`,
+    );
+  }
+  if (overallCitationRate < 25) {
+    actionItems.push(
+      `Add structured Organization and Product Schema.org markup with SameAs links to convert text mentions into verified URL citations.`,
+    );
+  } else {
+    actionItems.push(
+      `Maintain strong citation velocity on ${config.domain} by refreshing source dates and key statistics.`,
+    );
+  }
+  actionItems.push(
+    `Reinforce third-party validation (G2, Reddit, Capterra, industry listicles) to improve retrieval weights on web-grounded models (${weakestName}).`,
+  );
+
+  const shiftDiagnosis: AiShiftDiagnosis = {
+    headline,
+    summary,
+    primaryFactors,
+    actionItems,
+  };
+
   return {
     config,
     prompts: promptItems,
@@ -664,6 +843,8 @@ export function aggregateDashboardMetrics(params: {
       gaps: sortedGapPrompts,
     },
     coCitedCompetitors,
+    headToHead,
+    shiftDiagnosis,
     lastRun: latestRun,
   };
 }
