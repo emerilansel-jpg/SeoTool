@@ -97,6 +97,7 @@
     "cloudflare": "^5.2.0",
     "daisyui": "^5.5.5",
     "dataforseo-client": "^2.0.19",
+    "dodopayments": "^2.55.0",
     "drizzle-orm": "^0.45.2",
     "fast-xml-parser": "^5.4.1",
     "jose": "^6.0.12",

@@ -22,6 +22,10 @@ import {
   PAYPAL_WEBHOOK_PATH,
   handlePaypalWebhookRequest,
 } from "@/server/billing/paypal-webhook";
+import {
+  DODO_WEBHOOK_PATH,
+  handleDodoWebhookRequest,
+} from "@/server/billing/dodo-webhook";
 import { withPgClient } from "@/db";
 
 const appFetch = createStartHandler(defaultStreamHandler);
@@ -152,6 +156,10 @@ function handleFetch(
 
   if (pathname === PAYPAL_WEBHOOK_PATH) {
     return handlePaypalWebhookRequest(publicRequest);
+  }
+
+  if (pathname === DODO_WEBHOOK_PATH) {
+    return handleDodoWebhookRequest(publicRequest);
   }
 
   return seotoolOAuthProvider.fetch(publicRequest, env as SeoToolOAuthEnv, ctx);

@@ -37,6 +37,11 @@ declare namespace Cloudflare {
     PAYPAL_PLAN_ID_PRO?: string;
     PAYPAL_PLAN_ID_AGENCY?: string;
 
+    // Dodo Payments
+    DODO_PAYMENTS_API_KEY?: string;
+    DODO_PAYMENTS_MODE?: string;
+    DODO_WEBHOOK_SECRET?: string;
+
     // Cloudflare Turnstile — signup captcha. Secret verifies tokens
     // server-side; site key is public and inlined into the client build.
     TURNSTILE_SECRET_KEY?: string;

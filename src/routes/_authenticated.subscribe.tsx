@@ -21,6 +21,11 @@ import {
   capturePaypalLtdCheckout,
 } from "@/serverFunctions/paypal-checkout";
 import {
+  createDodoLtdCheckout,
+  createDodoSubscription,
+  verifyDodoCheckout,
+} from "@/serverFunctions/dodo-checkout";
+import {
   MONTHLY_CREDIT_PACKS,
   type MonthlyPlanTier,
 } from "@/shared/billing";
@@ -28,6 +33,7 @@ import { APPSUMO_TIERS } from "@/shared/pricing-definitions";
 
 type Search = {
   checkout?: "success" | "cancelled";
+  sessionId?: string;
   subscriptionId?: string;
   orderId?: string;
   token?: string;
@@ -38,6 +44,7 @@ type Search = {
   cohort?: string;
   tier?: string;
   ltd?: boolean;
+  provider?: string;
 };
 
 export const Route = createFileRoute("/_authenticated/subscribe")({
@@ -46,6 +53,12 @@ export const Route = createFileRoute("/_authenticated/subscribe")({
       search.checkout === "success" || search.checkout === "cancelled"
         ? search.checkout
         : undefined,
+    sessionId:
+      typeof search.session_id === "string"
+        ? search.session_id.slice(0, 128)
+        : typeof search.sessionId === "string"
+          ? search.sessionId.slice(0, 128)
+          : undefined,
     subscriptionId:
       typeof search.subscription_id === "string"
         ? search.subscription_id.slice(0, 128)
@@ -80,6 +93,8 @@ export const Route = createFileRoute("/_authenticated/subscribe")({
           ? String(search.tier)
           : undefined,
     ltd: search.ltd === true || search.ltd === "true" ? true : undefined,
+    provider:
+      typeof search.provider === "string" ? search.provider.slice(0, 32) : undefined,
   }),
   component: SubscribePage,
 });
@@ -93,7 +108,7 @@ function ExistingSubscriptionNotice({
 }) {
   const finalizing = kind === "finalizing";
   const description = finalizing
-    ? "PayPal approval is complete. We are waiting for the active confirmation."
+    ? "Payment approval is complete. We are waiting for the active confirmation."
     : kind === "all-access"
       ? "You already have an active membership. You can manage your account in Billing or choose an LTD plan below."
       : "Your legacy paid plan remains active. Manage it from Billing before switching so you are never billed for two subscriptions.";
@@ -146,10 +161,22 @@ function SubscribePage() {
 
   const ltdCheckout = useMutation({
     mutationFn: (planKey: string) =>
-      createPaypalLtdCheckout({ data: { planKey } }),
-    onSuccess: (result) => window.location.assign(result.approveUrl),
+      createDodoLtdCheckout({ data: { planKey } }),
+    onSuccess: (result) => window.location.assign(result.checkoutUrl),
     onError: (error) =>
-      toast.error(getStandardErrorMessage(error, "Could not start LTD checkout")),
+      toast.error(getStandardErrorMessage(error, "Could not start checkout")),
+  });
+
+  const dodoVerify = useMutation({
+    mutationFn: (sessionId?: string) =>
+      verifyDodoCheckout({ data: { sessionId } }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["membership-status"] });
+      toast.success("Payment verified! Access activated.");
+      void navigate({ to: search.redirect ?? "/projects", replace: true });
+    },
+    onError: (error) =>
+      toast.error(getStandardErrorMessage(error, "Could not verify payment")),
   });
 
   const ltdCapture = useMutation({
@@ -166,13 +193,13 @@ function SubscribePage() {
 
   const monthlyCheckout = useMutation({
     mutationFn: (tier: MonthlyPlanTier) =>
-      createPaypalSubscription({ data: { tier } }),
-    onSuccess: (result) => window.location.assign(result.approveUrl),
+      createDodoSubscription({ data: { tier } }),
+    onSuccess: (result) => window.location.assign(result.checkoutUrl),
     onError: (error) => {
       console.error("Monthly subscription checkout failed", error);
       toast.error(
         getErrorCode(error) === "UPSTREAM_UNAVAILABLE"
-          ? "We could not reach PayPal to start this checkout. Please try again in a moment."
+          ? "We could not start checkout right now. Please try again in a moment."
           : getStandardErrorMessage(error, "Checkout is temporarily unavailable"),
       );
     },
@@ -191,14 +218,34 @@ function SubscribePage() {
 
   useEffect(() => {
     if (search.checkout === "success") {
-      const activeOrderId = search.orderId || search.token;
-      if (activeOrderId && ltdCapture.isIdle) {
-        ltdCapture.mutate(activeOrderId);
-      } else if (search.subscriptionId && verify.isIdle) {
-        verify.mutate(search.subscriptionId);
+      if (
+        search.sessionId ||
+        search.provider === "dodo" ||
+        (!search.orderId && !search.subscriptionId)
+      ) {
+        if (dodoVerify.isIdle) {
+          dodoVerify.mutate(search.sessionId);
+        }
+      } else {
+        const activeOrderId = search.orderId || search.token;
+        if (activeOrderId && ltdCapture.isIdle) {
+          ltdCapture.mutate(activeOrderId);
+        } else if (search.subscriptionId && verify.isIdle) {
+          verify.mutate(search.subscriptionId);
+        }
       }
     }
-  }, [search.checkout, search.orderId, search.token, search.subscriptionId, ltdCapture, verify]);
+  }, [
+    search.checkout,
+    search.sessionId,
+    search.provider,
+    search.orderId,
+    search.token,
+    search.subscriptionId,
+    dodoVerify,
+    ltdCapture,
+    verify,
+  ]);
 
   useEffect(() => {
     if (!shouldReturnToWorkspace) return;
@@ -284,10 +331,10 @@ function SubscribePage() {
         </div>
       ) : null}
 
-      {search.checkout === "success" && (ltdCapture.isPending || verify.isPending) ? (
+      {search.checkout === "success" && (dodoVerify.isPending || ltdCapture.isPending || verify.isPending) ? (
         <div className="alert alert-info mx-auto max-w-3xl text-sm flex items-center justify-center gap-2">
           <span className="loading loading-spinner loading-xs" />
-          <span>Verifying your PayPal payment…</span>
+          <span>Verifying your payment…</span>
         </div>
       ) : null}
 
@@ -363,10 +410,10 @@ function SubscribePage() {
                 ) : (
                   <Zap className="size-4" />
                 )}
-                Pay Now (${ltdPriceDollars} One-Time via PayPal)
+                Pay Now (${ltdPriceDollars} One-Time via Dodo Payments)
               </button>
               <p className="mt-2 text-center text-[11px] text-base-content/50">
-                Instant access right after payment. No monthly bills ever.
+                Cards, Apple Pay, Google Pay supported. Instant access right after payment.
               </p>
             </div>
           </div>
@@ -470,7 +517,7 @@ function SubscribePage() {
 
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-base-content/60 pt-4">
         <span className="inline-flex items-center gap-1.5">
-          <Lock className="size-3.5" /> Encrypted and safe PayPal checkout
+          <Lock className="size-3.5" /> Encrypted and secure checkout via Dodo Payments (Cards, Apple Pay, Google Pay)
         </span>
         <span className="inline-flex items-center gap-1.5">
           <Sparkles className="size-3.5 text-primary" /> Instant access right after purchase

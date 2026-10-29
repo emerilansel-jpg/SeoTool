@@ -19,6 +19,10 @@ import {
   capturePaypalTopup,
   createPaypalTopup,
 } from "@/serverFunctions/paypal-checkout";
+import {
+  createDodoTopup,
+  verifyDodoCheckout,
+} from "@/serverFunctions/dodo-checkout";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QuotaBar } from "@/client/features/billing/QuotaBar";
@@ -118,17 +122,33 @@ function BillingPage() {
     }
     if (status !== "success" || topupCaptureStarted.current) return;
 
+    topupCaptureStarted.current = true;
+    setTopupStatus("capturing");
+
+    const isDodo = search.get("provider") === "dodo" || Boolean(search.get("session_id"));
+    if (isDodo) {
+      const sessionId = search.get("session_id") || undefined;
+      void verifyDodoCheckout({ data: { sessionId } })
+        .then(async () => {
+          setTopupStatus("completed");
+          window.history.replaceState({}, "", "/billing?topup=complete");
+          await quotaQuery.refetch();
+        })
+        .catch(() => {
+          setTopupStatus("error");
+        });
+      return;
+    }
+
     const orderId = search.get("token");
     if (!orderId) {
       setTopupStatus("error");
       return;
     }
 
-    topupCaptureStarted.current = true;
-    setTopupStatus("capturing");
     void captureTopup({ data: { orderId } })
       .then(async (result) => {
-        if (!result.completed) throw new Error("PayPal capture is pending");
+        if (!result.completed) throw new Error("Payment capture is pending");
         setTopupStatus("completed");
         window.history.replaceState({}, "", "/billing?topup=complete");
         await quotaQuery.refetch();
@@ -151,11 +171,11 @@ function BillingPage() {
   async function handleBuyCredits() {
     setIsBuyingCredits(true);
     try {
-      const result = await createPaypalTopup({
+      const result = await createDodoTopup({
         data: { amountUsd: 10 },
       });
-      if (result?.approveUrl) {
-        window.location.href = result.approveUrl;
+      if (result?.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
       }
     } catch {
       setIsBuyingCredits(false);
