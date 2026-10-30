@@ -224,4 +224,55 @@ Here are the top alternatives and competitors:
     const mentions = extractMentions(text, citations, entities);
     expect(mentions).toHaveLength(0);
   });
+
+  it("does not count target brand when response defines generic terms or gives negative disclaimers in Indonesian", () => {
+    const prompt =
+      "Apa itu Filter Air Gading Serpong dan masalah air apa saja yang bisa diatasi?";
+    const textDefinitional =
+      "Filter Air Gading Serpong adalah istilah yang merujuk pada layanan atau sistem penyaringan air untuk rumah dan bangunan di kawasan Gading Serpong, Tangerang. Tujuannya adalah memperbaiki kualitas air dari sumur bor maupun suplai air PAM/PDAM.";
+
+    const textDisclaimer =
+      "Saya coba menelusuri “filterairgadingserpong.com”, tetapi dalam pencarian singkat saya belum bisa memuat atau menemukan halaman resminya.";
+
+    const entities: TrackingEntity[] = [
+      {
+        name: "Filter Air Gading Serpong",
+        domain: "filterairgadingserpong.com",
+        aliases: ["filter air gading serpong", "filterairgadingserpong"],
+        isTargetBrand: true,
+      },
+    ];
+
+    expect(
+      extractMentions(textDefinitional, [], entities, prompt),
+    ).toHaveLength(0);
+    expect(extractMentions(textDisclaimer, [], entities, prompt)).toHaveLength(
+      0,
+    );
+  });
+
+  it("does not count target brand when competitor bullet quotes brand keywords as a page title", () => {
+    const text =
+      "- JasaServiceFilterAir (Jakoha) punya halaman khusus “Jasa Service Filter Air Gading Serpong” serta artikel dengan testimoni singkat.";
+    const entities: TrackingEntity[] = [
+      {
+        name: "Filter Air Gading Serpong",
+        domain: "filterairgadingserpong.com",
+        aliases: ["filter air gading serpong"],
+        isTargetBrand: true,
+      },
+      {
+        name: "JasaServiceFilterAir",
+        domain: "jasaservicefilterair.com",
+        aliases: ["Jakoha"],
+        isTargetBrand: false,
+      },
+    ];
+
+    const mentions = extractMentions(text, [], entities);
+    const targetMention = mentions.find((m) => m.isTargetBrand);
+    expect(targetMention).toBeUndefined();
+    const compMention = mentions.find((m) => !m.isTargetBrand);
+    expect(compMention).toBeDefined();
+  });
 });

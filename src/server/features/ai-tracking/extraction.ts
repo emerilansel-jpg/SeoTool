@@ -221,21 +221,27 @@ export function isDomainMatch(
 }
 
 const NEGATIVE_DISCLAIMER_PATTERNS = [
-  /doesn'?t (?:show|mention|have|find|return) any specific (?:business|service|listing|result)/i,
-  /don'?t (?:show|mention|have|find|return) any specific (?:business|service|listing|result)/i,
-  /couldn'?t find (?:a |any )?(?:clear,? )?(?:official )?(?:business|listing|information|review|result)/i,
-  /could not find (?:a |any )?(?:clear,? )?(?:official )?(?:business|listing|information|review|result)/i,
-  /didn'?t (?:return|find) specific information about/i,
+  /doesn['’]?t (?:show|mention|have|find|return) any specific (?:business|service|listing|result)/i,
+  /don['’]?t (?:show|mention|have|find|return) any specific (?:business|service|listing|result)/i,
+  /couldn['’]?t find (?:a |any )?(?:clear,? )?(?:official |well[-‑]established )?(?:business|listing|information|review|result|profile|page|website)/i,
+  /could not find (?:a |any )?(?:clear,? )?(?:official |well[-‑]established )?(?:business|listing|information|review|result|profile|page|website)/i,
+  /didn['’]?t (?:return|find) specific information about/i,
   /did not (?:return|find) specific information about/i,
   /no clear,? official business listing/i,
   /none (?:that )?i found use that exact name/i,
   /no results? found for/i,
-  /unable to find (?:any )?(?:specific )?(?:information|business|listing)/i,
-  /tidak menemukan (?:adanya )?(?:bisnis|layanan|informasi|listing)/i,
-  /tidak ditemukan (?:adanya )?(?:bisnis|layanan|informasi|listing)/i,
-  /tidak ada (?:informasi|ulasan|listing|profil|bisnis) spesifik/i,
-  /belum menemukan informasi/i,
+  /unable to (?:find|verify|load|access) (?:any )?(?:specific )?(?:information|business|listing|detail|website|official)/i,
+  /tidak menemukan (?:adanya )?(?:bisnis|layanan|informasi|listing|situs|halaman)/i,
+  /tidak ditemukan (?:adanya )?(?:bisnis|layanan|informasi|listing|situs|halaman)/i,
+  /tidak ada (?:informasi|ulasan|listing|profil|bisnis|situs|agregator) spesifik/i,
+  /belum menemukan (?:informasi|halaman|situs|website)/i,
   /tidak terdaftar secara resmi/i,
+  /belum bisa (?:memuat|menemukan|verifikasi|memverifikasi)/i,
+  /tidak (?:bisa|dapat) (?:memuat|menemukan|memverifikasi)/i,
+  /belum bisa memverifikasi/i,
+  /bukan (?:satu|suatu)?\s*(?:merek|brand|perusahaan|entitas|pabrikan)/i,
+  /not a (?:specific|single)?\s*(?:brand|manufacturer|company|entity)/i,
+  /(?:literally means|formed from)/i,
 ];
 
 export function isNegativeDisclaimer(sentence: string): boolean {
@@ -253,6 +259,13 @@ const PREAMBLE_ECHO_PATTERNS = [
   /^(?:berdasarkan hasil pencarian,? )?["'“]?[^"'”]+["'”]? merujuk pada /i,
   /^(?:berikut (?:ini )?(?:adalah )?(?:beberapa )?(?:alternatif|kompetitor|pilihan) (?:selain|untuk))/i,
   /^(?:jika anda mencari alternatif)/i,
+  /^(?:singkatnya,? )?["'“]?[^"'”]+["'”]? (?:adalah istilah yang merujuk|biasanya merujuk|merupakan istilah yang merujuk|merujuk (?:ke|pada) (?:jasa\/penyedia|penyedia\/instalator|layanan|sistem|istilah|instalator))/i,
+  /^(?:ringkasnya,? )?[-–—\s]*["'“]?[^"'”]+["'”]? (?:biasanya merujuk|adalah istilah)/i,
+  /["'“]?[^"'”]+["'”]? adalah istilah yang merujuk/i,
+  /(?:adalah|merupakan) istilah yang merujuk/i,
+  /(?:biasanya |adalah istilah yang |hanya )?merujuk (?:ke|pada) (?:jasa|penyedia|layanan|sistem|istilah|instalator)/i,
+  /(?:selain|apart from|other than)\s+["'“]?[^"'”\s]+["'”]?/i,
+  /(?:it looks like|it appears to be) an? indonesian/i,
 ];
 
 export function isPreambleEcho(sentence: string, prompt?: string): boolean {
@@ -279,6 +292,22 @@ export function isPreambleEcho(sentence: string, prompt?: string): boolean {
   return false;
 }
 
+function isCompetitorBullet(
+  sentence: string,
+  competitorNames: string[],
+): boolean {
+  const bulletMatch =
+    /^(?:[-*•]|\d+[.)])\s+(?:\*\*)?([^:*–—\n(]+?)(?:\*\*)?(?:\s*\([^)]*\))?\s*(?:[:–—-]|\b(?:punya|memiliki|menawarkan|menyediakan|adalah|merupakan|merujuk|fokus|spesialis)\b)/i.exec(
+      sentence,
+    );
+  if (!bulletMatch) return false;
+  const subject = bulletMatch[1].toLowerCase().trim();
+  return competitorNames.some(
+    (c) =>
+      subject.includes(c.toLowerCase()) || c.toLowerCase().includes(subject),
+  );
+}
+
 /**
  * Find the most relevant sentence or snippet where the brand appears affirmatively.
  */
@@ -286,6 +315,7 @@ function findValidEvidenceSnippet(
   text: string,
   regex: RegExp,
   prompt?: string,
+  competitorNames?: string[],
 ): { evidence: string | null; hasValidMention: boolean } {
   const sentences = text.split(/(?<=[.!?])\s+|\n+/);
   let validSnippet: string | null = null;
@@ -294,10 +324,14 @@ function findValidEvidenceSnippet(
   for (const sentence of sentences) {
     const trimmed = sentence.trim();
     if (trimmed.length > 5 && regex.test(trimmed)) {
-      if (isNegativeDisclaimer(trimmed)) {
+      if (isNegativeDisclaimer(trimmed) || isPreambleEcho(trimmed, prompt)) {
         continue;
       }
-      if (isPreambleEcho(trimmed, prompt)) {
+      if (
+        competitorNames &&
+        competitorNames.length > 0 &&
+        isCompetitorBullet(trimmed, competitorNames)
+      ) {
         continue;
       }
       hasValidMention = true;
@@ -320,6 +354,9 @@ export function extractMentions(
   prompt?: string,
 ): ExtractedMention[] {
   const results: ExtractedMention[] = [];
+  const competitorNames = entities
+    .filter((e) => !e.isTargetBrand)
+    .map((e) => e.name);
 
   for (const entity of entities) {
     const keywords = [entity.name, entity.domain, ...entity.aliases];
@@ -329,6 +366,7 @@ export function extractMentions(
       text,
       regex,
       prompt,
+      entity.isTargetBrand ? competitorNames : undefined,
     );
 
     const matchingCitation = citations.find(
