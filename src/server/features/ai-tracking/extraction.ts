@@ -252,6 +252,7 @@ const NEGATIVE_DISCLAIMER_PATTERNS = [
   /no (?:reliable,? )?(?:independent )?(?:review|online|public)\s+(?:footprint|profile|listing|presence)\s+found/i,
   /^do you mean a (?:specific )?(?:company|business|social account|brand|service)/i,
   /try (?:the handle|searching|searching for)/i,
+  /if you (?:can )?share (?:the |a )?(?:exact |link |map )/i,
   /not a (?:specific|single)?\s*(?:brand|manufacturer|company|entity)/i,
   /(?:literally means|formed from)/i,
 ];
