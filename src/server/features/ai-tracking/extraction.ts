@@ -240,6 +240,10 @@ const NEGATIVE_DISCLAIMER_PATTERNS = [
   /tidak (?:bisa|dapat) (?:memuat|menemukan|memverifikasi)/i,
   /belum bisa memverifikasi/i,
   /bukan (?:satu|suatu)?\s*(?:merek|brand|perusahaan|entitas|pabrikan)/i,
+  /bukan (?:khusus )?(?:dari|milik|untuk)\b/i,
+  /bukan (?:merupakan )?(?:nama|merek|brand)\b/i,
+  /tampaknya bukan (?:nama )?(?:brand|merek)\b/i,
+  /melainkan istilah umum\b/i,
   /not a (?:specific|single)?\s*(?:brand|manufacturer|company|entity)/i,
   /(?:literally means|formed from)/i,
 ];
@@ -292,6 +296,28 @@ export function isPreambleEcho(sentence: string, prompt?: string): boolean {
   return false;
 }
 
+function isOnlyInsideOtherDomainUrl(
+  text: string,
+  brandRegex: RegExp,
+  targetDomain?: string,
+): boolean {
+  if (!targetDomain) return false;
+  const cleanTarget = targetDomain.toLowerCase().replace(/^www\./, "");
+  const urlRegex = /https?:\/\/[^\s)"'>]+/gi;
+  const stripped = text.replace(urlRegex, (url) => {
+    try {
+      const u = new URL(url);
+      if (u.hostname.toLowerCase().includes(cleanTarget)) {
+        return url;
+      }
+      return "[EXTERNAL_URL]";
+    } catch {
+      return "[EXTERNAL_URL]";
+    }
+  });
+  return !brandRegex.test(stripped) && brandRegex.test(text);
+}
+
 function isCompetitorBullet(
   sentence: string,
   competitorNames: string[],
@@ -316,6 +342,7 @@ function findValidEvidenceSnippet(
   regex: RegExp,
   prompt?: string,
   competitorNames?: string[],
+  targetDomain?: string,
 ): { evidence: string | null; hasValidMention: boolean } {
   const sentences = text.split(/(?<=[.!?])\s+|\n+/);
   let validSnippet: string | null = null;
@@ -324,7 +351,11 @@ function findValidEvidenceSnippet(
   for (const sentence of sentences) {
     const trimmed = sentence.trim();
     if (trimmed.length > 5 && regex.test(trimmed)) {
-      if (isNegativeDisclaimer(trimmed) || isPreambleEcho(trimmed, prompt)) {
+      if (
+        isNegativeDisclaimer(trimmed) ||
+        isPreambleEcho(trimmed, prompt) ||
+        isOnlyInsideOtherDomainUrl(trimmed, regex, targetDomain)
+      ) {
         continue;
       }
       if (
@@ -367,6 +398,7 @@ export function extractMentions(
       regex,
       prompt,
       entity.isTargetBrand ? competitorNames : undefined,
+      entity.domain,
     );
 
     const matchingCitation = citations.find(

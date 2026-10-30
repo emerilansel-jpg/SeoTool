@@ -59,21 +59,6 @@ async function main() {
         .from(projectCompetitors)
         .where(eq(projectCompetitors.projectId, config.projectId));
 
-      const entities: TrackingEntity[] = [
-        {
-          name: config.brandName,
-          domain: config.domain,
-          aliases: brandAliases,
-          isTargetBrand: true,
-        },
-        ...rawComps.map((c) => ({
-          name: c.domain.replace(/\.[^.]+$/, ""),
-          domain: c.domain,
-          aliases: [],
-          isTargetBrand: false,
-        })),
-      ];
-
       const obsList = await db
         .select()
         .from(aiTrackingObservations)
@@ -87,6 +72,31 @@ async function main() {
         .select()
         .from(aiTrackingCitations)
         .where(inArray(aiTrackingCitations.observationId, obsIds));
+
+      const competitorDomainSet = new Set<string>();
+      for (const c of rawComps) {
+        competitorDomainSet.add(c.domain.toLowerCase().trim());
+      }
+      for (const cit of allCitations) {
+        if (!cit.isTargetBrand && cit.domain) {
+          competitorDomainSet.add(cit.domain.toLowerCase().trim());
+        }
+      }
+
+      const entities: TrackingEntity[] = [
+        {
+          name: config.brandName,
+          domain: config.domain,
+          aliases: brandAliases,
+          isTargetBrand: true,
+        },
+        ...Array.from(competitorDomainSet).map((d) => ({
+          name: d.replace(/\.[^.]+$/, ""),
+          domain: d,
+          aliases: [],
+          isTargetBrand: false,
+        })),
+      ];
 
       const citationsByObs = new Map<string, typeof allCitations>();
       for (const c of allCitations) {
