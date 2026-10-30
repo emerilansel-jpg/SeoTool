@@ -1,76 +1,14 @@
-const POSITIVE_WORDS = new Set([
-  "best",
-  "great",
-  "excellent",
-  "top",
-  "leading",
-  "powerful",
-  "affordable",
-  "budget",
-  "recommended",
-  "popular",
-  "trusted",
-  "effective",
-  "intuitive",
-  "reliable",
-  "good",
-  "easy",
-  "standout",
-  "solid",
-  "favorite",
-  "efficient",
-  "comprehensive",
-  "solution",
-  "solutions",
-  "specializes",
-  "specialized",
-  "features",
-  "robust",
-  "streamline",
-  "ideal",
-  "suitable",
-  "professional",
-  "fast",
-  "accurate",
-  "advanced",
-  "terbaik",
-  "bagus",
-  "rekomendasi",
-  "unggul",
-  "unggulan",
-  "efektif",
-  "solusi",
-  "lengkap",
-  "murah",
-  "andal",
-  "terpercaya",
-]);
+const POSITIVE_WORDS = new Set(
+  "best great excellent top leading powerful affordable budget recommended popular trusted effective intuitive reliable good easy standout solid favorite efficient comprehensive solution solutions specializes specialized features robust streamline ideal suitable professional fast accurate advanced terbaik bagus rekomendasi unggul unggulan efektif solusi lengkap murah andal terpercaya".split(
+    " ",
+  ),
+);
 
-const NEGATIVE_WORDS = new Set([
-  "poor",
-  "slow",
-  "expensive",
-  "complex",
-  "difficult",
-  "buggy",
-  "lacks",
-  "limited",
-  "downside",
-  "drawback",
-  "issue",
-  "worst",
-  "confusing",
-  "steep",
-  "outdated",
-  "clunky",
-  "buruk",
-  "lambat",
-  "mahal",
-  "sulit",
-  "kekurangan",
-  "masalah",
-  "kecewa",
-]);
+const NEGATIVE_WORDS = new Set(
+  "poor slow expensive complex difficult buggy lacks limited downside drawback issue worst confusing steep outdated clunky buruk lambat mahal sulit kekurangan masalah kecewa".split(
+    " ",
+  ),
+);
 
 export interface TrackingEntity {
   name: string;
@@ -276,6 +214,10 @@ const PREAMBLE_ECHO_PATTERNS = [
   /^(?:ringkasnya,? )?[-–—\s]*["'“]?[^"'”]+["'”]? (?:biasanya merujuk|adalah istilah)/i,
   /["'“]?[^"'”]+["'”]? adalah istilah yang merujuk/i,
   /(?:adalah|merupakan) istilah yang merujuk/i,
+  /^(?:berdasarkan hasil pencarian,?\s*)?(?:\*\*|#|\s)*["'“]?[^"'”\n]+["'”]?\s*(?:\*\*)?\s*(?:adalah|merupakan|merujuk pada|merujuk ke|biasanya merujuk|is a|refers to|stands for)\s+(?:layanan|jasa|produk|sistem|istilah|istilah umum|solusi|penyedia|kategori|sebutan)\b/i,
+  /(?:adalah|merupakan)\s+(?:istilah|istilah umum|kategori|sebutan)\b/i,
+  /merujuk (?:ke|pada)\s+(?:istilah|istilah umum|kategori|sebutan)\b/i,
+  /(?:adalah|merupakan|is|refers to|merujuk pada|merujuk ke)$/i,
   /(?:biasanya |adalah istilah yang |hanya )?merujuk (?:ke|pada) (?:jasa|penyedia|layanan|sistem|istilah|instalator)/i,
   /(?:selain|apart from|other than)\s+["'“]?[^"'”\s]+["'”]?/i,
   /(?:it looks like|it appears to be) an? indonesian/i,
@@ -377,6 +319,9 @@ function findValidEvidenceSnippet(
   for (const sentence of sentences) {
     const trimmed = sentence.trim();
     if (trimmed.length > 5 && regex.test(trimmed)) {
+      if (/^#+\s+/m.test(trimmed)) {
+        continue;
+      }
       if (
         isNegativeDisclaimer(trimmed) ||
         isPreambleEcho(trimmed, prompt) ||
