@@ -244,6 +244,11 @@ const NEGATIVE_DISCLAIMER_PATTERNS = [
   /bukan (?:merupakan )?(?:nama|merek|brand)\b/i,
   /tampaknya bukan (?:nama )?(?:brand|merek)\b/i,
   /melainkan istilah umum\b/i,
+  /aren['’]?t tied to\b/i,
+  /not tied to\b/i,
+  /use (?:that|this) phrase\b/i,
+  /generic\s+["'“][^"'”]+["'”]/i,
+  /coba telusuri ulang untuk menemukan/i,
   /not a (?:specific|single)?\s*(?:brand|manufacturer|company|entity)/i,
   /(?:literally means|formed from)/i,
 ];
@@ -318,6 +323,23 @@ function isOnlyInsideOtherDomainUrl(
   return !brandRegex.test(stripped) && brandRegex.test(text);
 }
 
+function bulletBelongsToOtherDomain(
+  text: string,
+  targetDomain?: string,
+): boolean {
+  if (!targetDomain) return false;
+  const cleanTarget = targetDomain.toLowerCase().replace(/^www\./, "");
+  const domainInParenMatch =
+    /\(([a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?)\)/.exec(text);
+  if (domainInParenMatch) {
+    const domain = domainInParenMatch[1].toLowerCase().replace(/^www\./, "");
+    if (!domain.includes(cleanTarget) && !cleanTarget.includes(domain)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function isCompetitorBullet(
   sentence: string,
   competitorNames: string[],
@@ -354,7 +376,8 @@ function findValidEvidenceSnippet(
       if (
         isNegativeDisclaimer(trimmed) ||
         isPreambleEcho(trimmed, prompt) ||
-        isOnlyInsideOtherDomainUrl(trimmed, regex, targetDomain)
+        isOnlyInsideOtherDomainUrl(trimmed, regex, targetDomain) ||
+        bulletBelongsToOtherDomain(trimmed, targetDomain)
       ) {
         continue;
       }
