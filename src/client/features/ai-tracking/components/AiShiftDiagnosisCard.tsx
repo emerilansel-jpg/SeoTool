@@ -29,7 +29,7 @@ export function AiShiftDiagnosisCard({ diagnosis }: Props) {
                 Why AI Visibility Shifted
               </h3>
               <span className="badge badge-primary badge-xs sm:badge-sm font-semibold gap-1">
-                <Sparkles className="size-2.5" /> Trackings.ai Diagnosis
+                <Sparkles className="size-2.5" /> AI Engine Diagnosis
               </span>
             </div>
             <p className="text-xs text-base-content/60">

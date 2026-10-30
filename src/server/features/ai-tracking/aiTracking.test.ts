@@ -553,7 +553,7 @@ describe("aggregateDashboardMetrics", () => {
       expect(citabilityAlert?.title).toContain("Passage Citability");
     });
 
-    it("generates Trackings.ai shift diagnosis, head-to-head records, and primary pick metrics", () => {
+    it("generates AI shift diagnosis, head-to-head records, and primary pick metrics", () => {
       const prompt1 = {
         id: "p-1",
         configId: "cfg-1",

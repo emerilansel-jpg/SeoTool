@@ -112,7 +112,7 @@ export function AiTrackingPromptsTable({
           <h3 className="font-semibold text-base text-base-content flex items-center gap-2">
             Tracked AI Prompts
             <span className="badge badge-sm badge-outline text-[11px] font-medium text-base-content/60">
-              Trackings.ai Diagnostics
+              AI Diagnostics
             </span>
           </h3>
           <p className="text-xs text-base-content/60">

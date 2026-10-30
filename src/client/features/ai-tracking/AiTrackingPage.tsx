@@ -296,7 +296,7 @@ export function AiTrackingPage({ projectId }: Props) {
               {/* Profound Pillar 4: Time-Series Alerts & Signals Banner */}
               <AiProfoundAlertsBanner alerts={data.profoundAlerts ?? []} />
 
-              {/* Trackings.ai Signature: Why AI Visibility Shifted Diagnostic */}
+              {/* Root-cause AI Visibility Shift Diagnosis */}
               <AiShiftDiagnosisCard diagnosis={data.shiftDiagnosis} />
 
               {/* Discovery Summary Card */}
@@ -338,14 +338,14 @@ export function AiTrackingPage({ projectId }: Props) {
                 llmMetrics={data.llmMetrics ?? []}
               />
 
-              {/* Trackings.ai Signature: 4-Engine Multi-Model Matrix */}
+              {/* 4-Engine Multi-Model Matrix */}
               <AiMultiEngineMatrix
                 llmMetrics={data.llmMetrics ?? []}
                 selectedPlatform={selectedPlatform}
                 onSelectPlatform={setSelectedPlatform}
               />
 
-              {/* Trackings.ai Signature: Head-to-Head Win-Loss Matrix */}
+              {/* Head-to-Head Win-Loss Matrix */}
               <AiHeadToHeadCard
                 headToHead={data.headToHead ?? []}
                 brandName={config.brandName}

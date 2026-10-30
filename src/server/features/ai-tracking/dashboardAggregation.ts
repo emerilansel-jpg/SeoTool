@@ -654,7 +654,7 @@ export function aggregateDashboardMetrics(params: {
         b.standaloneWins - a.standaloneWins,
     );
 
-  // 5. Head-to-Head Win/Loss/Tie vs Competitors (Trackings.ai Head-to-Head Matrix)
+  // 5. Head-to-Head Win/Loss/Tie vs Competitors (Competitive Positioning Matrix)
   const nonTargetEntities = Array.from(entityStats.values()).filter(
     (e) => !e.isTargetBrand,
   );
@@ -716,7 +716,7 @@ export function aggregateDashboardMetrics(params: {
     .filter((h) => h.totalPromptsCompared > 0)
     .toSorted((a, b) => b.totalPromptsCompared - a.totalPromptsCompared);
 
-  // 6. Why Rankings Shifted (Trackings.ai Root-Cause Shift Diagnosis)
+  // 6. Why Rankings Shifted (Root-Cause Shift Diagnosis)
   const overallCitationRate =
     totalResponses > 0
       ? Math.round((totalTargetCitations / totalResponses) * 100)
