@@ -249,6 +249,9 @@ const NEGATIVE_DISCLAIMER_PATTERNS = [
   /use (?:that|this) phrase\b/i,
   /generic\s+["'“][^"'”]+["'”]/i,
   /coba telusuri ulang untuk menemukan/i,
+  /no (?:reliable,? )?(?:independent )?(?:review|online|public)\s+(?:footprint|profile|listing|presence)\s+found/i,
+  /^do you mean a (?:specific )?(?:company|business|social account|brand|service)/i,
+  /try (?:the handle|searching|searching for)/i,
   /not a (?:specific|single)?\s*(?:brand|manufacturer|company|entity)/i,
   /(?:literally means|formed from)/i,
 ];
