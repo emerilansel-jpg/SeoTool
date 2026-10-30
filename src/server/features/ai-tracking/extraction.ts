@@ -219,6 +219,8 @@ const PREAMBLE_ECHO_PATTERNS = [
   /merujuk (?:ke|pada)\s+(?:istilah|istilah umum|kategori|sebutan)\b/i,
   /(?:adalah|merupakan|is|refers to|merujuk pada|merujuk ke)$/i,
   /(?:biasanya |adalah istilah yang |hanya )?merujuk (?:ke|pada) (?:jasa|penyedia|layanan|sistem|istilah|instalator)/i,
+  /(?:dapat|bisa) mengatasi (?:berbagai )?masalah/i,
+  /(?:antara lain|sebagai berikut):?$/i,
   /(?:selain|apart from|other than)\s+["'“]?[^"'”\s]+["'”]?/i,
   /(?:it looks like|it appears to be) an? indonesian/i,
 ];
