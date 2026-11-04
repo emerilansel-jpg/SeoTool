@@ -25,6 +25,15 @@ const mapsItemSchema = z
     category: z.string().nullable().optional(),
     domain: z.string().nullable().optional(),
     url: z.string().nullable().optional(),
+    phone: z.string().nullable().optional(),
+    rating: z
+      .object({
+        value: z.number().nullable().optional(),
+        votes_count: z.number().nullable().optional(),
+      })
+      .passthrough()
+      .nullable()
+      .optional(),
     latitude: z.number().nullable().optional(),
     longitude: z.number().nullable().optional(),
     gps_coordinates: z
@@ -196,6 +205,14 @@ export async function fetchMapsTaskResult(input: {
       category: it.category ?? null,
       domain: it.domain ?? null,
       url: it.url ?? null,
+      phone: it.phone ?? null,
+      rating:
+        it.rating?.value != null
+          ? {
+              value: it.rating.value,
+              votes_count: it.rating.votes_count ?? 0,
+            }
+          : null,
     }));
 
   return {
