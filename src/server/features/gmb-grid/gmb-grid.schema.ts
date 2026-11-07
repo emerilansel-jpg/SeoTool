@@ -49,3 +49,7 @@ export const GetGmbGridReportSchema = z.object({
   projectId: z.string().min(1),
   days: z.coerce.number().int().min(1).max(365).optional().default(30),
 });
+
+export const ResolveGoogleMapsUrlSchema = z.object({
+  url: z.string().trim().min(5).max(2000),
+});

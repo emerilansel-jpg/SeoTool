@@ -9,6 +9,8 @@ import {
   LOCATION_OPTIONS,
 } from "@/shared/keyword-locations";
 import { useProjectMarket } from "@/client/features/projects/useProjectMarket";
+import { isGoogleMapsUrl } from "@/shared/google-maps-url";
+import { GmbManualEntryForm } from "./GmbManualEntryForm";
 
 export interface GmbProfileSelection {
   businessName: string;
@@ -61,13 +63,7 @@ export function GmbProfileSearch({
   const searchProfiles = useServerFn(searchGmbProfiles);
   const [query, setQuery] = useState("");
   const [showManual, setShowManual] = useState(false);
-
-  // Manual entry fields
-  const [manualName, setManualName] = useState("");
-  const [manualPlaceId, setManualPlaceId] = useState("");
-  const [manualLat, setManualLat] = useState("");
-  const [manualLng, setManualLng] = useState("");
-  const [manualAddress, setManualAddress] = useState("");
+  const [pendingUrl, setPendingUrl] = useState("");
 
   const search = useMutation({
     mutationFn: () =>
@@ -80,28 +76,12 @@ export function GmbProfileSearch({
       }),
   });
 
-  const handleManualSubmit = () => {
-    const lat = parseFloat(manualLat);
-    const lng = parseFloat(manualLng);
-    if (
-      !manualName.trim() ||
-      !manualPlaceId.trim() ||
-      isNaN(lat) ||
-      isNaN(lng)
-    ) {
-      return;
+  const handleQueryChange = (val: string) => {
+    setQuery(val);
+    if (isGoogleMapsUrl(val)) {
+      setPendingUrl(val.trim());
+      setShowManual(true);
     }
-    onSelect({
-      businessName: manualName.trim(),
-      placeId: manualPlaceId.trim(),
-      cid: null,
-      address: manualAddress.trim() || null,
-      category: null,
-      domain: null,
-      url: null,
-      lat,
-      lng,
-    });
   };
 
   return (
@@ -113,87 +93,23 @@ export function GmbProfileSearch({
         <button
           type="button"
           onClick={() => setShowManual((prev) => !prev)}
-          className="text-xs text-primary hover:underline"
+          className="text-xs text-primary hover:underline font-medium"
         >
-          {showManual ? "Search Google Maps" : "Manual entry"}
+          {showManual ? "Search by Name" : "Manual / URL entry"}
         </button>
       </div>
 
       {showManual ? (
-        <div className="space-y-3 rounded-lg border border-base-300 bg-base-200/40 p-3 text-sm">
-          <p className="text-xs text-base-content/70">
-            Specify business details and coordinates directly if not found via
-            search.
-          </p>
-          <label className="form-control gap-1">
-            <span className="text-xs font-medium">Business Name</span>
-            <input
-              value={manualName}
-              onChange={(e) => setManualName(e.target.value)}
-              placeholder="e.g. The Grove"
-              className="input input-sm input-bordered w-full"
-            />
-          </label>
-          <label className="form-control gap-1">
-            <span className="text-xs font-medium">Google Place ID</span>
-            <input
-              value={manualPlaceId}
-              onChange={(e) => setManualPlaceId(e.target.value)}
-              placeholder="e.g. ChIJ..."
-              className="input input-sm input-bordered w-full"
-            />
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            <label className="form-control gap-1">
-              <span className="text-xs font-medium">Latitude</span>
-              <input
-                type="number"
-                step="any"
-                value={manualLat}
-                onChange={(e) => setManualLat(e.target.value)}
-                placeholder="34.072"
-                className="input input-sm input-bordered w-full"
-              />
-            </label>
-            <label className="form-control gap-1">
-              <span className="text-xs font-medium">Longitude</span>
-              <input
-                type="number"
-                step="any"
-                value={manualLng}
-                onChange={(e) => setManualLng(e.target.value)}
-                placeholder="-118.358"
-                className="input input-sm input-bordered w-full"
-              />
-            </label>
-          </div>
-          <label className="form-control gap-1">
-            <span className="text-xs font-medium">Address (optional)</span>
-            <input
-              value={manualAddress}
-              onChange={(e) => setManualAddress(e.target.value)}
-              placeholder="189 The Grove Dr, Los Angeles, CA 90036"
-              className="input input-sm input-bordered w-full"
-            />
-          </label>
-          <button
-            type="button"
-            disabled={
-              !manualName.trim() ||
-              !manualPlaceId.trim() ||
-              !manualLat.trim() ||
-              !manualLng.trim()
-            }
-            onClick={handleManualSubmit}
-            className="btn btn-sm btn-primary w-full"
-          >
-            Apply Target Listing
-          </button>
-        </div>
+        <GmbManualEntryForm
+          initialUrl={pendingUrl}
+          onSelect={(profile) => {
+            onSelect(profile);
+          }}
+        />
       ) : (
         <>
-          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center">
-            <span className="text-xs font-medium text-base-content/70 sm:w-28 shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-base-content/60 shrink-0">
               Target Country:
             </span>
             <div className="flex-1">
@@ -210,14 +126,19 @@ export function GmbProfileSearch({
               <input
                 id="gmb-profile-query"
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => handleQueryChange(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
                     event.preventDefault();
-                    if (query.trim().length >= 3) search.mutate();
+                    if (isGoogleMapsUrl(query)) {
+                      setPendingUrl(query.trim());
+                      setShowManual(true);
+                    } else if (query.trim().length >= 3) {
+                      search.mutate();
+                    }
                   }
                 }}
-                placeholder="Business name and city"
+                placeholder="Business name, city, or Google Maps URL"
                 className="min-w-0 grow"
                 autoComplete="off"
               />
@@ -226,7 +147,14 @@ export function GmbProfileSearch({
               type="button"
               className="btn btn-primary join-item"
               disabled={query.trim().length < 3 || search.isPending}
-              onClick={() => search.mutate()}
+              onClick={() => {
+                if (isGoogleMapsUrl(query)) {
+                  setPendingUrl(query.trim());
+                  setShowManual(true);
+                } else {
+                  search.mutate();
+                }
+              }}
             >
               {search.isPending ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -236,8 +164,8 @@ export function GmbProfileSearch({
             </button>
           </div>
           <p className="text-xs text-base-content/60">
-            Select the exact listing. Ranking is matched by Google Place ID, not
-            by a similar business name.
+            Select the exact listing or paste a Google Maps URL. Ranking is
+            matched by Google Place ID and CID.
           </p>
 
           {search.isError && (
@@ -252,9 +180,16 @@ export function GmbProfileSearch({
                 No matching listings found in {activeCountry}.
               </p>
               <p className="text-xs text-base-content/70">
-                Make sure the Target Country above matches where the business is
-                located, or append the city name (e.g. &ldquo;The Grove Los
-                Angeles&rdquo;).
+                Make sure the Target Country matches where the business is
+                located, or switch to{" "}
+                <button
+                  type="button"
+                  onClick={() => setShowManual(true)}
+                  className="text-primary underline font-medium"
+                >
+                  Manual / URL entry
+                </button>{" "}
+                to paste the direct Google Maps link.
               </p>
             </div>
           )}
@@ -279,16 +214,19 @@ export function GmbProfileSearch({
                     ) : (
                       <MapPin className="mt-0.5 size-5 shrink-0 text-primary" />
                     )}
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold">
-                        {profile.businessName}
-                      </span>
-                      <span className="block text-xs text-base-content/60">
-                        {[profile.category, profile.address]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </span>
-                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">{profile.businessName}</p>
+                      {profile.address && (
+                        <p className="truncate text-xs text-base-content/70">
+                          {profile.address}
+                        </p>
+                      )}
+                      {profile.category && (
+                        <span className="badge badge-xs badge-ghost mt-1 font-normal text-base-content/70">
+                          {profile.category}
+                        </span>
+                      )}
+                    </div>
                   </button>
                 );
               })}

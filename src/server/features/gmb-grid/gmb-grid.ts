@@ -1,3 +1,8 @@
+import {
+  normalizeCid,
+  extractCidFromFeatureId,
+} from "@/shared/google-maps-url";
+
 export const GMB_STANDARD_TASK_COST_USD = 0.0006;
 
 export function estimateGmbGridCost(gridSize: number) {
@@ -33,12 +38,19 @@ export function findGmbRank(
   items: GmbMapItem[],
   target: { placeId: string; businessName: string; cid?: string | null },
 ): number | null {
-  const exact = items.find(
-    (item) =>
-      item.type === "maps_search" &&
-      ((Boolean(target.placeId) && item.place_id === target.placeId) ||
-        (Boolean(target.cid) && item.cid === target.cid)),
-  );
+  const targetCidNorm =
+    normalizeCid(target.cid) ?? extractCidFromFeatureId(target.placeId);
+
+  const exact = items.find((item) => {
+    if (item.type !== "maps_search") return false;
+    if (target.placeId && item.place_id === target.placeId) return true;
+    if (targetCidNorm) {
+      const itemCidNorm =
+        normalizeCid(item.cid) ?? extractCidFromFeatureId(item.place_id);
+      if (itemCidNorm && itemCidNorm === targetCidNorm) return true;
+    }
+    return false;
+  });
   if (exact) return exact.rank_group ?? exact.rank_absolute ?? null;
 
   // Place ID or CID is the stable identity. Name matching is intentionally limited
