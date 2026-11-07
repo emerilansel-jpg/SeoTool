@@ -136,7 +136,7 @@ export function GmbManualEntryForm({
         </span>
       </div>
 
-      <label className="form-control gap-1">
+      <div className="form-control gap-1">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-primary flex items-center gap-1.5">
             <Link2 className="size-3.5" /> Google Maps URL
@@ -147,12 +147,33 @@ export function GmbManualEntryForm({
             </span>
           )}
         </div>
-        <input
-          value={manualUrl}
-          onChange={(e) => void handleUrlChange(e.target.value)}
-          placeholder="https://www.google.com/maps/place/... or maps.app.goo.gl/..."
-          className="input input-sm input-bordered w-full font-mono text-xs focus:input-primary"
-        />
+        <div className="join w-full">
+          <input
+            value={manualUrl}
+            onChange={(e) => void handleUrlChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                void handleUrlChange(manualUrl);
+              }
+            }}
+            placeholder="https://www.google.com/maps/place/... or maps.app.goo.gl/..."
+            className="input input-sm input-bordered join-item w-full font-mono text-xs focus:input-primary"
+          />
+          <button
+            type="button"
+            disabled={!manualUrl.trim() || isResolvingUrl}
+            onClick={() => void handleUrlChange(manualUrl)}
+            className="btn btn-sm btn-primary join-item shrink-0 gap-1 font-semibold"
+          >
+            {isResolvingUrl ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="size-3.5" />
+            )}
+            Submit URL
+          </button>
+        </div>
         {urlMessage && (
           <p
             className={`text-[11px] mt-1 font-medium ${
@@ -164,7 +185,7 @@ export function GmbManualEntryForm({
             {urlMessage}
           </p>
         )}
-      </label>
+      </div>
 
       <div className="divider my-0 text-[10px] text-base-content/40 uppercase">
         Business Details
