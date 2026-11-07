@@ -1,19 +1,9 @@
-// oxlint-disable
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+// oxlint-disable max-lines, max-lines-per-function
+import { useEffect, useState, type FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  Clock3,
-  Loader2,
-  MapPinned,
-  Play,
-  Zap,
-  Sparkles,
-  Map as MapIcon,
-  Trophy,
-  MousePointerClick,
-} from "lucide-react";
+import { Clock3, Loader2, MapPinned, Play, Zap } from "lucide-react";
 import { Modal } from "@/client/components/Modal";
 import {
   createGmbGridRun,
@@ -22,10 +12,7 @@ import {
   retryGmbGridFailedPins,
 } from "@/serverFunctions/gmb-grid";
 import type { CreateGmbGridInput } from "@/server/features/gmb-grid/gmb-grid.schema";
-import {
-  calculateGmbMetrics,
-  estimateGmbGridCost,
-} from "@/server/features/gmb-grid/gmb-grid";
+import { estimateGmbGridCost } from "@/server/features/gmb-grid/gmb-grid";
 import {
   DEFAULT_LOCATION_CODE,
   getDefaultLocationCoordinates,
@@ -37,15 +24,9 @@ import {
   type GmbProfileSelection,
 } from "./components/GmbProfileSearch";
 import { GmbScanPipeline } from "./components/GmbScanPipeline";
-import {
-  GmbMap,
-  type GmbPinFilter,
-  type GmbSnapshotMarker,
-} from "./components/GmbMap";
-import { GmbPinInspector } from "./components/GmbPinInspector";
-import { GmbCompetitorLeaderboard } from "./components/GmbCompetitorLeaderboard";
+import { GmbMap, type GmbSnapshotMarker } from "./components/GmbMap";
+import { PinCompetitorsModal } from "./components/GmbPinModal";
 import { GmbGridReportSection } from "./components/GmbGridReportSection";
-import { generateSampleDemoSnapshots } from "./gmbDemoData";
 
 type PendingScan = Omit<CreateGmbGridInput, "costConfirmed">;
 
@@ -74,8 +55,6 @@ export function GmbGridView({ projectId }: { projectId: string }) {
   const [selectedPin, setSelectedPin] = useState<GmbSnapshotMarker | null>(
     null,
   );
-  const [activeFilter, setActiveFilter] = useState<GmbPinFilter>("all");
-  const [viewTab, setViewTab] = useState<"map" | "competitors">("map");
   const [pendingScan, setPendingScan] = useState<PendingScan | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
 
@@ -83,13 +62,6 @@ export function GmbGridView({ projectId }: { projectId: string }) {
     queryKey: ["gmb-configs", projectId],
     queryFn: () => getConfigs({ data: { projectId } }),
   });
-
-  // Auto select latest run if none is active
-  useEffect(() => {
-    if (!activeRunId && configs?.[0]?.latestRun?.id) {
-      setActiveRunId(configs[0].latestRun.id);
-    }
-  }, [activeRunId, configs]);
 
   const { data: runData } = useQuery({
     queryKey: ["gmb-run", projectId, activeRunId],
@@ -200,37 +172,6 @@ export function GmbGridView({ projectId }: { projectId: string }) {
     runData?.config ?? selectedProfile ?? configs?.[0] ?? null;
   const hasSelection = Boolean(centerSource);
 
-  const isDemo = !runData && (!configs || configs.length === 0);
-
-  const demoSnapshots = useMemo(() => {
-    if (!isDemo) return [];
-    return generateSampleDemoSnapshots(
-      defaultCoords.lat,
-      defaultCoords.lng,
-      7,
-      4828,
-    );
-  }, [isDemo, defaultCoords.lat, defaultCoords.lng]);
-
-  const demoRun = useMemo(() => {
-    if (!isDemo) return null;
-    const metrics = calculateGmbMetrics(demoSnapshots);
-    return {
-      status: "completed" as const,
-      totalPoints: demoSnapshots.length,
-      completedPoints: demoSnapshots.length,
-      failedPoints: 0,
-      foundPoints: demoSnapshots.filter((s) => s.rank != null).length,
-      solv: metrics.solv,
-      averageRank: metrics.averageRank,
-      costUsd: 0.0294,
-      errorMessage: null,
-    };
-  }, [isDemo, demoSnapshots]);
-
-  const activeSnapshots = runData?.snapshots ?? (isDemo ? demoSnapshots : []);
-  const activeRun = runData?.run ?? (isDemo ? demoRun : null);
-
   const mapCenterLat = centerSource
     ? "centerLat" in centerSource
       ? centerSource.centerLat
@@ -242,52 +183,15 @@ export function GmbGridView({ projectId }: { projectId: string }) {
       : centerSource.lng
     : defaultCoords.lng;
   const mapRadius = runData?.config.radiusMeters ?? radiusMeters;
-
   const businessName = centerSource
     ? "businessName" in centerSource
       ? centerSource.businessName
       : ""
-    : isDemo
-      ? "Smile Bright Dental (Demo)"
-      : "";
-
-  // Filter counts
-  const ranks = activeSnapshots
-    .map((s) => s.rank)
-    .filter((r): r is number => r != null);
-  const top3Count = ranks.filter((r) => r <= 3).length;
-  const top10Count = ranks.filter((r) => r <= 10).length;
-  const rank11PlusCount = ranks.filter((r) => r > 10).length;
-  const notFoundCount = activeSnapshots.filter(
-    (s) => s.status === "completed" && s.rank === null,
-  ).length;
-
-  // Pin navigation
-  const currentPinIndex = selectedPin
-    ? activeSnapshots.findIndex((s) => s.id === selectedPin.id)
-    : -1;
-
-  const handlePrevPin = () => {
-    if (currentPinIndex > 0) {
-      setSelectedPin(activeSnapshots[currentPinIndex - 1]);
-    } else if (activeSnapshots.length > 0) {
-      setSelectedPin(activeSnapshots[activeSnapshots.length - 1]);
-    }
-  };
-
-  const handleNextPin = () => {
-    if (currentPinIndex >= 0 && currentPinIndex < activeSnapshots.length - 1) {
-      setSelectedPin(activeSnapshots[currentPinIndex + 1]);
-    } else if (activeSnapshots.length > 0) {
-      setSelectedPin(activeSnapshots[0]);
-    }
-  };
-
+    : "";
   return (
     <>
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        {/* LEFT COLUMN: SCAN SETTINGS */}
-        <aside className="rounded-xl border border-base-300 bg-base-100 p-5 xl:max-h-[860px] xl:overflow-y-auto">
+        <aside className="rounded-xl border border-base-300 bg-base-100 p-5 xl:max-h-[820px] xl:overflow-y-auto">
           <div className="mb-5 flex items-center gap-2">
             <MapPinned className="size-5 text-primary" />
             <h2 className="text-lg font-semibold">Scan settings</h2>
@@ -367,7 +271,6 @@ export function GmbGridView({ projectId }: { projectId: string }) {
                     </button>
                   </div>
                 </div>
-
                 <select
                   className="select select-bordered w-full"
                   value={radiusMeters}
@@ -470,19 +373,15 @@ export function GmbGridView({ projectId }: { projectId: string }) {
                 <Clock3 className="size-4" /> Recent scans
               </h3>
               <div className="space-y-2">
-                {configs.map((config) => (
+                {configs.slice(0, 8).map((config) => (
                   <button
-                    key={config.id}
                     type="button"
+                    key={config.id}
                     disabled={!config.latestRun}
                     onClick={() =>
                       config.latestRun && setActiveRunId(config.latestRun.id)
                     }
-                    className={`flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors ${
-                      config.latestRun?.id === activeRunId
-                        ? "border-primary bg-primary/5 shadow-xs"
-                        : "border-base-300 hover:bg-base-200"
-                    } disabled:opacity-50`}
+                    className="flex w-full items-center justify-between rounded-lg border border-base-300 p-3 text-left hover:bg-base-200 disabled:opacity-50"
                   >
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-medium">
@@ -494,15 +393,7 @@ export function GmbGridView({ projectId }: { projectId: string }) {
                       </span>
                     </span>
                     {config.latestRun && (
-                      <span
-                        className={`badge badge-sm uppercase font-mono ${
-                          config.latestRun.status === "completed"
-                            ? "badge-success"
-                            : config.latestRun.status === "running"
-                              ? "badge-primary"
-                              : "badge-ghost"
-                        }`}
-                      >
+                      <span className="badge badge-ghost badge-sm">
                         {config.latestRun.status}
                       </span>
                     )}
@@ -513,195 +404,37 @@ export function GmbGridView({ projectId }: { projectId: string }) {
           )}
         </aside>
 
-        {/* RIGHT COLUMN: REAL MAP & PIN INSPECTOR & LEADERBOARD */}
-        <section className="flex flex-col gap-4 xl:col-span-2 xl:min-h-[860px] relative">
-          {isDemo && (
-            <div className="flex items-center justify-between gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 py-2.5 text-xs text-primary shadow-xs">
-              <div className="flex items-center gap-2">
-                <Sparkles className="size-4 shrink-0" />
-                <span className="font-semibold">
-                  Interactive Demo Preview · Click any pin on the map to inspect
-                  real-time rankings & local competitors.
-                </span>
-              </div>
-              <span className="badge badge-sm badge-primary font-bold">
-                SAMPLE DATA
-              </span>
-            </div>
-          )}
-
-          {activeRun && (
+        <section className="flex min-h-[560px] flex-col gap-4 xl:col-span-2 xl:h-[820px] relative">
+          {runData && (
             <GmbScanPipeline
-              run={activeRun}
-              snapshots={activeSnapshots}
-              onRetryFailed={() =>
-                runData ? retryMutation.mutate(runData.run.id) : undefined
-              }
+              run={runData.run}
+              snapshots={runData.snapshots}
+              onRetryFailed={() => retryMutation.mutate(runData.run.id)}
               isRetrying={retryMutation.isPending}
             />
           )}
+          <GmbMap
+            centerLat={mapCenterLat}
+            centerLng={mapCenterLng}
+            radiusMeters={mapRadius}
+            hasSelection={hasSelection}
+            defaultZoom={defaultCoords.zoom}
+            businessName={businessName}
+            snapshots={runData?.snapshots}
+            onSelectSnapshot={(pin) => setSelectedPin(pin)}
+          />
+          {!centerSource && (
+            <p className="text-center text-sm text-base-content/60">
+              Find and select a business to center the map.
+            </p>
+          )}
 
-          {/* Filter Bar & View Mode Toggle */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-base-100 p-2.5 rounded-xl border border-base-300 shadow-xs">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <button
-                type="button"
-                className={`btn btn-xs rounded-lg font-bold ${
-                  activeFilter === "all"
-                    ? "btn-neutral"
-                    : "btn-ghost border border-base-300"
-                }`}
-                onClick={() => setActiveFilter("all")}
-              >
-                All ({activeSnapshots.length})
-              </button>
-              <button
-                type="button"
-                className={`btn btn-xs rounded-lg font-bold gap-1 ${
-                  activeFilter === "top3"
-                    ? "btn-success text-white"
-                    : "btn-ghost border border-base-300 text-success"
-                }`}
-                onClick={() => setActiveFilter("top3")}
-              >
-                <span className="size-2 rounded-full bg-emerald-500 inline-block" />
-                Top 3 ({top3Count})
-              </button>
-              <button
-                type="button"
-                className={`btn btn-xs rounded-lg font-bold gap-1 ${
-                  activeFilter === "top10"
-                    ? "btn-warning text-white"
-                    : "btn-ghost border border-base-300 text-warning"
-                }`}
-                onClick={() => setActiveFilter("top10")}
-              >
-                <span className="size-2 rounded-full bg-amber-500 inline-block" />
-                4 - 10 ({top10Count})
-              </button>
-              <button
-                type="button"
-                className={`btn btn-xs rounded-lg font-bold gap-1 ${
-                  activeFilter === "rank11Plus"
-                    ? "btn-error text-white"
-                    : "btn-ghost border border-base-300 text-error"
-                }`}
-                onClick={() => setActiveFilter("rank11Plus")}
-              >
-                <span className="size-2 rounded-full bg-rose-500 inline-block" />
-                11+ ({rank11PlusCount})
-              </button>
-              <button
-                type="button"
-                className={`btn btn-xs rounded-lg font-bold gap-1 ${
-                  activeFilter === "notFound"
-                    ? "btn-neutral"
-                    : "btn-ghost border border-base-300 text-base-content/60"
-                }`}
-                onClick={() => setActiveFilter("notFound")}
-              >
-                <span className="size-2 rounded-full bg-slate-400 inline-block" />
-                Unranked ({notFoundCount})
-              </button>
-            </div>
-
-            <div className="join border border-base-300 rounded-lg">
-              <button
-                type="button"
-                className={`join-item btn btn-xs gap-1.5 ${
-                  viewTab === "map" ? "btn-primary font-bold" : "btn-ghost"
-                }`}
-                onClick={() => setViewTab("map")}
-              >
-                <MapIcon className="size-3.5" />
-                Map & Pins
-              </button>
-              <button
-                type="button"
-                className={`join-item btn btn-xs gap-1.5 ${
-                  viewTab === "competitors"
-                    ? "btn-primary font-bold"
-                    : "btn-ghost"
-                }`}
-                onClick={() => setViewTab("competitors")}
-              >
-                <Trophy className="size-3.5" />
-                Leaderboard
-              </button>
-            </div>
-          </div>
-
-          {/* MAIN CONTENT AREA */}
-          {viewTab === "competitors" ? (
-            <div className="flex-1 min-h-[580px]">
-              <GmbCompetitorLeaderboard
-                snapshots={activeSnapshots}
-                targetBusinessName={businessName}
-                targetPlaceId={
-                  centerSource && "placeId" in centerSource
-                    ? centerSource.placeId
-                    : null
-                }
-              />
-            </div>
-          ) : (
-            <div className="flex flex-col lg:flex-row gap-4 h-[620px] relative">
-              <div className="flex-1 h-full min-h-[440px]">
-                <GmbMap
-                  centerLat={mapCenterLat}
-                  centerLng={mapCenterLng}
-                  radiusMeters={mapRadius}
-                  hasSelection={hasSelection || isDemo}
-                  defaultZoom={defaultCoords.zoom}
-                  businessName={businessName}
-                  snapshots={activeSnapshots}
-                  selectedPinId={selectedPin?.id}
-                  activeFilter={activeFilter}
-                  onSelectSnapshot={(pin) => setSelectedPin(pin)}
-                />
-              </div>
-
-              {selectedPin ? (
-                <div className="w-full lg:w-[380px] xl:w-[420px] h-full shrink-0 animate-in fade-in slide-in-from-right-4 duration-150">
-                  <GmbPinInspector
-                    pin={selectedPin}
-                    centerLat={mapCenterLat}
-                    centerLng={mapCenterLng}
-                    targetBusinessName={businessName}
-                    targetPlaceId={
-                      centerSource && "placeId" in centerSource
-                        ? centerSource.placeId
-                        : null
-                    }
-                    unit={distanceUnit}
-                    onClose={() => setSelectedPin(null)}
-                    onPrevPin={handlePrevPin}
-                    onNextPin={handleNextPin}
-                  />
-                </div>
-              ) : (
-                <div className="hidden lg:flex w-[260px] flex-col justify-center items-center rounded-xl border border-dashed border-base-300 p-6 text-center text-xs text-base-content/60 bg-base-100/50">
-                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
-                    <MousePointerClick className="size-5" />
-                  </div>
-                  <p className="font-bold text-sm text-base-content">
-                    Pin Inspector
-                  </p>
-                  <p className="mt-1 leading-relaxed">
-                    Click any pin on the map to inspect its real-time Google
-                    Maps ranking and see all local competitors.
-                  </p>
-                  <button
-                    type="button"
-                    className="btn btn-xs btn-outline btn-primary mt-4 gap-1.5"
-                    onClick={() => setViewTab("competitors")}
-                  >
-                    <Trophy className="size-3" />
-                    View Leaderboard
-                  </button>
-                </div>
-              )}
-            </div>
+          {/* Local Falcon Interactive Pin Inspector Modal */}
+          {selectedPin && (
+            <PinCompetitorsModal
+              pin={selectedPin}
+              onClose={() => setSelectedPin(null)}
+            />
           )}
         </section>
       </div>
@@ -761,35 +494,35 @@ function GmbScanConfirmModal({
               {scan.gridSize} × {scan.gridSize} grid
             </p>
             <p className="text-xs text-base-content/60">
-              {scan.gridSize * scan.gridSize} queued Google Maps checks
+              {estimate.points} queued Google Maps checks
             </p>
           </div>
           <p className="font-mono font-semibold">
-            ${estimate.estimatedCostUsd.toFixed(4)}
+            ~${estimate.estimatedCostUsd.toFixed(4)}
           </p>
         </div>
       </div>
-      <div className="flex justify-end gap-3 pt-2">
+      <p className="text-xs text-base-content/60">
+        The estimate uses DataForSEO standard queue pricing. Actual billed
+        provider cost is recorded on the completed run.
+      </p>
+      <div className="flex justify-end gap-2">
         <button
           type="button"
-          onClick={onCancel}
           className="btn btn-ghost"
+          onClick={onCancel}
           disabled={isPending}
         >
           Cancel
         </button>
         <button
           type="button"
-          onClick={onConfirm}
           className="btn btn-primary"
+          onClick={onConfirm}
           disabled={isPending}
         >
-          {isPending ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Play className="size-4" />
-          )}
-          Confirm & run scan
+          {isPending && <Loader2 className="size-4 animate-spin" />}
+          Confirm & start
         </button>
       </div>
     </Modal>
