@@ -10,13 +10,14 @@ import { AppError } from "@/server/lib/errors";
 import { resolveMarket } from "@/shared/keyword-locations";
 import { generateGridNodes } from "@/server/utils/geo-grid";
 import type { CreateGmbGridInput } from "../gmb-grid.schema";
-import {
-  calculateGmbMetrics,
-  computeGridMapZoom,
-  estimateGmbGridCost,
-} from "../gmb-grid";
+import { computeGridMapZoom, estimateGmbGridCost } from "../gmb-grid";
 import { GmbGridRepository } from "../repositories/GmbGridRepository";
 import { getReportHistory } from "./gmbGridReportHistory";
+import {
+  E2E_CONFIG_ID,
+  E2E_RUN_ID,
+  getE2eRunFixture,
+} from "./gmbGridE2eFixtures";
 
 const profileItemSchema = z
   .object({
@@ -41,8 +42,6 @@ const profileItemSchema = z
   .passthrough();
 
 const useE2eFixtures = import.meta.env.BYPASS_AUTH === "true";
-const E2E_RUN_ID = "00000000-0000-4000-8000-000000000091";
-const E2E_CONFIG_ID = "00000000-0000-4000-8000-000000000092";
 
 function computeNextCheckAt(interval: "weekly" | "monthly" | "manual") {
   if (interval === "manual") return null;
@@ -267,57 +266,7 @@ async function startScan(input: {
 
 async function getRun(projectId: string, runId: string) {
   if (useE2eFixtures && runId === E2E_RUN_ID) {
-    const now = new Date().toISOString();
-    const snapshots = generateGridNodes(-6.2, 106.816666, 7, 5000).map(
-      (node, index) => ({
-        id: `e2e-snapshot-${index}`,
-        runId,
-        ...node,
-        rank: index % 6 === 0 ? null : (index % 12) + 1,
-        taskId: `e2e-task-${index}`,
-        status: "completed" as const,
-        errorCode: null,
-        errorMessage: null,
-        checkedAt: now,
-      }),
-    );
-    const metrics = calculateGmbMetrics(snapshots);
-    return {
-      config: {
-        id: E2E_CONFIG_ID,
-        projectId,
-        businessName: "Test Dental Jakarta",
-        placeId: "e2e-place-id",
-        cid: "e2e-cid",
-        address: "Jakarta, Indonesia",
-        keyword: "dentist jakarta",
-        centerLat: -6.2,
-        centerLng: 106.816666,
-        gridSize: 7,
-        radiusMeters: 5000,
-        languageCode: "en",
-        device: "mobile" as const,
-        mapZoom: 15,
-        scheduleInterval: "manual" as const,
-        nextCheckAt: null,
-        isActive: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-      run: {
-        id: runId,
-        configId: E2E_CONFIG_ID,
-        status: "completed" as const,
-        trigger: "manual" as const,
-        ...metrics,
-        costUsd: estimateGmbGridCost(7).estimatedCostUsd,
-        errorCode: null,
-        errorMessage: null,
-        startedAt: now,
-        completedAt: now,
-      },
-      snapshots,
-    };
+    return getE2eRunFixture(projectId, runId);
   }
   const result = await GmbGridRepository.getRunForProject(runId, projectId);
   if (!result) throw new AppError("NOT_FOUND", "Grid scan not found");
@@ -406,10 +355,28 @@ async function retryFailedPins(input: {
   };
 }
 
+async function deactivateConfig(input: {
+  projectId: string;
+  configId: string;
+}) {
+  if (useE2eFixtures) {
+    return { ok: true as const, configId: input.configId };
+  }
+  const deactivated = await GmbGridRepository.deactivateConfig(
+    input.configId,
+    input.projectId,
+  );
+  if (!deactivated) {
+    throw new AppError("NOT_FOUND", "Grid scan configuration not found");
+  }
+  return { ok: true as const, configId: deactivated.id };
+}
+
 export const GmbGridService = {
   searchProfiles,
   startScan,
   retryFailedPins,
+  deactivateConfig,
   getRun,
   listConfigs: GmbGridRepository.listConfigsForProject,
   estimateCost: estimateGmbGridCost,

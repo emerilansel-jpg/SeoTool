@@ -115,6 +115,28 @@ async function updateConfig(
     );
 }
 
+/** Soft-deletes a scan configuration: the recurring schedule stops and it
+ *  leaves the active list, while run history stays queryable through the
+ *  non-filtered report/run joins. */
+async function deactivateConfig(configId: string, projectId: string) {
+  const rows = await db
+    .update(gmbGridConfigs)
+    .set({
+      isActive: false,
+      scheduleInterval: "manual",
+      nextCheckAt: null,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(
+      and(
+        eq(gmbGridConfigs.id, configId),
+        eq(gmbGridConfigs.projectId, projectId),
+      ),
+    )
+    .returning({ id: gmbGridConfigs.id });
+  return rows[0] ?? null;
+}
+
 async function tryCreateRun(data: RunInsert): Promise<boolean> {
   const inserted = await db
     .insert(gmbGridRuns)
@@ -308,6 +330,7 @@ export const GmbGridRepository = {
   findMatchingConfig,
   createConfig,
   updateConfig,
+  deactivateConfig,
   tryCreateRun,
   updateRun,
   getRunById,

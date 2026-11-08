@@ -3,10 +3,11 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Clock3, Loader2, MapPinned, Play, Zap } from "lucide-react";
+import { Clock3, Loader2, MapPinned, Play, Trash2, Zap } from "lucide-react";
 import { Modal } from "@/client/components/Modal";
 import {
   createGmbGridRun,
+  deleteGmbGridConfig,
   getGmbGridConfigs,
   getGmbGridRun,
   retryGmbGridFailedPins,
@@ -36,6 +37,7 @@ export function GmbGridView({ projectId }: { projectId: string }) {
   const getRun = useServerFn(getGmbGridRun);
   const createRun = useServerFn(createGmbGridRun);
   const retryFailed = useServerFn(retryGmbGridFailedPins);
+  const deleteConfig = useServerFn(deleteGmbGridConfig);
   const queryClient = useQueryClient();
 
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
@@ -132,6 +134,21 @@ export function GmbGridView({ projectId }: { projectId: string }) {
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to retry pins.");
+    },
+  });
+
+  const deleteConfigMutation = useMutation({
+    mutationFn: (configId: string) =>
+      deleteConfig({ data: { projectId, configId } }),
+    onSuccess: () => {
+      toast.success("Scan configuration deleted. Its schedule has stopped.");
+      if (activeRunId != null) setActiveRunId(null);
+      void queryClient.invalidateQueries({
+        queryKey: ["gmb-configs", projectId],
+      });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to delete the configuration.");
     },
   });
 
@@ -373,30 +390,60 @@ export function GmbGridView({ projectId }: { projectId: string }) {
               </h3>
               <div className="space-y-2">
                 {configs.slice(0, 8).map((config) => (
-                  <button
-                    type="button"
-                    key={config.id}
-                    disabled={!config.latestRun}
-                    onClick={() =>
-                      config.latestRun && setActiveRunId(config.latestRun.id)
-                    }
-                    className="flex w-full items-center justify-between rounded-lg border border-base-300 p-3 text-left hover:bg-base-200 disabled:opacity-50"
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium">
-                        {config.keyword}
+                  <div key={config.id} className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={!config.latestRun}
+                      onClick={() =>
+                        config.latestRun && setActiveRunId(config.latestRun.id)
+                      }
+                      className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-lg border border-base-300 p-3 text-left hover:bg-base-200 disabled:opacity-50"
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium">
+                          {config.keyword}
+                        </span>
+                        <span className="block truncate text-xs text-base-content/60">
+                          {config.businessName} · {config.gridSize}×
+                          {config.gridSize}
+                        </span>
                       </span>
-                      <span className="block truncate text-xs text-base-content/60">
-                        {config.businessName} · {config.gridSize}×
-                        {config.gridSize}
+                      <span className="flex shrink-0 items-center gap-1">
+                        {config.scheduleInterval !== "manual" && (
+                          <span className="badge badge-ghost badge-sm capitalize">
+                            {config.scheduleInterval}
+                          </span>
+                        )}
+                        {config.latestRun && (
+                          <span className="badge badge-ghost badge-sm">
+                            {config.latestRun.status}
+                          </span>
+                        )}
                       </span>
-                    </span>
-                    {config.latestRun && (
-                      <span className="badge badge-ghost badge-sm">
-                        {config.latestRun.status}
-                      </span>
-                    )}
-                  </button>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Delete the ${config.keyword} scan configuration`}
+                      disabled={deleteConfigMutation.isPending}
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            `Delete the "${config.keyword}" scan configuration? Its schedule stops and it disappears from recent scans. Past runs stay in reports.`,
+                          )
+                        ) {
+                          deleteConfigMutation.mutate(config.id);
+                        }
+                      }}
+                      className="btn btn-ghost btn-sm shrink-0 px-2 text-base-content/40 hover:text-error"
+                    >
+                      {deleteConfigMutation.isPending &&
+                      deleteConfigMutation.variables === config.id ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="size-4" />
+                      )}
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>

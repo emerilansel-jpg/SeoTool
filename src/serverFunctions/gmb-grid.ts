@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { AppError } from "@/server/lib/errors";
 import {
   CreateGmbGridSchema,
+  DeleteGmbGridConfigSchema,
   GetGmbGridConfigsSchema,
   GetGmbGridReportSchema,
   GetGmbGridRunSchema,
@@ -87,6 +88,17 @@ export const retryGmbGridFailedPins = createServerFn({ method: "POST" })
         userEmail: context.userEmail,
         projectId: data.projectId,
       },
+    });
+  });
+
+export const deleteGmbGridConfig = createServerFn({ method: "POST" })
+  .middleware([requireProjectContext, requireProjectRole("member")])
+  .validator(DeleteGmbGridConfigSchema)
+  .handler(async ({ data, context }) => {
+    assertRequestedProject(data.projectId, context.projectId);
+    return GmbGridService.deactivateConfig({
+      projectId: data.projectId,
+      configId: data.configId,
     });
   });
 

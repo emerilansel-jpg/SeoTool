@@ -138,6 +138,14 @@ export function GmbScanPipeline({
             </button>
           )}
         </div>
+
+        {run.foundPoints === 0 && run.completedPoints > 0 && (
+          <p className="mt-2 text-xs text-base-content/70">
+            The business did not appear in the Google Maps top 20 at any pin.
+            Try a smaller radius, a different keyword, or open a pin to see who
+            is ranking instead.
+          </p>
+        )}
       </div>
 
       {/* Local Falcon Style Large Metrics Scorecards */}
