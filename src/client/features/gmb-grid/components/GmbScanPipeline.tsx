@@ -149,10 +149,7 @@ export function GmbScanPipeline({
             </span>
           </div>
           <div className="my-2">
-            <span
-              className="block text-sm font-bold leading-snug truncate"
-              title={keyword ?? undefined}
-            >
+            <span className="block text-sm font-bold leading-snug break-words">
               {keyword ? `“${keyword}”` : "—"}
             </span>
           </div>
