@@ -143,17 +143,17 @@ export function GmbScanPipeline({
       {/* Local Falcon Style Large Metrics Scorecards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <div className="rounded-xl border border-base-300 bg-base-100 p-4 flex flex-col justify-between shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider whitespace-nowrap">
               Keyword
             </span>
           </div>
           <div className="my-2">
             <span
-              className="block text-sm font-bold leading-snug line-clamp-2"
+              className="block text-sm font-bold leading-snug truncate"
               title={keyword ?? undefined}
             >
-              “{keyword ?? "—"}”
+              {keyword ? `“${keyword}”` : "—"}
             </span>
           </div>
           <p className="text-[11px] text-base-content/50 leading-tight">
@@ -162,11 +162,11 @@ export function GmbScanPipeline({
         </div>
 
         <div className="rounded-xl border border-base-300 bg-base-100 p-4 flex flex-col justify-between shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
-              SoLV (Top 3)
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider whitespace-nowrap">
+              SoLV
             </span>
-            <span className="badge badge-sm badge-success font-bold">
+            <span className="badge badge-sm badge-success font-bold whitespace-nowrap shrink-0">
               Top 3
             </span>
           </div>
@@ -181,11 +181,13 @@ export function GmbScanPipeline({
         </div>
 
         <div className="rounded-xl border border-base-300 bg-base-100 p-4 flex flex-col justify-between shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider whitespace-nowrap">
               Avg Rank
             </span>
-            <span className="badge badge-sm badge-neutral font-mono">ATRP</span>
+            <span className="badge badge-sm badge-neutral font-mono whitespace-nowrap shrink-0">
+              ATRP
+            </span>
           </div>
           <div className="my-2">
             <span className="text-3xl font-extrabold tracking-tight">
@@ -198,11 +200,13 @@ export function GmbScanPipeline({
         </div>
 
         <div className="rounded-xl border border-base-300 bg-base-100 p-4 flex flex-col justify-between shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider whitespace-nowrap">
               Coverage
             </span>
-            <span className="badge badge-sm badge-ghost">{percentage}%</span>
+            <span className="badge badge-sm badge-ghost whitespace-nowrap shrink-0">
+              {percentage}%
+            </span>
           </div>
           <div className="my-2 flex items-baseline gap-1.5">
             <span className="text-3xl font-extrabold tracking-tight">
@@ -223,12 +227,9 @@ export function GmbScanPipeline({
         </div>
 
         <div className="rounded-xl border border-base-300 bg-base-100 p-4 flex flex-col justify-between shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider whitespace-nowrap">
               Distribution
-            </span>
-            <span className="text-[10px] font-mono text-base-content/40">
-              Total {total}
             </span>
           </div>
           <div className="grid grid-cols-4 gap-1 text-center my-2">
