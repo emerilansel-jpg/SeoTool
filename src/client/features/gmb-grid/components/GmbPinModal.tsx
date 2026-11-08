@@ -44,60 +44,54 @@ export function PinCompetitorsModal({
         </button>
       </div>
 
-      <div className="flex items-center gap-4 py-2 bg-base-200/50 rounded-lg px-3">
-        <div>
-          <span className="text-xs text-base-content/60 block">
-            Target Rank
-          </span>
-          <span
-            className={`text-lg font-black ${
-              pin.rank != null && pin.rank <= 3
-                ? "text-success"
-                : pin.rank != null && pin.rank <= 10
-                  ? "text-warning"
-                  : pin.rank != null
-                    ? "text-error"
-                    : "text-base-content/40"
-            }`}
-          >
-            {pin.rank != null ? `#${pin.rank}` : "Not Found"}
-          </span>
+      <div className="py-2 bg-base-200/50 rounded-lg px-3">
+        <div className="flex items-center gap-4">
+          <div>
+            <span className="text-xs text-base-content/60 block">
+              Target Rank
+            </span>
+            <span
+              className={`text-lg font-black ${
+                pin.rank != null && pin.rank <= 3
+                  ? "text-success"
+                  : pin.rank != null && pin.rank <= 10
+                    ? "text-warning"
+                    : pin.rank != null
+                      ? "text-error"
+                      : "text-base-content/40"
+              }`}
+            >
+              {pin.rank != null ? `#${pin.rank}` : "Not Found"}
+            </span>
+          </div>
+          <div className="divider divider-horizontal my-0" />
+          <div>
+            <span className="text-xs text-base-content/60 block">Status</span>
+            <span className="badge badge-sm badge-outline uppercase font-mono text-[10px]">
+              {pin.status}
+            </span>
+          </div>
+          {pin.gridRow !== undefined && pin.gridCol !== undefined && (
+            <>
+              <div className="divider divider-horizontal my-0" />
+              <div>
+                <span className="text-xs text-base-content/60 block">
+                  Position
+                </span>
+                <span className="text-xs font-mono">
+                  Row {pin.gridRow + 1}, Col {pin.gridCol + 1}
+                </span>
+              </div>
+            </>
+          )}
         </div>
         {keyword && (
-          <>
-            <div className="divider divider-horizontal my-0" />
-            <div className="min-w-0">
-              <span className="text-xs text-base-content/60 block">
-                Keyword
-              </span>
-              <span
-                className="text-sm font-semibold truncate block max-w-[190px]"
-                title={keyword}
-              >
-                “{keyword}”
-              </span>
-            </div>
-          </>
-        )}
-        <div className="divider divider-horizontal my-0" />
-        <div>
-          <span className="text-xs text-base-content/60 block">Status</span>
-          <span className="badge badge-sm badge-outline uppercase font-mono text-[10px]">
-            {pin.status}
-          </span>
-        </div>
-        {pin.gridRow !== undefined && pin.gridCol !== undefined && (
-          <>
-            <div className="divider divider-horizontal my-0" />
-            <div>
-              <span className="text-xs text-base-content/60 block">
-                Position
-              </span>
-              <span className="text-xs font-mono">
-                Row {pin.gridRow + 1}, Col {pin.gridCol + 1}
-              </span>
-            </div>
-          </>
+          <div className="mt-2">
+            <span className="text-xs text-base-content/60 block">Keyword</span>
+            <span className="text-sm font-semibold break-words">
+              “{keyword}”
+            </span>
+          </div>
         )}
       </div>
 
