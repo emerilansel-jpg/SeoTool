@@ -21,6 +21,25 @@ export function formatMapsCoordinate(
   return `${lat},${lng},${zoom}z`;
 }
 
+/**
+ * Google Maps zoom used for each pin's search viewport. DataForSEO restricts
+ * Maps results to the displayed area and returns an EMPTY result set when
+ * nothing matches inside it, so a fixed zoom breaks wide grids: at 15z the
+ * viewport is only ~1 km, and pins spaced further apart than that all come
+ * back "not found". Scale the viewport with the distance between pins instead
+ * (~1 km steps scan at 12z, 5 km steps at 11z, verified live), clamped to the
+ * provider's 3z-21z range.
+ */
+export function computeGridMapZoom(
+  gridSize: number,
+  radiusMeters: number,
+): number {
+  const stepsFromCenter = Math.max(1, Math.floor(gridSize / 2));
+  const stepMeters = radiusMeters / stepsFromCenter;
+  const zoom = Math.round(13 - Math.log2(stepMeters / 1000));
+  return Math.min(17, Math.max(3, zoom));
+}
+
 export function normalizeBusinessName(value: string): string {
   return value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 }

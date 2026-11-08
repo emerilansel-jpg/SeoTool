@@ -18,7 +18,6 @@ export const CreateGmbGridSchema = z.object({
   radiusMeters: z.number().int().min(100).max(100000),
   languageCode: z.string().trim().min(2).max(5).default("en"),
   device: z.enum(["desktop", "mobile"]).default("mobile"),
-  mapZoom: z.number().int().min(3).max(21).default(15),
   scheduleInterval: z.enum(["weekly", "monthly", "manual"]).default("manual"),
   costConfirmed: z.literal(true),
 });

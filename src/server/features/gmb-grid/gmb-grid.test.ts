@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   calculateGmbMetrics,
+  computeGridMapZoom,
   estimateGmbGridCost,
   findGmbRank,
   formatMapsCoordinate,
@@ -11,6 +12,24 @@ describe("GMB grid helpers", () => {
     expect(formatMapsCoordinate(-6.2, 106.816666, 15)).toBe(
       "-6.2,106.816666,15z",
     );
+  });
+
+  it("widens the search viewport as the grid expands", () => {
+    // A fixed 15z viewport is ~1 km wide: pins spaced further apart than that
+    // return an empty DataForSEO result set, so expanded grids found nothing.
+    expect(computeGridMapZoom(7, 4828)).toBe(12);
+    expect(computeGridMapZoom(7, 16093)).toBe(11);
+    expect(computeGridMapZoom(7, 48280)).toBe(9);
+  });
+
+  it("keeps tight grids scanning at street-level zooms", () => {
+    expect(computeGridMapZoom(7, 805)).toBe(15);
+    expect(computeGridMapZoom(15, 4828)).toBe(14);
+  });
+
+  it("clamps the zoom to the provider's supported range", () => {
+    expect(computeGridMapZoom(3, 100)).toBe(16);
+    expect(computeGridMapZoom(7, 100000)).toBe(8);
   });
 
   it("matches the stable place id even when another listing has the same name", () => {

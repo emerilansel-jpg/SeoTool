@@ -10,7 +10,11 @@ import { AppError } from "@/server/lib/errors";
 import { resolveMarket } from "@/shared/keyword-locations";
 import { generateGridNodes } from "@/server/utils/geo-grid";
 import type { CreateGmbGridInput } from "../gmb-grid.schema";
-import { calculateGmbMetrics, estimateGmbGridCost } from "../gmb-grid";
+import {
+  calculateGmbMetrics,
+  computeGridMapZoom,
+  estimateGmbGridCost,
+} from "../gmb-grid";
 import { GmbGridRepository } from "../repositories/GmbGridRepository";
 import { getReportHistory } from "./gmbGridReportHistory";
 
@@ -142,6 +146,9 @@ async function startScan(input: {
   if (!market) throw new AppError("NOT_FOUND", "Project not found");
   const languageCode = data.languageCode || market.languageCode || "en";
   const normalizedKeyword = data.keyword.trim().toLocaleLowerCase();
+  // The per-pin search viewport must scale with the grid: a fixed zoom makes
+  // every pin outside ~1 km return an empty result set (see computeGridMapZoom).
+  const mapZoom = computeGridMapZoom(data.gridSize, data.radiusMeters);
   const nowIso = new Date().toISOString();
   const nextCheckAt = computeNextCheckAt(data.scheduleInterval);
   let config = await GmbGridRepository.findMatchingConfig({
@@ -152,7 +159,7 @@ async function startScan(input: {
     radiusMeters: data.radiusMeters,
     languageCode,
     device: data.device,
-    mapZoom: data.mapZoom,
+    mapZoom,
   });
 
   if (config) {
@@ -188,7 +195,7 @@ async function startScan(input: {
       radiusMeters: data.radiusMeters,
       languageCode,
       device: data.device,
-      mapZoom: data.mapZoom,
+      mapZoom,
       scheduleInterval: data.scheduleInterval,
       nextCheckAt,
     });

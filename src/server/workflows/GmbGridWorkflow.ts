@@ -12,6 +12,7 @@ import {
   fetchMapsTaskResult,
   type PostedMapsTask,
 } from "@/server/lib/dataforseo";
+import { computeGridMapZoom } from "@/server/features/gmb-grid/gmb-grid";
 import { pgStep } from "./pgStep";
 
 const SINGLE_ATTEMPT = {
@@ -192,7 +193,13 @@ export class GmbGridWorkflow extends WorkflowEntrypoint<
             })),
             languageCode: prepared.config.languageCode,
             device: prepared.config.device,
-            zoom: prepared.config.mapZoom,
+            // Computed from the grid spacing, not the stored mapZoom: configs
+            // created before the zoom fix store 15z, whose ~1 km viewport
+            // returns an empty result set for every pin outside ~1 km.
+            zoom: computeGridMapZoom(
+              prepared.config.gridSize,
+              prepared.config.radiusMeters,
+            ),
             depth: 20,
             quotaUnits: pendingSnapshots.length,
           });

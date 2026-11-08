@@ -159,7 +159,6 @@ export function GmbGridView({ projectId }: { projectId: string }) {
       radiusMeters,
       languageCode: activeLanguage,
       device,
-      mapZoom: 15,
       scheduleInterval,
     });
   };
