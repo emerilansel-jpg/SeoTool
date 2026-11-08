@@ -432,6 +432,7 @@ export function GmbGridView({ projectId }: { projectId: string }) {
           {selectedPin && (
             <PinCompetitorsModal
               pin={selectedPin}
+              keyword={runData?.config.keyword}
               onClose={() => setSelectedPin(null)}
             />
           )}

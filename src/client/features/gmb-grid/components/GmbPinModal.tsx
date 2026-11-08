@@ -4,9 +4,11 @@ import type { GmbPinCompetitor, GmbSnapshotMarker } from "./GmbMap";
 
 export function PinCompetitorsModal({
   pin,
+  keyword,
   onClose,
 }: {
   pin: GmbSnapshotMarker;
+  keyword?: string | null;
   onClose: () => void;
 }) {
   let competitors: GmbPinCompetitor[] = [];
@@ -61,6 +63,22 @@ export function PinCompetitorsModal({
             {pin.rank != null ? `#${pin.rank}` : "Not Found"}
           </span>
         </div>
+        {keyword && (
+          <>
+            <div className="divider divider-horizontal my-0" />
+            <div className="min-w-0">
+              <span className="text-xs text-base-content/60 block">
+                Keyword
+              </span>
+              <span
+                className="text-sm font-semibold truncate block max-w-[190px]"
+                title={keyword}
+              >
+                “{keyword}”
+              </span>
+            </div>
+          </>
+        )}
         <div className="divider divider-horizontal my-0" />
         <div>
           <span className="text-xs text-base-content/60 block">Status</span>
