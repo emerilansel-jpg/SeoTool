@@ -408,6 +408,7 @@ export function GmbGridView({ projectId }: { projectId: string }) {
             <GmbScanPipeline
               run={runData.run}
               snapshots={runData.snapshots}
+              keyword={runData.config.keyword}
               onRetryFailed={() => retryMutation.mutate(runData.run.id)}
               isRetrying={retryMutation.isPending}
             />

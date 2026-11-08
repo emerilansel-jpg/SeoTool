@@ -27,11 +27,13 @@ interface SnapshotLike {
 export function GmbScanPipeline({
   run,
   snapshots,
+  keyword,
   onRetryFailed,
   isRetrying,
 }: {
   run: RunLike;
   snapshots: SnapshotLike[];
+  keyword?: string | null;
   onRetryFailed?: () => void;
   isRetrying?: boolean;
 }) {
@@ -139,7 +141,26 @@ export function GmbScanPipeline({
       </div>
 
       {/* Local Falcon Style Large Metrics Scorecards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="rounded-xl border border-base-300 bg-base-100 p-4 flex flex-col justify-between shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+              Keyword
+            </span>
+          </div>
+          <div className="my-2">
+            <span
+              className="block text-sm font-bold leading-snug line-clamp-2"
+              title={keyword ?? undefined}
+            >
+              “{keyword ?? "—"}”
+            </span>
+          </div>
+          <p className="text-[11px] text-base-content/50 leading-tight">
+            Query scanned at every pin
+          </p>
+        </div>
+
         <div className="rounded-xl border border-base-300 bg-base-100 p-4 flex flex-col justify-between shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
