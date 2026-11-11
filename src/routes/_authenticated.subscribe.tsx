@@ -15,20 +15,13 @@ import {
   getMembershipStatus,
   verifyMembershipCheckout,
 } from "@/serverFunctions/membership";
-import {
-  createPaypalSubscription,
-  createPaypalLtdCheckout,
-  capturePaypalLtdCheckout,
-} from "@/serverFunctions/paypal-checkout";
+import { capturePaypalLtdCheckout } from "@/serverFunctions/paypal-checkout";
 import {
   createDodoLtdCheckout,
   createDodoSubscription,
   verifyDodoCheckout,
 } from "@/serverFunctions/dodo-checkout";
-import {
-  MONTHLY_CREDIT_PACKS,
-  type MonthlyPlanTier,
-} from "@/shared/billing";
+import { MONTHLY_CREDIT_PACKS, type MonthlyPlanTier } from "@/shared/billing";
 import { APPSUMO_TIERS } from "@/shared/pricing-definitions";
 
 type Search = {
@@ -73,7 +66,8 @@ export const Route = createFileRoute("/_authenticated/subscribe")({
           : typeof search.token === "string"
             ? search.token.slice(0, 128)
             : undefined,
-    token: typeof search.token === "string" ? search.token.slice(0, 128) : undefined,
+    token:
+      typeof search.token === "string" ? search.token.slice(0, 128) : undefined,
     redirect:
       typeof search.redirect === "string"
         ? normalizeAuthRedirect(search.redirect)
@@ -94,7 +88,9 @@ export const Route = createFileRoute("/_authenticated/subscribe")({
           : undefined,
     ltd: search.ltd === true || search.ltd === "true" ? true : undefined,
     provider:
-      typeof search.provider === "string" ? search.provider.slice(0, 32) : undefined,
+      typeof search.provider === "string"
+        ? search.provider.slice(0, 32)
+        : undefined,
   }),
   component: SubscribePage,
 });
@@ -154,9 +150,9 @@ function SubscribePage() {
 
   const shouldReturnToWorkspace = Boolean(
     !search.plan &&
-      !search.upgrade &&
-      !search.checkout &&
-      (membership.data?.hasAccess || membership.data?.hasLegacyPaidPlan),
+    !search.upgrade &&
+    !search.checkout &&
+    (membership.data?.hasAccess || membership.data?.hasLegacyPaidPlan),
   );
 
   const ltdCheckout = useMutation({
@@ -170,10 +166,16 @@ function SubscribePage() {
   const dodoVerify = useMutation({
     mutationFn: (sessionId?: string) =>
       verifyDodoCheckout({ data: { sessionId } }),
-    onSuccess: () => {
+    onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: ["membership-status"] });
-      toast.success("Payment verified! Access activated.");
-      void navigate({ to: search.redirect ?? "/projects", replace: true });
+      if (result.active) {
+        toast.success("Payment verified! Access activated.");
+        void navigate({ to: search.redirect ?? "/projects", replace: true });
+      } else {
+        toast.info(
+          "Payment is being finalized. Your access will activate automatically in a few seconds.",
+        );
+      }
     },
     onError: (error) =>
       toast.error(getStandardErrorMessage(error, "Could not verify payment")),
@@ -200,7 +202,10 @@ function SubscribePage() {
       toast.error(
         getErrorCode(error) === "UPSTREAM_UNAVAILABLE"
           ? "We could not start checkout right now. Please try again in a moment."
-          : getStandardErrorMessage(error, "Checkout is temporarily unavailable"),
+          : getStandardErrorMessage(
+              error,
+              "Checkout is temporarily unavailable",
+            ),
       );
     },
   });
@@ -320,8 +325,8 @@ function SubscribePage() {
             : "SeoTool.im Lifetime Deals & Access"}
         </h1>
         <p className="text-sm text-base-content/70 max-w-xl mx-auto">
-          Get lifetime access with BYOK mode (zero data markup),
-          or subscribe to monthly volume credit packs starting at $1/month.
+          Get lifetime access with BYOK mode (zero data markup), or subscribe to
+          monthly volume credit packs starting at $1/month.
         </p>
       </div>
 
@@ -331,7 +336,8 @@ function SubscribePage() {
         </div>
       ) : null}
 
-      {search.checkout === "success" && (dodoVerify.isPending || ltdCapture.isPending || verify.isPending) ? (
+      {search.checkout === "success" &&
+      (dodoVerify.isPending || ltdCapture.isPending || verify.isPending) ? (
         <div className="alert alert-info mx-auto max-w-3xl text-sm flex items-center justify-center gap-2">
           <span className="loading loading-spinner loading-xs" />
           <span>Verifying your payment…</span>
@@ -350,7 +356,9 @@ function SubscribePage() {
                 <h2 className="mt-2 text-xl font-bold">{ltdTitle}</h2>
                 <p className="text-xs text-base-content/60 font-medium">
                   BYOK Mode · Zero Data Markup
-                  {cohort?.remaining != null ? ` · ${cohort.remaining} spots left` : ""}
+                  {cohort?.remaining != null
+                    ? ` · ${cohort.remaining} spots left`
+                    : ""}
                 </p>
               </div>
               <div className="text-right">
@@ -369,15 +377,16 @@ function SubscribePage() {
                 <span>Price Increases Every 10 Subscribers</span>
               </div>
               <p className="mt-1 text-base-content/70 leading-snug">
-                Batch 1 is strictly capped at 10 users ($27). Next batch automatically rises to $39.
+                Batch 1 is strictly capped at 10 users ($27). Next batch
+                automatically rises to $39.
               </p>
             </div>
 
             <div className="rounded-xl bg-primary/[0.05] p-3 text-xs text-base-content/80 flex items-center gap-2">
               <Key className="size-4 text-primary shrink-0" />
               <span>
-                <strong>BYOK Mode:</strong> Plug in your own Search API & AI API keys.
-                Save up to 90% on data costs with zero platform markup.
+                <strong>BYOK Mode:</strong> Plug in your own Search API & AI API
+                keys. Save up to 90% on data costs with zero platform markup.
               </span>
             </div>
 
@@ -413,7 +422,8 @@ function SubscribePage() {
                 Pay Now (${ltdPriceDollars} One-Time via Dodo Payments)
               </button>
               <p className="mt-2 text-center text-[11px] text-base-content/50">
-                Cards, Apple Pay, Google Pay supported. Instant access right after payment.
+                Cards, Apple Pay, Google Pay supported. Instant access right
+                after payment.
               </p>
             </div>
           </div>
@@ -432,14 +442,17 @@ function SubscribePage() {
                     {activeMonthlyPack.name} (${activeMonthlyPack.priceUsd}/mo)
                   </h2>
                   <p className="text-xs text-base-content/60">
-                    {activeMonthlyPack.credits.toLocaleString()} credits / month · Never expire
+                    {activeMonthlyPack.credits.toLocaleString()} credits / month
+                    · Never expire
                   </p>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-base-content">
                     ${activeMonthlyPack.priceUsd}
                   </div>
-                  <div className="text-xs text-base-content/60">USD / month</div>
+                  <div className="text-xs text-base-content/60">
+                    USD / month
+                  </div>
                 </div>
               </div>
 
@@ -452,7 +465,9 @@ function SubscribePage() {
                       key={pack.key}
                       type="button"
                       className={`btn btn-xs rounded-lg font-semibold ${
-                        selected ? "btn-primary shadow-xs" : "btn-ghost border border-base-300"
+                        selected
+                          ? "btn-primary shadow-xs"
+                          : "btn-ghost border border-base-300"
                       }`}
                       onClick={() => setSelectedMonthlyTier(pack.tier)}
                     >
@@ -466,13 +481,17 @@ function SubscribePage() {
                 <li className="flex gap-2">
                   <Check className="size-3.5 shrink-0 text-success" />
                   <span>
-                    <strong>{activeMonthlyPack.credits.toLocaleString()}</strong> usage credits
-                    added every month
+                    <strong>
+                      {activeMonthlyPack.credits.toLocaleString()}
+                    </strong>{" "}
+                    usage credits added every month
                   </span>
                 </li>
                 <li className="flex gap-2">
                   <Check className="size-3.5 shrink-0 text-success" />
-                  <span>Credits roll over and never expire, even if you cancel</span>
+                  <span>
+                    Credits roll over and never expire, even if you cancel
+                  </span>
                 </li>
                 <li className="flex gap-2">
                   <Check className="size-3.5 shrink-0 text-success" />
@@ -488,7 +507,8 @@ function SubscribePage() {
                 {monthlyCheckout.isPending ? (
                   <span className="loading loading-spinner loading-xs" />
                 ) : null}
-                Start {activeMonthlyPack.name} (${activeMonthlyPack.priceUsd}/mo)
+                Start {activeMonthlyPack.name} (${activeMonthlyPack.priceUsd}
+                /mo)
               </button>
             </div>
           </section>
@@ -499,13 +519,16 @@ function SubscribePage() {
                 Want to look around first?
               </h3>
               <p className="text-xs text-base-content/70 mt-1">
-                You can explore the workspace and create your first project for free.
+                You can explore the workspace and create your first project for
+                free.
               </p>
               <div className="mt-3">
                 <button
                   type="button"
                   className="btn btn-ghost btn-sm text-xs font-semibold"
-                  onClick={() => void navigate({ to: search.redirect ?? "/projects" })}
+                  onClick={() =>
+                    void navigate({ to: search.redirect ?? "/projects" })
+                  }
                 >
                   Continue to Workspace (Free) →
                 </button>
@@ -517,10 +540,12 @@ function SubscribePage() {
 
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-base-content/60 pt-4">
         <span className="inline-flex items-center gap-1.5">
-          <Lock className="size-3.5" /> Encrypted and secure checkout via Dodo Payments (Cards, Apple Pay, Google Pay)
+          <Lock className="size-3.5" /> Encrypted and secure checkout via Dodo
+          Payments (Cards, Apple Pay, Google Pay)
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <Sparkles className="size-3.5 text-primary" /> Instant access right after purchase
+          <Sparkles className="size-3.5 text-primary" /> Instant access right
+          after purchase
         </span>
       </div>
     </div>

@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { AppError } from "@/server/lib/errors";
-import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
+import {
+  isHostedServerAuthMode,
+  getOptionalEnvValue,
+} from "@/server/lib/runtime-env";
 import { requireAuthenticatedContext } from "@/serverFunctions/middleware";
 import {
   getQuotaState,
@@ -11,6 +14,8 @@ import {
   getCreditBalance,
   grantMonthlyCredits,
 } from "@/server/billing/credits";
+import { getDodoClient } from "@/server/billing/dodo-client";
+import { parseDodoSubscriptionRef } from "@/server/billing/dodo-fulfillment";
 import { QuotaRepository } from "@/server/features/billing/repositories/QuotaRepository";
 import { isPlatformAdmin } from "@/server/lib/platform-admin";
 import { paypal } from "@/server/billing/paypal";
@@ -95,7 +100,7 @@ export const getQuotaStateSummary = createServerFn({ method: "POST" })
     return { planTier: tier, quotas };
   });
 
-/** Open the PayPal customer billing portal for subscription management. */
+/** Open the customer billing portal (Dodo or PayPal) for subscription management. */
 export const getCustomerPortalUrl = createServerFn({ method: "POST" })
   .middleware([requireAuthenticatedContext])
   .handler(async ({ context }) => {
@@ -112,8 +117,20 @@ export const getCustomerPortalUrl = createServerFn({ method: "POST" })
     if (!sub?.paypalSubscriptionId) {
       throw new AppError(
         "PLAN_LIMIT_REACHED",
-        "No active PayPal subscription found",
+        "No active subscription portal reference found",
       );
+    }
+
+    const dodoSubId = parseDodoSubscriptionRef(sub.paypalSubscriptionId);
+    if (dodoSubId) {
+      const dodo = await getDodoClient();
+      const dodoSub = await dodo.subscriptions.retrieve(dodoSubId);
+      const publicUrl = await getOptionalEnvValue("BETTER_AUTH_URL");
+      const portal = await dodo.customers.customerPortal.create(
+        dodoSub.customer.customer_id,
+        publicUrl ? { return_url: `${publicUrl}/billing` } : undefined,
+      );
+      return portal.link;
     }
 
     const result = await paypal.billingPortal.createSession(

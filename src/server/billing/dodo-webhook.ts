@@ -1,119 +1,141 @@
-import { getDodoClient } from "./dodo-client";
-import { getOptionalEnvValue } from "@/server/lib/runtime-env";
+import type { UnwrapWebhookEvent } from "dodopayments/resources/webhooks/webhooks";
 import { QuotaRepository } from "@/server/features/billing/repositories/QuotaRepository";
-import { addTopupCredits } from "./credits";
-import { LTD_OFFERS } from "./paypal-checkout-service";
+import { getOptionalEnvValue } from "@/server/lib/runtime-env";
 import { MONTHLY_CREDIT_PACKS, type MonthlyPlanTier } from "@/shared/billing";
+import { getDodoClient } from "./dodo-client";
+import {
+  fulfillDodoLtd,
+  fulfillDodoSubscription,
+  fulfillDodoTopup,
+  toDodoSubscriptionRef,
+} from "./dodo-fulfillment";
 
 export const DODO_WEBHOOK_PATH = "/api/billing/dodo-webhook";
 
-export async function handleDodoWebhookRequest(request: Request): Promise<Response> {
+function jsonResponse(body: Record<string, unknown>, status: number): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+function readMetadata(metadata: unknown): Record<string, string> {
+  if (!metadata || typeof metadata !== "object") return {};
+  const result: Record<string, string> = {};
+  for (const [key, value] of Object.entries(metadata)) {
+    if (typeof value === "string") {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+export async function handleDodoWebhookRequest(
+  request: Request,
+): Promise<Response> {
   if (request.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
   }
 
+  const webhookSecret = await getOptionalEnvValue("DODO_WEBHOOK_SECRET");
+  if (!webhookSecret) {
+    console.error("[Dodo Webhook] DODO_WEBHOOK_SECRET is not configured");
+    return jsonResponse({ error: "Webhook secret is not configured" }, 503);
+  }
+
   const rawBody = await request.text();
   const dodo = await getDodoClient();
-  const webhookSecret = await getOptionalEnvValue("DODO_WEBHOOK_SECRET");
 
-  let event: any;
+  let event: UnwrapWebhookEvent;
   try {
-    if (webhookSecret) {
-      const headers: Record<string, string> = {};
-      request.headers.forEach((val, key) => {
-        headers[key.toLowerCase()] = val;
-      });
-      event = dodo.webhooks.unwrap(rawBody, { headers, key: webhookSecret });
-    } else {
-      event = dodo.webhooks.unsafeUnwrap(rawBody);
-    }
+    const headers: Record<string, string> = {};
+    request.headers.forEach((val, key) => {
+      headers[key.toLowerCase()] = val;
+    });
+    event = dodo.webhooks.unwrap(rawBody, { headers, key: webhookSecret });
   } catch (err) {
     console.error("[Dodo Webhook Signature Verification Failed]:", err);
-    return new Response(JSON.stringify({ error: "Invalid webhook signature" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Invalid webhook signature" }, 401);
   }
 
   const eventType = event.type;
-  const data = event.data;
-  const metadata = (data?.metadata as Record<string, string>) || {};
-  const orgId = metadata.organizationId;
-
-  console.log(`[Dodo Webhook Received]: ${eventType} for org: ${orgId}`);
+  console.log(`[Dodo Webhook Received]: ${eventType}`);
 
   try {
-    switch (eventType) {
+    switch (event.type) {
       case "payment.succeeded": {
+        const payment = event.data;
+        const metadata = readMetadata(payment.metadata);
+        const orgId = metadata.organizationId;
         if (!orgId) break;
 
         const type = metadata.type;
-        if (type === "ltd" || metadata.planKey) {
-          const planKey = metadata.planKey || "krp_founder_10";
-          const offer = LTD_OFFERS[planKey] ?? LTD_OFFERS.krp_founder_10;
-          await QuotaRepository.upsertSubscription({
+        if (type === "ltd" || (type !== "subscription" && metadata.planKey)) {
+          await fulfillDodoLtd({
             organizationId: orgId,
-            planTier: offer.tier,
-            status: "active",
-            currentPeriodEnd: "2099-12-31T23:59:59.000Z",
+            planKey: metadata.planKey || "krp_founder_10",
+            paymentId: payment.payment_id,
+            eventType,
           });
-          if (offer.bonusCredits > 0) {
-            await addTopupCredits(orgId, offer.bonusCredits);
-          }
         } else if (type === "topup") {
           const credits = Number(metadata.credits || 0);
-          if (credits > 0) {
-            await addTopupCredits(orgId, credits);
-          }
+          await fulfillDodoTopup({
+            organizationId: orgId,
+            credits,
+            paymentId: payment.payment_id,
+            eventType,
+          });
         }
         break;
       }
 
       case "subscription.active":
       case "subscription.renewed": {
+        const sub = event.data;
+        const metadata = readMetadata(sub.metadata);
+        const orgId = metadata.organizationId;
         if (!orgId) break;
 
-        const tier = (metadata.tier || "starter") as MonthlyPlanTier;
-        const pack = MONTHLY_CREDIT_PACKS.find((p) => p.tier === tier);
-        await QuotaRepository.upsertSubscription({
+        const cycleAnchor = sub.previous_billing_date || sub.created_at;
+        await fulfillDodoSubscription({
           organizationId: orgId,
-          planTier: tier,
-          status: "active",
-          currentPeriodEnd: new Date(Date.now() + 31 * 86400 * 1000).toISOString(),
+          tier: metadata.tier || "starter",
+          subscriptionId: sub.subscription_id,
+          cycleAnchor,
+          nextBillingDate: sub.next_billing_date || null,
+          eventType,
         });
-        if (pack && pack.credits > 0) {
-          await addTopupCredits(orgId, pack.credits);
-        }
         break;
       }
 
       case "subscription.cancelled":
       case "subscription.expired": {
+        const sub = event.data;
+        const metadata = readMetadata(sub.metadata);
+        const orgId = metadata.organizationId;
         if (!orgId) break;
 
-        const tier = (metadata.tier || "starter") as MonthlyPlanTier;
+        const rawTier = metadata.tier || "starter";
+        const pack = MONTHLY_CREDIT_PACKS.find((p) => p.tier === rawTier);
+        const tier: MonthlyPlanTier = pack ? pack.tier : "starter";
+
         await QuotaRepository.upsertSubscription({
           organizationId: orgId,
           planTier: tier,
-          status: eventType === "subscription.cancelled" ? "cancelled" : "expired",
+          paypalSubscriptionId: toDodoSubscriptionRef(sub.subscription_id),
+          status:
+            event.type === "subscription.cancelled" ? "cancelled" : "expired",
         });
         break;
       }
 
       default:
-        // Ignore unhandled events
         break;
     }
 
-    return new Response(JSON.stringify({ received: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ received: true }, 200);
   } catch (err) {
     console.error(`[Dodo Webhook Processing Error on ${eventType}]:`, err);
-    return new Response(JSON.stringify({ error: "Internal processing error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Internal processing error" }, 500);
   }
 }

@@ -15,10 +15,7 @@ import {
   getQuotaStateSummary,
   getCustomerPortalUrl,
 } from "@/serverFunctions/billing";
-import {
-  capturePaypalTopup,
-  createPaypalTopup,
-} from "@/serverFunctions/paypal-checkout";
+import { capturePaypalTopup } from "@/serverFunctions/paypal-checkout";
 import {
   createDodoTopup,
   verifyDodoCheckout,
@@ -125,11 +122,16 @@ function BillingPage() {
     topupCaptureStarted.current = true;
     setTopupStatus("capturing");
 
-    const isDodo = search.get("provider") === "dodo" || Boolean(search.get("session_id"));
+    const isDodo =
+      search.get("provider") === "dodo" || Boolean(search.get("session_id"));
     if (isDodo) {
       const sessionId = search.get("session_id") || undefined;
       void verifyDodoCheckout({ data: { sessionId } })
-        .then(async () => {
+        .then(async (result) => {
+          if (sessionId && !result.active) {
+            setTopupStatus("error");
+            return;
+          }
           setTopupStatus("completed");
           window.history.replaceState({}, "", "/billing?topup=complete");
           await quotaQuery.refetch();

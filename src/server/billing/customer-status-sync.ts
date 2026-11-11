@@ -10,6 +10,7 @@ import {
 import { syncBillingStatusToLoops } from "./loops-sync";
 import { QuotaRepository } from "@/server/features/billing/repositories/QuotaRepository";
 import { addTopupCredits, grantMonthlyCredits } from "@/server/billing/credits";
+import { parseDodoSubscriptionRef } from "@/server/billing/dodo-fulfillment";
 import { PLAN_TIERS, type PlanTier } from "@/shared/plans";
 import { isRetainerTier, retainerCreditsForUsd } from "@/shared/billing";
 
@@ -91,6 +92,7 @@ async function getSubscriptionForOrg(
 ): Promise<Record<string, unknown> | null> {
   const sub = await QuotaRepository.getSubscription(organizationId);
   if (!sub?.paypalSubscriptionId) return null;
+  if (parseDodoSubscriptionRef(sub.paypalSubscriptionId)) return null;
 
   try {
     const paypalSub = await paypal.subscriptions.get(sub.paypalSubscriptionId);
