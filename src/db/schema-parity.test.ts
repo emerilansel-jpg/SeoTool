@@ -50,6 +50,18 @@ import * as sqliteBrandLookup from "./brand-lookup.schema";
 import * as pgBrandLookup from "./pg/brand-lookup.schema";
 import * as sqliteAdmin from "./admin.schema";
 import * as pgAdmin from "./pg/admin.schema";
+import * as sqliteAiBots from "./ai-bots.schema";
+import * as pgAiBots from "./pg/ai-bots.schema";
+import * as sqliteGscRankTracker from "./gsc-rank-tracker.schema";
+import * as pgGscRankTracker from "./pg/gsc-rank-tracker.schema";
+import * as sqliteIndexNow from "./indexnow.schema";
+import * as pgIndexNow from "./pg/indexnow.schema";
+import * as sqliteNap from "./nap.schema";
+import * as pgNap from "./pg/nap.schema";
+import * as sqliteInternalLinks from "./internal-links.schema";
+import * as pgInternalLinks from "./pg/internal-links.schema";
+import * as sqliteWebhooks from "./webhooks.schema";
+import * as pgWebhooks from "./pg/webhooks.schema";
 
 // Guards the ONE structural artifact `db:generate` does not regenerate: the
 // hand-written Postgres schema. The provider-aware `db`/`@/db/schema` barrel
@@ -188,6 +200,12 @@ const sqliteAppTables = tablesFrom(
   sqliteAiTracking,
   sqliteBrandLookup,
   sqliteAdmin,
+  sqliteAiBots,
+  sqliteGscRankTracker,
+  sqliteIndexNow,
+  sqliteNap,
+  sqliteInternalLinks,
+  sqliteWebhooks,
 );
 const pgAppTables = tablesFrom(
   pgApp,
@@ -212,6 +230,12 @@ const pgAppTables = tablesFrom(
   pgAiTracking,
   pgBrandLookup,
   pgAdmin,
+  pgAiBots,
+  pgGscRankTracker,
+  pgIndexNow,
+  pgNap,
+  pgInternalLinks,
+  pgWebhooks,
 );
 const sqliteAuthTables = tablesFrom(sqliteAuth);
 const pgAuthTables = tablesFrom(pgAuth);

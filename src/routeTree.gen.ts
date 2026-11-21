@@ -65,20 +65,30 @@ import { Route as AppAdminPricingIndexRouteImport } from './routes/_app/admin/pr
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
 import { Route as ProjectPProjectIdIndexRouteImport } from './routes/_project/p/$projectId/index'
+import { Route as ProjectPProjectIdAiBotMonitorRouteImport } from './routes/_project/p/$projectId/ai-bot-monitor'
 import { Route as ProjectPProjectIdAiTrackingRouteImport } from './routes/_project/p/$projectId/ai-tracking'
 import { Route as ProjectPProjectIdAuditRouteImport } from './routes/_project/p/$projectId/audit'
+import { Route as ProjectPProjectIdAutomationsRouteImport } from './routes/_project/p/$projectId/automations'
 import { Route as ProjectPProjectIdBacklinksRouteImport } from './routes/_project/p/$projectId/backlinks'
 import { Route as ProjectPProjectIdBrandLookupRouteImport } from './routes/_project/p/$projectId/brand-lookup'
+import { Route as ProjectPProjectIdBulkToolsRouteImport } from './routes/_project/p/$projectId/bulk-tools'
+import { Route as ProjectPProjectIdCompetitorTrafficRouteImport } from './routes/_project/p/$projectId/competitor-traffic'
 import { Route as ProjectPProjectIdContentGapRouteImport } from './routes/_project/p/$projectId/content-gap'
+import { Route as ProjectPProjectIdContentOutlineRouteImport } from './routes/_project/p/$projectId/content-outline'
 import { Route as ProjectPProjectIdCrawlBudgetRouteImport } from './routes/_project/p/$projectId/crawl-budget'
 import { Route as ProjectPProjectIdDomainRouteImport } from './routes/_project/p/$projectId/domain'
 import { Route as ProjectPProjectIdGa4InsightsRouteImport } from './routes/_project/p/$projectId/ga4-insights'
 import { Route as ProjectPProjectIdGmbGridRouteImport } from './routes/_project/p/$projectId/gmb-grid'
+import { Route as ProjectPProjectIdGoogleReviewsRouteImport } from './routes/_project/p/$projectId/google-reviews'
+import { Route as ProjectPProjectIdGscRankTrackerRouteImport } from './routes/_project/p/$projectId/gsc-rank-tracker'
+import { Route as ProjectPProjectIdIndexnowRouteImport } from './routes/_project/p/$projectId/indexnow'
+import { Route as ProjectPProjectIdInternalLinksRouteImport } from './routes/_project/p/$projectId/internal-links'
 import { Route as ProjectPProjectIdJetRouteImport } from './routes/_project/p/$projectId/jet'
 import { Route as ProjectPProjectIdKeywordClusteringRouteImport } from './routes/_project/p/$projectId/keyword-clustering'
 import { Route as ProjectPProjectIdKeywordResearchProRouteImport } from './routes/_project/p/$projectId/keyword-research-pro'
 import { Route as ProjectPProjectIdKeywordsRouteImport } from './routes/_project/p/$projectId/keywords'
 import { Route as ProjectPProjectIdLinkIntersectRouteImport } from './routes/_project/p/$projectId/link-intersect'
+import { Route as ProjectPProjectIdNapFinderRouteImport } from './routes/_project/p/$projectId/nap-finder'
 import { Route as ProjectPProjectIdOnPageCheckerRouteImport } from './routes/_project/p/$projectId/on-page-checker'
 import { Route as ProjectPProjectIdPromptExplorerRouteImport } from './routes/_project/p/$projectId/prompt-explorer'
 import { Route as ProjectPProjectIdRankTrackingRouteImport } from './routes/_project/p/$projectId/rank-tracking'
@@ -383,6 +393,12 @@ const ProjectPProjectIdIndexRoute = ProjectPProjectIdIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProjectPProjectIdRouteRoute,
 } as any)
+const ProjectPProjectIdAiBotMonitorRoute =
+  ProjectPProjectIdAiBotMonitorRouteImport.update({
+    id: '/ai-bot-monitor',
+    path: '/ai-bot-monitor',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
 const ProjectPProjectIdAiTrackingRoute =
   ProjectPProjectIdAiTrackingRouteImport.update({
     id: '/ai-tracking',
@@ -394,6 +410,12 @@ const ProjectPProjectIdAuditRoute = ProjectPProjectIdAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => ProjectPProjectIdRouteRoute,
 } as any)
+const ProjectPProjectIdAutomationsRoute =
+  ProjectPProjectIdAutomationsRouteImport.update({
+    id: '/automations',
+    path: '/automations',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
 const ProjectPProjectIdBacklinksRoute =
   ProjectPProjectIdBacklinksRouteImport.update({
     id: '/backlinks',
@@ -406,10 +428,28 @@ const ProjectPProjectIdBrandLookupRoute =
     path: '/brand-lookup',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
+const ProjectPProjectIdBulkToolsRoute =
+  ProjectPProjectIdBulkToolsRouteImport.update({
+    id: '/bulk-tools',
+    path: '/bulk-tools',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
+const ProjectPProjectIdCompetitorTrafficRoute =
+  ProjectPProjectIdCompetitorTrafficRouteImport.update({
+    id: '/competitor-traffic',
+    path: '/competitor-traffic',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
 const ProjectPProjectIdContentGapRoute =
   ProjectPProjectIdContentGapRouteImport.update({
     id: '/content-gap',
     path: '/content-gap',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
+const ProjectPProjectIdContentOutlineRoute =
+  ProjectPProjectIdContentOutlineRouteImport.update({
+    id: '/content-outline',
+    path: '/content-outline',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
 const ProjectPProjectIdCrawlBudgetRoute =
@@ -433,6 +473,30 @@ const ProjectPProjectIdGmbGridRoute =
   ProjectPProjectIdGmbGridRouteImport.update({
     id: '/gmb-grid',
     path: '/gmb-grid',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
+const ProjectPProjectIdGoogleReviewsRoute =
+  ProjectPProjectIdGoogleReviewsRouteImport.update({
+    id: '/google-reviews',
+    path: '/google-reviews',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
+const ProjectPProjectIdGscRankTrackerRoute =
+  ProjectPProjectIdGscRankTrackerRouteImport.update({
+    id: '/gsc-rank-tracker',
+    path: '/gsc-rank-tracker',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
+const ProjectPProjectIdIndexnowRoute =
+  ProjectPProjectIdIndexnowRouteImport.update({
+    id: '/indexnow',
+    path: '/indexnow',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
+const ProjectPProjectIdInternalLinksRoute =
+  ProjectPProjectIdInternalLinksRouteImport.update({
+    id: '/internal-links',
+    path: '/internal-links',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
 const ProjectPProjectIdJetRoute = ProjectPProjectIdJetRouteImport.update({
@@ -462,6 +526,12 @@ const ProjectPProjectIdLinkIntersectRoute =
   ProjectPProjectIdLinkIntersectRouteImport.update({
     id: '/link-intersect',
     path: '/link-intersect',
+    getParentRoute: () => ProjectPProjectIdRouteRoute,
+  } as any)
+const ProjectPProjectIdNapFinderRoute =
+  ProjectPProjectIdNapFinderRouteImport.update({
+    id: '/nap-finder',
+    path: '/nap-finder',
     getParentRoute: () => ProjectPProjectIdRouteRoute,
   } as any)
 const ProjectPProjectIdOnPageCheckerRoute =
@@ -633,20 +703,30 @@ export interface FileRoutesByFullPath {
   '/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/admin/pages/new': typeof AppAdminPagesNewRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/p/$projectId/ai-bot-monitor': typeof ProjectPProjectIdAiBotMonitorRoute
   '/p/$projectId/ai-tracking': typeof ProjectPProjectIdAiTrackingRoute
   '/p/$projectId/audit': typeof ProjectPProjectIdAuditRouteWithChildren
+  '/p/$projectId/automations': typeof ProjectPProjectIdAutomationsRoute
   '/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
+  '/p/$projectId/bulk-tools': typeof ProjectPProjectIdBulkToolsRoute
+  '/p/$projectId/competitor-traffic': typeof ProjectPProjectIdCompetitorTrafficRoute
   '/p/$projectId/content-gap': typeof ProjectPProjectIdContentGapRoute
+  '/p/$projectId/content-outline': typeof ProjectPProjectIdContentOutlineRoute
   '/p/$projectId/crawl-budget': typeof ProjectPProjectIdCrawlBudgetRoute
   '/p/$projectId/domain': typeof ProjectPProjectIdDomainRoute
   '/p/$projectId/ga4-insights': typeof ProjectPProjectIdGa4InsightsRoute
   '/p/$projectId/gmb-grid': typeof ProjectPProjectIdGmbGridRoute
+  '/p/$projectId/google-reviews': typeof ProjectPProjectIdGoogleReviewsRoute
+  '/p/$projectId/gsc-rank-tracker': typeof ProjectPProjectIdGscRankTrackerRoute
+  '/p/$projectId/indexnow': typeof ProjectPProjectIdIndexnowRoute
+  '/p/$projectId/internal-links': typeof ProjectPProjectIdInternalLinksRoute
   '/p/$projectId/jet': typeof ProjectPProjectIdJetRoute
   '/p/$projectId/keyword-clustering': typeof ProjectPProjectIdKeywordClusteringRoute
   '/p/$projectId/keyword-research-pro': typeof ProjectPProjectIdKeywordResearchProRoute
   '/p/$projectId/keywords': typeof ProjectPProjectIdKeywordsRoute
   '/p/$projectId/link-intersect': typeof ProjectPProjectIdLinkIntersectRoute
+  '/p/$projectId/nap-finder': typeof ProjectPProjectIdNapFinderRoute
   '/p/$projectId/on-page-checker': typeof ProjectPProjectIdOnPageCheckerRoute
   '/p/$projectId/prompt-explorer': typeof ProjectPProjectIdPromptExplorerRoute
   '/p/$projectId/rank-tracking': typeof ProjectPProjectIdRankTrackingRouteWithChildren
@@ -719,19 +799,29 @@ export interface FileRoutesByTo {
   '/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/admin/pages/new': typeof AppAdminPagesNewRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/p/$projectId/ai-bot-monitor': typeof ProjectPProjectIdAiBotMonitorRoute
   '/p/$projectId/ai-tracking': typeof ProjectPProjectIdAiTrackingRoute
+  '/p/$projectId/automations': typeof ProjectPProjectIdAutomationsRoute
   '/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
+  '/p/$projectId/bulk-tools': typeof ProjectPProjectIdBulkToolsRoute
+  '/p/$projectId/competitor-traffic': typeof ProjectPProjectIdCompetitorTrafficRoute
   '/p/$projectId/content-gap': typeof ProjectPProjectIdContentGapRoute
+  '/p/$projectId/content-outline': typeof ProjectPProjectIdContentOutlineRoute
   '/p/$projectId/crawl-budget': typeof ProjectPProjectIdCrawlBudgetRoute
   '/p/$projectId/domain': typeof ProjectPProjectIdDomainRoute
   '/p/$projectId/ga4-insights': typeof ProjectPProjectIdGa4InsightsRoute
   '/p/$projectId/gmb-grid': typeof ProjectPProjectIdGmbGridRoute
+  '/p/$projectId/google-reviews': typeof ProjectPProjectIdGoogleReviewsRoute
+  '/p/$projectId/gsc-rank-tracker': typeof ProjectPProjectIdGscRankTrackerRoute
+  '/p/$projectId/indexnow': typeof ProjectPProjectIdIndexnowRoute
+  '/p/$projectId/internal-links': typeof ProjectPProjectIdInternalLinksRoute
   '/p/$projectId/jet': typeof ProjectPProjectIdJetRoute
   '/p/$projectId/keyword-clustering': typeof ProjectPProjectIdKeywordClusteringRoute
   '/p/$projectId/keyword-research-pro': typeof ProjectPProjectIdKeywordResearchProRoute
   '/p/$projectId/keywords': typeof ProjectPProjectIdKeywordsRoute
   '/p/$projectId/link-intersect': typeof ProjectPProjectIdLinkIntersectRoute
+  '/p/$projectId/nap-finder': typeof ProjectPProjectIdNapFinderRoute
   '/p/$projectId/on-page-checker': typeof ProjectPProjectIdOnPageCheckerRoute
   '/p/$projectId/prompt-explorer': typeof ProjectPProjectIdPromptExplorerRoute
   '/p/$projectId/saved': typeof ProjectPProjectIdSavedRoute
@@ -811,20 +901,30 @@ export interface FileRoutesById {
   '/_app/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/_app/admin/pages/new': typeof AppAdminPagesNewRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/_project/p/$projectId/ai-bot-monitor': typeof ProjectPProjectIdAiBotMonitorRoute
   '/_project/p/$projectId/ai-tracking': typeof ProjectPProjectIdAiTrackingRoute
   '/_project/p/$projectId/audit': typeof ProjectPProjectIdAuditRouteWithChildren
+  '/_project/p/$projectId/automations': typeof ProjectPProjectIdAutomationsRoute
   '/_project/p/$projectId/backlinks': typeof ProjectPProjectIdBacklinksRoute
   '/_project/p/$projectId/brand-lookup': typeof ProjectPProjectIdBrandLookupRoute
+  '/_project/p/$projectId/bulk-tools': typeof ProjectPProjectIdBulkToolsRoute
+  '/_project/p/$projectId/competitor-traffic': typeof ProjectPProjectIdCompetitorTrafficRoute
   '/_project/p/$projectId/content-gap': typeof ProjectPProjectIdContentGapRoute
+  '/_project/p/$projectId/content-outline': typeof ProjectPProjectIdContentOutlineRoute
   '/_project/p/$projectId/crawl-budget': typeof ProjectPProjectIdCrawlBudgetRoute
   '/_project/p/$projectId/domain': typeof ProjectPProjectIdDomainRoute
   '/_project/p/$projectId/ga4-insights': typeof ProjectPProjectIdGa4InsightsRoute
   '/_project/p/$projectId/gmb-grid': typeof ProjectPProjectIdGmbGridRoute
+  '/_project/p/$projectId/google-reviews': typeof ProjectPProjectIdGoogleReviewsRoute
+  '/_project/p/$projectId/gsc-rank-tracker': typeof ProjectPProjectIdGscRankTrackerRoute
+  '/_project/p/$projectId/indexnow': typeof ProjectPProjectIdIndexnowRoute
+  '/_project/p/$projectId/internal-links': typeof ProjectPProjectIdInternalLinksRoute
   '/_project/p/$projectId/jet': typeof ProjectPProjectIdJetRoute
   '/_project/p/$projectId/keyword-clustering': typeof ProjectPProjectIdKeywordClusteringRoute
   '/_project/p/$projectId/keyword-research-pro': typeof ProjectPProjectIdKeywordResearchProRoute
   '/_project/p/$projectId/keywords': typeof ProjectPProjectIdKeywordsRoute
   '/_project/p/$projectId/link-intersect': typeof ProjectPProjectIdLinkIntersectRoute
+  '/_project/p/$projectId/nap-finder': typeof ProjectPProjectIdNapFinderRoute
   '/_project/p/$projectId/on-page-checker': typeof ProjectPProjectIdOnPageCheckerRoute
   '/_project/p/$projectId/prompt-explorer': typeof ProjectPProjectIdPromptExplorerRoute
   '/_project/p/$projectId/rank-tracking': typeof ProjectPProjectIdRankTrackingRouteWithChildren
@@ -902,20 +1002,30 @@ export interface FileRouteTypes {
     | '/admin/pages/$postId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
+    | '/p/$projectId/ai-bot-monitor'
     | '/p/$projectId/ai-tracking'
     | '/p/$projectId/audit'
+    | '/p/$projectId/automations'
     | '/p/$projectId/backlinks'
     | '/p/$projectId/brand-lookup'
+    | '/p/$projectId/bulk-tools'
+    | '/p/$projectId/competitor-traffic'
     | '/p/$projectId/content-gap'
+    | '/p/$projectId/content-outline'
     | '/p/$projectId/crawl-budget'
     | '/p/$projectId/domain'
     | '/p/$projectId/ga4-insights'
     | '/p/$projectId/gmb-grid'
+    | '/p/$projectId/google-reviews'
+    | '/p/$projectId/gsc-rank-tracker'
+    | '/p/$projectId/indexnow'
+    | '/p/$projectId/internal-links'
     | '/p/$projectId/jet'
     | '/p/$projectId/keyword-clustering'
     | '/p/$projectId/keyword-research-pro'
     | '/p/$projectId/keywords'
     | '/p/$projectId/link-intersect'
+    | '/p/$projectId/nap-finder'
     | '/p/$projectId/on-page-checker'
     | '/p/$projectId/prompt-explorer'
     | '/p/$projectId/rank-tracking'
@@ -988,19 +1098,29 @@ export interface FileRouteTypes {
     | '/admin/pages/$postId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
+    | '/p/$projectId/ai-bot-monitor'
     | '/p/$projectId/ai-tracking'
+    | '/p/$projectId/automations'
     | '/p/$projectId/backlinks'
     | '/p/$projectId/brand-lookup'
+    | '/p/$projectId/bulk-tools'
+    | '/p/$projectId/competitor-traffic'
     | '/p/$projectId/content-gap'
+    | '/p/$projectId/content-outline'
     | '/p/$projectId/crawl-budget'
     | '/p/$projectId/domain'
     | '/p/$projectId/ga4-insights'
     | '/p/$projectId/gmb-grid'
+    | '/p/$projectId/google-reviews'
+    | '/p/$projectId/gsc-rank-tracker'
+    | '/p/$projectId/indexnow'
+    | '/p/$projectId/internal-links'
     | '/p/$projectId/jet'
     | '/p/$projectId/keyword-clustering'
     | '/p/$projectId/keyword-research-pro'
     | '/p/$projectId/keywords'
     | '/p/$projectId/link-intersect'
+    | '/p/$projectId/nap-finder'
     | '/p/$projectId/on-page-checker'
     | '/p/$projectId/prompt-explorer'
     | '/p/$projectId/saved'
@@ -1079,20 +1199,30 @@ export interface FileRouteTypes {
     | '/_app/admin/pages/$postId'
     | '/_app/admin/pages/new'
     | '/_app/admin/users/$userId'
+    | '/_project/p/$projectId/ai-bot-monitor'
     | '/_project/p/$projectId/ai-tracking'
     | '/_project/p/$projectId/audit'
+    | '/_project/p/$projectId/automations'
     | '/_project/p/$projectId/backlinks'
     | '/_project/p/$projectId/brand-lookup'
+    | '/_project/p/$projectId/bulk-tools'
+    | '/_project/p/$projectId/competitor-traffic'
     | '/_project/p/$projectId/content-gap'
+    | '/_project/p/$projectId/content-outline'
     | '/_project/p/$projectId/crawl-budget'
     | '/_project/p/$projectId/domain'
     | '/_project/p/$projectId/ga4-insights'
     | '/_project/p/$projectId/gmb-grid'
+    | '/_project/p/$projectId/google-reviews'
+    | '/_project/p/$projectId/gsc-rank-tracker'
+    | '/_project/p/$projectId/indexnow'
+    | '/_project/p/$projectId/internal-links'
     | '/_project/p/$projectId/jet'
     | '/_project/p/$projectId/keyword-clustering'
     | '/_project/p/$projectId/keyword-research-pro'
     | '/_project/p/$projectId/keywords'
     | '/_project/p/$projectId/link-intersect'
+    | '/_project/p/$projectId/nap-finder'
     | '/_project/p/$projectId/on-page-checker'
     | '/_project/p/$projectId/prompt-explorer'
     | '/_project/p/$projectId/rank-tracking'
@@ -1547,6 +1677,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectPProjectIdIndexRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
+    '/_project/p/$projectId/ai-bot-monitor': {
+      id: '/_project/p/$projectId/ai-bot-monitor'
+      path: '/ai-bot-monitor'
+      fullPath: '/p/$projectId/ai-bot-monitor'
+      preLoaderRoute: typeof ProjectPProjectIdAiBotMonitorRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
     '/_project/p/$projectId/ai-tracking': {
       id: '/_project/p/$projectId/ai-tracking'
       path: '/ai-tracking'
@@ -1559,6 +1696,13 @@ declare module '@tanstack/react-router' {
       path: '/audit'
       fullPath: '/p/$projectId/audit'
       preLoaderRoute: typeof ProjectPProjectIdAuditRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/automations': {
+      id: '/_project/p/$projectId/automations'
+      path: '/automations'
+      fullPath: '/p/$projectId/automations'
+      preLoaderRoute: typeof ProjectPProjectIdAutomationsRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
     '/_project/p/$projectId/backlinks': {
@@ -1575,11 +1719,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectPProjectIdBrandLookupRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
+    '/_project/p/$projectId/bulk-tools': {
+      id: '/_project/p/$projectId/bulk-tools'
+      path: '/bulk-tools'
+      fullPath: '/p/$projectId/bulk-tools'
+      preLoaderRoute: typeof ProjectPProjectIdBulkToolsRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/competitor-traffic': {
+      id: '/_project/p/$projectId/competitor-traffic'
+      path: '/competitor-traffic'
+      fullPath: '/p/$projectId/competitor-traffic'
+      preLoaderRoute: typeof ProjectPProjectIdCompetitorTrafficRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
     '/_project/p/$projectId/content-gap': {
       id: '/_project/p/$projectId/content-gap'
       path: '/content-gap'
       fullPath: '/p/$projectId/content-gap'
       preLoaderRoute: typeof ProjectPProjectIdContentGapRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/content-outline': {
+      id: '/_project/p/$projectId/content-outline'
+      path: '/content-outline'
+      fullPath: '/p/$projectId/content-outline'
+      preLoaderRoute: typeof ProjectPProjectIdContentOutlineRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
     '/_project/p/$projectId/crawl-budget': {
@@ -1608,6 +1773,34 @@ declare module '@tanstack/react-router' {
       path: '/gmb-grid'
       fullPath: '/p/$projectId/gmb-grid'
       preLoaderRoute: typeof ProjectPProjectIdGmbGridRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/google-reviews': {
+      id: '/_project/p/$projectId/google-reviews'
+      path: '/google-reviews'
+      fullPath: '/p/$projectId/google-reviews'
+      preLoaderRoute: typeof ProjectPProjectIdGoogleReviewsRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/gsc-rank-tracker': {
+      id: '/_project/p/$projectId/gsc-rank-tracker'
+      path: '/gsc-rank-tracker'
+      fullPath: '/p/$projectId/gsc-rank-tracker'
+      preLoaderRoute: typeof ProjectPProjectIdGscRankTrackerRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/indexnow': {
+      id: '/_project/p/$projectId/indexnow'
+      path: '/indexnow'
+      fullPath: '/p/$projectId/indexnow'
+      preLoaderRoute: typeof ProjectPProjectIdIndexnowRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/internal-links': {
+      id: '/_project/p/$projectId/internal-links'
+      path: '/internal-links'
+      fullPath: '/p/$projectId/internal-links'
+      preLoaderRoute: typeof ProjectPProjectIdInternalLinksRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
     '/_project/p/$projectId/jet': {
@@ -1643,6 +1836,13 @@ declare module '@tanstack/react-router' {
       path: '/link-intersect'
       fullPath: '/p/$projectId/link-intersect'
       preLoaderRoute: typeof ProjectPProjectIdLinkIntersectRouteImport
+      parentRoute: typeof ProjectPProjectIdRouteRoute
+    }
+    '/_project/p/$projectId/nap-finder': {
+      id: '/_project/p/$projectId/nap-finder'
+      path: '/nap-finder'
+      fullPath: '/p/$projectId/nap-finder'
+      preLoaderRoute: typeof ProjectPProjectIdNapFinderRouteImport
       parentRoute: typeof ProjectPProjectIdRouteRoute
     }
     '/_project/p/$projectId/on-page-checker': {
@@ -1915,20 +2115,30 @@ const ProjectPProjectIdRankTrackingRouteWithChildren =
 
 interface ProjectPProjectIdRouteRouteChildren {
   ProjectPProjectIdReportsRouteRoute: typeof ProjectPProjectIdReportsRouteRouteWithChildren
+  ProjectPProjectIdAiBotMonitorRoute: typeof ProjectPProjectIdAiBotMonitorRoute
   ProjectPProjectIdAiTrackingRoute: typeof ProjectPProjectIdAiTrackingRoute
   ProjectPProjectIdAuditRoute: typeof ProjectPProjectIdAuditRouteWithChildren
+  ProjectPProjectIdAutomationsRoute: typeof ProjectPProjectIdAutomationsRoute
   ProjectPProjectIdBacklinksRoute: typeof ProjectPProjectIdBacklinksRoute
   ProjectPProjectIdBrandLookupRoute: typeof ProjectPProjectIdBrandLookupRoute
+  ProjectPProjectIdBulkToolsRoute: typeof ProjectPProjectIdBulkToolsRoute
+  ProjectPProjectIdCompetitorTrafficRoute: typeof ProjectPProjectIdCompetitorTrafficRoute
   ProjectPProjectIdContentGapRoute: typeof ProjectPProjectIdContentGapRoute
+  ProjectPProjectIdContentOutlineRoute: typeof ProjectPProjectIdContentOutlineRoute
   ProjectPProjectIdCrawlBudgetRoute: typeof ProjectPProjectIdCrawlBudgetRoute
   ProjectPProjectIdDomainRoute: typeof ProjectPProjectIdDomainRoute
   ProjectPProjectIdGa4InsightsRoute: typeof ProjectPProjectIdGa4InsightsRoute
   ProjectPProjectIdGmbGridRoute: typeof ProjectPProjectIdGmbGridRoute
+  ProjectPProjectIdGoogleReviewsRoute: typeof ProjectPProjectIdGoogleReviewsRoute
+  ProjectPProjectIdGscRankTrackerRoute: typeof ProjectPProjectIdGscRankTrackerRoute
+  ProjectPProjectIdIndexnowRoute: typeof ProjectPProjectIdIndexnowRoute
+  ProjectPProjectIdInternalLinksRoute: typeof ProjectPProjectIdInternalLinksRoute
   ProjectPProjectIdJetRoute: typeof ProjectPProjectIdJetRoute
   ProjectPProjectIdKeywordClusteringRoute: typeof ProjectPProjectIdKeywordClusteringRoute
   ProjectPProjectIdKeywordResearchProRoute: typeof ProjectPProjectIdKeywordResearchProRoute
   ProjectPProjectIdKeywordsRoute: typeof ProjectPProjectIdKeywordsRoute
   ProjectPProjectIdLinkIntersectRoute: typeof ProjectPProjectIdLinkIntersectRoute
+  ProjectPProjectIdNapFinderRoute: typeof ProjectPProjectIdNapFinderRoute
   ProjectPProjectIdOnPageCheckerRoute: typeof ProjectPProjectIdOnPageCheckerRoute
   ProjectPProjectIdPromptExplorerRoute: typeof ProjectPProjectIdPromptExplorerRoute
   ProjectPProjectIdRankTrackingRoute: typeof ProjectPProjectIdRankTrackingRouteWithChildren
@@ -1947,15 +2157,25 @@ const ProjectPProjectIdRouteRouteChildren: ProjectPProjectIdRouteRouteChildren =
   {
     ProjectPProjectIdReportsRouteRoute:
       ProjectPProjectIdReportsRouteRouteWithChildren,
+    ProjectPProjectIdAiBotMonitorRoute: ProjectPProjectIdAiBotMonitorRoute,
     ProjectPProjectIdAiTrackingRoute: ProjectPProjectIdAiTrackingRoute,
     ProjectPProjectIdAuditRoute: ProjectPProjectIdAuditRouteWithChildren,
+    ProjectPProjectIdAutomationsRoute: ProjectPProjectIdAutomationsRoute,
     ProjectPProjectIdBacklinksRoute: ProjectPProjectIdBacklinksRoute,
     ProjectPProjectIdBrandLookupRoute: ProjectPProjectIdBrandLookupRoute,
+    ProjectPProjectIdBulkToolsRoute: ProjectPProjectIdBulkToolsRoute,
+    ProjectPProjectIdCompetitorTrafficRoute:
+      ProjectPProjectIdCompetitorTrafficRoute,
     ProjectPProjectIdContentGapRoute: ProjectPProjectIdContentGapRoute,
+    ProjectPProjectIdContentOutlineRoute: ProjectPProjectIdContentOutlineRoute,
     ProjectPProjectIdCrawlBudgetRoute: ProjectPProjectIdCrawlBudgetRoute,
     ProjectPProjectIdDomainRoute: ProjectPProjectIdDomainRoute,
     ProjectPProjectIdGa4InsightsRoute: ProjectPProjectIdGa4InsightsRoute,
     ProjectPProjectIdGmbGridRoute: ProjectPProjectIdGmbGridRoute,
+    ProjectPProjectIdGoogleReviewsRoute: ProjectPProjectIdGoogleReviewsRoute,
+    ProjectPProjectIdGscRankTrackerRoute: ProjectPProjectIdGscRankTrackerRoute,
+    ProjectPProjectIdIndexnowRoute: ProjectPProjectIdIndexnowRoute,
+    ProjectPProjectIdInternalLinksRoute: ProjectPProjectIdInternalLinksRoute,
     ProjectPProjectIdJetRoute: ProjectPProjectIdJetRoute,
     ProjectPProjectIdKeywordClusteringRoute:
       ProjectPProjectIdKeywordClusteringRoute,
@@ -1963,6 +2183,7 @@ const ProjectPProjectIdRouteRouteChildren: ProjectPProjectIdRouteRouteChildren =
       ProjectPProjectIdKeywordResearchProRoute,
     ProjectPProjectIdKeywordsRoute: ProjectPProjectIdKeywordsRoute,
     ProjectPProjectIdLinkIntersectRoute: ProjectPProjectIdLinkIntersectRoute,
+    ProjectPProjectIdNapFinderRoute: ProjectPProjectIdNapFinderRoute,
     ProjectPProjectIdOnPageCheckerRoute: ProjectPProjectIdOnPageCheckerRoute,
     ProjectPProjectIdPromptExplorerRoute: ProjectPProjectIdPromptExplorerRoute,
     ProjectPProjectIdRankTrackingRoute:

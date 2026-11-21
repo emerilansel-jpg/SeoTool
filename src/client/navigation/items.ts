@@ -1,8 +1,10 @@
 import {
+  Activity,
   BarChart3,
   Bell,
   Bookmark,
   Bot,
+  Boxes,
   Bug,
   ClipboardCheck,
   FileCode,
@@ -11,9 +13,13 @@ import {
   LayoutDashboard,
   Layers,
   Link2,
+  ListTree,
   MessageSquare,
   FileText,
+  MapPinned,
+  Radar,
   Search,
+  Star,
   MessageSquareWarning,
   Shield,
   Sparkles,
@@ -22,6 +28,8 @@ import {
   MapPin,
   Target,
   Waypoints,
+  Webhook,
+  Zap,
 } from "lucide-react";
 import { linkOptions } from "@tanstack/react-router";
 import { GoogleGlyphMuted } from "@/client/features/gsc/GoogleGlyph";
@@ -51,9 +59,24 @@ const projectNavItems = [
     icon: TrendingUp,
   },
   {
+    to: "/p/$projectId/gsc-rank-tracker" as const,
+    label: "GSC Rank Tracker",
+    icon: Activity,
+  },
+  {
     to: "/p/$projectId/gmb-grid" as const,
     label: "Local Map Rank",
     icon: MapPin,
+  },
+  {
+    to: "/p/$projectId/nap-finder" as const,
+    label: "N.A.P Finder",
+    icon: MapPinned,
+  },
+  {
+    to: "/p/$projectId/google-reviews" as const,
+    label: "Google Reviews",
+    icon: Star,
   },
   {
     to: "/p/$projectId/search-performance" as const,
@@ -136,9 +159,44 @@ const projectNavItems = [
     icon: Waypoints,
   },
   {
+    to: "/p/$projectId/competitor-traffic" as const,
+    label: "Competitor Traffic",
+    icon: TrendingUp,
+  },
+  {
     to: "/p/$projectId/crawl-budget" as const,
     label: "Crawl Budget",
     icon: Bug,
+  },
+  {
+    to: "/p/$projectId/ai-bot-monitor" as const,
+    label: "AI Bot Monitor",
+    icon: Radar,
+  },
+  {
+    to: "/p/$projectId/indexnow" as const,
+    label: "IndexNow",
+    icon: Zap,
+  },
+  {
+    to: "/p/$projectId/content-outline" as const,
+    label: "Content Outline",
+    icon: ListTree,
+  },
+  {
+    to: "/p/$projectId/bulk-tools" as const,
+    label: "Bulk Tools",
+    icon: Boxes,
+  },
+  {
+    to: "/p/$projectId/internal-links" as const,
+    label: "Internal Links",
+    icon: Link2,
+  },
+  {
+    to: "/p/$projectId/automations" as const,
+    label: "Automations",
+    icon: Webhook,
   },
 ] as const;
 
@@ -195,7 +253,10 @@ export function getProjectNavGroups(projectId: string) {
         byPath("/p/$projectId/keywords"),
         byPath("/p/$projectId/saved"),
         byPath("/p/$projectId/rank-tracking"),
+        byPath("/p/$projectId/gsc-rank-tracker"),
         byPath("/p/$projectId/gmb-grid"),
+        byPath("/p/$projectId/nap-finder"),
+        byPath("/p/$projectId/google-reviews"),
         byPath("/p/$projectId/keyword-clustering"),
       ],
     },
@@ -208,6 +269,8 @@ export function getProjectNavGroups(projectId: string) {
         byPath("/p/$projectId/on-page-checker"),
         byPath("/p/$projectId/sitemap-validator"),
         byPath("/p/$projectId/crawl-budget"),
+        byPath("/p/$projectId/ai-bot-monitor"),
+        byPath("/p/$projectId/indexnow"),
       ],
     },
     {
@@ -217,6 +280,8 @@ export function getProjectNavGroups(projectId: string) {
         byPath("/p/$projectId/backlinks"),
         byPath("/p/$projectId/content-gap"),
         byPath("/p/$projectId/link-intersect"),
+        byPath("/p/$projectId/competitor-traffic"),
+        byPath("/p/$projectId/internal-links"),
       ],
     },
     {
@@ -226,8 +291,11 @@ export function getProjectNavGroups(projectId: string) {
         byPath("/p/$projectId/brand-lookup"),
         byPath("/p/$projectId/ai-tracking"),
         byPath("/p/$projectId/prompt-explorer"),
+        byPath("/p/$projectId/content-outline"),
+        byPath("/p/$projectId/bulk-tools"),
         byPath("/p/$projectId/reports"),
         byPath("/p/$projectId/alerts"),
+        byPath("/p/$projectId/automations"),
       ],
     },
   ];

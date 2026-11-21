@@ -106,6 +106,21 @@ export class ReportGenerationWorkflow extends WorkflowEntrypoint<
           linkPath: `/p/${projectId}/reports/${reportId}`,
         }),
       );
+
+      // Automations webhooks: notify subscribers that a report snapshot landed.
+      try {
+        const { WebhookEmitter } = await import(
+          "@/server/features/webhooks/services/WebhookEmitter"
+        );
+        await WebhookEmitter.emitWebhookEvent({
+          organizationId,
+          projectId,
+          event: "report.generated",
+          payload: { reportId, snapshotId: snapshot.id, reportName: report.name },
+        });
+      } catch (error) {
+        console.error(`[report] webhook emit failed for ${reportId}:`, error);
+      }
     });
   }
 }

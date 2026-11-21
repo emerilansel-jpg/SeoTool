@@ -359,5 +359,35 @@ async function finalizeAudit(args: {
       },
     });
     await AuditProgressKV.clear(auditId);
+
+    // IndexNow auto-indexing: if the project enabled it with a verified key,
+    // submit this audit's new/changed URLs. Failure must never fail the audit.
+    try {
+      const { IndexNowService } = await import(
+        "@/server/features/indexnow/services/IndexNowService"
+      );
+      await IndexNowService.autoSubmitFromAudit({ projectId, auditId });
+    } catch (error) {
+      console.error(`[audit] IndexNow auto-submit failed for ${auditId}:`, error);
+    }
+
+    // Automations webhooks: notify subscribers that the audit finished.
+    try {
+      const { WebhookEmitter } = await import(
+        "@/server/features/webhooks/services/WebhookEmitter"
+      );
+      await WebhookEmitter.emitWebhookEvent({
+        organizationId: billingCustomer.organizationId,
+        projectId,
+        event: "audit.completed",
+        payload: {
+          auditId,
+          pagesCrawled: crawl.pages.length,
+          crawlCompleted: crawl.completed,
+        },
+      });
+    } catch (error) {
+      console.error(`[audit] webhook emit failed for ${auditId}:`, error);
+    }
   });
 }

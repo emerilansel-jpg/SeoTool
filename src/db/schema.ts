@@ -49,6 +49,18 @@ import * as pgAiTracking from "./pg/ai-tracking.schema";
 import * as pgBrandLookup from "./pg/brand-lookup.schema";
 import * as sqliteByok from "./byok.schema";
 import * as pgByok from "./pg/byok.schema";
+import * as sqliteAiBots from "./ai-bots.schema";
+import * as pgAiBots from "./pg/ai-bots.schema";
+import * as sqliteGscRankTracker from "./gsc-rank-tracker.schema";
+import * as pgGscRankTracker from "./pg/gsc-rank-tracker.schema";
+import * as sqliteIndexNow from "./indexnow.schema";
+import * as pgIndexNow from "./pg/indexnow.schema";
+import * as sqliteNap from "./nap.schema";
+import * as pgNap from "./pg/nap.schema";
+import * as sqliteInternalLinks from "./internal-links.schema";
+import * as pgInternalLinks from "./pg/internal-links.schema";
+import * as sqliteWebhooks from "./webhooks.schema";
+import * as pgWebhooks from "./pg/webhooks.schema";
 
 // Canonical schema barrel. Repositories import their tables from here and the
 // provider-aware `db` from "@/db", so each repository is written ONCE for both
@@ -84,7 +96,13 @@ type AppSchema = typeof sqliteApp &
   typeof sqliteProjectCompetitors &
   typeof sqliteAiTracking &
   typeof sqliteBrandLookup &
-  typeof sqliteByok;
+  typeof sqliteByok &
+  typeof sqliteAiBots &
+  typeof sqliteGscRankTracker &
+  typeof sqliteIndexNow &
+  typeof sqliteNap &
+  typeof sqliteInternalLinks &
+  typeof sqliteWebhooks;
 
 const runtimeSchema =
   getDatabaseProvider() === "postgres"
@@ -114,6 +132,12 @@ const runtimeSchema =
         ...pgAiTracking,
         ...pgBrandLookup,
         ...pgByok,
+        ...pgAiBots,
+        ...pgGscRankTracker,
+        ...pgIndexNow,
+        ...pgNap,
+        ...pgInternalLinks,
+        ...pgWebhooks,
       }
     : {
         ...sqliteApp,
@@ -141,6 +165,12 @@ const runtimeSchema =
         ...sqliteAiTracking,
         ...sqliteBrandLookup,
         ...sqliteByok,
+        ...sqliteAiBots,
+        ...sqliteGscRankTracker,
+        ...sqliteIndexNow,
+        ...sqliteNap,
+        ...sqliteInternalLinks,
+        ...sqliteWebhooks,
       };
 
 // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- guarded by schema-parity.test.ts
@@ -227,4 +257,18 @@ export const {
   couponCodes,
   couponRedemptions,
   feedback,
+  aiBotSites,
+  aiBotHits,
+  aiBotDailyStats,
+  gscTrackedKeywords,
+  gscRankHistory,
+  indexNowKeys,
+  indexNowSubmissions,
+  napAudits,
+  napResults,
+  gbpProfiles,
+  gbpReviews,
+  internalLinkSuggestions,
+  automationWebhooks,
+  automationWebhookDeliveries,
 } = schema;

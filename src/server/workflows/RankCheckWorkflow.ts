@@ -201,6 +201,21 @@ async function finalizeRankCheckRun(input: {
         : {}),
     },
   });
+
+  // Automations webhooks: notify subscribers that a rank check finished.
+  try {
+    const { WebhookEmitter } = await import(
+      "@/server/features/webhooks/services/WebhookEmitter"
+    );
+    await WebhookEmitter.emitWebhookEvent({
+      organizationId: input.billingCustomer.organizationId,
+      projectId: input.projectId,
+      event: "rank_check.completed",
+      payload: { runId: input.runId, keywordsChecked, keywordsTotal, trigger: input.trigger },
+    });
+  } catch (error) {
+    console.error(`[rank-check] webhook emit failed for ${input.runId}:`, error);
+  }
 }
 
 async function markRankCheckRunFailed(input: {

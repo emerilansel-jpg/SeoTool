@@ -118,6 +118,26 @@ export function createDataforseoClient(
         "local_seo",
         "business-depth",
       ),
+      myBusinessInfo: meter(
+        customer,
+        (s) => s.fetchMyBusinessInfo,
+        "local_seo",
+        "business-depth",
+      ),
+      reviewsTaskPost: meter(
+        customer,
+        (s) => s.postGoogleReviewsTask,
+        "local_seo",
+        "business-depth",
+      ),
+      // task_get is free in DataForSEO billing; the meter wrapper just routes
+      // it through the same credential/quota plumbing without a charge.
+      reviewsTaskGet: meter(
+        customer,
+        (s) => s.fetchGoogleReviewsTask,
+        "local_seo",
+        "business-depth",
+      ),
     },
     backlinks: {
       summary: meter(
@@ -219,12 +239,24 @@ export function createDataforseoClient(
         undefined,
         "google-ads",
       ),
+      autocomplete: meter(
+        customer,
+        (s) => s.fetchAutocompleteSuggestions,
+        "keyword_research",
+        "serp-live",
+      ),
     },
     domain: {
       rankOverview: meter(
         customer,
         (s) => s.fetchDomainRankOverview,
         undefined,
+        "labs-list",
+      ),
+      historicalTraffic: meter(
+        customer,
+        (s) => s.fetchHistoricalTrafficEstimation,
+        "domain_overview",
         "labs-list",
       ),
       // domain_* credit features (domain_overview → keyword_search quota) so
@@ -285,6 +317,7 @@ export function createDataforseoClient(
         "rank_tracking",
         "serp-task-batch",
       ),
+      paa: meter(customer, (s) => s.fetchPaaQuestions, "keyword_research", "serp-live"),
     },
     labs: {
       // Callers (e.g. the keyword-metrics MCP tool) can attribute the spend to

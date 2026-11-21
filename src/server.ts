@@ -11,6 +11,12 @@ import { runScheduledReports } from "@/server/features/reports/services/schedule
 import { runScheduledAlerts } from "@/server/features/alerts/services/scheduledAlerts";
 import { runScheduledGmbGridScans } from "@/server/features/gmb-grid/services/scheduledGmbGridScans";
 import { runScheduledAiTracking } from "@/server/features/ai-tracking/services/scheduledAiTracking";
+import { runScheduledAiBots } from "@/server/features/ai-bots/services/scheduledAiBots";
+import { runScheduledGscRankTracker } from "@/server/features/gsc-rank-tracker/services/scheduledGscRankTracker";
+import {
+  AI_BOTS_INGEST_PATH,
+  handleAiBotIngestRequest,
+} from "@/server/features/ai-bots/aiBotIngestApi";
 import { getOrCreateOrganizationCustomer } from "@/server/billing/subscription";
 import { assertFeatureAccess } from "@/server/billing/quota-gate";
 import {
@@ -170,6 +176,10 @@ function handleFetch(
     return handleFeedbackApiRequest(publicRequest);
   }
 
+  if (pathname === AI_BOTS_INGEST_PATH) {
+    return handleAiBotIngestRequest(publicRequest);
+  }
+
   return seotoolOAuthProvider.fetch(publicRequest, env as SeoToolOAuthEnv, ctx);
 }
 
@@ -197,5 +207,7 @@ export default {
     await withPgClient(() => runScheduledAlerts(env));
     await withPgClient(() => runScheduledGmbGridScans(env));
     await withPgClient(() => runScheduledAiTracking(env));
+    await withPgClient(() => runScheduledAiBots(env));
+    await withPgClient(() => runScheduledGscRankTracker(env));
   },
 };

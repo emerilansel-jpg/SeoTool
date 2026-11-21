@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   DataforseoLabsGoogleDomainIntersectionLiveRequestInfo,
   DataforseoLabsGoogleDomainRankOverviewLiveRequestInfo,
+  DataforseoLabsGoogleHistoricalBulkTrafficEstimationLiveRequestInfo,
   DataforseoLabsGoogleKeywordIdeasLiveRequestInfo,
   DataforseoLabsGoogleKeywordOverviewLiveRequestInfo,
   DataforseoLabsGoogleKeywordSuggestionsLiveRequestInfo,
@@ -241,6 +242,53 @@ export async function fetchDomainRankOverview(input: {
     data: task.result?.[0]?.items ?? [],
     billing: buildTaskBilling(task),
   };
+}
+
+export type HistoricalTrafficPoint = {
+  year: number;
+  month: number;
+  etv: number;
+  organicTraffic: number;
+};
+
+export type HistoricalTrafficSeries = {
+  target: string;
+  points: HistoricalTrafficPoint[];
+};
+
+/** Monthly estimated organic traffic for up to 5 domains in one call. */
+export async function fetchHistoricalTrafficEstimation(input: {
+  targets: string[];
+  locationCode: number;
+  languageCode: string;
+  dateFrom?: string;
+  dateTo?: string;
+  apiKey?: string;
+}): Promise<DataforseoApiResponse<HistoricalTrafficSeries[]>> {
+  const response = await labsApi(input.apiKey).googleHistoricalBulkTrafficEstimationLive([
+    new DataforseoLabsGoogleHistoricalBulkTrafficEstimationLiveRequestInfo({
+      targets: input.targets,
+      location_code: input.locationCode,
+      language_code: input.languageCode,
+      date_from: input.dateFrom,
+      date_to: input.dateTo,
+    }),
+  ]);
+  const task = assertOk(response, { treatNoResultsAsEmpty: true });
+  const series: HistoricalTrafficSeries[] = [];
+  for (const item of task.result?.[0]?.items ?? []) {
+    if (!item || typeof item.target !== "string") continue;
+    const points = (item.metrics?.organic ?? [])
+      .filter((metric) => typeof metric.year === "number" && typeof metric.month === "number")
+      .map((metric) => ({
+        year: metric.year as number,
+        month: metric.month as number,
+        etv: metric.etv ?? 0,
+        organicTraffic: metric.count ?? 0,
+      }));
+    series.push({ target: item.target, points });
+  }
+  return { data: series, billing: buildTaskBilling(task) };
 }
 
 type RankedKeywordsPage = {

@@ -8,7 +8,10 @@
 
 export {
   fetchBusinessListingsSearch,
+  fetchGoogleReviewsTask,
+  fetchMyBusinessInfo,
   fetchQuestionsAnswers,
+  postGoogleReviewsTask,
 } from "@/server/lib/dataforseo/business";
 
 export {
@@ -29,6 +32,7 @@ export { fetchBacklinksDomainIntersection } from "@/server/lib/dataforseo/backli
 export {
   fetchDomainIntersection,
   fetchDomainRankOverview,
+  fetchHistoricalTrafficEstimation,
   fetchKeywordIdeas,
   fetchKeywordOverview,
   fetchKeywordSuggestions,
@@ -64,6 +68,11 @@ export {
 } from "@/server/lib/dataforseo/bing-serp";
 
 export { fetchLighthouseResult } from "@/server/lib/dataforseo/lighthouse";
+
+export {
+  fetchAutocompleteSuggestions,
+  fetchPaaQuestions,
+} from "@/server/lib/dataforseo/bulk";
 
 export {
   fetchLlmAggregatedMetrics,

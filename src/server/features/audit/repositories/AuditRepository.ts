@@ -4,7 +4,7 @@
  * Provider-aware (D1 or Postgres) via the `@/db` handle. Covers audits,
  * audit_pages, audit_links, audit_issues, and stored Lighthouse results.
  */
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   audits,
@@ -342,6 +342,59 @@ async function getPagesForAudit(auditId: string) {
     .where(eq(auditPages.auditId, auditId));
 }
 
+/** URLs crawled in `auditId` that are new (never seen in an earlier completed
+ *  audit of the project) or whose contentHash changed since the most recent
+ *  prior completed audit. Drives IndexNow auto-submit after audit completion. */
+async function getNewOrChangedUrlsSincePreviousAudit(auditId: string): Promise<string[]> {
+  const current = await db
+    .select({
+      url: auditPages.url,
+      contentHash: auditPages.contentHash,
+      statusCode: auditPages.statusCode,
+    })
+    .from(auditPages)
+    .where(eq(auditPages.auditId, auditId));
+
+  const [audit] = await db
+    .select({ projectId: audits.projectId })
+    .from(audits)
+    .where(eq(audits.id, auditId))
+    .limit(1);
+  if (!audit) return [];
+
+  const previous = await db.query.audits.findFirst({
+    where: and(
+      eq(audits.projectId, audit.projectId),
+      eq(audits.status, "completed"),
+      sql`${audits.id} != ${auditId}`,
+    ),
+    orderBy: desc(audits.startedAt),
+  });
+  if (!previous) {
+    // First audit: every indexable page is "new".
+    return current
+      .filter((page) => (page.statusCode ?? 0) < 300)
+      .map((page) => page.url);
+  }
+
+  const previousHashes = new Map(
+    (
+      await db
+        .select({ url: auditPages.url, contentHash: auditPages.contentHash })
+        .from(auditPages)
+        .where(eq(auditPages.auditId, previous.id))
+    ).map((row) => [row.url, row.contentHash]),
+  );
+
+  return current
+    .filter((page) => {
+      if ((page.statusCode ?? 0) >= 300) return false;
+      const before = previousHashes.get(page.url);
+      return before === undefined || before !== page.contentHash;
+    })
+    .map((page) => page.url);
+}
+
 async function hasPagesForAudit(auditId: string): Promise<boolean> {
   const rows = await db
     .select({ id: auditPages.id })
@@ -464,6 +517,7 @@ export const AuditRepository = {
   getLatestCompletedAuditForProject,
   getIssuesForAudit,
   getPagesForAudit,
+  getNewOrChangedUrlsSincePreviousAudit,
   hasPagesForAudit,
   getAuditsByProject,
   getAuditUsageForUser,
