@@ -1,3 +1,4 @@
+// oxlint-disable max-lines, max-lines-per-function, complexity -- full scan config + run view in one component
 // oxlint-disable max-lines, max-lines-per-function
 import { useEffect, useState, type FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -26,10 +27,27 @@ import {
 } from "./components/GmbProfileSearch";
 import { GmbScanPipeline } from "./components/GmbScanPipeline";
 import { GmbMap, type GmbSnapshotMarker } from "./components/GmbMap";
+import type { GeoPoint, GmbGridShape } from "@/shared/geo-shape";
 import { PinCompetitorsModal } from "./components/GmbPinModal";
 import { GmbGridReportSection } from "./components/GmbGridReportSection";
 
 type PendingScan = Omit<CreateGmbGridInput, "costConfirmed">;
+
+/** Parse the stored polygon JSON defensively; bad JSON renders no overlay. */
+function parsePolygonJson(raw: string): GeoPoint[] {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (point): point is GeoPoint =>
+        !!point &&
+        typeof (point as { lat?: unknown }).lat === "number" &&
+        typeof (point as { lng?: unknown }).lng === "number",
+    );
+  } catch {
+    return [];
+  }
+}
 
 export function GmbGridView({ projectId }: { projectId: string }) {
   const projectMarket = useProjectMarket(projectId);
@@ -54,6 +72,9 @@ export function GmbGridView({ projectId }: { projectId: string }) {
     "weekly" | "monthly" | "manual"
   >("manual");
   const [distanceUnit, setDistanceUnit] = useState<"km" | "mi">("mi");
+  const [shape, setShape] = useState<GmbGridShape>("square");
+  const [polygonVertices, setPolygonVertices] = useState<GeoPoint[]>([]);
+  const [drawMode, setDrawMode] = useState(false);
   const [selectedPin, setSelectedPin] = useState<GmbSnapshotMarker | null>(
     null,
   );
@@ -174,6 +195,11 @@ export function GmbGridView({ projectId }: { projectId: string }) {
       centerLng: selectedProfile.lng,
       gridSize,
       radiusMeters,
+      shape,
+      polygonLatlngs:
+        shape === "polygon" && polygonVertices.length >= 3
+          ? polygonVertices
+          : undefined,
       languageCode: activeLanguage,
       device,
       scheduleInterval,
@@ -318,6 +344,77 @@ export function GmbGridView({ projectId }: { projectId: string }) {
                   )}
                 </select>
               </div>
+            </div>
+
+            <div className="form-control gap-1">
+              <span className="text-sm font-medium">Scan area shape</span>
+              <div className="join border border-base-300 rounded-md w-fit">
+                {(
+                  [
+                    ["square", "Square"],
+                    ["circle", "Circle"],
+                    ["polygon", "Polygon"],
+                  ] as const
+                ).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`join-item btn btn-xs px-3 ${shape === value ? "btn-primary font-bold" : "btn-ghost text-base-content/60"}`}
+                    onClick={() => {
+                      setShape(value);
+                      setDrawMode(false);
+                      if (value !== "polygon") setPolygonVertices([]);
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {shape === "circle" ? (
+                <p className="text-xs text-base-content/60">
+                  Only grid pins inside the radius circle are scanned.
+                </p>
+              ) : null}
+              {shape === "polygon" ? (
+                <div className="rounded-lg border border-base-300 bg-base-200/40 p-3 text-xs space-y-2">
+                  <p className="text-base-content/70">
+                    Click the map to place at least 3 vertices, then scan. Only
+                    pins inside the polygon are checked.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className={`btn btn-xs ${drawMode ? "btn-primary" : "btn-outline"}`}
+                      onClick={() => setDrawMode(!drawMode)}
+                    >
+                      {drawMode ? "Done drawing" : "Draw on map"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-xs btn-ghost"
+                      onClick={() =>
+                        setPolygonVertices(polygonVertices.slice(0, -1))
+                      }
+                      disabled={polygonVertices.length === 0}
+                    >
+                      Undo last
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-xs btn-ghost text-error"
+                      onClick={() => setPolygonVertices([])}
+                      disabled={polygonVertices.length === 0}
+                    >
+                      Clear
+                    </button>
+                    <span
+                      className={`ml-auto font-medium ${polygonVertices.length >= 3 ? "text-success" : "text-warning"}`}
+                    >
+                      {polygonVertices.length} vertices
+                    </span>
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -469,6 +566,25 @@ export function GmbGridView({ projectId }: { projectId: string }) {
             businessName={businessName}
             snapshots={runData?.snapshots}
             onSelectSnapshot={(pin) => setSelectedPin(pin)}
+            shape={
+              runData && "shape" in runData.config
+                ? runData.config.shape
+                : shape
+            }
+            polygonVertices={
+              runData &&
+              "shape" in runData.config &&
+              runData.config.shape === "polygon" &&
+              runData.config.polygonLatlngs
+                ? parsePolygonJson(runData.config.polygonLatlngs)
+                : polygonVertices
+            }
+            drawMode={drawMode}
+            onMapClick={(point) => {
+              if (drawMode && polygonVertices.length < 24) {
+                setPolygonVertices([...polygonVertices, point]);
+              }
+            }}
           />
           {!centerSource && (
             <p className="text-center text-sm text-base-content/60">

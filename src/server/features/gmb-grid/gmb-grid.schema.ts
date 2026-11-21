@@ -16,6 +16,19 @@ export const CreateGmbGridSchema = z.object({
     .max(15)
     .refine((val) => val % 2 !== 0, "Grid size must be odd"),
   radiusMeters: z.number().int().min(100).max(100000),
+  // Scan area shape: square = full grid (default), circle = radius clip,
+  // polygon = custom drawn area (requires polygonLatlngs).
+  shape: z.enum(["square", "circle", "polygon"]).default("square"),
+  polygonLatlngs: z
+    .array(
+      z.object({
+        lat: z.number().min(-90).max(90),
+        lng: z.number().min(-180).max(180),
+      }),
+    )
+    .min(3)
+    .max(24)
+    .optional(),
   languageCode: z.string().trim().min(2).max(5).default("en"),
   device: z.enum(["desktop", "mobile"]).default("mobile"),
   scheduleInterval: z.enum(["weekly", "monthly", "manual"]).default("manual"),

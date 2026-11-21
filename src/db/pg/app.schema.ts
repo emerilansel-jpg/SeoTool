@@ -426,6 +426,10 @@ export const gmbGridConfigs = pgTable(
     centerLng: real("center_lng").notNull(),
     gridSize: integer("grid_size").notNull(),
     radiusMeters: integer("radius_meters").notNull(),
+    shape: text("shape", { enum: ["square", "circle", "polygon"] })
+      .notNull()
+      .default("square"),
+    polygonLatlngs: text("polygon_latlngs"),
     languageCode: text("language_code").notNull().default("en"),
     device: text("device", { enum: ["desktop", "mobile"] })
       .notNull()

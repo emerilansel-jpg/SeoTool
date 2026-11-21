@@ -365,6 +365,13 @@
       "when": 1795263091146,
       "tag": "0051_tiny_blue_shield",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1795280742653,
+      "tag": "0052_grey_stark_industries",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,4 @@
+// oxlint-disable max-lines -- profile search + scan start + shape helper + report in one service
 import { env } from "cloudflare:workers";
 import { z } from "zod";
 import {
@@ -8,16 +9,75 @@ import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import { createDataforseoClient } from "@/server/lib/dataforseo";
 import { AppError } from "@/server/lib/errors";
 import { resolveMarket } from "@/shared/keyword-locations";
+import { filterNodesByShape, type GeoPoint } from "@/shared/geo-shape";
 import { generateGridNodes } from "@/server/utils/geo-grid";
 import type { CreateGmbGridInput } from "../gmb-grid.schema";
 import { computeGridMapZoom, estimateGmbGridCost } from "../gmb-grid";
-import { GmbGridRepository } from "../repositories/GmbGridRepository";
+import {
+  GmbGridRepository,
+  type SnapshotInsert,
+} from "../repositories/GmbGridRepository";
 import { getReportHistory } from "./gmbGridReportHistory";
 import {
   E2E_CONFIG_ID,
   E2E_RUN_ID,
   getE2eRunFixture,
 } from "./gmbGridE2eFixtures";
+
+/** Build the shape-filtered snapshot rows for a scan. Shared by the manual
+ *  start and the scheduled scans so both honor the same area definition. */
+export function buildShapeFilteredSnapshots(input: {
+  centerLat: number;
+  centerLng: number;
+  gridSize: number;
+  radiusMeters: number;
+  shape: "square" | "circle" | "polygon" | null;
+  polygonLatlngs: string | null;
+  runId: string;
+}): { snapshots: SnapshotInsert[]; totalPoints: number } {
+  const nodes = generateGridNodes(
+    input.centerLat,
+    input.centerLng,
+    input.gridSize,
+    input.radiusMeters,
+  );
+  let polygon: GeoPoint[] = [];
+  if (input.shape === "polygon" && input.polygonLatlngs) {
+    try {
+      const parsed: unknown = JSON.parse(input.polygonLatlngs);
+      if (Array.isArray(parsed)) {
+        polygon = parsed.filter(
+          (point): point is GeoPoint =>
+            !!point &&
+            typeof (point as { lat?: unknown }).lat === "number" &&
+            typeof (point as { lng?: unknown }).lng === "number",
+        );
+      }
+    } catch {
+      polygon = [];
+    }
+  }
+  const kept = filterNodesByShape(nodes, {
+    shape: input.shape ?? "square",
+    centerLat: input.centerLat,
+    centerLng: input.centerLng,
+    radiusMeters: input.radiusMeters,
+    polygon,
+  });
+
+  const snapshots = kept.map(
+    (node): SnapshotInsert => ({
+      id: crypto.randomUUID(),
+      runId: input.runId,
+      lat: node.lat,
+      lng: node.lng,
+      gridRow: node.gridRow,
+      gridCol: node.gridCol,
+      status: "pending" as const,
+    }),
+  );
+  return { snapshots, totalPoints: snapshots.length };
+}
 
 const profileItemSchema = z
   .object({
@@ -156,6 +216,7 @@ async function startScan(input: {
     keyword: normalizedKeyword,
     gridSize: data.gridSize,
     radiusMeters: data.radiusMeters,
+    shape: data.shape,
     languageCode,
     device: data.device,
     mapZoom,
@@ -192,6 +253,11 @@ async function startScan(input: {
       centerLng: data.centerLng,
       gridSize: data.gridSize,
       radiusMeters: data.radiusMeters,
+      shape: data.shape,
+      polygonLatlngs:
+        data.shape === "polygon" && data.polygonLatlngs
+          ? JSON.stringify(data.polygonLatlngs)
+          : null,
       languageCode,
       device: data.device,
       mapZoom,
@@ -205,7 +271,25 @@ async function startScan(input: {
     throw new AppError("INTERNAL_ERROR", "Failed to save grid configuration");
 
   const runId = crypto.randomUUID();
-  const totalPoints = data.gridSize * data.gridSize;
+  const shapePreview = buildShapeFilteredSnapshots({
+    centerLat: config.centerLat,
+    centerLng: config.centerLng,
+    gridSize: config.gridSize,
+    radiusMeters: config.radiusMeters,
+    shape: data.shape,
+    polygonLatlngs:
+      data.shape === "polygon" && data.polygonLatlngs
+        ? JSON.stringify(data.polygonLatlngs)
+        : null,
+    runId,
+  });
+  if (shapePreview.totalPoints === 0) {
+    throw new AppError(
+      "VALIDATION_ERROR",
+      "The drawn area covers no grid points. Enlarge the polygon or increase the grid size.",
+    );
+  }
+  const totalPoints = shapePreview.totalPoints;
   const inserted = await GmbGridRepository.tryCreateRun({
     id: runId,
     configId: config.id,
@@ -223,21 +307,7 @@ async function startScan(input: {
     };
   }
 
-  const snapshots = generateGridNodes(
-    config.centerLat,
-    config.centerLng,
-    config.gridSize,
-    config.radiusMeters,
-  ).map((node) => ({
-    id: crypto.randomUUID(),
-    runId,
-    lat: node.lat,
-    lng: node.lng,
-    gridRow: node.gridRow,
-    gridCol: node.gridCol,
-    status: "pending" as const,
-  }));
-  await GmbGridRepository.insertSnapshots(snapshots);
+  await GmbGridRepository.insertSnapshots(shapePreview.snapshots);
 
   try {
     await env.GMB_GRID_WORKFLOW.create({
@@ -381,5 +451,6 @@ export const GmbGridService = {
   listConfigs: GmbGridRepository.listConfigsForProject,
   estimateCost: estimateGmbGridCost,
   computeNextCheckAt,
+  buildShapeFilteredSnapshots,
   getReportHistory,
 };

@@ -1,7 +1,6 @@
 import { customerHasPaidPlan } from "@/server/billing/subscription";
 import { GmbGridRepository } from "../repositories/GmbGridRepository";
 import { GmbGridService } from "./GmbGridService";
-import { generateGridNodes } from "@/server/utils/geo-grid";
 import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 
 export async function runScheduledGmbGridScans(env: Env) {
@@ -22,32 +21,40 @@ export async function runScheduledGmbGridScans(env: Env) {
       });
 
       const runId = crypto.randomUUID();
+      const shaped = GmbGridService.buildShapeFilteredSnapshots({
+        centerLat: config.centerLat,
+        centerLng: config.centerLng,
+        gridSize: config.gridSize,
+        radiusMeters: config.radiusMeters,
+        shape: config.shape,
+        polygonLatlngs: config.polygonLatlngs,
+        runId,
+      });
+      // A shape that clips to nothing (tiny polygon) has nothing to scan.
+      if (shaped.totalPoints === 0) {
+        await GmbGridRepository.updateConfig(config.id, {
+          nextCheckAt: GmbGridService.computeNextCheckAt(
+            config.scheduleInterval,
+          ),
+          updatedAt: new Date().toISOString(),
+          isActive: false,
+        });
+        console.warn(
+          `[gmb-grid] config ${config.id} skipped: shape covers no grid points`,
+        );
+        continue;
+      }
       const inserted = await GmbGridRepository.tryCreateRun({
         id: runId,
         configId: config.id,
         status: "pending",
         trigger: "scheduled",
-        totalPoints: config.gridSize * config.gridSize,
+        totalPoints: shaped.totalPoints,
       });
       if (!inserted) continue;
       createdRunId = runId;
 
-      await GmbGridRepository.insertSnapshots(
-        generateGridNodes(
-          config.centerLat,
-          config.centerLng,
-          config.gridSize,
-          config.radiusMeters,
-        ).map((node) => ({
-          id: crypto.randomUUID(),
-          runId,
-          lat: node.lat,
-          lng: node.lng,
-          gridRow: node.gridRow,
-          gridCol: node.gridCol,
-          status: "pending" as const,
-        })),
-      );
+      await GmbGridRepository.insertSnapshots(shaped.snapshots);
 
       await env.GMB_GRID_WORKFLOW.create({
         id: runId,

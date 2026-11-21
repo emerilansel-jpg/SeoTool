@@ -11,7 +11,7 @@ import {
 
 type ConfigInsert = InferInsertModel<typeof gmbGridConfigs>;
 type RunInsert = InferInsertModel<typeof gmbGridRuns>;
-type SnapshotInsert = InferInsertModel<typeof gmbGridSnapshots>;
+export type SnapshotInsert = InferInsertModel<typeof gmbGridSnapshots>;
 
 async function listConfigsForProject(projectId: string) {
   const configs = await db
@@ -70,6 +70,7 @@ async function findMatchingConfig(input: {
   keyword: string;
   gridSize: number;
   radiusMeters: number;
+  shape: "square" | "circle" | "polygon";
   languageCode: string;
   device: "desktop" | "mobile";
   mapZoom: number;
@@ -84,6 +85,7 @@ async function findMatchingConfig(input: {
         eq(gmbGridConfigs.keyword, input.keyword),
         eq(gmbGridConfigs.gridSize, input.gridSize),
         eq(gmbGridConfigs.radiusMeters, input.radiusMeters),
+        eq(gmbGridConfigs.shape, input.shape),
         eq(gmbGridConfigs.languageCode, input.languageCode),
         eq(gmbGridConfigs.device, input.device),
         eq(gmbGridConfigs.mapZoom, input.mapZoom),

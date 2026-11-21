@@ -439,6 +439,12 @@ export const gmbGridConfigs = sqliteTable(
     centerLng: real("center_lng").notNull(),
     gridSize: integer("grid_size").notNull(),
     radiusMeters: integer("radius_meters").notNull(),
+    // Scan area shape: square = full grid, circle = radius clip, polygon =
+    // custom drawn area (vertices JSON in polygon_latlngs).
+    shape: text("shape", { enum: ["square", "circle", "polygon"] })
+      .notNull()
+      .default("square"),
+    polygonLatlngs: text("polygon_latlngs"),
     languageCode: text("language_code").notNull().default("en"),
     device: text("device", { enum: ["desktop", "mobile"] })
       .notNull()

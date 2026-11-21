@@ -519,6 +519,13 @@
       "when": 1795263088368,
       "tag": "0073_closed_corsair",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "6",
+      "when": 1795280739739,
+      "tag": "0074_strong_jigsaw",
+      "breakpoints": true
     }
   ]
 }

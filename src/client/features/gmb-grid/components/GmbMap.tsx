@@ -4,11 +4,15 @@ import {
   TileLayer,
   Circle,
   CircleMarker,
+  Polygon,
   Tooltip,
   useMap,
+  useMapEvents,
 } from "react-leaflet";
 // oxlint-disable-next-line import/no-unassigned-import
 import "leaflet/dist/leaflet.css";
+
+import type { GeoPoint, GmbGridShape } from "@/shared/geo-shape";
 
 import L from "leaflet";
 // oxlint-disable-next-line typescript-eslint/no-explicit-any, typescript-eslint/no-unsafe-type-assertion, typescript-eslint/no-unsafe-member-access
@@ -19,6 +23,25 @@ L.Icon.Default.mergeOptions({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
+
+/** react-leaflet v5: map-level clicks are captured by a child using
+ *  useMapEvents (MapContainer itself takes no eventHandlers prop). */
+function MapClickHandler({
+  drawMode,
+  onMapClick,
+}: {
+  drawMode: boolean;
+  onMapClick?: (point: GeoPoint) => void;
+}) {
+  useMapEvents({
+    click: (event) => {
+      if (drawMode && onMapClick) {
+        onMapClick({ lat: event.latlng.lat, lng: event.latlng.lng });
+      }
+    },
+  });
+  return null;
+}
 
 function MapBoundsUpdater({
   centerLat,
@@ -112,6 +135,10 @@ export function GmbMap({
   businessName,
   snapshots,
   onSelectSnapshot,
+  shape = "square",
+  polygonVertices,
+  drawMode = false,
+  onMapClick,
 }: {
   centerLat: number;
   centerLng: number;
@@ -121,18 +148,31 @@ export function GmbMap({
   businessName?: string;
   snapshots?: GmbSnapshotMarker[];
   onSelectSnapshot?: (snapshot: GmbSnapshotMarker) => void;
+  /** Active scan shape: draws the corresponding area overlay. */
+  shape?: GmbGridShape;
+  /** Polygon vertices for shape === "polygon" (already placed ones). */
+  polygonVertices?: GeoPoint[];
+  /** When true, map clicks are forwarded so the user can place vertices. */
+  drawMode?: boolean;
+  onMapClick?: (point: GeoPoint) => void;
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   return (
     <div className="relative flex-1 min-h-[400px] rounded-lg overflow-hidden border border-base-300 z-0">
+      {drawMode ? (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-primary/90 text-primary-content backdrop-blur-xs rounded-full px-4 py-1.5 shadow-sm text-xs font-medium pointer-events-none">
+          Click the map to add polygon vertices
+        </div>
+      ) : null}
       {mounted ? (
         <MapContainer
           center={[centerLat, centerLng]}
           zoom={defaultZoom}
           style={{ height: "100%", width: "100%" }}
         >
+          <MapClickHandler drawMode={drawMode} onMapClick={onMapClick} />
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; OpenStreetMap contributors"
@@ -147,17 +187,51 @@ export function GmbMap({
 
           {hasSelection && (
             <>
-              <Circle
-                center={[centerLat, centerLng]}
-                radius={radiusMeters}
-                pathOptions={{
-                  color: "#3b82f6",
-                  fillColor: "#3b82f6",
-                  fillOpacity: 0.08,
-                  weight: 1.5,
-                  dashArray: "5 5",
-                }}
-              />
+              {shape !== "polygon" ? (
+                <Circle
+                  center={[centerLat, centerLng]}
+                  radius={radiusMeters}
+                  pathOptions={{
+                    color: "#3b82f6",
+                    fillColor: "#3b82f6",
+                    fillOpacity: 0.08,
+                    weight: 1.5,
+                    dashArray: "5 5",
+                  }}
+                />
+              ) : null}
+              {shape === "polygon" &&
+              polygonVertices &&
+              polygonVertices.length >= 3 ? (
+                <Polygon
+                  positions={polygonVertices.map((vertex) => [
+                    vertex.lat,
+                    vertex.lng,
+                  ])}
+                  pathOptions={{
+                    color: "#3b82f6",
+                    fillColor: "#3b82f6",
+                    fillOpacity: 0.08,
+                    weight: 1.5,
+                    dashArray: "5 5",
+                  }}
+                />
+              ) : null}
+              {shape === "polygon"
+                ? polygonVertices?.map((vertex, index) => (
+                    <CircleMarker
+                      key={`vertex-${index}`}
+                      center={[vertex.lat, vertex.lng]}
+                      radius={5}
+                      pathOptions={{
+                        color: "#ffffff",
+                        fillColor: "#3b82f6",
+                        fillOpacity: 1,
+                        weight: 1.5,
+                      }}
+                    />
+                  ))
+                : null}
               <CircleMarker
                 center={[centerLat, centerLng]}
                 radius={7}
