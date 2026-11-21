@@ -31,11 +31,12 @@ docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T postgres \
   pg_dump -Fc --no-owner -U openseo openseo \
   | tee >(gzip > "$DUMP_FILE") >/dev/null
 
-# ─── Validate: non-trivial size + PostgreSQL custom-format magic bytes ────
-# A custom-format dump starts with "PGDMP".
+# ─── Validate: gzip integrity + PostgreSQL custom-format magic bytes ──────
+# The dump is gzipped, so check gzip validity first, then that the DECOMPRESSED
+# stream starts with "PGDMP" (a raw head -c would read the gzip magic instead).
 SIZE=$(stat -c%s "$DUMP_FILE")
-MAGIC=$(head -c 5 "$DUMP_FILE")
-if [ "$SIZE" -lt 1024 ] || [ "$MAGIC" != "PGDMP" ]; then
+MAGIC=$(gunzip -c "$DUMP_FILE" 2>/dev/null | head -c 5)
+if [ "$SIZE" -lt 1024 ] || ! gzip -t "$DUMP_FILE" 2>/dev/null || [ "$MAGIC" != "PGDMP" ]; then
   echo "[$(date -Is)] ERROR: dump invalid (size=$SIZE, magic=$MAGIC) — keeping file for inspection"
   exit 1
 fi
