@@ -1,6 +1,7 @@
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { defineConfig, loadEnv } from "vite";
-import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import tsConfigPaths from "vite-tsconfig-paths";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -12,7 +13,9 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   // Single source of truth for the app version (shown in the UI and attached
   // to feedback reports): package.json -> global define.
-  const appVersion = createRequire(import.meta.url)("package.json").version;
+  const appVersion = JSON.parse(
+    readFileSync(resolve(process.cwd(), "package.json"), "utf8"),
+  ).version as string;
   const port = process.env.PORT
     ? Number(process.env.PORT)
     : env.PORT
