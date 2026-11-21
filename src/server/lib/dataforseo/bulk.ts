@@ -10,9 +10,9 @@ import {
 } from "@/server/lib/dataforseo/envelope";
 
 // Bulk-tools fetchers: PAA questions and autocomplete suggestions per keyword.
-// PAA uses depth 2 — live QA showed depth 1 often omits the people_also_ask
-// element entirely; depth 2 reliably carries it without extra cost beyond the
-// per-request bill.
+// PAA requires page-1 depth: live probes showed the people_also_ask element is
+// absent at depth 1-2 and present at depth 10 (cost is flat per request, so
+// the deeper SERP is free).
 
 export async function fetchPaaQuestions(input: {
   keyword: string;
@@ -27,7 +27,7 @@ export async function fetchPaaQuestions(input: {
       language_code: input.languageCode,
       device: "desktop",
       os: "windows",
-      depth: 2,
+      depth: 10,
     }),
   ]);
   const task = assertOk(response, { treatNoResultsAsEmpty: true });
