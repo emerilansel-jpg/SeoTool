@@ -74,3 +74,12 @@ Follow along for updates:
 
 - Follow on X: https://x.com/bensenescu
 - Sign up for the mailing list on our website: [seotool.im](https://seotool.im)
+
+
+## Release checklist
+
+1. Bump the `version` field in `package.json` (SemVer: MAJOR.MINOR.PATCH).
+2. Add a matching entry at the TOP of `src/shared/changelog.ts`, grouped under `new` / `improved` / `fixed` (mark user-reported fixes with `reportedByUsers: true`).
+3. Write items in simple user-facing English, never internal jargon.
+4. Run `npm run ci:check`, then deploy; the sidebar version badge and feedback reports pick up the new version automatically.
+5. Admins marking user feedback "resolved" in /admin/feedback will email reporters with the version they fill in.
