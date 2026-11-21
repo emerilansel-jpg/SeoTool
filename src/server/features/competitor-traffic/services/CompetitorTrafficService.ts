@@ -98,11 +98,18 @@ async function topPages(
     locationCode,
     languageCode,
     limit: input.limit ?? 20,
-    orderBy: ["organic_data_from_labs_traffic_desc"],
   });
 
+  // Sort by estimated traffic client-side: DataForSEO rejected our earlier
+  // order_by value live ("Invalid Field"), so the default order + client sort
+  // is the reliable path.
+  const sorted = result.items.toSorted(
+    (a, b) =>
+      (b.metrics?.organic?.count ?? 0) - (a.metrics?.organic?.count ?? 0),
+  );
+
   return {
-    pages: result.items.slice(0, input.limit ?? 20).map((item) => ({
+    pages: sorted.slice(0, input.limit ?? 20).map((item) => ({
       url: item.url ?? "",
       traffic: item.metrics?.organic?.count ?? null,
       etv: item.metrics?.organic?.etv ?? null,

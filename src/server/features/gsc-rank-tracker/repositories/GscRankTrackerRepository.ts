@@ -195,6 +195,11 @@ async function listKeywords(options: KeywordListOptions): Promise<{
 const nullsLast = (a: number | null, b: number | null) =>
   (a === null ? 1 : 0) - (b === null ? 1 : 0);
 
+const average = (values: number[]) =>
+  values.length === 0
+    ? undefined
+    : values.reduce((sum, value) => sum + value, 0) / values.length;
+
 /** Client-side fallback sort used by tests and small result sets. */
 export function sortKeywordsClientSafe(
   rows: GscTrackedKeyword[],
@@ -314,11 +319,14 @@ async function summarize(projectId: string): Promise<{
   const windowAEnd = dayAt(7);
   const windowBEnd = dayAt(0);
 
-  const windows = await db
+  // Aggregate the two 7-day windows in JS: a SQL case-expression that appears
+  // in both SELECT and GROUP BY binds the window date twice, which Postgres
+  // treats as distinct expressions ("column must appear in GROUP BY").
+  const historyRows = await db
     .select({
       keywordId: gscRankHistory.keywordId,
-      position: sql<number>`avg(${gscRankHistory.position})`,
-      window: sql<string>`case when ${gscRankHistory.day} <= ${windowAEnd} then 'a' else 'b' end`,
+      day: gscRankHistory.day,
+      position: gscRankHistory.position,
     })
     .from(gscRankHistory)
     .where(
@@ -327,19 +335,20 @@ async function summarize(projectId: string): Promise<{
         gte(gscRankHistory.day, windowAStart),
         sql`${gscRankHistory.day} <= ${windowBEnd}`,
       ),
-    )
-    .groupBy(
-      gscRankHistory.keywordId,
-      sql`case when ${gscRankHistory.day} <= ${windowAEnd} then 'a' else 'b' end`,
     );
 
+  const buckets = new Map<string, { a: number[]; b: number[] }>();
+  for (const row of historyRows) {
+    if (row.position === null) continue;
+    const entry = buckets.get(row.keywordId) ?? { a: [], b: [] };
+    if (row.day <= windowAEnd) entry.a.push(row.position);
+    else entry.b.push(row.position);
+    buckets.set(row.keywordId, entry);
+  }
+
   const perKeyword = new Map<string, { a?: number; b?: number }>();
-  for (const row of windows) {
-    const entry = perKeyword.get(row.keywordId) ?? {};
-    if (row.window === "a")
-      entry.a = row.position === null ? undefined : Number(row.position);
-    else entry.b = row.position === null ? undefined : Number(row.position);
-    perKeyword.set(row.keywordId, entry);
+  for (const [keywordId, { a, b }] of buckets) {
+    perKeyword.set(keywordId, { a: average(a), b: average(b) });
   }
 
   let improved = 0;

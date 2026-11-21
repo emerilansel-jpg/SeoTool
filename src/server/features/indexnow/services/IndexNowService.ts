@@ -146,10 +146,12 @@ async function submitUrls(input: {
       responseStatus: null,
       responseSummary: "Key not verified",
     });
+    // rejected counts only host-mismatch drops; an unverified key skips the
+    // whole batch without judging the URLs.
     return {
       status: "skipped",
       submitted: 0,
-      rejected: input.urls.length,
+      rejected: 0,
       responseStatus: null,
       responseSummary: "Key not verified",
       submission: skipped,

@@ -84,10 +84,11 @@ export function AutomationsView({ projectId }: { projectId: string }) {
     mutationFn: (webhookId: string) =>
       sendWebhookTestPing({ data: { webhookId } }),
     onSuccess: (result) => {
+      void queryClient.invalidateQueries({ queryKey: ["webhooks"] });
       if (result.ok) {
-        toast.success(result.detail);
+        toast.success(`Ping delivered: ${result.detail}`);
       } else {
-        toast.error(result.detail);
+        toast.error(`Ping failed: ${result.detail}`);
       }
     },
     onError: (error) => {

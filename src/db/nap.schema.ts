@@ -94,7 +94,8 @@ export const gbpProfiles = sqliteTable(
       .default(sql`(current_timestamp)`),
   },
   (table) => [
-    index("gbp_profiles_project_idx").on(table.projectId),
+    // Unique on projectId: the profile upsert targets ON CONFLICT (project_id).
+    uniqueIndex("gbp_profiles_project_idx").on(table.projectId),
     index("gbp_profiles_organization_idx").on(table.organizationId),
   ],
 );

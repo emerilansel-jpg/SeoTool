@@ -1,8 +1,7 @@
-import { generateText } from "ai";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { gscTrackedKeywords } from "@/db/schema";
-import { getChatAgentModel } from "@/server/lib/openrouter";
+import { generateTextViaGateway } from "@/server/lib/ai-gateway";
 import { AppError } from "@/server/lib/errors";
 import {
   InternalLinksRepository,
@@ -140,10 +139,9 @@ async function generateSuggestions(input: {
 
   const targetTitles = new Map(litePages.map((page) => [page.url, page.title]));
 
-  const model = await getChatAgentModel(input.organizationId);
-  const result = await generateText({
-    model,
-    maxOutputTokens: 2500,
+  const result = await generateTextViaGateway({
+    organizationId: input.organizationId,
+    maxTokens: 4000,
     prompt: [
       "You are an internal linking strategist. For each pair below, write an internal link recommendation.",
       'Return ONLY valid JSON: {"links":[{"sourceUrl":"...","targetUrl":"...","anchorText":"2-5 word descriptive anchor","sentence":"one natural sentence from the source page containing the anchor text as a link","rationale":"max 15 words why"}]}',
@@ -187,9 +185,7 @@ async function generateSuggestions(input: {
   return { created, pairsConsidered: pairs.length };
 }
 
-function parseLinksJson(
-  raw: string,
-): Map<
+function parseLinksJson(raw: string): Map<
   string,
   Array<{
     targetUrl: string;

@@ -1,7 +1,6 @@
-import { generateText } from "ai";
 import { createDataforseoClient } from "@/server/lib/dataforseo";
 import type { BillingCustomerContext } from "@/server/billing/subscription";
-import { getChatAgentModel } from "@/server/lib/openrouter";
+import { generateTextViaGateway } from "@/server/lib/ai-gateway";
 import { AppError } from "@/server/lib/errors";
 
 // DataForSEO Keyword Overview accepts up to 200 keywords per request.
@@ -258,10 +257,9 @@ async function bulkMetadataOptimizer(
     )
     .join("\n\n");
 
-  const model = await getChatAgentModel(billingCustomer.organizationId);
-  const result = await generateText({
-    model,
-    maxOutputTokens: 3000,
+  const result = await generateTextViaGateway({
+    organizationId: billingCustomer.organizationId,
+    maxTokens: 4000,
     prompt: [
       "You are an on-page SEO optimizer. For each page below, suggest an improved <title> (max 60 chars) and meta description (max 155 chars).",
       "Rules: keep the primary keyword/topic, include the brand when natural, no clickbait, US English.",

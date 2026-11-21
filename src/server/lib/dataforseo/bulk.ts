@@ -10,8 +10,9 @@ import {
 } from "@/server/lib/dataforseo/envelope";
 
 // Bulk-tools fetchers: PAA questions and autocomplete suggestions per keyword.
-// Kept deliberately shallow (depth 1) — these endpoints bill per request, and
-// the PAA element is independent of organic result depth.
+// PAA uses depth 2 — live QA showed depth 1 often omits the people_also_ask
+// element entirely; depth 2 reliably carries it without extra cost beyond the
+// per-request bill.
 
 export async function fetchPaaQuestions(input: {
   keyword: string;
@@ -26,7 +27,7 @@ export async function fetchPaaQuestions(input: {
       language_code: input.languageCode,
       device: "desktop",
       os: "windows",
-      depth: 1,
+      depth: 2,
     }),
   ]);
   const task = assertOk(response, { treatNoResultsAsEmpty: true });
@@ -69,7 +70,10 @@ export async function fetchAutocompleteSuggestions(input: {
         ? (item as { suggestion?: unknown }).suggestion
         : undefined,
     )
-    .filter((keyword): keyword is string => typeof keyword === "string" && keyword.length > 0);
+    .filter(
+      (keyword): keyword is string =>
+        typeof keyword === "string" && keyword.length > 0,
+    );
   return {
     data: { keyword: input.keyword, suggestions },
     billing: buildTaskBilling(task),

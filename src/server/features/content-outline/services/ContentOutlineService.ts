@@ -1,7 +1,6 @@
-import { generateText } from "ai";
 import { createDataforseoClient } from "@/server/lib/dataforseo";
 import type { BillingCustomerContext } from "@/server/billing/subscription";
-import { getChatAgentModel } from "@/server/lib/openrouter";
+import { generateTextViaGateway } from "@/server/lib/ai-gateway";
 import { AppError } from "@/server/lib/errors";
 import { extractHeadings } from "./headingExtractor";
 
@@ -92,10 +91,9 @@ async function buildContentOutline(
       organic.findIndex((item) => item.url === b.url),
   );
 
-  const model = await getChatAgentModel(billingCustomer.organizationId);
-  const result = await generateText({
-    model,
-    maxOutputTokens: 2000,
+  const result = await generateTextViaGateway({
+    organizationId: billingCustomer.organizationId,
+    maxTokens: 4000,
     prompt: [
       `Build a content outline for the target keyword: "${keyword}".`,
       "Below are the top-ranking pages' headings (in rank order). Synthesize the common structure, fill gaps, and improve on it.",

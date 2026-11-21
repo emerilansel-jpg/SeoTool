@@ -1,4 +1,3 @@
-import { generateText } from "ai";
 import {
   GscRankTrackerRepository,
   type SyncKeywordRow,
@@ -10,7 +9,7 @@ import {
   GscTokenError,
   type GscSearchAnalyticsRequest,
 } from "@/server/lib/gscClient";
-import { getChatAgentModel } from "@/server/lib/openrouter";
+import { generateTextViaGateway } from "@/server/lib/ai-gateway";
 import { AppError } from "@/server/lib/errors";
 
 // GSC performance data trails by ~3 days; the sync never chases fresher data
@@ -339,7 +338,6 @@ async function explainMove(input: {
 
   let explanation: string;
   try {
-    const model = await getChatAgentModel(history.keyword.organizationId);
     const prompt = [
       "You are an SEO analyst. Explain in ONE sentence (max 40 words) why this keyword's Google position changed.",
       `Keyword: "${input.keyword}"`,
@@ -357,7 +355,11 @@ async function explainMove(input: {
         : "Same ranking URL in both periods.",
       "Plain sentence, no bullet points, no preamble.",
     ].join("\n");
-    const result = await generateText({ model, prompt, maxOutputTokens: 120 });
+    const result = await generateTextViaGateway({
+      organizationId: history.keyword.organizationId,
+      prompt,
+      maxTokens: 300,
+    });
     explanation = result.text.trim();
   } catch (error) {
     console.error("[gsc-rank-tracker] LLM explanation failed:", error);
