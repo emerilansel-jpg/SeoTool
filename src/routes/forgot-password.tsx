@@ -147,7 +147,7 @@ function ForgotPasswordPage() {
                     className="btn btn-soft w-full"
                     disabled={!isHostedMode || isSubmitting}
                   >
-                    {isSubmitting ? "Sending reset link..." : "Send reset link"}
+                    {isSubmitting ? "Sending your reset link..." : "Send Reset Link"}
                   </button>
                 </form>
               )}

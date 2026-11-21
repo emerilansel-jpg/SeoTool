@@ -56,6 +56,8 @@ import { Route as AppAdminBillingIndexRouteImport } from './routes/_app/admin/bi
 import { Route as AppAdminBlogIndexRouteImport } from './routes/_app/admin/blog/index'
 import { Route as AppAdminBlogPostIdRouteImport } from './routes/_app/admin/blog/$postId'
 import { Route as AppAdminBlogNewRouteImport } from './routes/_app/admin/blog/new'
+import { Route as AppAdminFeedbackIndexRouteImport } from './routes/_app/admin/feedback/index'
+import { Route as AppAdminFeedbackFeedbackIdRouteImport } from './routes/_app/admin/feedback/$feedbackId'
 import { Route as AppAdminPagesIndexRouteImport } from './routes/_app/admin/pages/index'
 import { Route as AppAdminPagesPostIdRouteImport } from './routes/_app/admin/pages/$postId'
 import { Route as AppAdminPagesNewRouteImport } from './routes/_app/admin/pages/new'
@@ -335,6 +337,17 @@ const AppAdminBlogNewRoute = AppAdminBlogNewRouteImport.update({
   path: '/blog/new',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
+const AppAdminFeedbackIndexRoute = AppAdminFeedbackIndexRouteImport.update({
+  id: '/feedback/',
+  path: '/feedback/',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminFeedbackFeedbackIdRoute =
+  AppAdminFeedbackFeedbackIdRouteImport.update({
+    id: '/feedback/$feedbackId',
+    path: '/feedback/$feedbackId',
+    getParentRoute: () => AppAdminRouteRoute,
+  } as any)
 const AppAdminPagesIndexRoute = AppAdminPagesIndexRouteImport.update({
   id: '/pages/',
   path: '/pages/',
@@ -616,6 +629,7 @@ export interface FileRoutesByFullPath {
   '/p/$projectId/reports': typeof ProjectPProjectIdReportsRouteRouteWithChildren
   '/admin/blog/$postId': typeof AppAdminBlogPostIdRoute
   '/admin/blog/new': typeof AppAdminBlogNewRoute
+  '/admin/feedback/$feedbackId': typeof AppAdminFeedbackFeedbackIdRoute
   '/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/admin/pages/new': typeof AppAdminPagesNewRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
@@ -647,6 +661,7 @@ export interface FileRoutesByFullPath {
   '/admin/api-keys/': typeof AppAdminApiKeysIndexRoute
   '/admin/billing/': typeof AppAdminBillingIndexRoute
   '/admin/blog/': typeof AppAdminBlogIndexRoute
+  '/admin/feedback/': typeof AppAdminFeedbackIndexRoute
   '/admin/pages/': typeof AppAdminPagesIndexRoute
   '/admin/pricing/': typeof AppAdminPricingIndexRoute
   '/admin/users/': typeof AppAdminUsersIndexRoute
@@ -700,6 +715,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingIndexRoute
   '/admin/blog/$postId': typeof AppAdminBlogPostIdRoute
   '/admin/blog/new': typeof AppAdminBlogNewRoute
+  '/admin/feedback/$feedbackId': typeof AppAdminFeedbackFeedbackIdRoute
   '/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/admin/pages/new': typeof AppAdminPagesNewRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
@@ -729,6 +745,7 @@ export interface FileRoutesByTo {
   '/admin/api-keys': typeof AppAdminApiKeysIndexRoute
   '/admin/billing': typeof AppAdminBillingIndexRoute
   '/admin/blog': typeof AppAdminBlogIndexRoute
+  '/admin/feedback': typeof AppAdminFeedbackIndexRoute
   '/admin/pages': typeof AppAdminPagesIndexRoute
   '/admin/pricing': typeof AppAdminPricingIndexRoute
   '/admin/users': typeof AppAdminUsersIndexRoute
@@ -790,6 +807,7 @@ export interface FileRoutesById {
   '/_project/p/$projectId/reports': typeof ProjectPProjectIdReportsRouteRouteWithChildren
   '/_app/admin/blog/$postId': typeof AppAdminBlogPostIdRoute
   '/_app/admin/blog/new': typeof AppAdminBlogNewRoute
+  '/_app/admin/feedback/$feedbackId': typeof AppAdminFeedbackFeedbackIdRoute
   '/_app/admin/pages/$postId': typeof AppAdminPagesPostIdRoute
   '/_app/admin/pages/new': typeof AppAdminPagesNewRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
@@ -821,6 +839,7 @@ export interface FileRoutesById {
   '/_app/admin/api-keys/': typeof AppAdminApiKeysIndexRoute
   '/_app/admin/billing/': typeof AppAdminBillingIndexRoute
   '/_app/admin/blog/': typeof AppAdminBlogIndexRoute
+  '/_app/admin/feedback/': typeof AppAdminFeedbackIndexRoute
   '/_app/admin/pages/': typeof AppAdminPagesIndexRoute
   '/_app/admin/pricing/': typeof AppAdminPricingIndexRoute
   '/_app/admin/users/': typeof AppAdminUsersIndexRoute
@@ -879,6 +898,7 @@ export interface FileRouteTypes {
     | '/p/$projectId/reports'
     | '/admin/blog/$postId'
     | '/admin/blog/new'
+    | '/admin/feedback/$feedbackId'
     | '/admin/pages/$postId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
@@ -910,6 +930,7 @@ export interface FileRouteTypes {
     | '/admin/api-keys/'
     | '/admin/billing/'
     | '/admin/blog/'
+    | '/admin/feedback/'
     | '/admin/pages/'
     | '/admin/pricing/'
     | '/admin/users/'
@@ -963,6 +984,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/admin/blog/$postId'
     | '/admin/blog/new'
+    | '/admin/feedback/$feedbackId'
     | '/admin/pages/$postId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
@@ -992,6 +1014,7 @@ export interface FileRouteTypes {
     | '/admin/api-keys'
     | '/admin/billing'
     | '/admin/blog'
+    | '/admin/feedback'
     | '/admin/pages'
     | '/admin/pricing'
     | '/admin/users'
@@ -1052,6 +1075,7 @@ export interface FileRouteTypes {
     | '/_project/p/$projectId/reports'
     | '/_app/admin/blog/$postId'
     | '/_app/admin/blog/new'
+    | '/_app/admin/feedback/$feedbackId'
     | '/_app/admin/pages/$postId'
     | '/_app/admin/pages/new'
     | '/_app/admin/users/$userId'
@@ -1083,6 +1107,7 @@ export interface FileRouteTypes {
     | '/_app/admin/api-keys/'
     | '/_app/admin/billing/'
     | '/_app/admin/blog/'
+    | '/_app/admin/feedback/'
     | '/_app/admin/pages/'
     | '/_app/admin/pricing/'
     | '/_app/admin/users/'
@@ -1459,6 +1484,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminBlogNewRouteImport
       parentRoute: typeof AppAdminRouteRoute
     }
+    '/_app/admin/feedback/': {
+      id: '/_app/admin/feedback/'
+      path: '/feedback'
+      fullPath: '/admin/feedback/'
+      preLoaderRoute: typeof AppAdminFeedbackIndexRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/feedback/$feedbackId': {
+      id: '/_app/admin/feedback/$feedbackId'
+      path: '/feedback/$feedbackId'
+      fullPath: '/admin/feedback/$feedbackId'
+      preLoaderRoute: typeof AppAdminFeedbackFeedbackIdRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
     '/_app/admin/pages/': {
       id: '/_app/admin/pages/'
       path: '/pages'
@@ -1760,12 +1799,14 @@ interface AppAdminRouteRouteChildren {
   AppAdminIndexRoute: typeof AppAdminIndexRoute
   AppAdminBlogPostIdRoute: typeof AppAdminBlogPostIdRoute
   AppAdminBlogNewRoute: typeof AppAdminBlogNewRoute
+  AppAdminFeedbackFeedbackIdRoute: typeof AppAdminFeedbackFeedbackIdRoute
   AppAdminPagesPostIdRoute: typeof AppAdminPagesPostIdRoute
   AppAdminPagesNewRoute: typeof AppAdminPagesNewRoute
   AppAdminUsersUserIdRoute: typeof AppAdminUsersUserIdRoute
   AppAdminApiKeysIndexRoute: typeof AppAdminApiKeysIndexRoute
   AppAdminBillingIndexRoute: typeof AppAdminBillingIndexRoute
   AppAdminBlogIndexRoute: typeof AppAdminBlogIndexRoute
+  AppAdminFeedbackIndexRoute: typeof AppAdminFeedbackIndexRoute
   AppAdminPagesIndexRoute: typeof AppAdminPagesIndexRoute
   AppAdminPricingIndexRoute: typeof AppAdminPricingIndexRoute
   AppAdminUsersIndexRoute: typeof AppAdminUsersIndexRoute
@@ -1775,12 +1816,14 @@ const AppAdminRouteRouteChildren: AppAdminRouteRouteChildren = {
   AppAdminIndexRoute: AppAdminIndexRoute,
   AppAdminBlogPostIdRoute: AppAdminBlogPostIdRoute,
   AppAdminBlogNewRoute: AppAdminBlogNewRoute,
+  AppAdminFeedbackFeedbackIdRoute: AppAdminFeedbackFeedbackIdRoute,
   AppAdminPagesPostIdRoute: AppAdminPagesPostIdRoute,
   AppAdminPagesNewRoute: AppAdminPagesNewRoute,
   AppAdminUsersUserIdRoute: AppAdminUsersUserIdRoute,
   AppAdminApiKeysIndexRoute: AppAdminApiKeysIndexRoute,
   AppAdminBillingIndexRoute: AppAdminBillingIndexRoute,
   AppAdminBlogIndexRoute: AppAdminBlogIndexRoute,
+  AppAdminFeedbackIndexRoute: AppAdminFeedbackIndexRoute,
   AppAdminPagesIndexRoute: AppAdminPagesIndexRoute,
   AppAdminPricingIndexRoute: AppAdminPricingIndexRoute,
   AppAdminUsersIndexRoute: AppAdminUsersIndexRoute,
@@ -2020,13 +2063,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

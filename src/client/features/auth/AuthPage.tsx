@@ -8,6 +8,10 @@ import { isHostedClientAuthMode } from "@/lib/auth-mode";
 
 export const authRedirectSearchSchema = z.object({
   redirect: z.string().optional(),
+  /** Set by the unauthenticated-redirect middleware when an anonymous visitor
+   *  hits a tool page, so auth pages can show a "create a free account"
+   *  nudge. */
+  reason: z.string().optional(),
 });
 
 export function useAuthPageState(redirect: string | undefined) {
@@ -90,16 +94,28 @@ function GoogleLogo() {
 export function AuthPageCard({
   title,
   helperText,
+  reasonBanner,
   children,
   footer,
 }: {
   title: string;
   helperText?: string;
+  /** Shown when an anonymous visitor clicked a tool before signing up. */
+  reasonBanner?: boolean;
   children: React.ReactNode;
   footer?: React.ReactNode;
 }) {
   return (
     <div className="w-full max-w-md rounded-2xl border border-base-300 bg-base-100 p-8 shadow-xl shadow-base-content/5 space-y-6">
+      {reasonBanner ? (
+        <div
+          role="status"
+          className="rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm text-base-content/80"
+        >
+          Create a free account to use this tool. It takes less than a minute,
+          and you will be returned to where you left off.
+        </div>
+      ) : null}
       <div className="text-center space-y-3">
         <Link
           to="/"

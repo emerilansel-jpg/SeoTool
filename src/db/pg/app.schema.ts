@@ -562,3 +562,36 @@ export const couponRedemptions = pgTable(
     index("coupon_redemptions_org_idx").on(table.organizationId),
   ],
 );
+
+export const feedback = pgTable(
+  "feedback",
+  {
+    id: text("id").primaryKey(),
+    displayNumber: integer("display_number").notNull(),
+    type: text("type", { enum: ["bug", "feature"] }).notNull(),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    email: text("email").notNull(),
+    userId: text("user_id"),
+    screenshotBase64: text("screenshot_base64"),
+    screenshotMime: text("screenshot_mime"),
+    pageUrl: text("page_url"),
+    userAgent: text("user_agent"),
+    appVersion: text("app_version"),
+    status: text("status", {
+      enum: ["new", "in_progress", "resolved", "wont_fix"],
+    })
+      .notNull()
+      .default("new"),
+    adminNote: text("admin_note"),
+    resolvedInVersion: text("resolved_in_version"),
+    notifiedAt: text("notified_at"),
+    createdAt: text("created_at").notNull().default(isoNow),
+    updatedAt: text("updated_at").notNull().default(isoNow),
+    resolvedAt: text("resolved_at"),
+  },
+  (table) => [
+    index("feedback_status_created_idx").on(table.status, table.createdAt),
+    index("feedback_type_idx").on(table.type),
+  ],
+);

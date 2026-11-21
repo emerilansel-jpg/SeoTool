@@ -226,4 +226,5 @@ export const {
   byokSettings,
   couponCodes,
   couponRedemptions,
+  feedback,
 } = schema;

@@ -14,6 +14,7 @@ import {
   MessageSquare,
   FileText,
   Search,
+  MessageSquareWarning,
   Shield,
   Sparkles,
   Swords,
@@ -157,7 +158,14 @@ export const connectNavGroup = {
 // current user passes the platform-admin check (env allowlist).
 export const adminNavGroup = {
   label: "Admin",
-  items: [linkOptions({ to: "/admin" as const, label: "Admin", icon: Shield })],
+  items: [
+    linkOptions({ to: "/admin" as const, label: "Admin", icon: Shield }),
+    linkOptions({
+      to: "/admin/feedback" as const,
+      label: "Feedback",
+      icon: MessageSquareWarning,
+    }),
+  ],
 };
 
 function getProjectNavItems(projectId: string) {

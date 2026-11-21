@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { AccountMenu } from "@/client/components/AccountMenu";
+import { FeedbackFloatingButton } from "@/client/features/feedback/FeedbackFloatingButton";
 
 const NAV_LINKS = [
   { label: "Features", href: "/features", internal: true },
@@ -307,6 +308,7 @@ export function MarketingChrome({
       <MarketingNavbar signedIn={signedIn} />
       <main className="flex-1">{children}</main>
       <MarketingFooter />
+      <FeedbackFloatingButton />
     </div>
   );
 }

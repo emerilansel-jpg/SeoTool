@@ -26,6 +26,10 @@ import {
   DODO_WEBHOOK_PATH,
   handleDodoWebhookRequest,
 } from "@/server/billing/dodo-webhook";
+import {
+  FEEDBACK_API_PATH,
+  handleFeedbackApiRequest,
+} from "@/server/features/feedback/feedbackApi";
 import { withPgClient } from "@/db";
 
 const appFetch = createStartHandler(defaultStreamHandler);
@@ -160,6 +164,10 @@ function handleFetch(
 
   if (pathname === DODO_WEBHOOK_PATH) {
     return handleDodoWebhookRequest(publicRequest);
+  }
+
+  if (pathname === FEEDBACK_API_PATH) {
+    return handleFeedbackApiRequest(publicRequest);
   }
 
   return seotoolOAuthProvider.fetch(publicRequest, env as SeoToolOAuthEnv, ctx);

@@ -100,12 +100,17 @@ export const unauthenticatedRedirectMiddleware = createMiddleware().server(
     }
 
     const redirectTo = `${url.pathname}${url.search}`;
+    // Send anonymous visitors to sign-up first with an explanatory nudge;
+    // sign-up links back to sign-in for returning users, and both pages
+    // return the visitor to their original action after auth.
     const search =
-      redirectTo === "/" ? "" : `?redirect=${encodeURIComponent(redirectTo)}`;
+      redirectTo === "/"
+        ? "?reason=tool"
+        : `?reason=tool&redirect=${encodeURIComponent(redirectTo)}`;
 
     // Force HTTPS in redirect URLs. Behind Cloudflare the incoming protocol
     // may be HTTP; always emit HTTPS so the browser lands on the secure origin.
     const httpsOrigin = url.origin.replace(/^http:/, "https:");
-    return Response.redirect(new URL(`/sign-in${search}`, httpsOrigin), 307);
+    return Response.redirect(new URL(`/sign-up${search}`, httpsOrigin), 307);
   },
 );

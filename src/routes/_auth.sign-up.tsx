@@ -156,7 +156,9 @@ function SignUpPage() {
 
   return (
     <AuthPageCard
-      title="Create your account"
+      title="Create your free account"
+      helperText="Save your reports and track your rankings. Free to start."
+      reasonBanner={search.reason === "tool"}
       footer={
         isHostedMode ? (
           showEmailForm ? (
@@ -402,7 +404,9 @@ function SignUpPage() {
                       (isTurnstileEnabled && !captcha.hasToken)
                     }
                   >
-                    {isSubmitting ? "Creating account..." : "Create account"}
+                    {isSubmitting
+                      ? "Creating your account..."
+                      : "Create My Account"}
                   </button>
                 </>
               );

@@ -125,7 +125,9 @@ function SignInPage() {
 
   return (
     <AuthPageCard
-      title="Sign in"
+      title="Log In"
+      helperText="Welcome back. Save your reports and track your rankings."
+      reasonBanner={search.reason === "tool"}
       footer={
         isHostedMode ? (
           <div
@@ -265,7 +267,7 @@ function SignInPage() {
                     className="btn btn-soft w-full"
                     disabled={!isHostedMode || isSubmitting}
                   >
-                    {isSubmitting ? "Signing in..." : "Sign in"}
+                    {isSubmitting ? "Logging in..." : "Log In"}
                   </button>
                 </>
               );

@@ -10,6 +10,8 @@ import {
 import { GscReEngagementModal } from "@/client/features/gsc/GscReEngagementModal";
 import { BillingStatusBanner } from "@/client/features/billing/BillingStatusBanner";
 import { Sidebar } from "@/client/components/Sidebar";
+import { FeedbackFloatingButton } from "@/client/features/feedback/FeedbackFloatingButton";
+import { useSession } from "@/lib/auth-client";
 import { AccountMenu } from "@/client/components/AccountMenu";
 import { BILLING_ROUTE } from "@/shared/billing";
 import { getSeoApiKeyStatus } from "@/serverFunctions/config";
@@ -121,6 +123,7 @@ export function AuthenticatedAppLayout({
       <div className="hidden shrink-0 md:block">
         <Sidebar projectId={sidebarProjectId} />
       </div>
+      <FeedbackFloatingButtonWithSession />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <MobileTopBar
@@ -199,5 +202,14 @@ function MobileTopBar({
       </div>
       <AccountMenu />
     </div>
+  );
+}
+
+
+/** Floating feedback button with the signed-in user's email prefilled. */
+function FeedbackFloatingButtonWithSession() {
+  const { data: session } = useSession();
+  return (
+    <FeedbackFloatingButton userEmail={session?.user?.email ?? ""} />
   );
 }

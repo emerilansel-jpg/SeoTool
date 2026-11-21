@@ -1,6 +1,8 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import type { LinkOptions } from "@tanstack/react-router";
 import { useEffect, useState, type ComponentType } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
   CircleHelp,
   CreditCard,
@@ -19,6 +21,7 @@ import {
 import { ProjectSwitcher } from "@/client/features/projects/ProjectSwitcher";
 import { JetSidebarPanel } from "@/client/features/jet/JetSidebarPanel";
 import { useIsPlatformAdmin } from "@/client/features/admin/useIsPlatformAdmin";
+import { getNewFeedbackCount } from "@/serverFunctions/feedback";
 import { NotificationCenter } from "@/client/features/notifications/NotificationCenter";
 import { ThemePreferenceMenuItems } from "@/client/components/ThemePreferenceMenuItems";
 import { closeDropdown } from "@/client/lib/dropdown";
@@ -26,6 +29,11 @@ import { signOutAndRedirect, useSession } from "@/lib/auth-client";
 import { isHostedClientAuthMode } from "@/lib/auth-mode";
 import { BILLING_ROUTE } from "@/shared/billing";
 import { CreditPricingGuideModal } from "@/client/features/billing/CreditPricingGuide";
+import {
+  useHasUnseenReleaseNotes,
+  WhatsNewModal,
+} from "@/client/features/version/WhatsNewModal";
+import { APP_VERSION } from "@/shared/appVersion";
 
 interface SidebarProps {
   projectId: string | null;
@@ -81,8 +89,20 @@ function SidebarNavLink({
   );
 }
 
+function useNewFeedbackCount(isAdmin: boolean): number {
+  const listCount = useServerFn(getNewFeedbackCount);
+  const { data } = useQuery({
+    queryKey: ["admin-feedback-count"],
+    queryFn: () => listCount(),
+    enabled: isAdmin,
+    refetchInterval: 60_000,
+  });
+  return data?.count ?? 0;
+}
+
 export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
   const isAdmin = useIsPlatformAdmin();
+  const newFeedbackCount = useNewFeedbackCount(isAdmin);
   const navGroups = [
     ...(projectId ? getProjectNavGroups(projectId) : []),
     connectNavGroup,
@@ -197,14 +217,25 @@ export function Sidebar({ projectId, onNavigate, onClose }: SidebarProps) {
               <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const { icon, label, ...linkProps } = item;
+                  const showFeedbackBadge =
+                    linkProps.to === "/admin/feedback" && newFeedbackCount > 0;
                   return (
-                    <SidebarNavLink
-                      key={linkProps.to}
-                      icon={icon}
-                      label={label}
-                      onNavigate={onNavigate}
-                      linkProps={linkProps}
-                    />
+                    <span key={linkProps.to} className="relative block">
+                      <SidebarNavLink
+                        icon={icon}
+                        label={label}
+                        onNavigate={onNavigate}
+                        linkProps={linkProps}
+                      />
+                      {showFeedbackBadge ? (
+                        <span
+                          data-testid="admin-feedback-badge"
+                          className="pointer-events-none absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-error px-1.5 py-0.5 text-[10px] font-bold text-white"
+                        >
+                          {newFeedbackCount > 9 ? "9+" : newFeedbackCount}
+                        </span>
+                      ) : null}
+                    </span>
                   );
                 })}
               </div>
@@ -253,6 +284,8 @@ function SidebarFooter({ onNavigate }: { onNavigate?: () => void }) {
   const email = session?.user?.email;
   const initial = email ? email.charAt(0).toUpperCase() : "U";
   const [isCreditGuideOpen, setIsCreditGuideOpen] = useState(false);
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+  const { unseen: hasUnseenReleaseNotes } = useHasUnseenReleaseNotes();
 
   const closeMenu = () => {
     closeDropdown();
@@ -331,7 +364,7 @@ function SidebarFooter({ onNavigate }: { onNavigate?: () => void }) {
                     onClick={() => signOutAndRedirect()}
                   >
                     <LogOut className="h-4 w-4" />
-                    Sign out
+                    Log Out
                   </button>
                 </li>
               </>
@@ -351,6 +384,24 @@ function SidebarFooter({ onNavigate }: { onNavigate?: () => void }) {
         isOpen={isCreditGuideOpen}
         onClose={() => setIsCreditGuideOpen(false)}
       />
+
+      <button
+        type="button"
+        onClick={() => setWhatsNewOpen(true)}
+        className="mt-auto flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-medium text-base-content/40 transition-colors hover:bg-base-300/50 hover:text-base-content/70"
+        aria-label={`Release notes for version ${APP_VERSION}`}
+      >
+        v{APP_VERSION}
+        {hasUnseenReleaseNotes ? (
+          <span className="rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold text-white">
+            New
+          </span>
+        ) : null}
+      </button>
+
+      {whatsNewOpen ? (
+        <WhatsNewModal onClose={() => setWhatsNewOpen(false)} />
+      ) : null}
     </div>
   );
 }
