@@ -20,6 +20,7 @@ import {
   useAppTable,
 } from "@/client/components/table/AppDataTable";
 import { AdminOrgActions } from "@/client/features/admin/AdminOrgActions";
+import { AdminCouponCodesCard } from "@/client/features/admin/AdminCouponCodesCard";
 
 const TIER_BADGE_CLASS: Record<string, string> = {
   free: "badge-neutral",
@@ -205,6 +206,8 @@ export function AdminBillingPage() {
           {total} subscriptions
         </span>
       </div>
+
+      <AdminCouponCodesCard />
 
       <div className="card bg-base-100 border border-base-300">
         <div className="card-body p-0">

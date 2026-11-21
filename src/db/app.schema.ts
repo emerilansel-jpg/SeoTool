@@ -540,3 +540,48 @@ export const gmbGridSnapshots = sqliteTable(
     index("gmb_grid_snapshots_task_idx").on(table.taskId),
   ],
 );
+
+export const couponCodes = sqliteTable(
+  "coupon_codes",
+  {
+    id: text("id").primaryKey(),
+    code: text("code").notNull().unique(),
+    credits: integer("credits").notNull(),
+    maxRedemptions: integer("max_redemptions"),
+    redeemedCount: integer("redeemed_count").notNull().default(0),
+    expiresAt: text("expires_at"),
+    note: text("note"),
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    createdBy: text("created_by"),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`(current_timestamp)`),
+  },
+  (table) => [
+    index("coupon_codes_active_idx").on(table.isActive, table.expiresAt),
+  ],
+);
+
+export const couponRedemptions = sqliteTable(
+  "coupon_redemptions",
+  {
+    id: text("id").primaryKey(),
+    couponId: text("coupon_id")
+      .notNull()
+      .references(() => couponCodes.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    creditsGranted: integer("credits_granted").notNull(),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`(current_timestamp)`),
+  },
+  (table) => [
+    uniqueIndex("coupon_redemptions_coupon_org_idx").on(
+      table.couponId,
+      table.organizationId,
+    ),
+    index("coupon_redemptions_org_idx").on(table.organizationId),
+  ],
+);

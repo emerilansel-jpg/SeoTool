@@ -23,6 +23,7 @@ import {
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QuotaBar } from "@/client/features/billing/QuotaBar";
+import { CouponRedeemCard } from "@/client/features/billing/CouponRedeemCard";
 import { getEffectivePricesUsd } from "@/server/billing/plan-config";
 import {
   cancelMembership,
@@ -298,6 +299,7 @@ function BillingPage() {
       {/* Credit top-up */}
       <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-lg font-semibold">Overage & Past Usage</h2>
+        <CouponRedeemCard />
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"

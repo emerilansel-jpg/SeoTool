@@ -224,4 +224,6 @@ export const {
   brandLookupPlatformSnapshots,
   brandLookupSovEntries,
   byokSettings,
+  couponCodes,
+  couponRedemptions,
 } = schema;

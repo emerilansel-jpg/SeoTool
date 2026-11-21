@@ -521,3 +521,44 @@ export const gmbGridSnapshots = pgTable(
     index("gmb_grid_snapshots_task_idx").on(table.taskId),
   ],
 );
+
+export const couponCodes = pgTable(
+  "coupon_codes",
+  {
+    id: text("id").primaryKey(),
+    code: text("code").notNull().unique(),
+    credits: integer("credits").notNull(),
+    maxRedemptions: integer("max_redemptions"),
+    redeemedCount: integer("redeemed_count").notNull().default(0),
+    expiresAt: text("expires_at"),
+    note: text("note"),
+    isActive: boolean("is_active").notNull().default(true),
+    createdBy: text("created_by"),
+    createdAt: text("created_at").notNull().default(isoNow),
+  },
+  (table) => [
+    index("coupon_codes_active_idx").on(table.isActive, table.expiresAt),
+  ],
+);
+
+export const couponRedemptions = pgTable(
+  "coupon_redemptions",
+  {
+    id: text("id").primaryKey(),
+    couponId: text("coupon_id")
+      .notNull()
+      .references(() => couponCodes.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    creditsGranted: integer("credits_granted").notNull(),
+    createdAt: text("created_at").notNull().default(isoNow),
+  },
+  (table) => [
+    uniqueIndex("coupon_redemptions_coupon_org_idx").on(
+      table.couponId,
+      table.organizationId,
+    ),
+    index("coupon_redemptions_org_idx").on(table.organizationId),
+  ],
+);
