@@ -260,7 +260,6 @@ function AdminFeedbackPage() {
                                 });
                               }
                             }}
-                            onBlur={() => setQuickStatusId(null)}
                             aria-label={`Set status for report #${row.displayNumber}`}
                           >
                             <option value="" disabled>

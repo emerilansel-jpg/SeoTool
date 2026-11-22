@@ -1,4 +1,4 @@
-// oxlint-disable complexity, max-lines
+// oxlint-disable complexity, max-lines, max-lines-per-function
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -419,7 +419,7 @@ function SubscribePage() {
                 ) : (
                   <Zap className="size-4" />
                 )}
-                Pay Now (${ltdPriceDollars} One-Time via Dodo Payments)
+                Pay Now (${ltdPriceDollars} One-Time)
               </button>
               <p className="mt-2 text-center text-[11px] text-base-content/50">
                 Cards, Apple Pay, Google Pay supported. Instant access right
@@ -540,8 +540,8 @@ function SubscribePage() {
 
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-base-content/60 pt-4">
         <span className="inline-flex items-center gap-1.5">
-          <Lock className="size-3.5" /> Encrypted and secure checkout via Dodo
-          Payments (Cards, Apple Pay, Google Pay)
+          <Lock className="size-3.5" /> Encrypted and secure checkout (Cards,
+          Apple Pay, Google Pay)
         </span>
         <span className="inline-flex items-center gap-1.5">
           <Sparkles className="size-3.5 text-primary" /> Instant access right
