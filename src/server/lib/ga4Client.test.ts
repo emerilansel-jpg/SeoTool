@@ -9,6 +9,13 @@ vi.mock("@/lib/auth", () => ({
   getAuth: () => ({ api: { getAccessToken: mocks.getAccessToken } }),
 }));
 
+vi.mock("@/server/lib/better-auth-account", () => ({
+  findBetterAuthAccountId: vi.fn(
+    async (input: { providerAccountId?: string }) =>
+      input.providerAccountId ?? "account-legacy",
+  ),
+}));
+
 function jsonResponse(body: unknown, status = 200) {
   return Response.json(body, { status });
 }
@@ -59,9 +66,8 @@ describe("ga4Client", () => {
     ]);
     expect(mocks.getAccessToken).toHaveBeenCalledWith({
       body: {
-        providerId: "google-analytics",
-        userId: "u1",
         accountId: "google-sub-a",
+        userId: "u1",
       },
     });
     expect(mocks.fetch.mock.calls[0]?.[0]).toBe(

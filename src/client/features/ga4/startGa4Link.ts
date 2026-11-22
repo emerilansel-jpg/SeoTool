@@ -20,8 +20,8 @@ export async function startGa4Link(callbackURL: string): Promise<void> {
       return;
     }
 
-    const res = await authClient.oauth2.link({
-      providerId: GA4_OAUTH_PROVIDER_ID,
+    const res = await authClient.linkSocial({
+      provider: GA4_OAUTH_PROVIDER_ID,
       callbackURL,
     });
     if (res.error) {

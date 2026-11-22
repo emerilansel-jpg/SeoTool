@@ -20,8 +20,8 @@ export async function startGscLink(callbackURL: string): Promise<void> {
       return;
     }
 
-    const res = await authClient.oauth2.link({
-      providerId: GSC_OAUTH_PROVIDER_ID,
+    const res = await authClient.linkSocial({
+      provider: GSC_OAUTH_PROVIDER_ID,
       callbackURL,
     });
     if (res.error) {

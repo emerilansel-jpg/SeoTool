@@ -282,7 +282,7 @@ export function TwoFactorSection() {
           });
           return;
         }
-        if (result.data?.totpURI) {
+        if (result.data?.method === "totp") {
           setTotpUri(result.data.totpURI);
           setIsSetup(true);
         }

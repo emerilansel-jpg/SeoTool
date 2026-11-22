@@ -1,4 +1,5 @@
 import { getAuth } from "@/lib/auth";
+import { findBetterAuthAccountId } from "@/server/lib/better-auth-account";
 import { GA4_OAUTH_PROVIDER_ID } from "@/shared/ga4";
 import { z } from "zod";
 
@@ -128,12 +129,16 @@ export function createGa4Client(opts: {
     try {
       // Headerless call: getAccessToken trusts body.userId when no request
       // session is present, and auto-refreshes via the genericOAuth provider.
+      const accountId = await findBetterAuthAccountId({
+        userId: opts.userId,
+        providerId: GA4_OAUTH_PROVIDER_ID,
+        providerAccountId: opts.ga4AccountId,
+      });
+      if (!accountId) {
+        throw new Ga4TokenError("Google Analytics grant not found.");
+      }
       result = await getAuth().api.getAccessToken({
-        body: {
-          providerId: GA4_OAUTH_PROVIDER_ID,
-          userId: opts.userId,
-          ...(opts.ga4AccountId ? { accountId: opts.ga4AccountId } : {}),
-        },
+        body: { accountId, userId: opts.userId },
       });
     } catch (error) {
       throw new Ga4TokenError(

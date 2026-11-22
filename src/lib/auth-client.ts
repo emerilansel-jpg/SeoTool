@@ -1,11 +1,12 @@
 import { createAuthClient } from "better-auth/react";
 import {
   adminClient,
-  genericOAuthClient,
   inferAdditionalFields,
+  InferServerPlugin,
   organizationClient,
   twoFactorClient,
 } from "better-auth/client/plugins";
+import type { getAuth } from "@/lib/auth";
 import { captureClientEvent, resetAnalyticsUser } from "@/client/lib/posthog";
 import { userAdditionalFields } from "@/lib/auth-options";
 import { getSignInHrefForLocation } from "@/lib/auth-redirect";
@@ -13,8 +14,8 @@ import { getSignInHrefForLocation } from "@/lib/auth-redirect";
 export const authClient = createAuthClient({
   baseURL: typeof window !== "undefined" ? window.location.origin : "",
   plugins: [
+    InferServerPlugin<ReturnType<typeof getAuth>, "generic-oauth">(),
     organizationClient(),
-    genericOAuthClient(),
     twoFactorClient(),
     adminClient(),
     inferAdditionalFields({ user: userAdditionalFields }),

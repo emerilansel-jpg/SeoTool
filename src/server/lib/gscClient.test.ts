@@ -9,6 +9,13 @@ vi.mock("@/lib/auth", () => ({
   getAuth: () => ({ api: { getAccessToken: mocks.getAccessToken } }),
 }));
 
+vi.mock("@/server/lib/better-auth-account", () => ({
+  findBetterAuthAccountId: vi.fn(
+    async (input: { providerAccountId?: string }) =>
+      input.providerAccountId ?? "account-legacy",
+  ),
+}));
+
 function jsonResponse(body: unknown, status = 200) {
   return Response.json(body, { status });
 }
@@ -50,9 +57,8 @@ describe("gscClient", () => {
 
     expect(mocks.getAccessToken).toHaveBeenCalledWith({
       body: {
-        providerId: "google-search-console",
-        userId: "u1",
         accountId: "google-sub-a",
+        userId: "u1",
       },
     });
   });
@@ -64,7 +70,7 @@ describe("gscClient", () => {
     await createGscClient({ userId: "u1" }).listSites();
 
     expect(mocks.getAccessToken).toHaveBeenCalledWith({
-      body: { providerId: "google-search-console", userId: "u1" },
+      body: { accountId: "account-legacy", userId: "u1" },
     });
   });
 

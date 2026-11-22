@@ -1,6 +1,6 @@
 import { getAuth } from "@/lib/auth";
+import { findBetterAuthAccountId } from "@/server/lib/better-auth-account";
 import { GSC_OAUTH_PROVIDER_ID } from "@/shared/gsc";
-
 const GSC_API_BASE = "https://www.googleapis.com/webmasters/v3";
 const GOOGLE_USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo";
 
@@ -111,12 +111,16 @@ export function createGscClient(opts: {
       // session is present, and auto-refreshes via the genericOAuth provider.
       // Works in every auth mode — self-hosted builds the same Better Auth
       // instance once BETTER_AUTH_SECRET is set.
+      const accountId = await findBetterAuthAccountId({
+        userId: opts.userId,
+        providerId: GSC_OAUTH_PROVIDER_ID,
+        providerAccountId: opts.gscAccountId,
+      });
+      if (!accountId) {
+        throw new GscTokenError("Google Search Console grant not found.");
+      }
       result = await getAuth().api.getAccessToken({
-        body: {
-          providerId: GSC_OAUTH_PROVIDER_ID,
-          userId: opts.userId,
-          ...(opts.gscAccountId ? { accountId: opts.gscAccountId } : {}),
-        },
+        body: { accountId, userId: opts.userId },
       });
     } catch (error) {
       throw new GscTokenError(
